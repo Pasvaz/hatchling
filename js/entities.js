@@ -462,9 +462,11 @@ function weaponPos(e) {
 // be hit and species with body peculiarities can hand-tune their own array:
 // set `hitZones: [{dx, dy, r}, …]` on the DINO entry (body-local units,
 // facing right, unscaled — growth scaling is applied at test time).
-// `dz` is each zone's height above the ground anchor (body-local, unscaled) —
-// DISPLAY ONLY: combat stays on the ground plane, dz just lets the H overlay
-// draw every circle on the body part it represents instead of at the feet.
+// `dz` is each zone's height above the ground anchor (body-local, unscaled).
+// Combat happens in SCREEN space: every test folds dz into y, the exact same
+// coordinates the H overlay draws — the circles you see ARE the hitboxes.
+// (A tall hunter must stand a step south of short prey so its jaws reach
+// down to them; aimYAt below bakes that into NPC aim.)
 // Derived from drawDino's skeleton anchors (cy, neckBase, tailY).
 function zoneHeights(d) {
   const L = d.L;
@@ -504,25 +506,88 @@ function hitZonesOf(d) {
   }
   return d._zones;
 }
-// the nearest point where the circle (x,y,r) touches any of the victim's hit
-// zones — null if it touches none. Any part of the body counts.
-function bodyHitPoint(victim, x, y, r) {
+// how high this dino's weapon rides above its ground anchor (scaled px) —
+// jaws at head height, tail swings and claw swipes nearer the spine. The H
+// overlay lifts the red circle by exactly this, so combat must too.
+function weaponHeight(e) {
+  const d = DINO[e.species];
+  const s = d.scale * sizeScale(e.growth != null ? e.growth : 1) * genderMod(e).size;
+  const zh = zoneHeights(d);
+  return (d.tailWeapon ? zh.spine : d.clawWeapon ? zh.spine * 0.7 : zh.head) * s;
+}
+// where an NPC should aim so its lifted weapon circle lands ON the victim's
+// body circles: the victim's ground spot, shifted south by however much
+// higher the hunter's jaws ride than the victim's spine
+function aimYAt(e, t) {
+  const td = DINO[t.species];
+  const ts = td.scale * sizeScale(t.growth != null ? t.growth : 1) * genderMod(t).size;
+  return t.y + weaponHeight(e) - zoneHeights(td).spine * ts;
+}
+// ---- THE combat circles ----
+// The single source of truth: every hit test below AND the H overlay consume
+// these exact objects. The overlay does no geometry of its own, so what it
+// draws cannot drift from what combat tests — same function, same numbers.
+function bodyCircles(victim) {
   const d = DINO[victim.species];
   const s = d.scale * sizeScale(victim.growth != null ? victim.growth : 1) * genderMod(victim).size;
   const f = victim.facing || 1;
-  let best = null, bd = 1e9;
+  const out = [];
   for (const z of hitZonesOf(d)) {
-    const zx = victim.x + f * z.dx * s, zy = victim.y + z.dy * s, zr = z.r * s;
-    const dd = dist(x, y, zx, zy);
-    if (dd - zr > r || dd - zr > bd) continue;
-    bd = dd - zr;
+    out.push({ x: victim.x + f * z.dx * s, y: victim.y + (z.dy || 0) * s - (z.dz || 0) * s, r: z.r * s });
+  }
+  return out;
+}
+// the attack circle for circle weapons (jaws, claw sweep, the player's tail
+// smack) — contact pad included, so drawn radius = tested radius
+function weaponCircle(e) {
+  const wz = weaponPos(e);
+  return { x: wz.x, y: wz.y - weaponHeight(e), r: wz.r + 4 };
+}
+// an NPC tail swing: this circle, restricted to ±45° of dead-rear
+function tailWedgeCircle(e) {
+  const d = DINO[e.species];
+  const s = d.scale * sizeScale(e.growth != null ? e.growth : 1) * genderMod(e).size;
+  return { x: e.x, y: e.y - weaponHeight(e), r: (d.L.body[0] * 0.42 + d.L.tail[0] * 0.9) * s };
+}
+// the nip jaws of tail-fighters that can ALSO bite (wuerhosaurus)
+function nipCircle(e) {
+  const d = DINO[e.species];
+  const s = d.scale * sizeScale(e.growth != null ? e.growth : 1) * genderMod(e).size;
+  const hl = d.L.head[0] * s;
+  return {
+    x: e.x + (e.facing || 1) * (snoutLen(d, s) - hl * 0.25),
+    y: e.y - zoneHeights(d).head * s,
+    r: Math.max(5, hl * 0.5) + 4,
+  };
+}
+// spinosaurus' second strike: the claw sweep arcing over the chest
+function clawArcCircle(e) {
+  const d = DINO[e.species];
+  const s = d.scale * sizeScale(e.growth != null ? e.growth : 1) * genderMod(e).size;
+  return {
+    x: e.x + (e.facing || 1) * d.L.body[0] * 0.28 * s,
+    y: e.y - zoneHeights(d).spine * s,
+    r: Math.max(8, d.L.body[1] * 0.5 * s) + 4,
+  };
+}
+// the nearest point where the circle (x,y,r) touches any of the victim's
+// body circles — null if it touches none. Any part of the body counts.
+// (x,y) is the weapon's SCREEN position (already lifted by its height) and
+// the body circles come from bodyCircles() — the very objects the H overlay
+// draws, so what you see is what hits.
+function bodyHitPoint(victim, x, y, r) {
+  let best = null, bd = 1e9;
+  for (const z of bodyCircles(victim)) {
+    const dd = dist(x, y, z.x, z.y);
+    if (dd - z.r > r || dd - z.r > bd) continue;
+    bd = dd - z.r;
     // contact sits on the zone's surface, toward the attacker — but a weapon
     // buried INSIDE the zone contacts right where it is (projecting to the
     // far surface used to throw the point behind the attacker, where the
     // back-side guard wrongly rejected point-blank hits on big victims)
-    best = dd < zr
+    best = dd < z.r
       ? { x, y }
-      : { x: zx + (x - zx) / dd * zr, y: zy + (y - zy) / dd * zr };
+      : { x: z.x + (x - z.x) / dd * z.r, y: z.y + (y - z.y) / dd * z.r };
   }
   return best;
 }
@@ -533,23 +598,22 @@ function weaponContact(e, target) {
     // a tail swing sweeps a 90° wedge dead behind the swinger — anything off
     // to the sides (or at its face) is out of the arc (the dino keeps its
     // back turned to what it wants to hit)
-    const s = d.scale * sizeScale(e.growth != null ? e.growth : 1) * genderMod(e).size;
-    const arc = (d.L.body[0] * 0.42 + d.L.tail[0] * 0.9) * s;
-    const pt = bodyHitPoint(target, e.x, e.y, arc);
+    const wc = tailWedgeCircle(e);
+    const pt = bodyHitPoint(target, wc.x, wc.y, wc.r);
     if (!pt) return null;
-    const dx = pt.x - e.x, dy = pt.y - e.y;
+    const dx = pt.x - wc.x, dy = pt.y - wc.y;
     const len = Math.hypot(dx, dy);
     if (len > 1 && -dx * (e.facing || 1) / len < 0.7071) return null; // outside ±45° of dead-rear
     return pt;
   }
   // jaws: the mouth zone must touch the victim's body, and the contact must be
   // on the jaw side of the attacker — nothing behind the head ever counts
-  const wz = weaponPos(e);
-  const pt = bodyHitPoint(target, wz.x, wz.y, wz.r + 4);
+  const wc = weaponCircle(e);
+  const pt = bodyHitPoint(target, wc.x, wc.y, wc.r);
   if (!pt) return null;
   const dirX = e.state === 'lunge' && e.lungeA != null ? Math.cos(e.lungeA) : (e.facing || 1);
   const dirY = e.state === 'lunge' && e.lungeA != null ? Math.sin(e.lungeA) : 0;
-  if ((pt.x - e.x) * dirX + (pt.y - e.y) * dirY < -2) return null;
+  if ((pt.x - e.x) * dirX + (pt.y - wc.y) * dirY < -2) return null;
   return pt;
 }
 function tryMelee(e, target, def, opts) {
@@ -564,13 +628,8 @@ function tryMelee(e, target, def, opts) {
 // the jaw zone alone, for tail-fighters that can ALSO bite (wuerhosaurus'
 // nip): same face-side rules as regular jaws, ignoring the tail weapon
 function jawContact(e, target) {
-  const d = DINO[e.species];
-  const g = e.growth != null ? e.growth : 1;
-  const s = d.scale * sizeScale(g) * genderMod(e).size;
-  const hl = d.L.head[0] * s;
-  const fwd = snoutLen(d, s) - hl * 0.25;
-  const r = Math.max(5, hl * 0.5);
-  const pt = bodyHitPoint(target, e.x + (e.facing || 1) * fwd, e.y, r + 4);
+  const nc = nipCircle(e);
+  const pt = bodyHitPoint(target, nc.x, nc.y, nc.r);
   if (!pt) return null;
   if ((pt.x - e.x) * (e.facing || 1) < -2) return null;
   return pt;
@@ -1363,7 +1422,7 @@ function updateNPC(e, dt) {
         if (e.atkCd <= 0 && !packBusy) {
           e.state = 'windup';
           e.stateT = d.chargeR ? 0.45 : 0.3;      // a charge earns a longer tell
-          e.lungeA = angTo(e.x, e.y, t.x, t.y);   // aim locks here — dodge the lunge!
+          e.lungeA = angTo(e.x, e.y, t.x, aimYAt(e, t));   // aim locks here — dodge the lunge!
         } else {
           const selfA = angTo(t.x, t.y, e.x, e.y);
           const oa = selfA + e.orbitDir * 0.85;
@@ -1386,7 +1445,7 @@ function updateNPC(e, dt) {
       if (e.stateT <= 0) {
         // NPC prey can't read a telegraph, so the aim re-locks at the dash
         // itself — only the PLAYER keeps the honest windup-locked dodge window
-        if (t && !t.isPlayer) e.lungeA = angTo(e.x, e.y, t.x, t.y);
+        if (t && !t.isPlayer) e.lungeA = angTo(e.x, e.y, t.x, aimYAt(e, t));
         e.state = 'lunge';
         e.stateT = d.lungeT || 0.22;   // chargers dash much longer
         e.attackT = 1;
@@ -1398,7 +1457,7 @@ function updateNPC(e, dt) {
       // committed dash along the locked aim — no homing on a PLAYER (dodge
       // it!), but jaws chasing NPC prey are allowed to track a little
       if (e.target && !e.target.isPlayer && e.target.hp > 0) {
-        const want = angTo(e.x, e.y, e.target.x, e.target.y);
+        const want = angTo(e.x, e.y, e.target.x, aimYAt(e, e.target));
         let dA = want - e.lungeA;
         while (dA > Math.PI) dA -= TAU;
         while (dA < -Math.PI) dA += TAU;
@@ -1574,7 +1633,7 @@ function updateNPC(e, dt) {
       stepToward(e, t.x, t.y, sp * 1.9, dt);   // the silent glide
       if (dist(e.x, e.y, t.x, t.y) < 58) {
         e.state = 'strike'; e.stateT = 0.28; e.attackT = 1;
-        e.lungeA = angTo(e.x, e.y, t.x, t.y);
+        e.lungeA = angTo(e.x, e.y, t.x, aimYAt(e, t));
         e.strikeHit = false;
         SFX.bite();
       }
@@ -1965,6 +2024,8 @@ function updatePlayer(dt) {
       let bestF = null, bfd = 1e9, bpt = null;
       for (const e of G.npcs) {
         if (!DINO[e.species].fish) continue;
+        // the strike is a downward PLUNGE: the jaws come all the way down to
+        // the surface, so this test stays at water level (no height lift)
         const c = bodyHitPoint(e, wz.x, wz.y, wz.r + def.reach + 16);
         if (!c) continue;
         const dd = dist(wz.x, wz.y, c.x, c.y);
@@ -2113,22 +2174,13 @@ function updatePlayer(dt) {
     SFX.bite();
     // the attack comes from the weapon: jaws forward, or the tail arc behind —
     // running away and snapping backwards no longer connects
-    const wz = weaponPos(p);
-    // the attack is EXACTLY the weapon circle (+ the same 4px contact pad
-    // NPCs get in weaponContact) — you hit what your head actually reaches
-    const biteR = wz.r + 4;
-    const zones = [{ x: wz.x, y: wz.y, r: biteR }];
-    // arm-and-jaw fighters (spinosaurus) strike with BOTH: the bite zone at
-    // the snout plus a claw sweep over the chest, so point-blank prey that
-    // slips inside the long jaws still catches the arms
-    const dSp = DINO[p.species];
-    if (dSp.armAndJaw) {
-      const sAJ = dSp.scale * sizeScale(p.growth) * genderMod(p).size;
-      zones.push({
-        x: p.x + p.facing * dSp.L.body[0] * 0.28 * sAJ, y: p.y,
-        r: Math.max(8, dSp.L.body[1] * 0.5 * sAJ) + 4,
-      });
-    }
+    // the attack is EXACTLY the weapon circle the H overlay draws (contact
+    // pad included, identical to NPCs) — you hit what you see, nothing else.
+    // Arm-and-jaw fighters (spinosaurus) strike with BOTH: the bite circle
+    // at the snout plus the claw sweep over the chest, so point-blank prey
+    // that slips inside the long jaws still catches the arms
+    const zones = [weaponCircle(p)];
+    if (DINO[p.species].armAndJaw) zones.push(clawArcCircle(p));
     let best = null, bestPt = null, bd = 1e9;
     for (const e of G.npcs) {
       // no friendly fire: never your packmates, your babies, or your mate
@@ -2520,13 +2572,13 @@ function updateBurrow(dt) {
     p.attackT = 1;
     p.vx += p.facing * 70;
     SFX.bite();
-    const wz = weaponPos(p);
+    const wc = weaponCircle(p);
     let best = null, bpt = null, bd = 1e9;
     for (const e of B.residents) {
       if (e.hp <= 0) continue;
-      const pt = bodyHitPoint(e, wz.x, wz.y, wz.r + 4);
+      const pt = bodyHitPoint(e, wc.x, wc.y, wc.r);
       if (!pt || (pt.x - p.x) * p.facing < -2) continue;
-      const dd = dist(wz.x, wz.y, pt.x, pt.y);
+      const dd = dist(wc.x, wc.y, pt.x, pt.y);
       if (dd < bd) { bd = dd; best = e; bpt = pt; }
     }
     if (best) hurtResident(best, playerDmg() * rrange(0.9, 1.1), bpt.x, bpt.y);

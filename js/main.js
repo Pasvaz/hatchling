@@ -1535,24 +1535,22 @@ function dbgCircle(g, x, y, r, col) {
 function drawEntityHitboxes(g, e) {
   const d = DINO[e.species];
   if (!d) return;
-  const s = d.scale * sizeScale(e.growth != null ? e.growth : 1) * genderMod(e).size;
-  const f = e.facing || 1;
-  const zh = zoneHeights(d);
-  // the hittable silhouette: every circle in the skeleton chain, drawn at
-  // its body part's height (dz — display only, combat is ground-plane)
-  for (const z of hitZonesOf(d)) dbgCircle(g, e.x + f * z.dx * s, e.y + (z.dy || 0) * s - (z.dz || 0) * s, z.r * s, '#3ec8ff');
-  // the attack zone: mirror each combat code path exactly
+  // NO local geometry here, ever: every circle comes straight from the
+  // combat functions in entities.js — the overlay draws the exact objects
+  // the hit tests consume, so it CANNOT show anything but the truth
+  for (const z of bodyCircles(e)) dbgCircle(g, z.x, z.y, z.r, '#3ec8ff');
   const def = e.isPlayer ? PLAYER_DEF[e.species] : (NPC_DEF[e.species] || e.mateDef || PLAYER_DEF[e.species]);
   if (!def || !def.dmg) return; // the meek carry no weapon
+  const f = e.facing || 1;
   if (!e.isPlayer && d.tailWeapon) {
-    // NPC tail swing: a 90° wedge swept dead behind the swinger
-    const arc = (d.L.body[0] * 0.42 + d.L.tail[0] * 0.9) * s;
-    const ay = e.y - zh.spine * s;
+    // NPC tail swing: tailWedgeCircle restricted to ±45° of dead-rear,
+    // matching weaponContact's angle gate
+    const wc = tailWedgeCircle(e);
     g.strokeStyle = '#ff5040';
     g.lineWidth = 1;
     g.beginPath();
-    g.moveTo(e.x, ay);
-    g.arc(e.x, ay, arc, f > 0 ? Math.PI * 0.75 : -Math.PI * 0.25, f > 0 ? Math.PI * 1.25 : Math.PI * 0.25);
+    g.moveTo(wc.x, wc.y);
+    g.arc(wc.x, wc.y, wc.r, f > 0 ? Math.PI * 0.75 : -Math.PI * 0.25, f > 0 ? Math.PI * 1.25 : Math.PI * 0.25);
     g.closePath();
     g.stroke();
     g.globalAlpha = 0.09;
@@ -1560,14 +1558,17 @@ function drawEntityHitboxes(g, e) {
     g.fill();
     g.globalAlpha = 1;
   } else {
-    const wz = weaponPos(e);
-    const wy = d.tailWeapon ? zh.spine : d.clawWeapon ? zh.spine * 0.7 : zh.head;
-    dbgCircle(g, wz.x, wz.y - wy * s, wz.r + 4, '#ff5040');
+    const wc = weaponCircle(e);
+    dbgCircle(g, wc.x, wc.y, wc.r, '#ff5040');
     if (e.isPlayer && d.armAndJaw) {
-      dbgCircle(g, e.x + f * d.L.body[0] * 0.28 * s, e.y - zh.spine * s, Math.max(8, d.L.body[1] * 0.5 * s) + 4, '#ff5040');
+      const cc = clawArcCircle(e);
+      dbgCircle(g, cc.x, cc.y, cc.r, '#ff5040');
     }
   }
-  if (def.nip) dbgCircle(g, e.x + f * (snoutLen(d, s) - d.L.head[0] * s * 0.25), e.y - zh.head * s, Math.max(5, d.L.head[0] * s * 0.5) + 4, '#ffb03e');
+  if (def.nip) {
+    const nc = nipCircle(e);
+    dbgCircle(g, nc.x, nc.y, nc.r, '#ffb03e');
+  }
 }
 function drawHitboxes() {
   const p = G.player;

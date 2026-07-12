@@ -302,9 +302,14 @@ hugging the front half of the head whose edge barely clears the snout tip
 (+4px contact pad, identical for player and NPCs), tail swingers sweep a 90°
 wedge dead behind themselves (sidestep out of it!), claw/arm strikes arc over
 the chest. Long necks (sauropods) get an
-extra mid-neck circle and club tails cover the knob. Each zone also carries a
-`dz` height so the H overlay draws it on the body part it represents — dz is
-cosmetic; combat is strictly ground-plane. Press **H** in game to see all of
+extra mid-neck circle and club tails cover the knob. Each zone carries a
+`dz` height that lifts it onto the body part it represents, and combat runs
+in exactly that lifted space — the circles the H overlay draws ARE the hit
+test, coordinate for coordinate. A bite lands if and only if the red weapon
+circle touches a cyan body circle, so a tall hunter has to step toward the
+camera to bring its jaws down onto short prey (NPC hunters aim their lunges
+with the same height offset, and the fishing plunge is the one exception —
+the strike dives to the water's surface). Press **H** in game to see all of
 it live (red = attack, cyan = body, orange = nip).
 Gender loadouts are automatic for every playable: the stat spread lives in
 `GENDER_MOD` (js/util.js) and both coats are derived from the species palette
