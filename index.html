@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HATCHLING — A Dinosaur Survival Game</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    background: #16110a;
+    overflow: hidden;
+    font-family: 'Consolas', 'Courier New', monospace;
+    color: #f5e9c8;
+  }
+  body { display: flex; align-items: center; justify-content: center; }
+  #wrap { position: relative; }
+  canvas#game {
+    display: block;
+    background: #16110a;
+  }
+  .hidden { display: none !important; }
+
+  /* ---------- HUD ---------- */
+  #hud { position: absolute; inset: 0; pointer-events: none; }
+  .panel {
+    background: linear-gradient(180deg, rgba(48,37,20,0.92), rgba(27,20,11,0.94));
+    border: 1px solid #7a5c34;
+    border-radius: 9px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,228,170,0.10);
+  }
+  #stats {
+    position: absolute; left: 12px; bottom: 12px;
+    padding: 9px 11px;
+  }
+  .statrow { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+  .sicon {
+    width: 13px; height: 13px; flex: none;
+    background-size: contain; background-repeat: no-repeat; background-position: center;
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.55));
+  }
+  .ic-hp    { background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><path d='M6 10.4C2.2 7.6 1 5 2.6 3.3 3.9 2 5.4 2.7 6 3.8 6.6 2.7 8.1 2 9.4 3.3 11 5 9.8 7.6 6 10.4Z' fill='%23e4685a'/></svg>"); }
+  .ic-stam  { background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><path d='M6.8 1 3.2 6.6h2.2L4.6 11l4.2-5.8H6.4L6.8 1Z' fill='%23e6c05a'/></svg>"); }
+  .ic-meat  { background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><rect x='3.2' y='5.1' width='5.6' height='1.9' rx='.95' fill='%23ecdcbc'/><circle cx='3' cy='4.7' r='1.35' fill='%23ecdcbc'/><circle cx='2.8' cy='7' r='1.15' fill='%23ecdcbc'/><circle cx='9' cy='4.7' r='1.35' fill='%23ecdcbc'/><circle cx='9.2' cy='7' r='1.15' fill='%23ecdcbc'/></svg>"); }
+  .ic-leaf  { background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><path d='M10.2 1.8C5.4 2 2.8 4.8 2.4 9.9 7.4 9.5 9.9 6.8 10.2 1.8Z' fill='%23a2c46a'/><path d='M2.4 9.9C4.4 7.4 6.6 5.3 8.6 3.6' stroke='%236d8846' stroke-width='.7' fill='none'/></svg>"); }
+  .ic-water { background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><path d='M6 1.2C6 1.2 2.8 5.6 2.8 7.8a3.2 3.2 0 0 0 6.4 0C9.2 5.6 6 1.2 6 1.2Z' fill='%2378bcd8'/></svg>"); }
+  .ic-hyg   { background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><path d='M6 1.2 7.1 4.3 10.2 5.4 7.1 6.5 6 9.6 4.9 6.5 1.8 5.4 4.9 4.3Z' fill='%23c1a2e0'/><circle cx='9.6' cy='9.4' r='1' fill='%23c1a2e0'/></svg>"); }
+  .bar {
+    width: 122px; height: 10px;
+    background: rgba(9,6,3,0.85);
+    border: 1px solid rgba(122,92,52,0.65);
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.65);
+  }
+  .bar .fill { height: 100%; border-radius: 4px; transition: width 0.15s linear; }
+  #fill-hp    { background: linear-gradient(180deg, #e4685a, #a52f24); }
+  #fill-stam  { background: linear-gradient(180deg, #eec25e, #b8862a); }
+  #fill-food  { background: linear-gradient(180deg, #a3bf58, #718c34); }
+  #fill-water { background: linear-gradient(180deg, #6cadc4, #3f7a92); }
+  #fill-hyg   { background: linear-gradient(180deg, #b790d8, #8258aa); }
+  .fill.low { animation: blink 0.7s steps(2) infinite; }
+  @keyframes blink { 50% { opacity: 0.35; } }
+
+  #growthbox {
+    position: absolute; left: 12px; top: 12px;
+    padding: 8px 11px;
+  }
+  #stage { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px; text-shadow: 0 1px 0 rgba(0,0,0,0.6); }
+  #growthbar {
+    width: 150px; height: 9px; position: relative;
+    background: rgba(9,6,3,0.85);
+    border: 1px solid rgba(122,92,52,0.65);
+    border-radius: 5px; overflow: hidden;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.65);
+  }
+  #growth-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #7da34a, #e2b23a); }
+  #growth-pct { font-size: 10px; color: #cdbb92; margin-left: 7px; }
+  #growthbox .gr { display: flex; align-items: center; }
+
+  #minimap {
+    position: absolute; right: 12px; bottom: 12px;
+    border: 1px solid #7a5c34;
+    border-radius: 9px;
+    image-rendering: pixelated;
+    background: #120d07;
+    opacity: 0.94;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.45);
+  }
+  #prompt {
+    position: absolute; left: 50%; bottom: 68px; transform: translateX(-50%);
+    font-size: 13px; letter-spacing: 1px; color: #ffe9a0;
+    background: linear-gradient(180deg, rgba(48,37,20,0.9), rgba(27,20,11,0.92));
+    border: 1px solid #7a5c34; border-radius: 7px;
+    padding: 4px 13px;
+    text-shadow: 0 1px 0 rgba(0,0,0,0.6);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+    transition: opacity 0.15s;
+  }
+  #banner {
+    position: absolute; left: 50%; top: 16%; transform: translateX(-50%);
+    font-size: 17px; letter-spacing: 2px; font-weight: bold;
+    text-shadow: 2px 2px 0 #1a1008;
+    white-space: nowrap;
+    transition: opacity 0.3s;
+  }
+  #growthscount {
+    margin-top: 6px; font-size: 11px; color: #ffd23e; letter-spacing: 1px;
+    text-shadow: 0 1px 0 rgba(0,0,0,0.6);
+  }
+  #btn-lobby {
+    position: absolute; left: 50%; top: 10px; transform: translateX(-50%);
+    pointer-events: auto; cursor: pointer;
+    font-family: inherit; font-size: 10px; letter-spacing: 2px;
+    color: #e8d8a8; background: linear-gradient(180deg, rgba(48,37,20,0.85), rgba(27,20,11,0.9));
+    border: 1px solid #7a5c34; border-radius: 7px;
+    padding: 4px 12px; margin: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+  #btn-lobby:hover { background: #57452a; color: #ffe9a0; }
+  #keys {
+    position: absolute; right: 12px; top: 12px;
+    font-size: 10px; color: #a5936c; text-align: right; line-height: 1.5;
+    background: linear-gradient(180deg, rgba(48,37,20,0.75), rgba(27,20,11,0.8));
+    padding: 5px 9px; border: 1px solid rgba(122,92,52,0.6); border-radius: 7px;
+  }
+  #statspanel {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+    width: 300px;
+    background: rgba(24,17,9,0.94);
+    border: 3px solid #57452a;
+    padding: 14px 18px;
+  }
+  #statspanel h3 { font-size: 13px; letter-spacing: 3px; margin-bottom: 10px; color: #ffe9a0; text-align: center; }
+  .sprow { display: flex; justify-content: space-between; font-size: 12px; padding: 3px 0; border-bottom: 1px solid #2c2113; }
+  .sprow span { color: #a5936c; }
+
+  /* ---------- screens ---------- */
+  .screen {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: radial-gradient(ellipse at 50% 35%, #2c2113 0%, #16110a 75%);
+    z-index: 10;
+  }
+  .screen.trans { background: rgba(16,12,7,0.75); }
+  #title h1, #profiles h1 {
+    font-size: 42px; letter-spacing: 10px; color: #ffe9a0;
+    text-shadow: 3px 3px 0 #6a3a1a, 6px 6px 0 rgba(0,0,0,0.4);
+    margin-bottom: 4px;
+  }
+  #title .sub, #profiles .sub { font-size: 12px; letter-spacing: 4px; color: #a5936c; margin-bottom: 14px; text-transform: uppercase; }
+  #profiles .sub { margin-bottom: 26px; }
+  #gr-balance {
+    position: absolute; right: 22px; top: 18px;
+    font-size: 15px; letter-spacing: 1px; color: #ffd23e;
+    background: rgba(35,26,14,0.9); border: 2px solid #57452a; border-radius: 8px;
+    padding: 6px 14px;
+    text-shadow: 0 1px 0 rgba(0,0,0,0.6);
+    cursor: pointer;
+    transition: border-color 0.12s, transform 0.12s;
+  }
+  #gr-balance:hover { border-color: #d8a534; transform: translateY(-2px); }
+  #gr-balance .pname { color: #f5e9c8; }
+  #gr-balance .swap { font-size: 10px; color: #a5936c; margin-left: 6px; }
+
+  /* ---------- profiles ---------- */
+  #profile-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px; min-width: 300px; max-height: 44vh; overflow-y: auto; padding: 3px;}
+  .profcard {
+    display: flex; justify-content: space-between; align-items: center; gap: 18px;
+    cursor: pointer;
+    background: rgba(35,26,14,0.9);
+    border: 2px solid #57452a; border-radius: 10px;
+    padding: 11px 18px;
+    transition: border-color 0.12s, transform 0.12s;
+  }
+  .profcard:hover { border-color: #d8a534; transform: translateY(-2px); }
+  .profcard .pname { font-size: 15px; letter-spacing: 2px; color: #ffe9a0; }
+  .profcard .pstats { font-size: 10px; color: #a5936c; letter-spacing: 1px; text-align: right; line-height: 1.5; }
+  .profcard .pstats b { color: #ffd23e; }
+  .profcard .pdel {
+    opacity: 0; flex: none;
+    color: #a5936c; font-size: 12px; letter-spacing: 1px;
+    border: 1px solid transparent; border-radius: 6px; padding: 3px 8px;
+    transition: opacity 0.12s, color 0.12s, background 0.12s;
+  }
+  .profcard:hover .pdel { opacity: 1; }
+  .profcard .pdel:hover { color: #ff6a5e; border-color: #7a3a30; background: rgba(60,20,14,0.5); }
+  .profcard .pdel.armed { color: #fff; background: #a52f24; border-color: #d05a4a; opacity: 1; font-size: 10px; }
+  #profile-create { display: flex; gap: 10px; align-items: center; }
+  #new-name {
+    font-family: inherit; font-size: 13px; letter-spacing: 1px;
+    background: rgba(9,6,3,0.85); color: #f5e9c8;
+    border: 2px solid #57452a; border-radius: 7px;
+    padding: 9px 12px; width: 190px; outline: none;
+  }
+  #new-name:focus { border-color: #d8a534; }
+  #profile-msg { min-height: 16px; margin-top: 12px; font-size: 12px; color: #ffd23e; letter-spacing: 1px; opacity: 0; transition: opacity 0.25s; }
+  #ecotabs { display: flex; gap: 12px; margin-bottom: 16px; }
+  .ecotab {
+    cursor: pointer; text-align: center;
+    background: rgba(35,26,14,0.85);
+    border: 2px solid #57452a; border-radius: 9px;
+    padding: 7px 20px 6px;
+    transition: border-color 0.12s, transform 0.12s;
+  }
+  .ecotab:hover { transform: translateY(-2px); }
+  .ecotab.sel { border-color: #d8a534; background: rgba(58,44,22,0.95); }
+  .ecotab h3 { font-size: 13px; letter-spacing: 3px; color: #ffe9a0; }
+  .ecotab .tabsub { font-size: 9px; letter-spacing: 1px; color: #a5936c; margin-top: 3px; }
+  .ecotab.locked h3 { color: #8d7c58; }
+  #title-msg {
+    min-height: 16px; font-size: 12px; color: #ffd23e; letter-spacing: 1px;
+    margin-bottom: 8px; opacity: 0; transition: opacity 0.25s;
+    text-shadow: 0 1px 0 rgba(0,0,0,0.6);
+  }
+  /* card sets wrap and scroll — built to hold 30+ dinos per ecosystem */
+  .cards {
+    display: flex; flex-wrap: wrap; justify-content: center;
+    gap: 18px; margin-bottom: 18px;
+    max-width: 76vw; max-height: 56vh;
+    overflow-y: auto; padding: 8px;
+  }
+  .card {
+    width: 218px; cursor: pointer;
+    background: rgba(35,26,14,0.9);
+    border: 3px solid #57452a;
+    padding: 12px;
+    text-align: center;
+    transition: transform 0.12s, border-color 0.12s;
+  }
+  .card:hover { transform: translateY(-4px) scale(1.02); border-color: #d8a534; }
+  .card canvas { width: 100%; height: 120px; background: #1d1912; border: 1px solid #3a2d18; }
+  .card h2 { font-size: 15px; letter-spacing: 2px; margin: 8px 0 2px; color: #ffe9a0; }
+  .card .latin { font-size: 10px; font-style: italic; color: #a5936c; margin-bottom: 8px; }
+  .card p { font-size: 10.5px; line-height: 1.5; color: #cdbb92; text-align: left; }
+  .card .diff { margin-top: 8px; font-size: 10px; letter-spacing: 2px; }
+  .diff.mod { color: #d8a534; } .diff.hard { color: #e05a4a; } .diff.swim { color: #6cadc4; }
+  .card .price { margin-top: 6px; font-size: 10px; letter-spacing: 1px; color: #ffd23e; }
+  .card .price.poor { color: #8d7c58; }
+  .card .prog { margin-top: 4px; font-size: 9.5px; letter-spacing: 1px; color: #a3bf58; min-height: 12px; }
+  #title .hint { font-size: 11px; color: #7d6c4c; letter-spacing: 1px; }
+
+  /* ---------- gender picker ---------- */
+  #gender-pick { z-index: 12; }
+  #gp-box {
+    background: rgba(24,17,9,0.96); border: 3px solid #57452a; border-radius: 12px;
+    padding: 18px 24px 16px; text-align: center;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+  }
+  #gp-title { font-size: 17px; letter-spacing: 4px; color: #ffe9a0; }
+  #gp-box .gp-sub { font-size: 10px; letter-spacing: 3px; color: #a5936c; text-transform: uppercase; margin: 4px 0 14px; }
+  #gp-skins { display: flex; gap: 12px; justify-content: center; margin-bottom: 14px; }
+  .skinsq {
+    cursor: pointer; text-align: center;
+    background: rgba(35,26,14,0.9); border: 2px solid #57452a; border-radius: 8px;
+    padding: 6px 8px 4px;
+    transition: transform 0.12s, border-color 0.12s;
+  }
+  .skinsq:hover { transform: translateY(-2px); }
+  .skinsq.sel { border-color: #d8a534; background: rgba(58,44,22,0.95); }
+  .skinsq canvas { width: 44px; height: 44px; display: block; border-radius: 4px; }
+  .skinsq .skname { font-size: 8.5px; letter-spacing: 1px; color: #a5936c; margin-top: 4px; }
+  .skinsq.sel .skname { color: #ffe9a0; }
+  .skinsq .skprice { font-size: 8.5px; letter-spacing: 1px; color: #ffd23e; margin-top: 2px; }
+  .skinsq .skprice.poor { color: #8d7c58; }
+  .skinsq.forsale canvas { opacity: 0.55; }
+  #gp-msg { min-height: 14px; font-size: 11px; color: #ffd23e; letter-spacing: 1px; margin: -6px 0 8px; opacity: 0; transition: opacity 0.25s; }
+  #gp-cards { display: flex; gap: 18px; margin-bottom: 14px; }
+  .gcard {
+    width: 218px; cursor: pointer;
+    background: rgba(35,26,14,0.9); border: 3px solid #57452a;
+    padding: 12px; text-align: center;
+    transition: transform 0.12s, border-color 0.12s;
+  }
+  .gcard:hover { transform: translateY(-4px) scale(1.02); border-color: #d8a534; }
+  .gcard canvas { width: 100%; height: 120px; background: #1d1912; border: 1px solid #3a2d18; }
+  .gcard h2 { font-size: 15px; letter-spacing: 3px; margin: 8px 0 6px; }
+  .gcard h2.gf { color: #d8b8c8; }
+  .gcard h2.gm { color: #6cadc4; }
+  .gcard p { font-size: 10.5px; line-height: 1.6; color: #cdbb92; min-height: 48px; }
+  .gcard .gprog { margin-top: 7px; font-size: 10px; letter-spacing: 1px; color: #a3bf58; min-height: 12px; }
+  #gp-cancel { font-size: 11px; padding: 7px 16px; }
+
+  #death h2 { font-size: 34px; letter-spacing: 8px; color: #e05a4a; text-shadow: 3px 3px 0 #2a0d08; margin-bottom: 12px; }
+  #death p { font-size: 13px; color: #cdbb92; margin-bottom: 24px; }
+  button {
+    font-family: inherit; font-size: 13px; letter-spacing: 2px;
+    background: #57452a; color: #ffe9a0;
+    border: 2px solid #8a6a40; padding: 10px 22px;
+    cursor: pointer; margin: 0 8px;
+  }
+  button:hover { background: #6a5433; }
+  #pause h2 { font-size: 30px; letter-spacing: 8px; color: #ffe9a0; }
+  #help .helpbox {
+    background: rgba(24,17,9,0.95); border: 3px solid #57452a; padding: 20px 30px;
+  }
+  #help h3 { letter-spacing: 3px; margin-bottom: 12px; color: #ffe9a0; }
+  #help td { font-size: 12px; padding: 3px 12px 3px 0; color: #cdbb92; }
+  #help td:first-child { color: #ffe9a0; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="game" width="640" height="360"></canvas>
+
+  <div id="hud" class="hidden">
+    <div id="growthbox" class="panel">
+      <div id="stage">Hatchling</div>
+      <div class="gr">
+        <div id="growthbar"><div id="growth-fill" style="width:0%"></div></div>
+        <span id="growth-pct">0%</span>
+      </div>
+      <div id="growthscount" title="Growths — earned every minute; spend them in the lobby">❖ 0</div>
+    </div>
+    <button id="btn-lobby" title="Back to species select — your dino keeps its progress">⌂ LOBBY</button>
+    <div id="stats" class="panel">
+      <div class="statrow"><span class="sicon ic-hp" title="Health"></span><div class="bar"><div class="fill" id="fill-hp"></div></div></div>
+      <div class="statrow"><span class="sicon ic-stam" title="Stamina"></span><div class="bar"><div class="fill" id="fill-stam"></div></div></div>
+      <div class="statrow"><span class="sicon ic-meat" id="ic-food" title="Food"></span><div class="bar"><div class="fill" id="fill-food"></div></div></div>
+      <div class="statrow"><span class="sicon ic-water" title="Water"></span><div class="bar"><div class="fill" id="fill-water"></div></div></div>
+      <div class="statrow"><span class="sicon ic-hyg" title="Hygiene"></span><div class="bar"><div class="fill" id="fill-hyg"></div></div></div>
+    </div>
+    <canvas id="minimap" width="120" height="120"></canvas>
+    <div id="prompt" style="opacity:0"></div>
+    <div id="banner" style="opacity:0"></div>
+    <div id="keys">WASD move &nbsp;·&nbsp; SHIFT sprint<br>SPACE bite &nbsp;·&nbsp; E eat / drink<br>TAB health menu &nbsp;·&nbsp; F1 help</div>
+    <div id="statspanel" class="hidden">
+      <h3>HEALTH MENU</h3>
+      <div id="sp-body"></div>
+    </div>
+  </div>
+
+  <div id="profiles" class="screen">
+    <h1>HATCHLING</h1>
+    <div class="sub">who's playing today?</div>
+    <div id="profile-list"></div>
+    <div id="profile-create">
+      <input id="new-name" maxlength="14" spellcheck="false" placeholder="new player name…">
+      <button id="btn-create">＋ CREATE PLAYER</button>
+    </div>
+    <div id="profile-msg"></div>
+  </div>
+
+  <div id="title" class="screen hidden">
+    <div id="gr-balance">❖ 0</div>
+    <h1>HATCHLING</h1>
+    <div class="sub">a dinosaur survival game</div>
+    <!-- tabs and dino cards are generated from the ECOS / PLAYER_DEF registries -->
+    <div id="ecotabs"></div>
+    <div id="title-msg"></div>
+    <div id="cards-area"></div>
+    <div class="hint">choose your hatchling · survive from hatchling to full adult · ❖ growths are earned every minute you survive</div>
+  </div>
+
+  <!-- gender picker: every dino is two loadouts — pick one before you hatch -->
+  <div id="gender-pick" class="screen trans hidden">
+    <div id="gp-box">
+      <h3 id="gp-title"></h3>
+      <div class="gp-sub">pick a skin, then choose your loadout</div>
+      <div id="gp-skins"></div>
+      <div id="gp-msg"></div>
+      <div id="gp-cards">
+        <div class="gcard" id="gcard-f">
+          <canvas id="gprev-f" width="200" height="120"></canvas>
+          <h2 class="gf">♀ FEMALE</h2>
+          <p id="gp-f-traits">plain sensible coat<br>+ quicker on her feet · earns more ❖<br>&nbsp;</p>
+          <div class="gprog" id="gprog-f"></div>
+        </div>
+        <div class="gcard" id="gcard-m">
+          <canvas id="gprev-m" width="200" height="120"></canvas>
+          <h2 class="gm">♂ MALE</h2>
+          <p id="gp-m-traits"></p>
+          <div class="gprog" id="gprog-m"></div>
+        </div>
+      </div>
+      <button id="gp-cancel">← BACK</button>
+    </div>
+  </div>
+
+  <div id="death" class="screen hidden">
+    <h2>YOU DIED</h2>
+    <p id="death-cause"></p>
+    <div>
+      <button id="btn-respawn">HATCH AGAIN</button>
+      <button id="btn-title">CHANGE SPECIES</button>
+    </div>
+  </div>
+
+  <div id="pause" class="screen trans hidden"><h2>PAUSED</h2></div>
+
+  <div id="help" class="screen trans hidden">
+    <div class="helpbox">
+      <h3>HOW TO SURVIVE</h3>
+      <table>
+        <tr><td>WASD / Arrows</td><td>move</td></tr>
+        <tr><td>SHIFT</td><td>sprint (drains stamina)</td></tr>
+        <tr><td>SPACE</td><td>bite / attack</td></tr>
+        <tr><td>E</td><td>eat · drink · feed on carcass</td></tr>
+        <tr><td>TAB</td><td>health menu</td></tr>
+        <tr><td>ESC / U</td><td>pause / mute</td></tr>
+        <tr><td>R</td><td>rest — heal faster, drain slower (move to get up)</td></tr>
+        <tr><td>G</td><td>grab a carcass (hold: tear off a chunk) · G drops · E swallows</td></tr>
+        <tr><td>M</td><td>wrestle a dino your size (apex carnivores)</td></tr>
+        <tr><td>P / I</td><td>aardiraptor: create a pack / invade a burrow</td></tr>
+        <tr><td>H</td><td>hitbox X-ray (red = attack, cyan = body)</td></tr>
+        <tr><td>Open jaws!</td><td>a predator pausing with open jaws is about to lunge — sidestep!</td></tr>
+        <tr><td>Stand in mud</td><td>restores hygiene</td></tr>
+        <tr><td>Water edge</td><td>drink to restore water</td></tr>
+        <tr><td>Grow</td><td>eat &amp; drink well and time will do the rest</td></tr>
+        <tr><td>❖ Growths</td><td>earned every minute alive (+ kill bonus) — spend in the lobby</td></tr>
+        <tr><td>⌂ Lobby</td><td>swap dinosaur any time; your dino keeps its progress</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="js/util.js"></script>
+<script src="js/sprites.js"></script>
+<script src="js/world.js"></script>
+<script src="js/entities.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
