@@ -124,6 +124,9 @@ const NPC_DEF = {
   // massive flat-plated tank: smacks with the tail, occasionally bites
   // whatever stands at its face (the nip)
   wuerho: { hp: 2800, dmg: 175, atkCd: 2.2, speed: 52, detect: 120, homeR: 220, reach: 48, biome: 'any', turn: 1.4, fearless: true, tank: true, bleedable: true, melee: { kb: 300 }, nip: { dmg: 70, cd: 3 } },
+  // the river barge: a placid mountain of belly with a hippo's temper —
+  // and a thumb spike that ends most arguments in one jab
+  fluvio: { hp: 1900, dmg: 150, atkCd: 1.6, speed: 70, detect: 150, homeR: 260, reach: 40, biome: 'any', turn: 1.5, fearless: true, tank: true, bleedable: true, melee: { kb: 260 } },
   // the charger: telegraphs, then arrives at a dead run — a long committed
   // dash (lungeT/lungeMul) launched from way out (chargeR)
   sino: { hp: 1600, dmg: 145, atkCd: 2.0, speed: 88, detect: 200, homeR: 300, reach: 38, biome: 'plains', turn: 1.8, fearless: true, tank: true, bleedable: true, melee: { kb: 300 }, chargeR: 170, lungeT: 0.7, lungeMul: 3.4 },
@@ -382,6 +385,19 @@ function shallowDir(x, y) {
   return 0;
 }
 
+// NPCs can't pivot on a dime: once one commits to a facing it must hold it
+// for a beat before flipping again. Without this a tail-swinger spins to
+// present its thagomizer and smacks in the SAME frame — the turn is invisible
+// and the tail seems to come out of nowhere. The short hold makes the pivot
+// readable (and, paired with the tryMelee gate, forces a real telegraph).
+const TURN_DELAY = 0.3;
+function faceToward(e, dir) {
+  if (!dir || dir === e.facing) return;
+  if (e.isPlayer) { e.facing = dir; return; }   // you turn on a dime — the delay is for NPCs only
+  if ((e.turnCd || 0) > 0) return;      // still committed to the current facing
+  e.facing = dir;
+  e.turnCd = TURN_DELAY;
+}
 function stepToward(e, tx, ty, speed, dt) {
   const d = dist(e.x, e.y, tx, ty);
   if (d < 2) { e.move = lerp(e.move, 0, 0.2); return true; }
@@ -395,7 +411,7 @@ function stepToward(e, tx, ty, speed, dt) {
   const sp = speed * terrainSpeedAt(e.x, e.y);
   e.x += Math.cos(e.heading) * sp * dt;
   e.y += Math.sin(e.heading) * sp * dt;
-  if (Math.abs(Math.cos(e.heading)) > 0.25) e.facing = Math.cos(e.heading) > 0 ? 1 : -1;
+  if (Math.abs(Math.cos(e.heading)) > 0.25) faceToward(e, Math.cos(e.heading) > 0 ? 1 : -1);
   e.pitchT = Math.sin(e.heading) * 0.3;   // nose leads into vertical movement
   e.move = lerp(e.move, 1, 0.15);
   e.phase += dt * sp * 0.055;
@@ -618,6 +634,7 @@ function weaponContact(e, target) {
 }
 function tryMelee(e, target, def, opts) {
   if (e.atkCd > 0) return;
+  if (e.turnCd > 0) return;    // let the pivot land first — no turn-and-smack in one frame
   const pt = weaponContact(e, target);
   if (!pt) return;
   e.atkCd = def.atkCd;
@@ -796,9 +813,10 @@ function thinkSkittish(e, d) {
 }
 
 // short-fused living fortress (huayangosaurus, kosmoceratops)
-function thinkTank(e, d) {
-  // very short detection; kills predators that come too close
-  // (a hatchling isn't a predator worth the energy — unless it bites first)
+// the tank threat scan, shared by every short-fused heavyweight: the nearest
+// carnivore worth a swing, with a grudge for whoever drew blood last
+// (a hatchling isn't a predator worth the energy — unless it bites first)
+function tankThreat(e, d) {
   let threat = null, td = 1e9;
   const p = G.player;
   if (p && p.alive && PLAYER_DEF[p.species].diet === 'carn' && p.growth > 0.2) {
@@ -814,6 +832,11 @@ function thinkTank(e, d) {
   if (e.aggroT > 0 && e.lastAttacker && dist(e.x, e.y, e.lastAttacker.x, e.lastAttacker.y) < d.detect * 1.6) {
     threat = e.lastAttacker;
   }
+  return threat;
+}
+function thinkTank(e, d) {
+  // very short detection; kills predators that come too close
+  const threat = tankThreat(e, d);
   if (threat) { e.state = 'fight'; e.target = threat; e.stateT = 1.2; return; }
   defaultWander(e, true);
 }
@@ -1030,6 +1053,28 @@ const NPC_THINK = {
     // (with the kin truce built into thinkPackHunter)
     if (e.packAlpha) { thinkPackFollower(e, d); return; }
     thinkPackHunter(e, d);
+  },
+  fluvio(e, d) {
+    // the river barge: tank rules for anything with teeth — and between
+    // meals it seeks out a leafy tree and rears up to strip the canopy
+    const threat = tankThreat(e, d);
+    if (threat) { e.state = 'fight'; e.target = threat; e.stateT = 1.2; return; }
+    if (e.stateT > 0) return;
+    if (rnd() < 0.3) {
+      let tree = null, bd = 240;
+      for (const t of World.trees) {
+        if (t.kind === 2 || t.leaf === 0) continue;   // dead snags have no leaves
+        const dd = dist(e.x, e.y, t.x, t.y);
+        if (dd < bd) { bd = dd; tree = t; }
+      }
+      if (tree) {
+        e.facing = tree.x > e.x ? 1 : -1;
+        if (bd < 40) { e.state = 'browse'; e.stateT = rrange(4.5, 7); e.browseTree = tree; return; }
+        e.state = 'wander'; e.tx = tree.x + (e.x > tree.x ? 26 : -26); e.ty = tree.y + 6; e.stateT = 8;
+        return;
+      }
+    }
+    defaultWander(e, true);
   },
   mawsonia: thinkSurfKing,
   proto(e, d) {
@@ -1309,6 +1354,7 @@ function updateNPC(e, dt) {
   const wx0 = e.x, wy0 = e.y;              // fish anchor: last known wet position
   e.atkCd = Math.max(0, e.atkCd - dt);
   e.attackT = Math.max(0, e.attackT - dt * 3);
+  e.turnCd = Math.max(0, (e.turnCd || 0) - dt);
   e.hurtT = Math.max(0, e.hurtT - dt);
   e.aggroT = Math.max(0, e.aggroT - dt);
   e.tiredT = Math.max(0, (e.tiredT || 0) - dt);
@@ -1340,6 +1386,13 @@ function updateNPC(e, dt) {
   e.x += e.vx * dt; e.y += e.vy * dt;
   e.vx *= Math.pow(0.02, dt); e.vy *= Math.pow(0.02, dt);
 
+  // a reared-up browser eases back onto all fours the moment it's disturbed
+  if (e.state !== 'browse' && e.rear) {
+    e.rear = lerp(e.rear, 0, 0.08);
+    e.headUp = lerp(e.headUp || 0, 0, 0.1);
+    if (e.rear < 0.01) { e.rear = 0; e.headUp = 0; }
+  }
+
   e.thinkT -= dt;
   if (e.thinkT <= 0) {
     e.thinkT = 0.22 + rnd() * 0.08;
@@ -1355,6 +1408,20 @@ function updateNPC(e, dt) {
   switch (e.state) {
     case 'idle': idleDrift(e, dt); e.headDown = lerp(e.headDown, 0, 0.1); break;
     case 'graze': idleDrift(e, dt); e.headDown = lerp(e.headDown, 1, 0.08); break;
+    case 'browse': {
+      // planted against the trunk, reared up on the hind legs, neck craning
+      // into the canopy (the rear/headUp pose eases back down elsewhere)
+      e.headDown = lerp(e.headDown, 0, 0.15);
+      e.rear = lerp(e.rear || 0, 1, 0.06);
+      e.headUp = lerp(e.headUp || 0, 1, 0.08);
+      if (e.stateT <= 0) {
+        const t = e.browseTree;
+        if (t && t.leaf !== 0) { t.leaf = 0; t.leafRegrow = 60 + rnd() * 45; }   // stripped bare where it fed
+        e.browseTree = null;
+        e.state = 'idle'; e.stateT = rrange(1.5, 3);
+      }
+      break;
+    }
     case 'wander': {
       e.headDown = lerp(e.headDown, 0, 0.1);
       if (stepToward(e, e.tx, e.ty, sp * 0.45, dt)) { e.state = 'idle'; e.stateT = rrange(1, 3); }
@@ -1394,7 +1461,7 @@ function updateNPC(e, dt) {
         stepToward(e, e.x + Math.cos(a) * 60, e.y + Math.sin(a) * 60, sp * 0.8, dt);
       } else {
         idleDrift(e, dt);
-        e.facing = t.x > e.x ? 1 : -1;
+        faceToward(e, t.x > e.x ? 1 : -1);
       }
       if (e.stateT <= 0) { e.state = 'idle'; e.stateT = 1; }
       break;
@@ -1427,7 +1494,7 @@ function updateNPC(e, dt) {
           const selfA = angTo(t.x, t.y, e.x, e.y);
           const oa = selfA + e.orbitDir * 0.85;
           stepToward(e, t.x + Math.cos(oa) * strikeR, t.y + Math.sin(oa) * strikeR, sp * 0.55, dt);
-          e.facing = t.x > e.x ? 1 : -1;
+          faceToward(e, t.x > e.x ? 1 : -1);
         }
       }
       e.stateT = Math.max(e.stateT, 0.5);
@@ -1497,7 +1564,7 @@ function updateNPC(e, dt) {
       e.move = lerp(e.move, 0.55, 0.2);
       e.phase += dt * d.speed * 0.03;
       const t = e.target;
-      if (t) e.facing = t.x > e.x ? 1 : -1;
+      if (t) faceToward(e, t.x > e.x ? 1 : -1);
       e.pitchT = 0;
       if (e.stateT <= 0) { e.state = 'chase'; e.stateT = 4; }
       break;
@@ -1515,7 +1582,7 @@ function updateNPC(e, dt) {
       // is still in the air, even if the knockback threw the target out of range
       const toward = t.x > e.x ? 1 : -1;
       const swinging = DINO[e.species].tailWeapon && e.attackT > 0.15;
-      if (!swinging) e.facing = DINO[e.species].tailWeapon && inRange ? -toward : toward;
+      if (!swinging) faceToward(e, DINO[e.species].tailWeapon && inRange ? -toward : toward);
       if (!inRange) stepToward(e, t.x, t.y, sp * 0.9, dt);
       else idleDrift(e, dt);
       // don't stray too far from home (the tanks barely pursue)
@@ -1545,7 +1612,7 @@ function updateNPC(e, dt) {
     }
     case 'guard': {
       idleDrift(e, dt);
-      if (e.target) e.facing = e.target.x > e.x ? 1 : -1;
+      if (e.target) faceToward(e, e.target.x > e.x ? 1 : -1);
       if (e.stateT <= 0) { e.state = 'idle'; e.stateT = 0.5; }
       break;
     }
@@ -1581,7 +1648,7 @@ function updateNPC(e, dt) {
       // presence — telling the female everything about him
       const p2 = G.player;
       idleDrift(e, dt);
-      if (p2) e.facing = p2.x > e.x ? 1 : -1;
+      if (p2) faceToward(e, p2.x > e.x ? 1 : -1);
       e.headDown = 0.35 + 0.35 * Math.sin(G.time * 3.2);
       e.phase += dt * 4;
       if (Math.random() < dt * 1.2) {
@@ -1802,6 +1869,7 @@ const ECO_SPAWNS = {
     { sp: 'aardi', pack: 3, sizes: [3, 4, 3], min: 8 },
     { sp: 'yuty', n: 3, min: 3, away: true },
     { sp: 'wuerho', n: 3, min: 3, away: true },
+    { sp: 'fluvio', n: 4, min: 3, away: true },
     { sp: 'sino', n: 4, min: 4, away: true },
     { sp: 'lourinha', n: 2, min: 2, away: true },
     // every fish in the game lives here — plus the delta's own two

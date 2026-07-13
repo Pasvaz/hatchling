@@ -250,6 +250,7 @@ and the hatchlings stay safely below until they emerge as sub-adults.
 - **Yutyrannus** — fast, robust-headed, feared bite. Hunts most mid-sized things, you included until you're nearly grown.
 - **Olorotitan** — the fan-crested 'titanic swan': Charonosaurus' niche, herds on the open islands, tail like a river gate.
 - **Wuerhosaurus** — a massive flat-plated stegosaur tank. Smacks with its tail — and, unusually, **occasionally bites** whatever stands at its face.
+- **Fluviodon** *(invented)* — the river barge: a hippo-heavy iguanodont, all belly and bad temper. It grazes on all fours, then **rears right up on its hind legs** to strip a tree's whole canopy (the leaves regrow in a minute or two). Placid until a carnivore wanders close — then the **thumb spike** comes out: 150 a jab, and it does not scare.
 - **Sinoceratops** — the charger: a long warning stance, then it arrives at three times its own speed. Sidestep the telegraph or eat 300 knockback.
 - **Lourinhanosaurus** — the delta's terror: strong, relentless, and its bite opens wounds that don't close (13/s bleed). The ONE predator with no upper size limit — even a full-grown Morosaurus checks the tree line for it.
 - **Onchopristis** *(fish)* — the sawfish: lethal and angry. Anything that touches its water is prey.
@@ -259,7 +260,7 @@ and the hatchlings stay safely below until they emerge as sub-adults.
 **Fear:** when a dinosaur dies, packmates nearby panic and rout (Huayangosaurus,
 Kosmoceratops, Grunos, Charonosaurus, Megorontosuchus, Tarbosaurus,
 Nothronychus, Pinacosaurus, Panoplosaurus, Atlasaurus, Wuerhosaurus,
-Sinoceratops, Yutyrannus, Lourinhanosaurus, Onchopristis and Mawsonia are
+Fluviodon, Sinoceratops, Yutyrannus, Lourinhanosaurus, Onchopristis and Mawsonia are
 fearless; Concavenator and Dakotaraptor packs hold as long as one packmate
 still stands).
 

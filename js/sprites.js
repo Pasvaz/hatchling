@@ -593,6 +593,19 @@ const DINO = {
     },
     tailUp: 0.24, armScale: 1.2, arch: 1, forageQuad: true, tailWeapon: true, duckbill: true, pattern: 'dapple',
   },
+  fluvio: {
+    // the river barge: an invented hippo-heavy iguanodont — all belly and
+    // bad temper, with a thumb spike for anyone who tests it. Grazes on all
+    // fours, and rears right up on its hind legs to strip the canopy.
+    name: 'Fluviodon', full: 'Fluviodon ponderosus (imagined)', diet: 'herb', biped: true, scale: 1.35,
+    L: { body: [52, 28], tail: [36, 10], neckLen: 11, neckAng: 0.45, head: [14, 9], leg: [17, 8] },
+    col: {
+      top: '#6e5f56', mid: '#9a8579', belly: '#ecc9b8', line: '#241c16',
+      acc: '#d09280', eye: '#3a2d24', pat: '#57493f', shade: '#82706a',
+    },
+    tailUp: 0.18, armScale: 1.35, bigClaws: true, clawLen: 5.5, clawWeapon: true,
+    forageQuad: true, arch: 0.4, snoutW: 0.5, snoutMidW: 0.62, pattern: 'band',
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -809,8 +822,10 @@ function drawDino(ctx, key, o) {
 
   // ---------------- skeleton anchors ----------------
   // foreLift (atlasaurus): the giraffe posture — shoulders carried high on
-  // long front legs, the whole back sloping down toward the hips
-  const fl = (d.foreLift || 0) * bodyH;
+  // long front legs, the whole back sloping down toward the hips.
+  // o.rear is the DYNAMIC version of the same lift: a browser rearing up
+  // on its hind legs to reach the canopy, easing back down afterwards
+  const fl = ((d.foreLift || 0) + (o.rear || 0) * 0.7) * bodyH;
   const hipX = -bodyL * 0.22, hipY = cy + bodyH * 0.16;
   const shX = bodyL * 0.27, shY = cy + bodyH * 0.18 - fl * 0.62;   // quad front shoulder
   const neckBase = { x: bodyL * 0.36, y: cy - bodyH * 0.14 - fl * 0.6 };
