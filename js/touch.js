@@ -15,6 +15,11 @@
   const ctxBox = document.getElementById('ctxbtns');
   const swz = document.getElementById('swipezone');
 
+  // no zoom, ever: CSS touch-action handles double-tap on modern browsers,
+  // these catch iOS Safari's pinch gesture and stray double-clicks
+  document.addEventListener('gesturestart', (e) => e.preventDefault());
+  document.addEventListener('dblclick', (e) => e.preventDefault());
+
   // ---- fullscreen + landscape lock, on the first tap once a game is on ----
   // (Android honors the lock; iPhones can't lock at all — the #rotate overlay
   // covers portrait there, and add-to-home-screen gives them fullscreen)
@@ -42,7 +47,7 @@
       mode: 'static',
       position: { left: '50%', top: '62%' },
       color: '#ffe9a0',
-      size: 120,
+      size: 96,
       restOpacity: 0.35,
     });
     joy.on('move', (ev, data) => {
@@ -52,7 +57,7 @@
       i.right = data.vector.x > dead;
       i.up = data.vector.y > dead;      // nipplejs y points UP
       i.down = data.vector.y < -dead;
-      i.sprint = data.force > 1.12;     // finger dragged past the ring = run
+      i.sprint = data.force >= 1;       // thumb at (or past) the rim = run
     });
     joy.on('end', clearDirs);
     window.TOUCH._joy = joy;   // exposed for the test harness

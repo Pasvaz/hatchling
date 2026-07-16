@@ -16,7 +16,11 @@
     font-family: 'Consolas', 'Courier New', monospace;
     color: #f5e9c8;
     -webkit-tap-highlight-color: transparent;
+    /* manipulation = taps + scrolling still work, but DOUBLE-TAP ZOOM dies
+       (rapid attack-button taps were zooming the whole page on phones) */
+    touch-action: manipulation;
   }
+  canvas#game { touch-action: none; }
   body { display: flex; align-items: center; justify-content: center; }
   #wrap { position: relative; }
   canvas#game {
@@ -374,6 +378,35 @@
   body.touch #prompt { display: none; }
   body.touch #banner { font-size: 14px; top: 12%; }
   body.touch #btn-lobby { font-size: 11px; padding: 9px 18px; }
+
+  /* ---------- compact lobby for touch screens ----------
+     phone screens are ~half the height the lobby was designed for: smaller
+     logo/tabs, tighter cards (the blurb hides — the preview and name carry
+     it), and everything hover-gated becomes always-visible */
+  body.touch #title h1, body.touch #profiles h1 { font-size: 22px; letter-spacing: 5px; text-shadow: 2px 2px 0 #6a3a1a; margin-bottom: 2px; }
+  body.touch #title .sub, body.touch #profiles .sub { font-size: 9px; letter-spacing: 2px; margin-bottom: 8px; }
+  body.touch #gr-balance { right: 8px; top: 8px; font-size: 12px; padding: 5px 10px; }
+  body.touch #ecotabs { gap: 8px; margin-bottom: 8px; }
+  body.touch .ecotab { padding: 5px 12px 4px; }
+  body.touch .ecotab h3 { font-size: 11px; letter-spacing: 2px; }
+  body.touch .ecotab .tabsub { font-size: 8px; }
+  body.touch #title-msg { margin-bottom: 4px; font-size: 11px; }
+  body.touch .cards { gap: 10px; max-width: 96vw; max-height: 58vh; padding: 4px; margin-bottom: 4px; touch-action: pan-y; }
+  body.touch .card { width: 168px; padding: 8px; border-width: 2px; }
+  body.touch .card canvas { height: 86px; }
+  body.touch .card h2 { font-size: 12px; letter-spacing: 1px; margin: 6px 0 1px; }
+  body.touch .card .latin { font-size: 8.5px; margin-bottom: 4px; }
+  body.touch .card p { display: none; }
+  body.touch .card .diff { margin-top: 4px; font-size: 9px; letter-spacing: 1px; }
+  body.touch .card .prog { font-size: 9px; min-height: 11px; margin-top: 2px; }
+  body.touch .card .price { margin-top: 4px; font-size: 9px; }
+  body.touch .gsel { margin: 6px 0 2px; }
+  body.touch .gseg { padding: 7px 0; font-size: 10px; }
+  body.touch .skinsel { gap: 6px; margin-top: 6px; }
+  body.touch .cskin canvas { width: 30px; height: 30px; }
+  body.touch #title .hint { display: none; }
+  body.touch .profcard { padding: 9px 14px; }
+  body.touch .profcard .pdel { opacity: 1; }   /* no hover on touch — delete is always visible */
 
   /* portrait on a touch device: the game wants your phone sideways */
   #rotate {
