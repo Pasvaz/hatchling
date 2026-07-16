@@ -34,10 +34,18 @@ const PROFILES_KEY = 'hatchling_profiles_v1';
 const LEGACY_SAVE_KEY = 'hatchling_save_v1';
 // earned = lifetime growths score (never spent down — it's the leaderboard)
 // ecoPaid = one flag per unlocked ecosystem, ready for however many we add
-function defaultSave() { return { growths: 0, earned: 0, ecoPaid: {}, mastery: {}, owned: {}, dino: {}, skinChoice: {}, skinOwned: {} }; }
+function defaultSave() { return { growths: 0, earned: 0, ecoPaid: {}, mastery: {}, owned: {}, dino: {}, skinChoice: {}, genderChoice: {}, skinOwned: {} }; }
 // paid skins are bought once per species (Classic and other free skins pass)
 function skinOwned(species, skinId) {
   return !SKINS[skinId].cost || !!(Save.skinOwned || {})[species + ':' + skinId];
+}
+// the loadout currently chosen on a species' lobby card — remembered per
+// species, defaulting to male + Classic the first time (a bad/unowned skin
+// falls back to Classic so you never launch in a coat you don't own)
+function cardGender(species) { return (Save.genderChoice || {})[species] === 'f' ? 'f' : 'm'; }
+function cardSkin(species) {
+  const s = (Save.skinChoice || {})[species];
+  return SKINS[s] && (!SKINS[s].only || SKINS[s].only === species) && skinOwned(species, s) ? s : 'default';
 }
 const Profiles = (() => {
   try {
@@ -122,8 +130,7 @@ window.addEventListener('keydown', (e) => {
   if (e.code === 'KeyR') G.input.rest = true;
   if (e.code === 'KeyG') G.input.grab = true;
   if (e.code === 'Escape') {
-    if (genderPickSp) closeGenderPick();
-    else if (G.started) { G.paused = !G.paused; document.getElementById('pause').classList.toggle('hidden', !G.paused); }
+    if (G.started) { G.paused = !G.paused; document.getElementById('pause').classList.toggle('hidden', !G.paused); }
   }
   if (e.code === 'KeyU') {
     const m = SFX.toggleMute();
@@ -196,9 +203,10 @@ function animatePreview(canvasId, species, gender, growth, skinId) {
 const ALL_PLAYABLES = Object.keys(PLAYER_DEF);
 function animateAllPreviews() {
   previewGen++;
-  // only the visible ecosystem's previews animate — 30 dinos won't burn CPU
+  // only the visible ecosystem's previews animate — 30 dinos won't burn CPU.
+  // Each hatchling wears the loadout currently selected on its card.
   for (const sp of ALL_PLAYABLES) {
-    if ((PLAYER_DEF[sp].eco || 'valley') === titleEco) animatePreview('prev-' + sp, sp);
+    if ((PLAYER_DEF[sp].eco || 'valley') === titleEco) animatePreview('prev-' + sp, sp, cardGender(sp), undefined, cardSkin(sp));
   }
 }
 
@@ -267,8 +275,20 @@ function buildTitleUI() {
       const card = document.createElement('div');
       card.className = 'card';
       card.id = 'card-' + sp;
-      card.innerHTML = '<canvas width="200" height="120"></canvas><h2></h2><div class="latin"></div><p></p>' +
-        '<div class="diff"></div><div class="price"></div><div class="prog"></div>';
+      // gender is a segmented toggle sat right under the preview (it changes the
+      // dino you see); ownership is a corner badge on the preview (✓ / 🔒); the
+      // chosen loadout's growth sits under the difficulty tag; skins are their
+      // own swatch row lower down. Clicking the dino/body launches — the gender
+      // bar and skin row swallow their own clicks.
+      card.innerHTML = '<div class="prevwrap"><canvas width="200" height="120"></canvas><span class="ownbadge"></span></div>' +
+        '<div class="gsel">' +
+        '<span class="gseg" data-g="f">♀ Female<span class="tip"></span></span>' +
+        '<span class="gseg" data-g="m">♂ Male<span class="tip"></span></span>' +
+        '</div>' +
+        '<h2></h2><div class="latin"></div><p></p>' +
+        '<div class="diff"></div><div class="prog"></div>' +
+        '<div class="price"></div>' +
+        '<div class="skinsel"></div>';
       card.querySelector('canvas').id = 'prev-' + sp;
       card.querySelector('h2').textContent = DINO[sp].name.toUpperCase();
       card.querySelector('.latin').textContent = DINO[sp].full;
@@ -276,6 +296,25 @@ function buildTitleUI() {
       const diff = card.querySelector('.diff');
       diff.textContent = info.tag;
       diff.classList.add(info.tagClass);
+      // gender segments: hover one for the trait tooltip; clicking only changes
+      // the selection (the bar swallows its clicks so it never launches the game)
+      const verb = DINO[sp].tailWeapon ? 'swings' : DINO[sp].clawWeapon ? 'slashes' : DINO[sp].headButt ? 'rams' : 'bites';
+      card.querySelector('.gseg[data-g="m"] .tip').textContent = 'bigger · tougher · ' + verb + ' harder · slower · earns fewer ❖';
+      card.querySelector('.gseg[data-g="f"] .tip').textContent = 'quicker on her feet · earns more ❖';
+      for (const seg of card.querySelectorAll('.gseg')) {
+        seg.classList.toggle('sel', seg.dataset.g === cardGender(sp));
+        seg.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          if (!Save.genderChoice) Save.genderChoice = {};
+          Save.genderChoice[sp] = seg.dataset.g;
+          saveSave();
+          refreshCardOpts(sp);
+        });
+      }
+      // the gender bar and skin row swallow gap-clicks so only the dino launches
+      card.querySelector('.gsel').addEventListener('click', (ev) => ev.stopPropagation());
+      card.querySelector('.skinsel').addEventListener('click', (ev) => ev.stopPropagation());
+      buildCardSkins(sp, card.querySelector('.skinsel'));
       card.addEventListener('click', () => tryPlay(sp));
       wrap.appendChild(card);
     }
@@ -303,22 +342,109 @@ function refreshTitle() {
     tab.classList.toggle('sel', titleEco === key);
     document.getElementById('cards-' + key).classList.toggle('hidden', titleEco !== key);
   }
-  // per-card price / progress state
+  // per-card ownership badge / price / progress state
   for (const sp of ALL_PLAYABLES) {
     const card = document.getElementById('card-' + sp);
     if (!card) continue;
     const def = PLAYER_DEF[sp];
-    const priceEl = card.querySelector('.price');
+    const owned = Save.owned[sp] || !def.cost;
     const reqLocked = def.req && !Save.mastery[def.req];
-    if (Save.owned[sp] || !def.cost) priceEl.textContent = '✔ OWNED — TAP TO PLAY';
-    else if (reqLocked) priceEl.textContent = '🔒 grow ' + DINO[def.req].name.toUpperCase() + ' to Full Adult';
-    else priceEl.textContent = '❖ ' + def.cost + (Save.growths >= def.cost ? ' — TAP TO BUY & PLAY' : ' — need ' + (def.cost - Save.growths) + ' more');
-    priceEl.classList.toggle('poor', !Save.owned[sp] && (reqLocked || def.cost > 0 && Save.growths < def.cost));
-    // both loadouts report their progress on the card
-    const bit = (sym, s) => s && s.growth > 0.005 ? sym + ' ' + Math.floor(s.growth * 100) + '% ' + stageOf(s.growth) : '';
-    card.querySelector('.prog').textContent =
-      [bit('♀', Save.dino[dinoKey(sp, 'f')]), bit('♂', Save.dino[dinoKey(sp, 'm')])].filter(Boolean).join('  ·  ');
+    // ownership is a corner badge on the preview now — ✓ owned, 🔒 not yet
+    const badge = card.querySelector('.ownbadge');
+    badge.textContent = owned ? '✓' : '🔒';
+    badge.className = 'ownbadge ' + (owned ? 'owned' : 'locked');
+    // the price row shows only while the dino is still locked (owned needs no row)
+    const priceEl = card.querySelector('.price');
+    if (owned) {
+      priceEl.style.display = 'none';
+      priceEl.textContent = '';
+    } else {
+      priceEl.style.display = '';
+      priceEl.textContent = reqLocked
+        ? 'grow ' + DINO[def.req].name.toUpperCase() + ' to Full Adult'
+        : '❖ ' + def.cost + (Save.growths >= def.cost ? ' — TAP TO BUY' : ' — need ' + (def.cost - Save.growths) + ' more');
+      priceEl.classList.toggle('poor', reqLocked || (def.cost > 0 && Save.growths < def.cost));
+    }
+    // the chosen loadout's growth sits right under the difficulty tag
+    card.querySelector('.prog').textContent = cardProgText(sp);
+    // rebuild the swatches so OWNED / affordability labels track the live
+    // balance (they're first built at boot, before a profile is even chosen)
+    buildCardSkins(sp, card.querySelector('.skinsel'));
   }
+}
+// the selected gender's saved growth, e.g. "♂ 100% Full Adult" (blank if new)
+function cardProgText(sp) {
+  const g = cardGender(sp);
+  const s = Save.dino[dinoKey(sp, g)];
+  return s && s.growth > 0.005 ? (g === 'm' ? '♂' : '♀') + ' ' + Math.floor(s.growth * 100) + '% ' + stageOf(s.growth) : '';
+}
+
+// the skin swatches on a species card — the inline heir to the old picker's
+// skin row: same registry loop and buy flow, painted small onto the card
+function buildCardSkins(sp, container) {
+  container.innerHTML = '';
+  const cur = cardSkin(sp);
+  for (const id of Object.keys(SKINS)) {
+    const def = SKINS[id];
+    if (def.only && def.only !== sp) continue;      // species-exclusive coat
+    const owned = skinOwned(sp, id);
+    const selected = id === cur;
+    const sq = document.createElement('div');
+    sq.className = 'cskin' + (selected ? ' sel' : '') + (owned ? '' : ' forsale');
+    sq.title = def.name + (def.cost && !owned ? ' — ❖ ' + def.cost : '');
+    const cv = document.createElement('canvas');
+    cv.width = 40; cv.height = 40;
+    sq.appendChild(cv);
+    drawSkinSwatch(cv, sp, id);
+    // EVERY swatch carries a label so the row never changes height: BASE for
+    // the free default, OWNED once a paid coat is bought, its ❖ price while
+    // it's still locked. The green ✓ check (absolute, no layout effect) marks
+    // whichever swatch is currently selected — Classic included.
+    const label = document.createElement('div');
+    if (!def.cost) { label.className = 'csklabel base'; label.textContent = 'BASE'; }
+    else if (owned) { label.className = 'csklabel owned'; label.textContent = 'OWNED'; }
+    else { label.className = 'csklabel' + (Save.growths < def.cost ? ' poor' : ''); label.textContent = '❖' + def.cost; }
+    sq.appendChild(label);
+    if (selected) {
+      const chk = document.createElement('span');
+      chk.className = 'cskchk';
+      chk.textContent = '✓';
+      sq.appendChild(chk);
+    }
+    sq.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      let bought = false;
+      if (!skinOwned(sp, id)) {
+        if (Save.growths < def.cost) { flashTitleMsg(def.name + ' costs ❖ ' + def.cost + needMsg(def.cost)); return; }
+        Save.growths -= def.cost;
+        if (!Save.skinOwned) Save.skinOwned = {};
+        Save.skinOwned[sp + ':' + id] = true;
+        bought = true;
+      } else if (cardSkin(sp) === id) return;
+      if (!Save.skinChoice) Save.skinChoice = {};
+      Save.skinChoice[sp] = id;
+      saveSave();            // persist FIRST — before anything that could throw
+      refreshTitle();        // the ❖ balance + card prices
+      refreshCardOpts(sp);   // .sel/check states + the card's preview
+      if (bought) {
+        try { SFX.buy(); } catch (e) { }
+        flashTitleMsg(def.name.toUpperCase() + ' unlocked for ' + DINO[sp].name + '!');
+      }
+    });
+    container.appendChild(sq);
+  }
+}
+// after a chip/swatch change: move the checkmarks and re-render the preview to
+// the chosen loadout (retiring the old preview loops via animateAllPreviews)
+function refreshCardOpts(sp) {
+  const card = document.getElementById('card-' + sp);
+  if (!card) return;
+  const g = cardGender(sp);
+  for (const seg of card.querySelectorAll('.gseg')) seg.classList.toggle('sel', seg.dataset.g === g);
+  card.querySelector('.prog').textContent = cardProgText(sp);   // growth follows the chosen loadout
+  const skinsel = card.querySelector('.skinsel');
+  if (skinsel) buildCardSkins(sp, skinsel);
+  animateAllPreviews();
 }
 
 function tryEcoTab(key) {
@@ -363,18 +489,19 @@ function tryPlay(species) {
     SFX.buy();
     refreshTitle();
   }
-  openGenderPick(species);
+  // no popup any more: the card already carries the gender + skin choice.
+  // Launch straight into the game with whatever is selected on the card.
+  const g = cardGender(species);
+  const sk = cardSkin(species);   // already validated + owned
+  if (!Save.skinChoice) Save.skinChoice = {};
+  if (!Save.genderChoice) Save.genderChoice = {};
+  Save.skinChoice[species] = sk;
+  Save.genderChoice[species] = g;
+  saveSave();
+  startGame(species, g, sk);
 }
 
-// ---------- gender picker: every dino is two loadouts (× its skins) ----------
-let genderPickSp = null;
-let pickerSkin = 'default';
-// grown previews so the coat, the skin and the size difference actually show
-function refreshGenderPreviews() {
-  previewGen++;   // retire the previous pair of preview loops
-  animatePreview('gprev-f', genderPickSp, 'f', 0.55, pickerSkin);
-  animatePreview('gprev-m', genderPickSp, 'm', 0.55, pickerSkin);
-}
+// ---------- skin swatches (painted onto each species card) ----------
 // one square per skin — a little painted swatch of that skin's markings
 function drawSkinSwatch(cv, species, skinId) {
   const x = cv.getContext('2d');
@@ -404,95 +531,6 @@ function drawSkinSwatch(cv, species, skinId) {
   }
   x.strokeStyle = C.line; x.lineWidth = 3; x.strokeRect(0, 0, W, H);
 }
-const flashGpMsg = makeFlash('gp-msg');
-function buildSkinRow(species) {
-  const row = document.getElementById('gp-skins');
-  row.innerHTML = '';
-  for (const id of Object.keys(SKINS)) {
-    const def = SKINS[id];
-    if (def.only && def.only !== species) continue;   // species-exclusive coat
-    const owned = skinOwned(species, id);
-    const sq = document.createElement('div');
-    sq.className = 'skinsq' + (id === pickerSkin ? ' sel' : '') + (owned ? '' : ' forsale');
-    const cv = document.createElement('canvas');
-    cv.width = 88; cv.height = 88;
-    sq.appendChild(cv);
-    const lab = document.createElement('div');
-    lab.className = 'skname';
-    lab.textContent = def.name.toUpperCase();
-    sq.appendChild(lab);
-    if (def.cost) {
-      const pr = document.createElement('div');
-      pr.className = 'skprice' + (!owned && Save.growths < def.cost ? ' poor' : '');
-      pr.textContent = owned ? '✔ owned' : '❖ ' + def.cost;
-      sq.appendChild(pr);
-    }
-    drawSkinSwatch(cv, species, id);
-    sq.addEventListener('click', () => {
-      if (!skinOwned(species, id)) {
-        if (Save.growths < def.cost) {
-          flashGpMsg(def.name + ' costs ❖ ' + def.cost + needMsg(def.cost));
-          return;
-        }
-        Save.growths -= def.cost;
-        if (!Save.skinOwned) Save.skinOwned = {};
-        Save.skinOwned[species + ':' + id] = true;
-        saveSave();
-        SFX.buy();
-        refreshTitle();   // the ❖ balance behind the overlay
-        flashGpMsg(def.name.toUpperCase() + ' unlocked for ' + DINO[species].name + '!');
-      } else if (pickerSkin === id) return;
-      pickerSkin = id;
-      buildSkinRow(species);
-      refreshGenderPreviews();
-    });
-    row.appendChild(sq);
-  }
-}
-function openGenderPick(species) {
-  genderPickSp = species;
-  markUiSwitch();
-  document.getElementById('gp-title').textContent = DINO[species].name.toUpperCase();
-  const verb = DINO[species].tailWeapon ? 'swings' : DINO[species].clawWeapon ? 'slashes' : DINO[species].headButt ? 'rams' : 'bites';
-  document.getElementById('gp-m-traits').innerHTML =
-    'bright showy coat<br>+ larger · tougher · ' + verb + ' harder<br>− slower · earns fewer ❖';
-  for (const g of ['f', 'm']) {
-    const snap = Save.dino[dinoKey(species, g)];
-    document.getElementById('gprog-' + g).textContent =
-      snap && snap.growth > 0.005
-        ? 'CONTINUE — ' + Math.floor(snap.growth * 100) + '% ' + stageOf(snap.growth)
-        : 'NEW HATCHLING';
-  }
-  // the picker remembers the last skin you wore as this species (if still owned)
-  const worn = (Save.skinChoice || {})[species];
-  pickerSkin = SKINS[worn] && skinOwned(species, worn) ? worn : 'default';
-  buildSkinRow(species);
-  document.getElementById('gender-pick').classList.remove('hidden');
-  refreshGenderPreviews();
-}
-function closeGenderPick() {
-  genderPickSp = null;
-  document.getElementById('gender-pick').classList.add('hidden');
-  animateAllPreviews();   // bumps the generation: the picker's loops die off
-}
-function pickGender(g) {
-  if (!genderPickSp || uiSwitchBlocked()) return;
-  const sp = genderPickSp;
-  genderPickSp = null;
-  document.getElementById('gender-pick').classList.add('hidden');
-  if (!skinOwned(sp, pickerSkin)) pickerSkin = 'default';   // never start in an unpaid skin
-  if (!Save.skinChoice) Save.skinChoice = {};
-  Save.skinChoice[sp] = pickerSkin;
-  saveSave();
-  startGame(sp, g, pickerSkin);
-}
-document.getElementById('gcard-f').addEventListener('click', () => pickGender('f'));
-document.getElementById('gcard-m').addEventListener('click', () => pickGender('m'));
-document.getElementById('gp-cancel').addEventListener('click', () => { markUiSwitch(); closeGenderPick(); });
-// clicking the dimmed backdrop (not the cards) also backs out
-document.getElementById('gender-pick').addEventListener('click', (ev) => {
-  if (ev.target === ev.currentTarget) closeGenderPick();
-});
 document.getElementById('btn-respawn').addEventListener('click', () => {
   document.getElementById('death').classList.add('hidden');
   respawn(G.player.species, G.player.gender, G.player.skin);
@@ -515,7 +553,7 @@ document.getElementById('btn-lobby').addEventListener('click', (ev) => {
   if (G.started) exitToLobby();
 });
 // buttons must never hold keyboard focus, or SPACE (bite!) re-clicks them mid-game
-for (const id of ['btn-lobby', 'btn-respawn', 'btn-title', 'gp-cancel']) {
+for (const id of ['btn-lobby', 'btn-respawn', 'btn-title']) {
   const b = document.getElementById(id);
   b.setAttribute('tabindex', '-1');
   b.addEventListener('mousedown', (ev) => ev.preventDefault());   // click still fires; focus never sticks

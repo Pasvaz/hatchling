@@ -54,24 +54,37 @@ No build step, no dependencies — plain HTML5 canvas + JavaScript.
 
 ## The dinosaurs
 
-**Genders.** Every playable dinosaur is really two loadouts: picking a card
-opens a ♀/♂ choice instead of dropping you straight into the nest. The
-**female** wears a plain, sensible coat but is quicker on her feet and earns
-more ❖ growths; the **male** wears a bright showy coat and is larger, tougher
-and hits harder — but he's slower and earns less. Each loadout keeps its own
-saved dino, so you can grow a female and a male of the same species side by
-side (and losing one never costs you the other). Saves from before genders
-carry on as females.
+**Genders.** Every playable dinosaur is really two loadouts, chosen right on
+its lobby card: a **♀ Female / ♂ Male segmented toggle** sits just under the
+preview (male selected by default) — hover a segment to read what it changes.
+The selected loadout's growth shows just under the difficulty tag (e.g. "♂ 100%
+Full Adult"), and whether you own the dino rides as a corner badge on the
+preview (✓ owned, 🔒 still locked, with the ❖ price shown below only while it's
+locked). The **female** wears a plain, sensible coat but is quicker on her feet
+and earns more ❖ growths; the **male** wears a bright showy coat and is larger,
+tougher and hits harder — but he's slower and earns less. Each loadout keeps
+its own saved dino, so you can grow a female and a male of the same species
+side by side (and losing one never costs you the other). Saves from before
+genders carry on as females. Pick your gender and skin on the card, then click
+the dino to play — happy with the defaults (male, Classic), and it's a single
+click. No popup.
 
-**Skins.** The same picker also holds a row of skin squares — pick a skin
-first, then your loadout. Every dinosaur has its **Classic** skin (the species
-colors, in both gender coats) and a **Ripcel** skin: the body sunk toward
-black, navy flank stripes, and shining lime dots from shoulder to tail — muted
-on her, turned all the way up on him. Ripcel costs **❖ 100 per species**
-(bought once, worn forever — something to spend a fortune on, one dinosaur at
-a time). Skins are pure style (no stats), and the picker remembers the last
-one you wore as each species. Some skins are species-exclusive (`only` on the
-SKINS entry): **Jungell** (❖ 100) belongs to Tyrannotitan alone — mossy green
+**Skins.** At the bottom of each card is a row of **skin swatches**. Each one
+always carries a label so the row never jumps: **BASE** for the free default,
+**OWNED** for a paid coat you've bought, or its **❖ 100** price while it's
+still locked — and a green ✓ badge marks the one you'll wear (Classic
+included; the badge simply follows your choice). Every dinosaur has its
+**Classic** skin (the species colors, in both gender coats) and a **Ripcel**
+skin: the body sunk toward black, navy flank stripes, and shining lime dots
+from shoulder to tail — muted on her, turned all the way up on him. Clicking a
+locked swatch buys it on the spot (once, worn forever — something to spend a
+fortune on, one dinosaur at a time): the ❖ price is deducted, the label flips
+to OWNED, and the check moves onto it. Skins are pure style (no stats), and
+each card
+remembers the last gender + skin you wore as that species — the card's little
+preview even repaints to whatever you've picked. Some skins are
+species-exclusive (`only` on the SKINS entry): **Jungell** (❖ 100) belongs to
+Tyrannotitan alone — mossy green
 over brown flanks with shining lime leaf-flecks dappled down its back.
 
 **Playable — Fern Valley**
@@ -314,11 +327,15 @@ the strike dives to the water's surface). Press **H** in game to see all of
 it live (red = attack, cyan = body, orange = nip).
 Gender loadouts are automatic for every playable: the stat spread lives in
 `GENDER_MOD` (js/util.js) and both coats are derived from the species palette
-(`genderSkin`, js/sprites.js), so a new dino gets its ♀/♂ picker for free.
-Skins are a registry too — add an entry to `SKINS` (give it a `cost` to make
-it a per-species ❖ purchase) plus a palette branch in `skinColors` (and a
-`drawPattern` branch if it repaints the markings), and every playable's
-picker grows a new square.
+(`genderSkin`, js/sprites.js), so a new dino gets its inline ♀/♂ toggle for
+free. The selection lives on the card itself — `cardGender(sp)`/`cardSkin(sp)`
+(js/main.js) read the remembered choice (`Save.genderChoice`/`Save.skinChoice`,
+default male + Classic), `tryPlay` launches straight into `startGame` with it,
+and the chips/swatches `stopPropagation` so only a click on the rest of the
+card starts the game. Skins are a registry too — add an entry to `SKINS` (give
+it a `cost` to make it a per-species ❖ purchase) plus a palette branch in
+`skinColors` (and a `drawPattern` branch if it repaints the markings), and
+every playable's card grows a new swatch (`buildCardSkins`).
 
 **Terrain & hazards.** Tiles have types (grass, forest, sand, water, deep,
 mud, lava); a generator carves them and can flag `World.ashy` for a grey

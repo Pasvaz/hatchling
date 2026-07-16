@@ -230,57 +230,72 @@
     transition: transform 0.12s, border-color 0.12s;
   }
   .card:hover { transform: translateY(-4px) scale(1.02); border-color: #d8a534; }
+  .card .prevwrap { position: relative; line-height: 0; }
   .card canvas { width: 100%; height: 120px; background: #1d1912; border: 1px solid #3a2d18; }
+  /* ownership badge in the preview's top-right corner: ✓ owned, 🔒 still locked */
+  .ownbadge {
+    position: absolute; top: 6px; right: 6px; pointer-events: none;
+    width: 22px; height: 22px; line-height: 21px; text-align: center;
+    font-size: 12px; border-radius: 50%;
+    background: rgba(10,7,3,0.82); border: 1px solid #57452a;
+  }
+  .ownbadge.owned { color: #8fdc6a; border-color: #5c8a3a; }
+  .ownbadge.locked { color: #d6c088; }
   .card h2 { font-size: 15px; letter-spacing: 2px; margin: 8px 0 2px; color: #ffe9a0; }
   .card .latin { font-size: 10px; font-style: italic; color: #a5936c; margin-bottom: 8px; }
   .card p { font-size: 10.5px; line-height: 1.5; color: #cdbb92; text-align: left; }
   .card .diff { margin-top: 8px; font-size: 10px; letter-spacing: 2px; }
   .diff.mod { color: #d8a534; } .diff.hard { color: #e05a4a; } .diff.swim { color: #6cadc4; }
-  .card .price { margin-top: 6px; font-size: 10px; letter-spacing: 1px; color: #ffd23e; }
+  .card .prog { margin-top: 3px; font-size: 10px; letter-spacing: 1px; color: #a3bf58; min-height: 13px; }
+  .card .price { margin-top: 8px; font-size: 10px; letter-spacing: 1px; color: #ffd23e; }
   .card .price.poor { color: #8d7c58; }
-  .card .prog { margin-top: 4px; font-size: 9.5px; letter-spacing: 1px; color: #a3bf58; min-height: 12px; }
   #title .hint { font-size: 11px; color: #7d6c4c; letter-spacing: 1px; }
 
-  /* ---------- gender picker ---------- */
-  #gender-pick { z-index: 12; }
-  #gp-box {
-    background: rgba(24,17,9,0.96); border: 3px solid #57452a; border-radius: 12px;
-    padding: 18px 24px 16px; text-align: center;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+  /* ---------- gender segmented toggle (under the preview) ---------- */
+  .gsel { display: flex; margin: 9px 0 2px; border: 1px solid #4a3a22; border-radius: 6px; overflow: hidden; }
+  .gseg {
+    position: relative; flex: 1; cursor: pointer;
+    padding: 5px 0; font-size: 11px; letter-spacing: 1px; text-align: center;
+    color: #8d7c58; background: rgba(28,21,11,0.6);
+    transition: background 0.12s, color 0.12s;
   }
-  #gp-title { font-size: 17px; letter-spacing: 4px; color: #ffe9a0; }
-  #gp-box .gp-sub { font-size: 10px; letter-spacing: 3px; color: #a5936c; text-transform: uppercase; margin: 4px 0 14px; }
-  #gp-skins { display: flex; gap: 12px; justify-content: center; margin-bottom: 14px; }
-  .skinsq {
-    cursor: pointer; text-align: center;
-    background: rgba(35,26,14,0.9); border: 2px solid #57452a; border-radius: 8px;
-    padding: 6px 8px 4px;
-    transition: transform 0.12s, border-color 0.12s;
+  .gseg + .gseg { border-left: 1px solid #4a3a22; }
+  .gseg:hover { color: #cdbb92; }
+  .gseg[data-g="f"].sel { background: rgba(96,52,72,0.6); color: #f0cadd; }
+  .gseg[data-g="m"].sel { background: rgba(38,72,92,0.6); color: #bfe6f5; }
+  /* the hover trait tooltip: the male/female stat difference, on demand */
+  .gseg .tip {
+    display: none; position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%);
+    width: 150px; padding: 6px 8px; z-index: 20;
+    background: rgba(10,7,3,0.98); border: 1px solid #57452a; border-radius: 6px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.6);
+    font-size: 9px; line-height: 1.55; letter-spacing: 0.4px; color: #cdbb92;
+    text-transform: none; white-space: normal; pointer-events: none;
   }
-  .skinsq:hover { transform: translateY(-2px); }
-  .skinsq.sel { border-color: #d8a534; background: rgba(58,44,22,0.95); }
-  .skinsq canvas { width: 44px; height: 44px; display: block; border-radius: 4px; }
-  .skinsq .skname { font-size: 8.5px; letter-spacing: 1px; color: #a5936c; margin-top: 4px; }
-  .skinsq.sel .skname { color: #ffe9a0; }
-  .skinsq .skprice { font-size: 8.5px; letter-spacing: 1px; color: #ffd23e; margin-top: 2px; }
-  .skinsq .skprice.poor { color: #8d7c58; }
-  .skinsq.forsale canvas { opacity: 0.55; }
-  #gp-msg { min-height: 14px; font-size: 11px; color: #ffd23e; letter-spacing: 1px; margin: -6px 0 8px; opacity: 0; transition: opacity 0.25s; }
-  #gp-cards { display: flex; gap: 18px; margin-bottom: 14px; }
-  .gcard {
-    width: 218px; cursor: pointer;
-    background: rgba(35,26,14,0.9); border: 3px solid #57452a;
-    padding: 12px; text-align: center;
-    transition: transform 0.12s, border-color 0.12s;
+  .gseg:hover .tip { display: block; }
+  /* ---------- skin swatches (their own row lower down) ---------- */
+  .skinsel { display: flex; gap: 7px; justify-content: center; margin-top: 10px; }
+  .cskin {
+    position: relative; cursor: pointer;
+    border: 2px solid #4a3a22; border-radius: 6px; padding: 2px;
+    transition: transform 0.12s, border-color 0.12s, background 0.12s;
   }
-  .gcard:hover { transform: translateY(-4px) scale(1.02); border-color: #d8a534; }
-  .gcard canvas { width: 100%; height: 120px; background: #1d1912; border: 1px solid #3a2d18; }
-  .gcard h2 { font-size: 15px; letter-spacing: 3px; margin: 8px 0 6px; }
-  .gcard h2.gf { color: #d8b8c8; }
-  .gcard h2.gm { color: #6cadc4; }
-  .gcard p { font-size: 10.5px; line-height: 1.6; color: #cdbb92; min-height: 48px; }
-  .gcard .gprog { margin-top: 7px; font-size: 10px; letter-spacing: 1px; color: #a3bf58; min-height: 12px; }
-  #gp-cancel { font-size: 11px; padding: 7px 16px; }
+  .cskin:hover { transform: translateY(-2px); border-color: #7a6034; }
+  .cskin.sel { border-color: #d8a534; background: rgba(58,44,22,0.95); }
+  .cskin canvas { width: 34px; height: 34px; display: block; border-radius: 3px; }
+  .cskin.forsale canvas { opacity: 0.5; }
+  /* the selection check badge — sits on whichever skin is chosen */
+  .cskchk {
+    position: absolute; top: -6px; right: -6px;
+    width: 16px; height: 16px; line-height: 15px; text-align: center;
+    font-size: 10px; border-radius: 50%;
+    background: #5c8a3a; color: #eafce0; border: 1px solid #1d1912;
+  }
+  /* every swatch keeps a label of the same height so the row never jumps */
+  .csklabel { font-size: 8px; letter-spacing: 0.5px; color: #ffd23e; text-align: center; margin-top: 2px; min-height: 10px; }
+  .csklabel.base { color: #8d7c58; }
+  .csklabel.owned { color: #8fdc6a; }
+  .csklabel.poor { color: #8d7c58; }
 
   #death h2 { font-size: 34px; letter-spacing: 8px; color: #e05a4a; text-shadow: 3px 3px 0 #2a0d08; margin-bottom: 12px; }
   #death p { font-size: 13px; color: #cdbb92; margin-bottom: 24px; }
@@ -351,31 +366,6 @@
     <div id="title-msg"></div>
     <div id="cards-area"></div>
     <div class="hint">choose your hatchling · survive from hatchling to full adult · ❖ growths are earned every minute you survive</div>
-  </div>
-
-  <!-- gender picker: every dino is two loadouts — pick one before you hatch -->
-  <div id="gender-pick" class="screen trans hidden">
-    <div id="gp-box">
-      <h3 id="gp-title"></h3>
-      <div class="gp-sub">pick a skin, then choose your loadout</div>
-      <div id="gp-skins"></div>
-      <div id="gp-msg"></div>
-      <div id="gp-cards">
-        <div class="gcard" id="gcard-f">
-          <canvas id="gprev-f" width="200" height="120"></canvas>
-          <h2 class="gf">♀ FEMALE</h2>
-          <p id="gp-f-traits">plain sensible coat<br>+ quicker on her feet · earns more ❖<br>&nbsp;</p>
-          <div class="gprog" id="gprog-f"></div>
-        </div>
-        <div class="gcard" id="gcard-m">
-          <canvas id="gprev-m" width="200" height="120"></canvas>
-          <h2 class="gm">♂ MALE</h2>
-          <p id="gp-m-traits"></p>
-          <div class="gprog" id="gprog-m"></div>
-        </div>
-      </div>
-      <button id="gp-cancel">← BACK</button>
-    </div>
   </div>
 
   <div id="death" class="screen hidden">
