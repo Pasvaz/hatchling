@@ -757,8 +757,11 @@ function resize() {
   const scale = Math.max(1, Math.min(window.innerWidth / VIEW_W, window.innerHeight / VIEW_H));
   const w = Math.floor(VIEW_W * scale), h = Math.floor(VIEW_H * scale);
   // back the canvas with real pixels so the vector art renders sharp
+  // (phones get a lower cap: their 3×+ displays would quadruple the fill
+  // cost for sharpness nobody can see at arm's length)
   const dpr = window.devicePixelRatio || 1;
-  G.RS = clamp(scale * dpr, 1, 3);
+  const coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+  G.RS = clamp(scale * dpr, 1, coarse ? 2 : 3);
   const bw = Math.round(VIEW_W * G.RS), bh = Math.round(VIEW_H * G.RS);
   if (canvas.width !== bw || canvas.height !== bh) {
     // only when it really changed: assigning width clears the canvas,

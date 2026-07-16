@@ -52,6 +52,21 @@ No build step, no dependencies — plain HTML5 canvas + JavaScript.
 | H | Hitbox X-ray — red = attack zone, cyan = hittable body, orange = nip jaws |
 | Y | (cheat) +5% growth, for testing |
 
+**On a phone** the game grows transparent touch controls (js/touch.js +
+vendored [nipple.js](js/lib/nipplejs.min.js) — they appear automatically on
+touch screens, or add `?touch=1` to the URL to force them): a **virtual
+joystick** on the left (push past the rim to sprint), and on the right an
+**ATTACK** button, **GRAB** (hold it to tear a chunk, like holding G), **REST**,
+and a pause button. The game's contextual prompts — drink, nest, wrestle,
+invade a burrow — appear as **tappable buttons** above the attack cluster, so
+every keyboard action is reachable. During a wrestle the right half of the
+screen becomes a **swipe pad** (the QTE shows which way). Landscape is the
+intended orientation: portrait shows a "turn your phone" screen, and the first
+tap in-game requests fullscreen + landscape lock where the browser allows it
+(Android; iPhones can't lock, but adding the page to the home screen plays
+fullscreen). To play on your phone, run the dev server and open
+`http://<your-pc-ip>:8642` on the same wifi.
+
 ## The dinosaurs
 
 **Genders.** Every playable dinosaur is really two loadouts, chosen right on
