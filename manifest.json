@@ -1,0 +1,9 @@
+{
+  "name": "HATCHLING — A Dinosaur Survival Game",
+  "short_name": "HATCHLING",
+  "start_url": ".",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#16110a",
+  "theme_color": "#16110a"
+}

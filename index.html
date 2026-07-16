@@ -6,6 +6,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
 <title>HATCHLING — A Dinosaur Survival Game</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -19,8 +20,12 @@
     /* manipulation = taps + scrolling still work, but DOUBLE-TAP ZOOM dies
        (rapid attack-button taps were zooming the whole page on phones) */
     touch-action: manipulation;
+    /* a game, not a document: double-tap-drag must never select the UI */
+    -webkit-user-select: none; user-select: none;
+    -webkit-touch-callout: none;
   }
   canvas#game { touch-action: none; }
+  #new-name { -webkit-user-select: text; user-select: text; }   /* typing a profile name still works */
   body { display: flex; align-items: center; justify-content: center; }
   #wrap { position: relative; }
   canvas#game {
@@ -364,16 +369,16 @@
      shrink ~25%, stats move out from under the joystick (top-left column),
      the minimap moves out from under the attack cluster (top-right), and
      keyboard hints / key prompts disappear (the buttons ARE the prompts) */
-  body.touch #growthbox { left: 8px; top: 8px; padding: 5px 8px; }
+  body.touch #growthbox { left: max(8px, env(safe-area-inset-left)); top: max(8px, env(safe-area-inset-top)); padding: 5px 8px; }
   body.touch #stage { font-size: 9.5px; letter-spacing: 1px; margin-bottom: 3px; }
   body.touch #growthbar { width: 96px; height: 7px; }
   body.touch #growth-pct { font-size: 8.5px; margin-left: 5px; }
   body.touch #growthscount { margin-top: 3px; font-size: 9px; }
-  body.touch #stats { left: 8px; top: 62px; bottom: auto; padding: 5px 8px; }
+  body.touch #stats { left: max(8px, env(safe-area-inset-left)); top: calc(62px + env(safe-area-inset-top)); bottom: auto; padding: 5px 8px; }
   body.touch .statrow { gap: 5px; margin: 2px 0; }
   body.touch .sicon { width: 10px; height: 10px; }
   body.touch .bar { width: 78px; height: 7px; }
-  body.touch #minimap { right: 62px; top: 8px; bottom: auto; width: 78px; height: 78px; }
+  body.touch #minimap { right: calc(62px + env(safe-area-inset-right)); top: max(8px, env(safe-area-inset-top)); bottom: auto; width: 78px; height: 78px; }
   body.touch #keys { display: none; }
   body.touch #prompt { display: none; }
   body.touch #banner { font-size: 14px; top: 12%; }
@@ -407,6 +412,16 @@
   body.touch #title .hint { display: none; }
   body.touch .profcard { padding: 9px 14px; }
   body.touch .profcard .pdel { opacity: 1; }   /* no hover on touch — delete is always visible */
+  /* hover is a mouse thing: on touch the lift animations just flicker and
+     stick, and the lobby screens scroll from the top instead of clipping */
+  body.touch .card:hover, body.touch .ecotab:hover, body.touch .profcard:hover,
+  body.touch #gr-balance:hover, body.touch .cskin:hover, body.touch .gseg:hover { transform: none; }
+  body.touch #title, body.touch #profiles {
+    justify-content: flex-start;
+    overflow-y: auto; touch-action: pan-y;
+    padding: calc(8px + env(safe-area-inset-top)) env(safe-area-inset-right)
+             calc(10px + env(safe-area-inset-bottom)) env(safe-area-inset-left);
+  }
 
   /* portrait on a touch device: the game wants your phone sideways */
   #rotate {

@@ -63,9 +63,16 @@ every keyboard action is reachable. During a wrestle the right half of the
 screen becomes a **swipe pad** (the QTE shows which way). Landscape is the
 intended orientation: portrait shows a "turn your phone" screen, and the first
 tap in-game requests fullscreen + landscape lock where the browser allows it
-(Android; iPhones can't lock, but adding the page to the home screen plays
-fullscreen). To play on your phone, run the dev server and open
-`http://<your-pc-ip>:8642` on the same wifi.
+(Android; iPhones can't lock, but **Share → Add to Home Screen** installs the
+game as a fullscreen app — no URL bar — via the web app manifest). The view
+itself is **responsive**: the world is always 360 units tall, and the view
+width follows the screen's aspect (clamped 560–960), so the biome fills the
+whole display — an iPhone's 19.5:9 screen simply sees more delta to the sides,
+no black bands. Panels respect the notch (safe-area insets), text selection is
+disabled game-wide (double-tap-drag never highlights the UI), and the compact
+touch lobby scrolls, drops hover effects, and flashes the ♀/♂ trait line when
+you toggle instead of a hover tooltip. To play on your phone, run the dev
+server and open `http://<your-pc-ip>:8642` on the same wifi.
 
 ## The dinosaurs
 

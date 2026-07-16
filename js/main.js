@@ -1,6 +1,10 @@
 'use strict';
 // ---------- main: boot, input, loop, render, HUD, screens ----------
-const VIEW_W = 640, VIEW_H = 360;
+// the view HEIGHT is the world-scale anchor (360 units tall, always); the
+// view WIDTH follows the screen's aspect so the biome fills the whole
+// display — no letterbox bands, a wider screen simply sees more delta
+const VIEW_H = 360;
+let VIEW_W = 640;   // recomputed in resize(), clamped 560..960
 
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
@@ -309,6 +313,12 @@ function buildTitleUI() {
           Save.genderChoice[sp] = seg.dataset.g;
           saveSave();
           refreshCardOpts(sp);
+          // no hover on touch: toggling is the moment to say what it means
+          if (document.body.classList.contains('touch')) {
+            flashTitleMsg(seg.dataset.g === 'm'
+              ? '♂ bigger · tougher · ' + verb + ' harder · slower · earns fewer ❖'
+              : '♀ quicker on her feet · earns more ❖');
+          }
         });
       }
       // the gender bar and skin row swallow gap-clicks so only the dino launches
@@ -754,7 +764,17 @@ refreshTitle();
 
 // ---------- resize ----------
 function resize() {
-  const scale = Math.max(1, Math.min(window.innerWidth / VIEW_W, window.innerHeight / VIEW_H));
+  // measure the VISIBLE viewport: on iOS Safari the URL bar overlays part of
+  // window.innerHeight, and visualViewport is the only honest answer
+  const vv = window.visualViewport;
+  const iw = Math.round((vv && vv.width) || window.innerWidth);
+  const ih = Math.round((vv && vv.height) || window.innerHeight);
+  if (!iw || !ih) return;
+  // the view width follows the screen's aspect — the biome fills the estate.
+  // No scale floor: a window shorter than 360px simply shows the world a
+  // little smaller instead of cropping it (RS keeps the backing store sharp)
+  VIEW_W = clamp(Math.round(iw / ih * VIEW_H), 560, 960);
+  const scale = Math.min(iw / VIEW_W, ih / VIEW_H);
   const w = Math.floor(VIEW_W * scale), h = Math.floor(VIEW_H * scale);
   // back the canvas with real pixels so the vector art renders sharp
   // (phones get a lower cap: their 3×+ displays would quadruple the fill
@@ -778,6 +798,7 @@ function resize() {
 }
 window.addEventListener('resize', resize);
 document.addEventListener('visibilitychange', resize);
+if (window.visualViewport) window.visualViewport.addEventListener('resize', resize);
 resize();
 // safety net: some environments report 0×0 until the tab is shown
 let lastInner = window.innerWidth + 'x' + window.innerHeight;
