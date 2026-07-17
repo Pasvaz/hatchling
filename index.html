@@ -9,14 +9,6 @@
 <link rel="manifest" href="manifest.json">
 <title>HATCHLING — A Dinosaur Survival Game</title>
 <style>
-  /* Fredoka (OFL, vendored like nipplejs): the rounded display face that
-     makes the touch UI read as a game instead of a terminal */
-  @font-face {
-    font-family: 'Fredoka';
-    src: url('fonts/fredoka.woff2') format('woff2');
-    font-weight: 300 700;
-    font-display: swap;
-  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
     height: 100%;
@@ -327,6 +319,14 @@
     width: 44%; height: 72%;
     pointer-events: auto; touch-action: none;
   }
+  /* the stick heats up gold while sprint is latched — an instant "you're
+     running" read (nipplejs paints its nubs inline, hence the !important) */
+  #joyzone .front, #joyzone .back { transition: background 0.1s, box-shadow 0.1s; }
+  #joyzone.sprint .front {
+    background: #ffd23e !important;
+    box-shadow: 0 0 16px 5px rgba(255, 210, 62, 0.55);
+  }
+  #joyzone.sprint .back { background: rgba(255, 210, 62, 0.28) !important; }
   .tbtn {
     pointer-events: auto; touch-action: none;
     user-select: none; -webkit-user-select: none;
@@ -414,12 +414,15 @@
   body.touch .card .prog { font-size: 9px; min-height: 11px; margin-top: 2px; }
   body.touch .card .price { margin-top: 4px; font-size: 9px; }
   body.touch .gsel { margin: 6px 0 2px; }
-  body.touch .gseg { padding: 7px 0; font-size: 10px; }
-  body.touch .skinsel { gap: 6px; margin-top: 6px; }
-  body.touch .cskin canvas { width: 30px; height: 30px; }
+  /* finger-sized targets (~44px) — same look, just more room to hit */
+  body.touch .gseg { padding: 16px 0; font-size: 10px; }
+  body.touch .skinsel { gap: 9px; margin-top: 6px; }
+  body.touch .cskin { padding: 4px; }
+  body.touch .cskin canvas { width: 34px; height: 34px; }
   body.touch #title .hint { display: none; }
   body.touch .profcard { padding: 9px 14px; }
-  body.touch .profcard .pdel { opacity: 1; }   /* no hover on touch — delete is always visible */
+  /* no hover on touch — delete is always visible, and big enough to hit */
+  body.touch .profcard .pdel { opacity: 1; font-size: 14px; padding: 13px 15px; }
   /* hover is a mouse thing: on touch the lift animations just flicker and
      stick, and the lobby screens scroll from the top instead of clipping */
   body.touch .card:hover, body.touch .ecotab:hover, body.touch .profcard:hover,
@@ -430,83 +433,6 @@
     padding: calc(8px + env(safe-area-inset-top)) env(safe-area-inset-right)
              calc(10px + env(safe-area-inset-bottom)) env(safe-area-inset-left);
   }
-
-  /* ---------- mobile-native reskin (touch only) ----------
-     Fredoka type, pill buttons, badge chips, unboxed icon-chip stats and a
-     round minimap: the phone build reads as a game, not a shrunk website.
-     Placed LAST among the body.touch rules so it wins the cascade. */
-  body.touch #title h1, body.touch #profiles h1 {
-    font-family: 'Fredoka', sans-serif; font-weight: 600;
-    font-size: 27px; letter-spacing: 1px;
-    text-shadow: 0 3px 0 #6a3a1a, 0 6px 14px rgba(0,0,0,0.55);
-  }
-  body.touch #title .sub, body.touch #profiles .sub { font-family: 'Fredoka', sans-serif; letter-spacing: 3px; }
-  body.touch .ecotab { border-radius: 999px; border-width: 2px; padding: 7px 15px 6px; }
-  body.touch .ecotab h3 { font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 12px; letter-spacing: 0.5px; }
-  body.touch .ecotab .tabsub { display: none; }   /* chips, not panels */
-  body.touch #gr-balance { border-radius: 999px; font-family: 'Fredoka', sans-serif; font-weight: 600; letter-spacing: 0.5px; padding: 7px 14px; }
-  body.touch #title-msg { font-family: 'Fredoka', sans-serif; }
-  /* cards: image-first, badge + pill CTA */
-  body.touch .card {
-    border-radius: 16px; border-width: 2px;
-    background: linear-gradient(180deg, rgba(48,37,20,0.95), rgba(27,20,11,0.97));
-    box-shadow: 0 4px 12px rgba(0,0,0,0.45);
-  }
-  body.touch .card canvas { border-radius: 10px; }
-  body.touch .card h2 { font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 14px; letter-spacing: 0.5px; margin: 6px 0 3px; }
-  body.touch .card .latin { display: none; }
-  body.touch .card .diff {
-    display: inline-block; font-family: 'Fredoka', sans-serif; font-weight: 500;
-    font-size: 9px; letter-spacing: 0.5px; padding: 3px 10px; border-radius: 999px; margin-top: 3px;
-  }
-  body.touch .card .diff.mod { background: rgba(216,165,52,0.16); }
-  body.touch .card .diff.hard { background: rgba(224,90,74,0.15); }
-  body.touch .card .diff.swim { background: rgba(108,173,196,0.15); }
-  body.touch .card .prog { font-family: 'Fredoka', sans-serif; font-weight: 500; }
-  /* the CTA pill: gold = buy, green = play, dim = can't yet */
-  .card .price.go { display: none; }   /* desktop: owned cards need no CTA row */
-  body.touch .card .price {
-    display: block; font-family: 'Fredoka', sans-serif; font-weight: 600;
-    font-size: 11px; letter-spacing: 0.5px;
-    margin: 7px 2px 2px; padding: 8px 10px; border-radius: 999px;
-    background: linear-gradient(180deg, #e8b74a, #c78f24); color: #241c0a;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
-  }
-  body.touch .card .price.poor {
-    background: rgba(20,14,7,0.55); color: #8d7c58;
-    box-shadow: none; border: 1px solid #4a3a22; font-size: 9.5px;
-  }
-  body.touch .card .price.go {
-    display: block;
-    background: linear-gradient(180deg, #8fce56, #5c9a2e); color: #17300a;
-  }
-  body.touch .gsel { border-radius: 999px; overflow: hidden; }
-  body.touch .gseg { font-family: 'Fredoka', sans-serif; font-weight: 500; letter-spacing: 0.5px; }
-  body.touch .cskin { border-radius: 10px; }
-  body.touch .csklabel { font-family: 'Fredoka', sans-serif; font-weight: 500; }
-  body.touch .ownbadge { width: 25px; height: 25px; line-height: 24px; font-size: 13px; }
-  body.touch .profcard { border-radius: 14px; }
-  body.touch .profcard .pname { font-family: 'Fredoka', sans-serif; font-weight: 600; letter-spacing: 0.5px; }
-  body.touch button { font-family: 'Fredoka', sans-serif; font-weight: 600; letter-spacing: 0.5px; border-radius: 999px; }
-  /* in-game HUD: no boxes — floating icon chips */
-  body.touch #stats { background: none; border: none; box-shadow: none; padding: 0; }
-  body.touch .statrow {
-    background: rgba(10,7,3,0.5); border-radius: 999px;
-    padding: 3px 8px 3px 6px; margin: 3px 0; gap: 5px; width: max-content;
-  }
-  body.touch .sicon { width: 12px; height: 12px; }
-  body.touch .bar { width: 64px; height: 7px; border: none; background: rgba(255,255,255,0.14); border-radius: 999px; box-shadow: none; }
-  body.touch #growthbox { background: rgba(10,7,3,0.5); border: none; box-shadow: none; border-radius: 999px; padding: 5px 12px 6px; }
-  body.touch #stage { font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 10px; letter-spacing: 0.5px; }
-  body.touch #growthbar { border: none; background: rgba(255,255,255,0.14); border-radius: 999px; box-shadow: none; }
-  body.touch #growthscount { font-family: 'Fredoka', sans-serif; font-weight: 500; }
-  body.touch #minimap { border-radius: 50%; border: 3px solid rgba(122,92,52,0.85); box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-  body.touch #banner { font-family: 'Fredoka', sans-serif; font-weight: 600; letter-spacing: 1px; }
-  body.touch #btn-lobby { border-radius: 999px; font-family: 'Fredoka', sans-serif; font-weight: 500; }
-  body.touch .tbtn { font-family: 'Fredoka', sans-serif; font-weight: 600; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,0,0,0.35); }
-  body.touch .tbtn:active { transform: translateY(1px); box-shadow: 0 2px 5px rgba(0,0,0,0.35); }
-  body.touch #ctxbtns .tbtn { border-radius: 999px; }
-  body.touch #swipezone, body.touch #rotate { font-family: 'Fredoka', sans-serif; font-weight: 500; }
 
   /* portrait on a touch device: the game wants your phone sideways */
   #rotate {

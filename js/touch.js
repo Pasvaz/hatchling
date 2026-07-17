@@ -10,6 +10,7 @@
   window.TOUCH = { enabled };
   if (!enabled) return;
   document.body.classList.add('touch');
+  resize();   // main.js booted before the class existed — re-derive the zoomed-in touch view
 
   const layer = document.getElementById('touch');
   const ctxBox = document.getElementById('ctxbtns');
@@ -19,6 +20,21 @@
   // these catch iOS Safari's pinch gesture and stray double-clicks
   document.addEventListener('gesturestart', (e) => e.preventDefault());
   document.addEventListener('dblclick', (e) => e.preventDefault());
+
+  // ---- a flick is not a tap: drop any click whose finger travelled ----
+  // scrolling the lobby used to launch whatever card the flick ended on.
+  // Capture phase so it beats every UI handler; synthetic clicks are
+  // isTrusted:false and pass through untouched (the test harness needs them).
+  let downAt = null;
+  document.addEventListener('pointerdown', (ev) => { downAt = { x: ev.clientX, y: ev.clientY }; }, true);
+  document.addEventListener('click', (ev) => {
+    // isTrusted is unforgeable, so the harness marks its events _testTrusted
+    if (!(ev.isTrusted || ev._testTrusted) || !downAt) return;
+    if (Math.hypot(ev.clientX - downAt.x, ev.clientY - downAt.y) > 12) {
+      ev.stopPropagation();
+      ev.preventDefault();
+    }
+  }, true);
 
   // ---- fullscreen + landscape lock, on the first tap once a game is on ----
   // (Android honors the lock; iPhones can't lock at all — the #rotate overlay
@@ -30,24 +46,27 @@
     }).catch(() => { });
   }, { passive: true });
 
-  // ---- the joystick: left thumb, push past the rim to sprint ----
-  // Created LAZILY the first time the layer is actually visible: nipplejs
-  // anchors the static stick from the zone's rect at create time, and a
-  // display:none zone measures 0×0 — the stick would be born at a garbage
-  // position and its first session of vectors would be NaN.
+  // ---- the joystick: spawns UNDER the thumb, anywhere on the left side ----
+  // dynamic mode — nipplejs creates the stick at the touch point and removes
+  // it on release, so it's always exactly where the thumb landed (the old
+  // fixed stick sat at one arbitrary spot and felt "randomly located").
+  // Still created lazily on first in-game frame: the zone is display:none in
+  // the lobby and can't take touches anyway.
+  const joyzone = document.getElementById('joyzone');
   const clearDirs = () => {
     const i = G.input;
     i.up = i.down = i.left = i.right = i.sprint = false;
+    joyzone.classList.remove('sprint');
   };
   let joy = null;
   function ensureJoy() {
     if (joy) return;
     joy = nipplejs.create({
-      zone: document.getElementById('joyzone'),
-      mode: 'static',
-      position: { left: '50%', top: '62%' },
+      zone: joyzone,
+      mode: 'dynamic',
       color: '#ffe9a0',
-      size: 96,
+      size: 110,
+      maxNumberOfNipples: 1,
       restOpacity: 0.35,
     });
     joy.on('move', (ev, data) => {
@@ -57,7 +76,10 @@
       i.right = data.vector.x > dead;
       i.up = data.vector.y > dead;      // nipplejs y points UP
       i.down = data.vector.y < -dead;
-      i.sprint = data.force >= 1;       // thumb at (or past) the rim = run
+      // sprint LATCHES near the rim and only lets go well inside it — the old
+      // razor 'force >= 1' trigger flickered off with every thumb wobble
+      i.sprint = i.sprint ? data.force > 0.7 : data.force >= 0.95;
+      joyzone.classList.toggle('sprint', i.sprint);   // the stick heats up while running
     });
     joy.on('end', clearDirs);
     window.TOUCH._joy = joy;   // exposed for the test harness

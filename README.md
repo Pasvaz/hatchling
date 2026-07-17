@@ -55,7 +55,9 @@ No build step, no dependencies — plain HTML5 canvas + JavaScript.
 **On a phone** the game grows transparent touch controls (js/touch.js +
 vendored [nipple.js](js/lib/nipplejs.min.js) — they appear automatically on
 touch screens, or add `?touch=1` to the URL to force them): a **virtual
-joystick** on the left (push past the rim to sprint), and on the right an
+joystick** on the left — it appears wherever your thumb lands (push out to
+the rim to sprint; the stick glows gold while the run is latched, and lets go
+when you ease well back) — and on the right an
 **ATTACK** button, **GRAB** (hold it to tear a chunk, like holding G), **REST**,
 and a pause button. The game's contextual prompts — drink, nest, wrestle,
 invade a burrow — appear as **tappable buttons** above the attack cluster, so
@@ -65,19 +67,18 @@ intended orientation: portrait shows a "turn your phone" screen, and the first
 tap in-game requests fullscreen + landscape lock where the browser allows it
 (Android; iPhones can't lock, but **Share → Add to Home Screen** installs the
 game as a fullscreen app — no URL bar — via the web app manifest). The view
-itself is **responsive**: the world is always 360 units tall, and the view
-width follows the screen's aspect (clamped 560–960), so the biome fills the
-whole display — an iPhone's 19.5:9 screen simply sees more delta to the sides,
+itself is **responsive**: the view is 360 world-units tall on desktop and a
+zoomed-in 310 on touch (the dinos read bigger at arm's length), and the view
+width follows the screen's aspect, so the biome fills the whole display — an iPhone's 19.5:9 screen simply sees more delta to the sides,
 no black bands. Panels respect the notch (safe-area insets), text selection is
 disabled game-wide (double-tap-drag never highlights the UI), and the compact
 touch lobby scrolls, drops hover effects, and flashes the ♀/♂ trait line when
-you toggle instead of a hover tooltip. The phone build also wears its own
-**mobile-native skin** (touch only — desktop keeps the classic look): the
-vendored rounded display font [Fredoka](fonts/fredoka.woff2) on titles,
-buttons and badges, pill-shaped ecosystem chips and CTA buttons (green
-**PLAY ▶** on owned dinos, gold **❖ price** on locked ones), difficulty tags
-as tinted badge chips, the stat bars as floating unboxed icon chips, and a
-**circular minimap**. To play on your phone, run the dev server and open
+you toggle instead of a hover tooltip. Touch taps are deliberate: a scroll
+flick that ends on a card never launches it (only a still tap counts), the
+gender/skin/delete controls are finger-sized, and buying a skin takes two taps
+(the first flips its price to **BUY?**, the second confirms). The phone build
+keeps the game's retro look — same font, same panels — just resized and
+repositioned for thumbs. To play on your phone, run the dev server and open
 `http://<your-pc-ip>:8642` on the same wifi.
 
 ## The dinosaurs

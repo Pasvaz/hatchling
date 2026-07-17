@@ -3,8 +3,10 @@
 // the view HEIGHT is the world-scale anchor (360 units tall, always); the
 // view WIDTH follows the screen's aspect so the biome fills the whole
 // display — no letterbox bands, a wider screen simply sees more delta
-const VIEW_H = 360;
-let VIEW_W = 640;   // recomputed in resize(), clamped 560..960
+// touch screens run a bit zoomed-in (310 world-units tall vs 360): at arm's
+// length the dino read too small to play. Both set for real in resize().
+let VIEW_H = 360;
+let VIEW_W = 640;
 
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
@@ -363,12 +365,12 @@ function refreshTitle() {
     const badge = card.querySelector('.ownbadge');
     badge.textContent = owned ? '✓' : '🔒';
     badge.className = 'ownbadge ' + (owned ? 'owned' : 'locked');
-    // the CTA row: a PLAY pill when owned (mobile shows it, desktop hides it —
-    // the corner badge already says owned there), price/requirement when locked
+    // the price row: hidden when owned (the corner badge already says so),
+    // price/requirement when locked
     const priceEl = card.querySelector('.price');
     if (owned) {
-      priceEl.className = 'price go';
-      priceEl.textContent = 'PLAY ▶';
+      priceEl.className = 'price';
+      priceEl.textContent = '';
     } else if (reqLocked) {
       priceEl.className = 'price poor';
       priceEl.textContent = 'grow ' + DINO[def.req].name.toUpperCase() + ' to Full Adult';
@@ -376,7 +378,7 @@ function refreshTitle() {
       priceEl.className = 'price' + (def.cost > 0 && Save.growths < def.cost ? ' poor' : '');
       priceEl.textContent = '❖ ' + def.cost + (Save.growths >= def.cost ? ' — TAP TO BUY' : ' — need ' + (def.cost - Save.growths) + ' more');
     }
-    priceEl.style.display = '';
+    priceEl.style.display = owned ? 'none' : '';
     // the chosen loadout's growth sits right under the difficulty tag
     card.querySelector('.prog').textContent = cardProgText(sp);
     // rebuild the swatches so OWNED / affordability labels track the live
@@ -392,7 +394,11 @@ function cardProgText(sp) {
 }
 
 // the skin swatches on a species card — the inline heir to the old picker's
-// skin row: same registry loop and buy flow, painted small onto the card
+// skin row: same registry loop and buy flow, painted small onto the card.
+// On touch a purchase takes TWO taps: the first arms the swatch (its label
+// flips to BUY?), the second within 2.5s spends the growths — a stray tap
+// on the way through the lobby must never buy a coat.
+let armSkin = null, armSkinT = 0;
 function buildCardSkins(sp, container) {
   container.innerHTML = '';
   const cur = cardSkin(sp);
@@ -428,6 +434,17 @@ function buildCardSkins(sp, container) {
       let bought = false;
       if (!skinOwned(sp, id)) {
         if (Save.growths < def.cost) { flashTitleMsg(def.name + ' costs ❖ ' + def.cost + needMsg(def.cost)); return; }
+        if (document.body.classList.contains('touch')) {
+          const key = sp + ':' + id;
+          if (armSkin !== key || performance.now() - armSkinT > 2500) {
+            armSkin = key; armSkinT = performance.now();
+            label.textContent = 'BUY?';
+            flashTitleMsg('Tap ' + def.name + ' again to buy it for ❖ ' + def.cost);
+            setTimeout(() => { if (armSkin === key) { armSkin = null; refreshCardOpts(sp); } }, 2600);
+            return;
+          }
+          armSkin = null;
+        }
         Save.growths -= def.cost;
         if (!Save.skinOwned) Save.skinOwned = {};
         Save.skinOwned[sp + ':' + id] = true;
@@ -775,7 +792,9 @@ function resize() {
   // the view width follows the screen's aspect — the biome fills the estate.
   // No scale floor: a window shorter than 360px simply shows the world a
   // little smaller instead of cropping it (RS keeps the backing store sharp)
-  VIEW_W = clamp(Math.round(iw / ih * VIEW_H), 560, 960);
+  VIEW_H = document.body.classList.contains('touch') ? 310 : 360;
+  // width clamps scale with the height so the aspect range stays the same
+  VIEW_W = clamp(Math.round(iw / ih * VIEW_H), Math.round(VIEW_H * 56 / 36), Math.round(VIEW_H * 96 / 36));
   const scale = Math.min(iw / VIEW_W, ih / VIEW_H);
   const w = Math.floor(VIEW_W * scale), h = Math.floor(VIEW_H * scale);
   // back the canvas with real pixels so the vector art renders sharp
