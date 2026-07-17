@@ -71,8 +71,14 @@ whole display — an iPhone's 19.5:9 screen simply sees more delta to the sides,
 no black bands. Panels respect the notch (safe-area insets), text selection is
 disabled game-wide (double-tap-drag never highlights the UI), and the compact
 touch lobby scrolls, drops hover effects, and flashes the ♀/♂ trait line when
-you toggle instead of a hover tooltip. To play on your phone, run the dev
-server and open `http://<your-pc-ip>:8642` on the same wifi.
+you toggle instead of a hover tooltip. The phone build also wears its own
+**mobile-native skin** (touch only — desktop keeps the classic look): the
+vendored rounded display font [Fredoka](fonts/fredoka.woff2) on titles,
+buttons and badges, pill-shaped ecosystem chips and CTA buttons (green
+**PLAY ▶** on owned dinos, gold **❖ price** on locked ones), difficulty tags
+as tinted badge chips, the stat bars as floating unboxed icon chips, and a
+**circular minimap**. To play on your phone, run the dev server and open
+`http://<your-pc-ip>:8642` on the same wifi.
 
 ## The dinosaurs
 

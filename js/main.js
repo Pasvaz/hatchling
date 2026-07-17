@@ -363,18 +363,20 @@ function refreshTitle() {
     const badge = card.querySelector('.ownbadge');
     badge.textContent = owned ? '✓' : '🔒';
     badge.className = 'ownbadge ' + (owned ? 'owned' : 'locked');
-    // the price row shows only while the dino is still locked (owned needs no row)
+    // the CTA row: a PLAY pill when owned (mobile shows it, desktop hides it —
+    // the corner badge already says owned there), price/requirement when locked
     const priceEl = card.querySelector('.price');
     if (owned) {
-      priceEl.style.display = 'none';
-      priceEl.textContent = '';
+      priceEl.className = 'price go';
+      priceEl.textContent = 'PLAY ▶';
+    } else if (reqLocked) {
+      priceEl.className = 'price poor';
+      priceEl.textContent = 'grow ' + DINO[def.req].name.toUpperCase() + ' to Full Adult';
     } else {
-      priceEl.style.display = '';
-      priceEl.textContent = reqLocked
-        ? 'grow ' + DINO[def.req].name.toUpperCase() + ' to Full Adult'
-        : '❖ ' + def.cost + (Save.growths >= def.cost ? ' — TAP TO BUY' : ' — need ' + (def.cost - Save.growths) + ' more');
-      priceEl.classList.toggle('poor', reqLocked || (def.cost > 0 && Save.growths < def.cost));
+      priceEl.className = 'price' + (def.cost > 0 && Save.growths < def.cost ? ' poor' : '');
+      priceEl.textContent = '❖ ' + def.cost + (Save.growths >= def.cost ? ' — TAP TO BUY' : ' — need ' + (def.cost - Save.growths) + ' more');
     }
+    priceEl.style.display = '';
     // the chosen loadout's growth sits right under the difficulty tag
     card.querySelector('.prog').textContent = cardProgText(sp);
     // rebuild the swatches so OWNED / affordability labels track the live
