@@ -539,6 +539,19 @@ function aimYAt(e, t) {
   const ts = td.scale * sizeScale(t.growth != null ? t.growth : 1) * genderMod(t).size;
   return t.y + weaponHeight(e) - zoneHeights(td).spine * ts;
 }
+// ---- pounce: coil, leap, bite at the landing ----
+// One rule for every dino, player and NPC alike: the PREP time scales with
+// SIZE (a big body takes longer to load the spring), the LEAP length with
+// SPEED (fast dinos cover real ground). Tail-fighters trade the leap for the
+// spin — planted in place, scything on a metronome for as long as it's held.
+function pouncePrep(sp, growth) {
+  const g = growth == null ? 1 : 0.55 + 0.45 * growth;
+  return clamp(0.18 + (DINO[sp].scale || 1) * g * 0.3, 0.22, 0.85);
+}
+function pounceDist(spd) { return clamp(spd * 1.05, 60, 240); }
+// the landing pin: the pouncing body itself, near ground level — combat AND
+// the H overlay consume this same object (the single-source hitbox rule)
+function pounceLandZone(p) { return { x: p.x + p.facing * 6, y: p.y - 12, r: 14 + 12 * p.growth }; }
 // ---- THE combat circles ----
 // The single source of truth: every hit test below AND the H overlay consume
 // these exact objects. The overlay does no geometry of its own, so what it
@@ -1488,7 +1501,9 @@ function updateNPC(e, dt) {
           (o.state === 'windup' || o.state === 'lunge') && dist(o.x, o.y, e.x, e.y) < 220);
         if (e.atkCd <= 0 && !packBusy) {
           e.state = 'windup';
-          e.stateT = d.chargeR ? 0.45 : 0.3;      // a charge earns a longer tell
+          // the tell is the pounce prep: proportional to the dino's size
+          // (chargers never telegraph shorter than their old 0.45)
+          e.stateT = Math.max(d.chargeR ? 0.45 : 0, pouncePrep(e.species, e.growth));
           e.lungeA = angTo(e.x, e.y, t.x, aimYAt(e, t));   // aim locks here — dodge the lunge!
         } else {
           const selfA = angTo(t.x, t.y, e.x, e.y);
@@ -2075,6 +2090,25 @@ function updatePlayer(dt) {
     }
   }
 
+  // ------ pounce / tail-swing (hold CTRL, or the touch button) ------
+  // press-and-hold WITH a direction: the dino coils (prep ∝ size), then leaps
+  // (length ∝ speed) and the bite fires at the landing. Release during the
+  // coil and nothing happens. A tail-fighter plants instead of leaping: the
+  // tail scythes continuously until release, but the feet never move.
+  const tailPow = !!DINO[p.species].tailWeapon;
+  if (input.pounceHold && !p.pounce && !p.pounceLatch &&
+      p.atkCd <= 0 && p.actionT <= 0 && !p.fishing && !G.wrestle) {
+    let pdx = (input.right ? 1 : 0) - (input.left ? 1 : 0);
+    let pdy = (input.down ? 1 : 0) - (input.up ? 1 : 0);
+    if (tailPow || pdx || pdy) {
+      const l = Math.hypot(pdx, pdy) || 1;
+      p.pounce = { phase: 'prep', t: pouncePrep(p.species, p.growth), dirX: pdx / l, dirY: pdy / l };
+      p.pounceLatch = true;   // one pounce per press — release to re-arm
+      p.resting = false;
+    }
+  }
+  if (!input.pounceHold) p.pounceLatch = false;
+
   // action animation (eat / drink) locks movement briefly
   let pitchTarget = 0;
   if (p.fishing) {
@@ -2124,6 +2158,51 @@ function updatePlayer(dt) {
     }
     p.move = lerp(p.move, 0, 0.25);
     if (p.actionT <= 0) finishAction(p);
+  } else if (p.pounce) {
+    const P = p.pounce;
+    if (P.phase === 'prep') {
+      // coiled and planted: jaws open, spring loading — the tell
+      p.move = lerp(p.move, 0, 0.3);
+      p.attackT = Math.max(p.attackT, 0.38);
+      p.headDown = lerp(p.headDown, tailPow ? 0 : 0.3, 0.15);
+      P.t -= dt;
+      if (!input.pounceHold) {
+        p.pounce = null;   // let go mid-coil: cancelled, no leap
+      } else if (P.t <= 0) {
+        if (tailPow) {
+          P.phase = 'swing'; P.t = 0.01;
+        } else {
+          P.phase = 'jump'; P.t = 0.26;
+          const spd = pounceDist(def.speed * genderMod(p).speed) / 0.26;
+          P.vx = P.dirX * spd; P.vy = P.dirY * spd;
+          if (P.dirX) p.facing = P.dirX > 0 ? 1 : -1;
+          p.attackT = 1;
+          SFX.bite();
+        }
+      }
+    } else if (P.phase === 'jump') {
+      // airborne: committed like an NPC lunge — the bite waits at the landing
+      P.t -= dt;
+      p.x += P.vx * dt; p.y += P.vy * dt;
+      p.move = 1;
+      p.phase += dt * Math.hypot(P.vx, P.vy) * 0.055;
+      pitchTarget = P.dirY * 0.35;
+      if (P.t <= 0) {
+        p.pounce = null;
+        input.attack = true;   // the landing bite: the normal attack, right here
+        p.atkCd = 0;
+        // a leap that lands ON the prey buries you in it — the anti-back-bite
+        // side guard would reject the overlap, so the landing bite waives it
+        p.landBite = true;
+      }
+    } else {
+      // swing: locked in place, the tail scythes on a metronome while held —
+      // double the usual cadence is the power, the planted feet the price
+      p.move = lerp(p.move, 0, 0.3);
+      P.t -= dt;
+      if (P.t <= 0) { input.attack = true; p.atkCd = 0; P.t = 0.55; }
+      if (!input.pounceHold) p.pounce = null;
+    }
   } else if (p.resting) {
     // settled on the ground: no moving around — any step gets you up
     if (input.left || input.right || input.up || input.down) p.resting = false;
@@ -2238,7 +2317,8 @@ function updatePlayer(dt) {
     // back on what you want to hit. Biters hop forward, swingers rock back.
     const tailFighter = !!DINO[p.species].tailWeapon;
     // swingers rock back, biters hop forward — and a headbutt DRIVES forward
-    p.vx += p.facing * (tailFighter ? -45 : DINO[p.species].headButt ? 105 : 70);
+    // (no kick mid tail-swing: the power's whole deal is planted feet)
+    if (!p.pounce) p.vx += p.facing * (tailFighter ? -45 : DINO[p.species].headButt ? 105 : 70);
     SFX.bite();
     // the attack comes from the weapon: jaws forward, or the tail arc behind —
     // running away and snapping backwards no longer connects
@@ -2249,6 +2329,10 @@ function updatePlayer(dt) {
     // that slips inside the long jaws still catches the arms
     const zones = [weaponCircle(p)];
     if (DINO[p.species].armAndJaw) zones.push(clawArcCircle(p));
+    // a pounce PINS what it lands on: the underbody is a contact zone too,
+    // down near the ground where the prey actually is — the raised jaw circle
+    // alone can graze clean over a small dino you're standing on
+    if (p.landBite) zones.push(pounceLandZone(p));
     let best = null, bestPt = null, bd = 1e9;
     for (const e of G.npcs) {
       // no friendly fire: never your packmates, your babies, or your mate
@@ -2258,7 +2342,7 @@ function updatePlayer(dt) {
         const pt = bodyHitPoint(e, z.x, z.y, z.r);
         if (!pt) continue;
         const side = (pt.x - p.x) * p.facing;
-        if (tailFighter ? side > 8 : side < -2) continue;
+        if (tailFighter ? side > 8 : (side < -2 && !p.landBite)) continue;
         const dd = dist(z.x, z.y, pt.x, pt.y);
         if (dd < bd) { bd = dd; best = e; bestPt = pt; }
       }
@@ -2274,6 +2358,7 @@ function updatePlayer(dt) {
       }
       dealDamage(best, playerDmg() * rrange(0.9, 1.1), p, opts);
     }
+    p.landBite = false;   // the waiver lasts exactly one bite
   } else {
     input.attack = false;
   }
@@ -2906,6 +2991,7 @@ function interactContext(p) {
 
 function startAction(p, ctx) {
   if (ctx.kind === 'mudinfo') return;
+  p.resting = false;   // you don't eat or drink lying down — up you get
   p.action = ctx;
   p.actionT = ctx.kind === 'drink' ? 1.0 : ctx.kind === 'browse' ? 1.5 : 1.1;
   if (ctx.kind === 'drink') SFX.drink(); else SFX.eat();

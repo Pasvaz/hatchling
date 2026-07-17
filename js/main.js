@@ -24,7 +24,7 @@ G.prompt = '';
 G.banner = null;
 G.paused = false;
 G.started = false;
-G.input = { up: false, down: false, left: false, right: false, sprint: false, attack: false, interact: false, sprinting: false, fish: false, nest: false, wrestle: false, pack: false, burrow: false, rest: false, grab: false };
+G.input = { up: false, down: false, left: false, right: false, sprint: false, attack: false, interact: false, sprinting: false, fish: false, nest: false, wrestle: false, pack: false, burrow: false, rest: false, grab: false, pounceHold: false };
 G.mate = null;
 G.nesting = { stage: 'none', babies: [] };
 G.wrestle = null;
@@ -135,6 +135,11 @@ window.addEventListener('keydown', (e) => {
   if (e.code === 'KeyI') G.input.burrow = true;
   if (e.code === 'KeyR') G.input.rest = true;
   if (e.code === 'KeyG') G.input.grab = true;
+  // hold P (+ a direction) to pounce — tail-fighters hold it to swing.
+  // (CTRL was tried first and abandoned: Ctrl+letter combos are browser
+  // shortcuts — bookmarks, close-tab — and can't be prevented. P doubles as
+  // the aardiraptor's pack key; tap = pack, hold-with-direction = pounce.)
+  if (e.code === 'KeyP') G.input.pounceHold = true;
   if (e.code === 'Escape') {
     if (G.started) { G.paused = !G.paused; document.getElementById('pause').classList.toggle('hidden', !G.paused); }
   }
@@ -154,6 +159,14 @@ window.addEventListener('keydown', (e) => {
 window.addEventListener('keyup', (e) => {
   G.keys[e.code] = false;
   if (KEYMAP[e.code]) G.input[KEYMAP[e.code]] = false;
+  if (e.code === 'KeyP') G.input.pounceHold = false;
+});
+// losing focus (a browser shortcut fired, a tab switch) eats the keyups —
+// clear every held flag so nothing stays latched behind our back
+window.addEventListener('blur', () => {
+  const i = G.input;
+  i.up = i.down = i.left = i.right = i.sprint = i.pounceHold = false;
+  G.keys = {};
 });
 
 // ---------- boot ----------
@@ -792,7 +805,7 @@ function resize() {
   // the view width follows the screen's aspect — the biome fills the estate.
   // No scale floor: a window shorter than 360px simply shows the world a
   // little smaller instead of cropping it (RS keeps the backing store sharp)
-  VIEW_H = document.body.classList.contains('touch') ? 310 : 360;
+  VIEW_H = document.body.classList.contains('touch') ? 285 : 360;
   // width clamps scale with the height so the aspect range stays the same
   VIEW_W = clamp(Math.round(iw / ih * VIEW_H), Math.round(VIEW_H * 56 / 36), Math.round(VIEW_H * 96 / 36));
   const scale = Math.min(iw / VIEW_W, ih / VIEW_H);
@@ -1651,6 +1664,12 @@ function drawEntityHitboxes(g, e) {
   if (def.nip) {
     const nc = nipCircle(e);
     dbgCircle(g, nc.x, nc.y, nc.r, '#ffb03e');
+  }
+  // mid-pounce, the landing pin rides along under the body — the same object
+  // the landing bite will test the moment the leap ends
+  if (e.isPlayer && e.pounce && e.pounce.phase === 'jump') {
+    const pz = pounceLandZone(e);
+    dbgCircle(g, pz.x, pz.y, pz.r, '#ff5040');
   }
 }
 function drawHitboxes() {

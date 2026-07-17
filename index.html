@@ -324,9 +324,22 @@
   #joyzone .front, #joyzone .back { transition: background 0.1s, box-shadow 0.1s; }
   #joyzone.sprint .front {
     background: #ffd23e !important;
-    box-shadow: 0 0 16px 5px rgba(255, 210, 62, 0.55);
+    box-shadow: 0 0 28px 10px rgba(255, 210, 62, 0.9);
   }
-  #joyzone.sprint .back { background: rgba(255, 210, 62, 0.28) !important; }
+  #joyzone.sprint .back { background: rgba(255, 210, 62, 0.3) !important; }
+  /* the RUN RING: a second circle at the exact radius where sprint engages —
+     inside it you walk, cross it and you run. Solid gold while running. */
+  #joyring {
+    position: absolute; width: 94px; height: 94px;
+    margin-left: -47px; margin-top: -47px;
+    border: 2px dashed rgba(255, 233, 160, 0.5); border-radius: 50%;
+    display: none; pointer-events: none;
+  }
+  #joyzone.active #joyring { display: block; }
+  #joyzone.sprint #joyring {
+    border-style: solid; border-color: #ffd23e;
+    box-shadow: 0 0 22px rgba(255, 210, 62, 0.7), inset 0 0 16px rgba(255, 210, 62, 0.35);
+  }
   .tbtn {
     pointer-events: auto; touch-action: none;
     user-select: none; -webkit-user-select: none;
@@ -337,25 +350,38 @@
     backdrop-filter: blur(2px);
   }
   .tbtn:active { background: rgba(216,165,52,0.42); border-color: rgba(255,233,160,0.8); }
+  /* the right-hand cluster: icons, not words. ATTACK is the anchor; POUNCE
+     (or the tail-spin) sits beside it; GRAB and EAT/DRINK are contextual —
+     invisible until the world offers a carcass or a meal */
   #btn-atk {
     position: absolute; right: calc(20px + env(safe-area-inset-right)); bottom: calc(26px + env(safe-area-inset-bottom));
-    width: 88px; height: 88px; font-size: 13px;
+    width: 88px; height: 88px; font-size: 34px;
+  }
+  #btn-pnc {
+    position: absolute; right: calc(124px + env(safe-area-inset-right)); bottom: calc(20px + env(safe-area-inset-bottom));
+    width: 66px; height: 66px; font-size: 27px;
   }
   #btn-grab {
-    position: absolute; right: calc(124px + env(safe-area-inset-right)); bottom: calc(20px + env(safe-area-inset-bottom));
-    width: 62px; height: 62px;
+    position: absolute; right: calc(128px + env(safe-area-inset-right)); bottom: calc(104px + env(safe-area-inset-bottom));
+    width: 56px; height: 56px; font-size: 23px;
   }
   #btn-rest {
     position: absolute; right: calc(30px + env(safe-area-inset-right)); bottom: calc(128px + env(safe-area-inset-bottom));
-    width: 62px; height: 62px;
+    width: 56px; height: 56px; font-size: 23px;
   }
+  #btn-eat {
+    position: absolute; right: calc(32px + env(safe-area-inset-right)); bottom: calc(198px + env(safe-area-inset-bottom));
+    width: 60px; height: 60px; font-size: 25px;
+  }
+  .tbtn.ctxb { display: none; }
+  .tbtn.ctxb.on { display: flex; }
   #btn-pause {
     position: absolute; top: calc(10px + env(safe-area-inset-top)); right: calc(10px + env(safe-area-inset-right));
     width: 44px; height: 44px; border-radius: 12px; font-size: 14px;
   }
-  /* context actions (drink, nest, wrestle…) stack above the attack cluster */
+  /* context actions (nest, wrestle, fish…) stack above the attack cluster */
   #ctxbtns {
-    position: absolute; right: calc(20px + env(safe-area-inset-right)); bottom: calc(206px + env(safe-area-inset-bottom));
+    position: absolute; right: calc(20px + env(safe-area-inset-right)); bottom: calc(272px + env(safe-area-inset-bottom));
     display: flex; flex-direction: column-reverse; gap: 10px; align-items: flex-end;
     pointer-events: none;
   }
@@ -434,13 +460,27 @@
              calc(10px + env(safe-area-inset-bottom)) env(safe-area-inset-left);
   }
 
-  /* portrait on a touch device: the game wants your phone sideways */
+  /* portrait on a touch device: the game wants your phone sideways —
+     a big animated phone does the explaining, the words just confirm it */
   #rotate {
     position: fixed; inset: 0; z-index: 99; display: none;
     background: #16110a; color: #ffe9a0;
     text-align: center; align-items: center; justify-content: center;
-    font-size: 15px; letter-spacing: 2px; line-height: 2;
   }
+  #rot-phone {
+    width: 58px; height: 100px; margin: 0 auto 30px;
+    border: 4px solid #ffe9a0; border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+    animation: rotphone 2.6s ease-in-out infinite;
+  }
+  #rot-phone .rot-scr { width: 40px; height: 76px; background: rgba(122, 92, 52, 0.45); border-radius: 3px; }
+  @keyframes rotphone {
+    0%, 16% { transform: rotate(0deg); }
+    42%, 62% { transform: rotate(90deg); }
+    88%, 100% { transform: rotate(0deg); }
+  }
+  #rotate h2 { font-size: 21px; letter-spacing: 5px; color: #ffd23e; margin-bottom: 14px; }
+  #rotate p { font-size: 12px; letter-spacing: 1px; line-height: 1.9; color: #a5936c; }
   @media (orientation: portrait) { body.touch #rotate { display: flex; } }
 
   #death h2 { font-size: 34px; letter-spacing: 8px; color: #e05a4a; text-shadow: 3px 3px 0 #2a0d08; margin-bottom: 12px; }
@@ -553,15 +593,23 @@
 
   <!-- touch controls: joystick left, transparent buttons right (js/touch.js) -->
   <div id="touch">
-    <div id="joyzone"></div>
+    <div id="joyzone"><div id="joyring"></div></div>
     <div id="ctxbtns"></div>
-    <div class="tbtn" id="btn-atk">ATTACK</div>
-    <div class="tbtn" id="btn-grab">GRAB</div>
-    <div class="tbtn" id="btn-rest">REST</div>
+    <div class="tbtn" id="btn-atk">🦷</div>
+    <div class="tbtn" id="btn-pnc">🐾</div>
+    <div class="tbtn ctxb" id="btn-grab">✊</div>
+    <div class="tbtn ctxb" id="btn-eat">💧</div>
+    <div class="tbtn" id="btn-rest">💤</div>
     <div class="tbtn" id="btn-pause">❚❚</div>
     <div id="swipezone"></div>
   </div>
-  <div id="rotate">🔄<br>turn your phone sideways —<br>the delta is wider than it is tall</div>
+  <div id="rotate">
+    <div class="rotbox">
+      <div id="rot-phone"><div class="rot-scr"></div></div>
+      <h2>TURN YOUR PHONE</h2>
+      <p>HATCHLING plays sideways —<br>the delta is wider than it is tall</p>
+    </div>
+  </div>
 
 <script src="js/util.js"></script>
 <script src="js/sprites.js"></script>

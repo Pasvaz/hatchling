@@ -1155,7 +1155,8 @@ function drawDino(ctx, key, o) {
   }
 
   // ---------------- head details ----------------
-  const blink = !hd && ((G.time + (o.x || 0) * 0.137 + ph * 0.05) % 3.8) < 0.13;
+  // a settled-down dino sleeps with its eyes closed (restT rides in on o)
+  const blink = (o.restT || 0) > 0.55 || (!hd && ((G.time + (o.x || 0) * 0.137 + ph * 0.05) % 3.8) < 0.13);
   drawHead(ctx, key, d, C, {
     hPt, hl, hh, s, g, lineW, open, hinge, snout, eyeMul, headAng, blink,
   });

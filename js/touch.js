@@ -69,6 +69,15 @@
       maxNumberOfNipples: 1,
       restOpacity: 0.35,
     });
+    // the RUN RING sits exactly where sprint engages: walk inside it, cross
+    // it to run. Positioned at the stick's spawn point every touch.
+    const ring = document.getElementById('joyring');
+    joy.on('start', (ev, data) => {
+      const zr = joyzone.getBoundingClientRect();
+      ring.style.left = (data.position.x - zr.left) + 'px';
+      ring.style.top = (data.position.y - zr.top) + 'px';
+      joyzone.classList.add('active');
+    });
     joy.on('move', (ev, data) => {
       if (!data.vector) return;
       const i = G.input, dead = 0.28;
@@ -76,12 +85,14 @@
       i.right = data.vector.x > dead;
       i.up = data.vector.y > dead;      // nipplejs y points UP
       i.down = data.vector.y < -dead;
-      // sprint LATCHES near the rim and only lets go well inside it — the old
-      // razor 'force >= 1' trigger flickered off with every thumb wobble
-      i.sprint = i.sprint ? data.force > 0.7 : data.force >= 0.95;
-      joyzone.classList.toggle('sprint', i.sprint);   // the stick heats up while running
+      // sprint LATCHES when the thumb crosses the ring (0.85 of the rim) and
+      // only lets go well back inside (0.55) — walk and run stay distinct
+      const was = i.sprint;
+      i.sprint = i.sprint ? data.force > 0.55 : data.force >= 0.85;
+      if (i.sprint && !was && navigator.vibrate) navigator.vibrate(18);   // a tick you can feel
+      joyzone.classList.toggle('sprint', i.sprint);
     });
-    joy.on('end', clearDirs);
+    joy.on('end', () => { joyzone.classList.remove('active'); clearDirs(); });
     window.TOUCH._joy = joy;   // exposed for the test harness
   }
 
@@ -93,10 +104,20 @@
     }
   };
   press(document.getElementById('btn-atk'), () => { G.input.attack = true; });
+  // pounce (or the tail-spin) is a HOLD: down starts the coil, release either
+  // cancels it (mid-prep) or ends the swing — the game reads the held flag
+  const pncBtn = document.getElementById('btn-pnc');
+  press(pncBtn,
+    () => { G.input.pounceHold = true; },
+    () => { G.input.pounceHold = false; });
   // grab is HOLD-sensitive (hold to tear a chunk) — mirror the real key state
-  press(document.getElementById('btn-grab'),
+  const grabBtn = document.getElementById('btn-grab');
+  press(grabBtn,
     () => { G.input.grab = true; G.keys.KeyG = true; },
     () => { G.keys.KeyG = false; });
+  // the 4th slot: eat / drink, whenever the world offers a meal
+  const eatBtn = document.getElementById('btn-eat');
+  press(eatBtn, () => { G.input.interact = true; });
   press(document.getElementById('btn-rest'), () => { G.input.rest = true; });
   press(document.getElementById('btn-pause'), () => {
     if (!G.started) return;
@@ -107,14 +128,23 @@
   // ---- context actions: the game's own prompts become buttons ----
   // G.prompt strings look like 'E — Drink' (several joined by wide spaces);
   // the leading letter tells us which input flag the action wants.
-  const KEYACT = { E: 'interact', N: 'nest', F: 'fish', M: 'wrestle', P: 'pack', I: 'burrow', R: 'rest', G: 'grab' };
+  const KEYACT = { E: 'interact', N: 'nest', F: 'fish', M: 'wrestle', P: 'pack', I: 'burrow', R: 'rest' };
   let lastPrompt = null;
   function buildCtx(prompt) {
     ctxBox.innerHTML = '';
-    if (!prompt) return;
-    for (const seg of prompt.split(/\s{3,}/)) {
+    // G-actions light up the GRAB button; drink/eat light up the 4th slot
+    // with the right icon — everything else stays a labelled pill
+    let grabOn = false, eatIcon = null;
+    if (prompt) for (const seg of prompt.split(/\s{3,}/)) {
       const m = seg.match(/^([A-Z])\s*—\s*(.+)$/);
-      if (!m || !KEYACT[m[1]]) continue;
+      if (!m) continue;
+      if (m[1] === 'G') { grabOn = true; continue; }
+      if (m[1] === 'E' && /Drink/i.test(m[2])) { eatIcon = '💧'; continue; }
+      if (m[1] === 'E' && /Eat|Feed|Swallow|Browse/i.test(m[2])) {
+        eatIcon = /carcass|Swallow/i.test(m[2]) ? '🍖' : '🌿';
+        continue;
+      }
+      if (!KEYACT[m[1]]) continue;
       const act = KEYACT[m[1]];
       const b = document.createElement('div');
       b.className = 'tbtn ctx';
@@ -122,6 +152,9 @@
       b.addEventListener('pointerdown', (ev) => { ev.preventDefault(); G.input[act] = true; });
       ctxBox.appendChild(b);
     }
+    grabBtn.classList.toggle('on', grabOn);
+    if (eatIcon) eatBtn.textContent = eatIcon;
+    eatBtn.classList.toggle('on', !!eatIcon);
   }
 
   // ---- wrestle QTE: the right half becomes a swipe pad (W A S D → ↑ ← ↓ →) ----
@@ -137,10 +170,16 @@
   });
 
   // ---- per-frame sync: show/hide with the game, rebuild the context row ----
+  let pncSp = null;
   function syncTouch() {
     const on = G.started && G.player && G.player.alive;
     layer.classList.toggle('ingame', !!on);
     if (on) ensureJoy();   // the zone is measurable now — safe to anchor the stick
+    // the third button is the dino's power: leap for biters, spin for tails
+    if (on && G.player.species !== pncSp) {
+      pncSp = G.player.species;
+      pncBtn.textContent = DINO[pncSp].tailWeapon ? '🌀' : '🐾';
+    }
     layer.classList.toggle('paused', !!(on && G.paused));
     layer.classList.toggle('wrestling', !!(on && G.wrestle));
     if (on && G.wrestle) {

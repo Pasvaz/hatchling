@@ -41,8 +41,9 @@ No build step, no dependencies — plain HTML5 canvas + JavaScript.
 | WASD / Arrows | Move |
 | SHIFT | Sprint (drains stamina) |
 | SPACE | Bite / attack |
+| P (hold) + direction | **Pounce** — the dino coils (bigger = longer), leaps (faster = farther) and bites where it lands. Tail-fighters instead hold P to **tail-swing**: continuous hits on a metronome, but the feet are planted until you let go. (P still creates an aardiraptor pack on a quick tap — hold + direction is the pounce.) |
 | E | Eat ferns · drink · feed on carcass · swallow what you carry |
-| R | Rest — sit down, heal faster, needs drain slower (move to get up) |
+| R | Rest — sit down eyes closed, heal faster, needs drain slower (moving, eating or drinking gets you up) |
 | G | Grab a carcass to carry (hold: tear off a chunk) · press again to drop |
 | M | Wrestle a dino your own size (apex carnivores) |
 | P / I | Aardiraptor: create a pack / invade a protoceratops burrow |
@@ -55,20 +56,23 @@ No build step, no dependencies — plain HTML5 canvas + JavaScript.
 **On a phone** the game grows transparent touch controls (js/touch.js +
 vendored [nipple.js](js/lib/nipplejs.min.js) — they appear automatically on
 touch screens, or add `?touch=1` to the URL to force them): a **virtual
-joystick** on the left — it appears wherever your thumb lands (push out to
-the rim to sprint; the stick glows gold while the run is latched, and lets go
-when you ease well back) — and on the right an
-**ATTACK** button, **GRAB** (hold it to tear a chunk, like holding G), **REST**,
-and a pause button. The game's contextual prompts — drink, nest, wrestle,
-invade a burrow — appear as **tappable buttons** above the attack cluster, so
-every keyboard action is reachable. During a wrestle the right half of the
+joystick** on the left — it appears wherever your thumb lands, with a dashed
+**run ring** around it: inside the ring you walk, cross it and you run (the
+stick and ring flare gold while the run is latched, and it lets go when you
+ease well back toward the center). On the right, an **icon button cluster**:
+🦷 attack, 🐾 pounce (🌀 tail-swing on tail-fighters — hold it like the P key),
+💤 rest, and two buttons that only exist when the world offers them — ✊ grab
+appears beside a carcass (tap to carry, hold to tear a chunk) and a fourth
+slot appears as 💧/🌿/🍖 to drink or eat whatever you're standing at. Rarer
+prompts — nest, wrestle, fish, burrows — stay as labelled pills above the
+cluster. During a wrestle the right half of the
 screen becomes a **swipe pad** (the QTE shows which way). Landscape is the
 intended orientation: portrait shows a "turn your phone" screen, and the first
 tap in-game requests fullscreen + landscape lock where the browser allows it
 (Android; iPhones can't lock, but **Share → Add to Home Screen** installs the
 game as a fullscreen app — no URL bar — via the web app manifest). The view
 itself is **responsive**: the view is 360 world-units tall on desktop and a
-zoomed-in 310 on touch (the dinos read bigger at arm's length), and the view
+zoomed-in 285 on touch (the dinos read bigger at arm's length), and the view
 width follows the screen's aspect, so the biome fills the whole display — an iPhone's 19.5:9 screen simply sees more delta to the sides,
 no black bands. Panels respect the notch (safe-area insets), text selection is
 disabled game-wide (double-tap-drag never highlights the UI), and the compact
