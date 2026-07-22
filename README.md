@@ -10,19 +10,36 @@ and everything you do is saved under that name: growths, unlocks, purchases and
 every dinosaur's progress. Click your name next to the ❖ balance in the lobby
 to switch players.
 
-Five ecosystems: everyone starts in **Fern Valley**; grow any dinosaur to
-Full Adult to unlock **Skull Prairie** (❖ 100), a wide bone-strewn grassland
-with ponds and a southern swamp; **Coastal Scrubs** (❖ 250), a sea of waving
-grass rolling down to a real sea; **Ashfall Ridge** (❖ 500), a scorched
-volcanic badland where the land itself is trying to kill you; and the
-**Lertentous Delta** (❖ 1000) — a map FOUR TIMES the size of any other, where
-one great river braids into four channels on its way to a drowned southern
-sea, and nearly a hundred animals live between them. New playable
-dinosaurs are bought with **❖ growths** — the currency you earn every minute
-you survive (bigger dinos earn more, and kills pay a bonus); the later dinos
-also demand you master a specific species first. The **⌂ LOBBY** button (top
-of the screen) takes you back to species select at any time — your dino keeps
-its progress. Death erases it.
+The game is one long **mastery ladder**: you start as Rajasaurus, and every
+time you grow a dinosaur to Full Adult the **next dinosaur on the ladder
+unlocks** — and when you master the last dinosaur of an ecosystem, the **next
+land opens** with its first dinosaur. The chain runs through six ecosystems:
+**Fern Valley** (Rajasaurus → Camptosaurus), **Skull Prairie** — a wide
+bone-strewn grassland with ponds and a southern swamp (Ichthyovenator →
+Qianzhousaurus → Scutellosaurus), **Coastal Scrubs** — a sea of waving grass
+rolling down to a real sea (Metriacanthosaurus → Gigantspinosaurus →
+Cristatusaurus), **Ashfall Ridge** — a scorched volcanic badland where the
+land itself is trying to kill you (Linheraptor → Nothronychus), the
+**Lertentous Delta** — a map FOUR TIMES the size of any other, where one great
+river braids into four channels on its way to a drowned southern sea
+(Aardiraptor → Centrosaurus → Omniraptor → Eotrachodon → Lokiceratops →
+Morosaurus, then a **choice of apex**: master Tyrannotitan OR Spinosaurus —
+both unlock together, either one opens the endgame), and finally
+**The Nivalotitan Wall** — a misty mountain built as a CLIMBING MAZE of rock
+walls, where a **COLD bar** ticks toward freezing solid, **blizzards** force
+you to curl up or shelter (rarely one shakes loose an **avalanche** you must
+outrun), climbing species scale the walls (Eshanosaurus always;
+Jianchangosaurus only as a hatchling), pouncing off a wall flies farther and
+lands harder, Kerberosaurus herds are warm to huddle beside, and Nanuqsaurus
+rules the whiteout (Jianchangosaurus → Eshanosaurus → Nanuqsaurus). Somewhere
+in the high maze one hidden cave holds the **frozen giant** the mountain is
+named for — find it, and the biggest animal in the game joins your lobby
+forever, outside the ladder. Every locked card and tab tells you exactly which
+mastery opens it. **❖ growths** — earned every minute you survive (bigger
+dinos earn more, and kills pay a bonus) — now buy **skins only**. To replay
+any dinosaur you've already unlocked (or switch gender or skin), use the
+**⌂ LOBBY** button — top of the screen in-game, or on the PAUSED screen —
+and your dino keeps its progress. Death erases it.
 
 ## How to run
 
@@ -121,13 +138,13 @@ Tyrannotitan alone — mossy green
 over brown flanks with shining lime leaf-flecks dappled down its back.
 
 **Playable — Fern Valley**
-- **Rajasaurus narmadensis** — carnivore, hatches in the fern forest. Scavenge and hunt. Bites make big prey bleed: bite, run, wait.
-- **Camptosaurus** — herbivore, hatches on the open plains where Moros hunts. Sprint to the fern forest shade to survive. Hard mode. Earns extra growths.
+- **Rajasaurus narmadensis** — carnivore, hatches in the fern forest. Scavenge and hunt. Bites make big prey bleed: bite, run, wait. (Bleeding is visible on anyone it's happening to — a blood-red **-N 🩸** number floats up every second alongside the drips, yours included.)
+- **Camptosaurus** (master Rajasaurus) — herbivore, hatches on the open plains where Moros hunts. Sprint to the fern forest shade to survive. Hard mode. Earns extra growths.
 
-**Playable — Skull Prairie** (unlock: any Full Adult, then ❖ 100)
-- **Ichthyovenator** (❖ 10) — sail-backed swimmer from the southern swamp. The only dinosaur that can cross deep water. Hunts gar and thirsty drinkers.
-- **Qianzhousaurus** (❖ 150) — the long-snouted "Pinocchio rex". Grows slowly, but a full adult is the fastest, toughest hunter on the prairie.
-- **Scutellosaurus** (❖ 200) — small armored herbivore. Grows fast, earns extra growths, resists bleeding.
+**Playable — Skull Prairie** (opens when Camptosaurus is mastered)
+- **Ichthyovenator** (unlocked with the land) — sail-backed swimmer from the southern swamp. The only dinosaur that can cross deep water. Hunts gar and thirsty drinkers.
+- **Qianzhousaurus** (master Ichthyovenator) — the long-snouted "Pinocchio rex". Grows slowly, but a full adult is the fastest, toughest hunter on the prairie.
+- **Scutellosaurus** (master Qianzhousaurus) — small armored herbivore. Grows fast, earns extra growths, resists bleeding.
 
 **Combat:** predators circle you at striking distance, freeze with open jaws
 (the tell!), then lunge in a straight line — sidestep during the tell and they
@@ -159,14 +176,14 @@ cornered against the lava. (Nests are always safe ground.)
 - **Scelidosaurus** — armored. Tail-smacks baby Rajasaurus, flees from grown ones. Sneak up while it drinks.
 - **Huayangosaurus** — 1,500 HP tank with a very short detection range. Its tail causes bleeding. Its head takes double damage.
 
-**Playable — Coastal Scrubs** (unlock: ❖ 250)
-- **Metriacanthosaurus** (❖ 150, requires a Full Adult Qianzhousaurus) — a storm-grey hunter built to run down Ugrunaaluk herds. Fast, strong, mean.
-- **Gigantspinosaurus** (❖ 225, requires a Full Adult Scutellosaurus) — a giant-shoulder-spined living fortress. It cannot bite at all: turn your back and swing the thagomizer. Slow, but almost unkillable.
-- **Cristatusaurus** (❖ 275, requires a Full Adult Ichthyovenator) — Ichthyovenator's heavyweight cousin: a croc-snouted shoreline tank that swims deep water and hits like a slammed door. Megorontosuchus can grab it — but can't hold it: every thrash counts double.
+**Playable — Coastal Scrubs** (opens when Scutellosaurus is mastered)
+- **Metriacanthosaurus** (unlocked with the land) — a storm-grey hunter built to run down Ugrunaaluk herds. Fast, strong, mean.
+- **Gigantspinosaurus** (master Metriacanthosaurus) — a giant-shoulder-spined living fortress. It cannot bite at all: turn your back and swing the thagomizer. Slow, but almost unkillable.
+- **Cristatusaurus** (master Gigantspinosaurus) — Ichthyovenator's heavyweight cousin: a croc-snouted shoreline tank that swims deep water and hits like a slammed door. Megorontosuchus can grab it — but can't hold it: every thrash counts double.
 
-**Playable — Ashfall Ridge** (unlock: ❖ 500)
-- **Linheraptor** (❖ 250, requires a Full Adult Metriacanthosaurus) — a deep-cut dromaeosaur, the fastest thing on the ridge and the most fragile. Outrun the eruptions, dodge Tarbosaurus, and mind the wild packs — they hunt here too.
-- **Nothronychus** (❖ 300, requires a Full Adult Gigantspinosaurus) — a pot-bellied giant that stands tall and **swipes with great scythe claws**. Eats only plants; slashes anything that forgets that, and its claw wounds bleed.
+**Playable — Ashfall Ridge** (opens when Cristatusaurus is mastered)
+- **Linheraptor** (unlocked with the land) — a deep-cut dromaeosaur, the fastest thing on the ridge and the most fragile. Outrun the eruptions, dodge Tarbosaurus, and mind the wild packs — they hunt here too.
+- **Nothronychus** (master Linheraptor) — a pot-bellied giant that stands tall and **swipes with great scythe claws**. Eats only plants; slashes anything that forgets that, and its claw wounds bleed.
 
 **NPCs — Skull Prairie**
 - **Troodon** — pack hunter of the mud groves; Guanlong's niche, a little meaner.
@@ -276,15 +293,15 @@ in with you (up to four) and fights at your side; kill every resident and
 accepted pair can **nest (N)** — den eggs are beyond every raider's reach,
 and the hatchlings stay safely below until they emerge as sub-adults.
 
-**Playable — Lertentous Delta** (unlock: ❖ 1000)
-- **Aardiraptor** *(invented)* (❖ 25) — small, weak, and it looks like a dumb pick — until you meet your kin. Feathered on top (bare-bellied), bushy-tailed, and the only dinosaur that leads a pack and raids burrows.
-- **Centrosaurus** (❖ 50) — the cheap tank: one great nose horn, slow to grow, but a grown one is a wall that hits back. Like every horned dinosaur, it **headbutts**: horn strikes launch victims twice as far as any bite.
-- **Omniraptor** *(imagined)* (❖ 75) — fast, strong, cheap: the working raptor of the islands. Its bite bleeds.
-- **Eotrachodon** (❖ 150) — the oldest duckbill: tough and hardy, resists bleeding, swings a real hadrosaur tail. Earns extra.
-- **Lokiceratops** (❖ 350, requires a Full Adult Centrosaurus) — Centrosaurus but cooler: midnight coat, golden blade horns, more of everything.
-- **Morosaurus** (❖ 400, requires a Full Adult Eotrachodon) — **the sauropod.** Grows agonizingly slowly; a full adult swings a whip tail, shrugs off nearly everything, and fears exactly one animal in the delta (see below).
-- **Spinosaurus maroccanus** (❖ 500, requires a Full Adult Cristatusaurus) — the end of the spinosaurid road (Ichthyovenator → Cristatusaurus → this), built to its Prior Extinction likeness: an **M-shaped sail**, a throat **dewlap**, an upward-arcing neck, and a skull all its own (nasal crest, rosette snout, interlocking croc teeth, slit nostrils set far back). It attacks with **jaws AND clawed arms together** — point-blank prey inside the long snout still catches the swipe — and its **Wet Wrath** makes it hit 1.2× harder standing in water (and 15% softer on dry land). The fastest swimmer in the game; at adult, the undisputed apex of the water. Getting there is the whole game.
-- **Tyrannotitan** (❖ 500, requires a Full Adult Omniraptor) — Spinosaurus' opposite number: the LAND apex. A lesser-sung carcharodontosaurid with the deep shark-toothed skull and heavy brow bosses of its famous cousin, and a **bleed-based** kit — its wounds bleed nearly twice as hard and longer. Hit, fall back, and let the blood do the rest.
+**Playable — Lertentous Delta** (opens when Nothronychus is mastered)
+- **Aardiraptor** *(invented)* (unlocked with the land) — small, weak, and it looks like a dumb pick — until you meet your kin. Feathered on top (bare-bellied), bushy-tailed, and the only dinosaur that leads a pack and raids burrows.
+- **Centrosaurus** (master Aardiraptor) — the cheap tank: one great nose horn, slow to grow, but a grown one is a wall that hits back. Like every horned dinosaur, it **headbutts**: horn strikes launch victims twice as far as any bite.
+- **Omniraptor** *(imagined)* (master Centrosaurus) — fast and strong: the working raptor of the islands. Its bite bleeds.
+- **Eotrachodon** (master Omniraptor) — the oldest duckbill: tough and hardy, resists bleeding, swings a real hadrosaur tail. Earns extra.
+- **Lokiceratops** (master Eotrachodon) — Centrosaurus but cooler: midnight coat, golden blade horns, more of everything.
+- **Morosaurus** (master Lokiceratops) — **the sauropod.** Grows agonizingly slowly; a full adult swings a whip tail, shrugs off nearly everything, and fears exactly one animal in the delta (see below).
+- **Spinosaurus maroccanus** (master Morosaurus — then Tyrannotitan and Spinosaurus unlock TOGETHER: choose your apex, and mastering either opens the Wall) — the end of the spinosaurid road (Ichthyovenator → Cristatusaurus → this), built to its Prior Extinction likeness: an **M-shaped sail**, a throat **dewlap**, an upward-arcing neck, and a skull all its own (nasal crest, rosette snout, interlocking croc teeth, slit nostrils set far back). It attacks with **jaws AND clawed arms together** — point-blank prey inside the long snout still catches the swipe — and its **Wet Wrath** makes it hit 1.2× harder standing in water (and 15% softer on dry land). The fastest swimmer in the game; at adult, the undisputed apex of the water. Getting there is the whole game.
+- **Tyrannotitan** (the other half of the apex choice) — Spinosaurus' opposite number: the LAND apex. A lesser-sung carcharodontosaurid with the deep shark-toothed skull and heavy brow bosses of its famous cousin, and a **bleed-based** kit — its wounds bleed nearly twice as hard and longer. Hit, fall back, and let the blood do the rest.
 
 **NPCs — Lertentous Delta**
 - **Magnapaulia** — a giant hadrosaur that defends its herd *vigorously*: strike one and the whole river bank swings back.
@@ -303,6 +320,21 @@ and the hatchlings stay safely below until they emerge as sub-adults.
 - **Mawsonia** *(fish)* — the greatest coelacanth that ever lived: immensely tanky, strong, and it never, ever flees.
 - …plus **Lepisosteus**, **Black-back Bass**, **Herrietopus** and **Scutelocephalichthyus** — every fish in the game swims the delta.
 
+**Playable — The Nivalotitan Wall** (opens when Tyrannotitan OR Spinosaurus is mastered)
+- **Jianchangosaurus** (unlocked with the land) — the cheap way onto the mountain: a small rusty therizinosaur, quick and thin-coated. Its **hatchlings can climb** the maze walls to escape anything with teeth — a grown one is too heavy for the rock. Use the gift while you have it.
+- **Eshanosaurus** (master Jianchangosaurus) — the oldest therizinosaur, held nearly upright on stumpy legs, short high arms ending in great scythes. Thick-coated (55% cold resistance), claw wounds bleed, and it is the ONLY grown dino that climbs the Wall — the whole maze is its road, and every wall-top a pounce perch.
+- **Nivalotitan** *(imagined — THE SECRET)* — the frozen giant the mountain is named for. It cannot be bought at any price: somewhere in the high north maze, one hidden cave holds it, **visibly asleep inside a slab of old blue ice**, and standing before it once unlocks it forever. The largest animal in the game — a brachiosaur silhouette with towering shoulders and a near-vertical neck, a sweeping tail, near-total cold immunity, the slowest growth there is — and it **TRAMPLES**: anything clearly smaller caught under a walking giant's footprint is simply crushed.
+
+- **Nanuqsaurus** (master Eshanosaurus) — play the KING: the polar tyrant itself. Thick coat (70% cold resistance), bleed bites, wrestling strength — every herd on the mountain knows your silhouette.
+
+**NPCs — The Nivalotitan Wall**
+- **Kerberosaurus** — the herd: a huge flat-headed polar hadrosaur, Prior-Extinction-Edmontosaurus by silhouette. Warm to huddle beside on the open snowfields — until the tail comes around.
+- **Beipiaosaurus** — the guardian of the pine belt: the shaggiest thing on the mountain, a charcoal therizinosaur that plants itself and rakes with feathered scythes. The wounds stay open in the cold.
+- **Pectinodon** — the scavenger gang: snow-white troodontids with sooty masks that trail every blizzard, picking at whatever froze. Bold in a pack; gone in a blink alone.
+- **Koreanosaurus** — the snowball underfoot: a tiny fluffy burrowing ornithopod, the bottom of every food chain on the mountain.
+- **Nanuqsaurus** — the king of the Wall. A compact polar tyrant that fears nothing, hunts everything on the mountain, and uses the mist better than you do.
+- **Titanovenator** *(imagined)* — the TITAN-KILLER. Exactly ONE walks the whole mountain: a colossal bone-white theropod with a blood-red crest — the only warm color in the snow. It is the one hunter with **no upper size limit**: a full-grown Nivalotitan reads as dinner, not danger, and its bite opens wounds the cold won't close.
+
 **Fear:** when a dinosaur dies, packmates nearby panic and rout (Huayangosaurus,
 Kosmoceratops, Grunos, Charonosaurus, Megorontosuchus, Tarbosaurus,
 Nothronychus, Pinacosaurus, Panoplosaurus, Atlasaurus, Wuerhosaurus,
@@ -315,9 +347,11 @@ still stands).
 Hatchling (0–10%) → Juvenile (10–20%) → Adolescent (20–30%) →
 Sub-adult (30–90%) → Adult (90–100%) → **Full Adult**.
 
-Keep food and water above 25% and you grow over time (~9 minutes to full).
-Mud baths restore hygiene; the horsetails around them are edible — a haven,
-but Guanlong knows that too.
+Keep food and water above 25% — and **hygiene above 60%** — and you grow over
+time (~9 minutes to full). Let yourself get too dirty and growth stops dead:
+the growth bar turns muddy brown and the stage line reads TOO DIRTY TO GROW
+until you bathe. Mud baths restore hygiene; the horsetails around them are
+edible — a haven, but Guanlong knows that too.
 
 ## Adding content (the arcade loop)
 

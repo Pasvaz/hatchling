@@ -9,6 +9,8 @@ let WORLD_W = WT * TILE, WORLD_H = HT * TILE;
 
 // terrain ids
 const T_GRASS = 0, T_FOREST = 1, T_SAND = 2, T_WATER = 3, T_DEEP = 4, T_MUD = 5, T_LAVA = 6;
+// the Nivalotitan Wall adds rock walls (the climbing maze) and frozen ponds
+const T_CLIFF = 7, T_ICE = 8;
 
 const TGRID = 96;   // tree-collision grid cell size (px)
 const World = {
@@ -60,6 +62,11 @@ const ECOS = {
     name: 'Lertentous Delta', emoji: '🐟', sub: 'rainforest · a hundred islands · the drowned south',
     seed: 20260711, cost: 1000, size: 256,   // the engine's maximum — tile packing caps at 256
     gen: () => genDelta(),
+  },
+  wall: {
+    name: 'The Nivalotitan Wall', emoji: '🏔️', sub: 'the climbing maze · giant pines · the frozen dark',
+    seed: 20260718, cost: 2000, size: 256,   // the new endgame — biggest, coldest, deadliest
+    gen: () => genWall(),
   },
 };
 // the river only ever occupies this x window (px) — used to cull river passes
@@ -151,6 +158,22 @@ function isWaterPx(x, y) { const t = terAtPx(x, y); return t === T_WATER || t ==
 function isDeepPx(x, y) { return terAtPx(x, y) === T_DEEP; }
 function isMudPx(x, y) { return terAtPx(x, y) === T_MUD; }
 function isLavaPx(x, y) { return terAtPx(x, y) === T_LAVA; }
+function isCliffPx(x, y) { return terAtPx(x, y) === T_CLIFF; }
+// inside a Wall cave's wind shadow — the warmth (and the secret) live here
+function caveAt(x, y) {
+  for (const c of World.caves) if (dist(x, y, c.x, c.y) < c.r) return c;
+  return null;
+}
+// direction of the nearest walkable ground off a rock wall (the climb-block hatch)
+function offCliffDir(x, y) {
+  for (let r = TILE; r <= TILE * 6; r += TILE) {
+    for (let k = 0; k < 12; k++) {
+      const a = (k / 12) * TAU;
+      if (!isCliffPx(x + Math.cos(a) * r, y + Math.sin(a) * r)) return a;
+    }
+  }
+  return 0;
+}
 // direction of the nearest non-lava ground (npc escape hatch)
 function coolDir(x, y) {
   for (let r = TILE; r <= TILE * 8; r += TILE) {
@@ -207,6 +230,8 @@ function genWorld(eco) {
   W.hasRiver = false;   // ecosystems with a river switch this on
   W.ashy = false;       // volcanic ecosystems tint the whole palette
   W.lush = false;       // rainforest ecosystems deepen every green
+  W.snowy = false;      // the Wall whitens the land and hides it in mist
+  W.caves = [];         // wind-shadow shelters (the Wall) — one hides the giant
 
   ECOS[eco].gen();
   dressNests();
@@ -634,6 +659,114 @@ function genAsh() {
 }
 
 // ---------------------------------------------------------------------------
+// THE NIVALOTITAN WALL — a misty mountain the size of the delta, but built
+// UP instead of out. Rock walls (T_CLIFF) break the snowfield into a climbing
+// maze: non-climbers route the long way around, climbers cross them, and
+// height off a wall feeds the pounce. The higher you go (north = the summit)
+// the barer, colder and more walled it gets. Giant pines cloak the southern
+// belt; frozen ponds are the only drink; caves are the only warmth — and one
+// cave, hidden deep, holds the frozen giant the whole mountain is named for.
+// ---------------------------------------------------------------------------
+function genWall() {
+  const W = World;
+  W.snowy = true;
+  // elevation: south (high ty) is the wooded lower slope, north (low ty) the
+  // bare summit. The maze walls follow this field's contour lines.
+  const elev = (tx, ty) => {
+    const base = fbm(tx * 0.045 + 12, ty * 0.045 + 30);
+    const detail = fbm(tx * 0.12 + 5, ty * 0.12 + 8);
+    const north = 1 - ty / HT;                 // 0 at the south foot, 1 at the summit
+    return base * 0.62 + detail * 0.24 + north * 0.4;
+  };
+  for (let ty = 0; ty < HT; ty++) {
+    for (let tx = 0; tx < WT; tx++) {
+      const i = tIdx(tx, ty);
+      const el = elev(tx, ty);
+      // pines belong to the lower southern belt, thinning as the air bites
+      const belt = clamp((ty / HT - 0.28) * 1.7, 0, 1) * (1 - clamp((el - 0.6) * 3, 0, 1));
+      const ff = belt * (0.35 + 0.6 * fbm(tx * 0.1 + 3, ty * 0.1 + 7));
+      W.forest[i] = ff;
+      // CLIFF WALLS: the contour bands of the elevation field, thin so passes
+      // stay open, punched with gaps so nothing is ever fully sealed in.
+      // Denser up high (the summit is the true maze); the border is solid rock.
+      const contour = ((el * 7) % 1 + 1) % 1;
+      const gap = fbm(tx * 0.33 + 40, ty * 0.33 + 20);
+      const bandW = 0.09 + 0.05 * clamp((el - 0.4) * 2, 0, 1);   // walls thicken up high
+      const edge = tx < 2 || ty < 2 || tx >= WT - 2 || ty >= HT - 2;
+      if (edge || (el > 0.22 && contour < bandW && gap > 0.42)) W.ter[i] = T_CLIFF;
+      else W.ter[i] = ff > 0.4 ? T_FOREST : T_GRASS;   // snow (a grass tile the snowy palette whitens)
+    }
+  }
+
+  // a clear spawn bowl at the southern foot — never hatch inside a wall
+  const sx = Math.floor(WT * 0.5), sy = Math.floor(HT * 0.8);
+  W.nests.spawn = { x: sx * TILE, y: sy * TILE };
+  W.nests.eshano = { x: sx * TILE, y: sy * TILE };            // hatches in the pine-belt bowl
+  W.nests.jianchang = { x: (sx - 16) * TILE, y: (sy + 4) * TILE };   // its own corner of the belt
+  W.nests.nanuq = { x: (sx + 22) * TILE, y: (sy - 14) * TILE };      // the king hatches higher up
+  for (let ty = sy - 17; ty <= sy - 11; ty++) for (let tx = sx + 19; tx <= sx + 25; tx++) {
+    if (tx > 0 && ty > 0 && tx < WT - 1 && ty < HT - 1 && W.ter[tIdx(tx, ty)] === T_CLIFF) W.ter[tIdx(tx, ty)] = T_GRASS;
+  }
+  // the little climber never hatches inside a wall either
+  for (let ty = sy - 2; ty <= sy + 8; ty++) for (let tx = sx - 20; tx <= sx - 12; tx++) {
+    if (tx > 0 && ty > 0 && tx < WT - 1 && ty < HT - 1 && W.ter[tIdx(tx, ty)] === T_CLIFF) W.ter[tIdx(tx, ty)] = T_GRASS;
+  }
+  for (let ty = sy - 7; ty <= sy + 7; ty++) {
+    for (let tx = sx - 7; tx <= sx + 7; tx++) {
+      if (tx < 1 || ty < 1 || tx >= WT - 1 || ty >= HT - 1) continue;
+      if (Math.hypot(tx - sx, ty - sy) < 7) { const i = tIdx(tx, ty); if (W.ter[i] === T_CLIFF) W.ter[i] = T_GRASS; }
+    }
+  }
+
+  // frozen ponds — the only drink on the mountain (rendered pale as ice)
+  const ponds = [{ x: 48, y: 196, r: 3.4 }, { x: 176, y: 210, r: 3.8 }, { x: 118, y: 150, r: 3.0 }, { x: 82, y: 96, r: 2.6 }];
+  for (const p of ponds) addWaterBlob(p.x, p.y, p.r, false);
+
+  // caves: wind-shadow shelters tucked against the walls. The last one, buried
+  // deep in the high north maze, is SECRET — it holds the frozen Nivalotitan.
+  const caveSpots = [
+    { x: 40, y: 168 }, { x: 150, y: 182 }, { x: 96, y: 128 }, { x: 200, y: 120 }, { x: 64, y: 92 },
+  ];
+  for (const c of caveSpots) {
+    const cx = c.x * TILE, cy = c.y * TILE;
+    W.caves.push({ x: cx, y: cy, r: 46, secret: false });
+    W.props.push({ kind: 'cavemouth', x: cx, y: cy, s: rrange(1.1, 1.5), flip: rnd() < 0.5 ? 1 : -1 });
+  }
+  // the secret cave: high in the north, off in a maze pocket
+  const gx = 210 * TILE, gy = 30 * TILE;
+  W.caves.push({ x: gx, y: gy, r: 40, secret: true, found: false });
+  W.nests.nivalo = { x: gx, y: gy };
+
+  // giant pines + snow rocks, thickest in the southern belt
+  for (let ty = 1; ty < HT - 1; ty++) {
+    for (let tx = 1; tx < WT - 1; tx++) {
+      const i = tIdx(tx, ty), t = W.ter[i];
+      if (t === T_WATER || t === T_DEEP || t === T_CLIFF) continue;
+      const px = tx * TILE + rrange(2, TILE - 2), py = ty * TILE + rrange(2, TILE - 2);
+      const ff = W.forest[i];
+      const r = rnd();
+      if (ff > 0.42 && r < 0.05 + 0.16 * clamp((ff - 0.42) * 3, 0, 1)) {
+        // giant pines: kind-0 conifers, but towering — the tallest trees around
+        W.trees.push({ x: px, y: py, s: rrange(1.7, 2.9), kind: 0, v: rnd() < 0.5 ? 0 : 3 });
+      } else if (ff > 0.25 && r > 0.9 && r < 0.93) {
+        W.trees.push({ x: px, y: py, s: rrange(1.0, 1.7), kind: 0, v: rnd() < 0.5 ? 0 : 3 });   // scattered smaller firs
+      } else if (r > 0.985) {
+        W.rocks.push({ x: px, y: py, s: rrange(0.9, 2.2) });   // boulders & scree
+      } else if (r > 0.978) {
+        W.props.push({ kind: 'snowdrift', x: px, y: py, s: rrange(0.8, 1.6), flip: rnd() < 0.5 ? 1 : -1 });
+      }
+    }
+  }
+
+  // forage: hardy conifer browse (ferns stand in for evergreen shoots) in the belt
+  for (let k = 0; k < 60; k++) {
+    const px = rrange(6, WT - 6) * TILE, py = rrange(HT * 0.45, HT - 6) * TILE;
+    if (!isWaterPx(px, py) && terAtPx(px, py) !== T_CLIFF)
+      W.ferns.push({ x: px, y: py, food: 1, regrow: 0, s: rrange(0.8, 1.3) });
+  }
+}
+
+// ---------------------------------------------------------------------------
 // LERTENTOUS DELTA — the biggest world in the game, four times the land of
 // any other. One great trunk river pours in from the north, splits at the fan
 // apex and braids into four distributary channels that wander south through
@@ -858,7 +991,8 @@ function buildPaintData() {
     const warm = crnd();
     const alpha = 0.05 + crnd() * 0.055;
     let rgb;
-    if (World.ashy) rgb = warm < 0.4 ? '74,70,62' : warm < 0.75 ? '128,120,104' : '156,120,84';
+    if (World.snowy) rgb = warm < 0.5 ? '210,224,238' : warm < 0.8 ? '176,196,216' : '150,172,196';
+    else if (World.ashy) rgb = warm < 0.4 ? '74,70,62' : warm < 0.75 ? '128,120,104' : '156,120,84';
     else if (World.lush) rgb = ff > 0.42
       ? (warm < 0.45 ? '24,58,30' : warm < 0.8 ? '52,104,52' : '88,128,58')
       : (warm < 0.4 ? '120,142,66' : warm < 0.75 ? '72,116,54' : '96,132,60');
@@ -878,7 +1012,7 @@ function buildPaintData() {
     : World.lush
       ? ['#5c8a42', '#6e9c4c', '#82ae58', '#4c7838']
       : ['#8f8a48', '#a89a54', '#bbaf62', '#7d7a40'];
-  for (let k = 0; k < Math.round(2800 * areaMul); k++) {
+  for (let k = 0; World.snowy ? false : k < Math.round(2800 * areaMul); k++) {
     const x = crnd() * WORLD_W, y = crnd() * WORLD_H;
     const t = terAtPx(x, y);
     if (t !== T_GRASS && t !== T_FOREST) continue;
@@ -974,17 +1108,23 @@ function renderGroundRegion(ctx, rx, ry, rw, rh) {
       const grass = mixHex(mixHex('#b0a55c', '#98944c', n), '#8d9251', big * 0.7);
       const forest = mixHex(mixHex('#78884a', '#61723c', n), '#576939', big * 0.6);
       const ff = clamp((World.forest[i] - 0.28) / 0.3, 0, 1);
+      const t = World.ter[i];
       let ground = mixHex(grass, forest, ff);
       // ashfall: the whole land is grey with ash, greener only under the groves
       if (World.ashy) ground = mixHex(ground, '#736c60', 0.55 - ff * 0.25);
       // rainforest: everything sinks toward deep wet green, jungle deepest
       else if (World.lush) ground = mixHex(ground, '#3d6b38', 0.34 + ff * 0.22);
+      // the Wall: deep snow, a hair bluer up high (north), a hair warmer under pines
+      else if (World.snowy) {
+        const alt = 1 - ty / HT;
+        ground = mixHex(mixHex('#dfe8f2', '#c8d6e6', alt), '#c2cbd0', ff * 0.35);
+        if (t === T_CLIFF) ground = mixHex('#43454f', '#565863', fbm(tx * 0.4 + 2, ty * 0.4));   // bare rock wall
+      }
       ctx.fillStyle = ground;
       // +1px overdraw: at fractional render scales adjacent rects would
       // otherwise antialias apart and show a hairline grid
       ctx.fillRect(tx * TILE, ty * TILE, TILE + 1, TILE + 1);
-      const t = World.ter[i];
-      if ((t === T_GRASS || t === T_FOREST) && ff > 0.15 && ff < 0.85) {
+      if (!World.snowy && (t === T_GRASS || t === T_FOREST) && ff > 0.15 && ff < 0.85) {
         ctx.fillStyle = ff > 0.5 ? 'rgba(170,161,90,0.5)' : 'rgba(98,112,60,0.5)';
         for (let k = 0; k < 4; k++) {
           const hx = hash2(tx * 13 + k * 5, ty * 7 + k), hy = hash2(tx * 3 + k, ty * 19 + k * 3);
@@ -1077,11 +1217,28 @@ function renderGroundRegion(ctx, rx, ry, rw, rh) {
   // swamp pools merge into one waterline, then shallows, then deep hearts)
   if (World.waterBlobs.length) {
     const bs = World.waterBlobs.filter(b => inR(b.x, b.y, b.r * 1.5 + 14));
-    for (const b of bs) poolBlob(b, 1.3, 5, WATER_COLS.sand);
-    for (const b of bs) poolBlob(b, 1.08, 1.5, WATER_COLS.foam);
-    for (const b of bs) poolBlob(b, 1.0, 0, WATER_COLS.shallow);
-    for (const b of bs) poolBlob(b, 0.8, 0, WATER_COLS.open);
-    for (const b of bs) if (b.deep) poolBlob(b, 0.52, 0, WATER_COLS.deep);
+    // frozen ponds on the Wall read as pale cracked ice, not open water
+    const WC = World.snowy
+      ? { sand: '#b8c4cf', foam: '#d6e2ec', shallow: '#c2d2df', open: '#a6bccb', deep: '#8ea9bc' }
+      : WATER_COLS;
+    for (const b of bs) poolBlob(b, 1.3, 5, WC.sand);
+    for (const b of bs) poolBlob(b, 1.08, 1.5, WC.foam);
+    for (const b of bs) poolBlob(b, 1.0, 0, WC.shallow);
+    for (const b of bs) poolBlob(b, 0.8, 0, WC.open);
+    for (const b of bs) if (b.deep) poolBlob(b, 0.52, 0, WC.deep);
+    // a few dark crack lines etched across each ice sheet
+    if (World.snowy) {
+      ctx.strokeStyle = 'rgba(90,120,145,0.4)'; ctx.lineWidth = 0.8;
+      for (const b of bs) {
+        for (let k = 0; k < 3; k++) {
+          const a = hash2(Math.round(b.x) + k, Math.round(b.y)) * TAU;
+          ctx.beginPath();
+          ctx.moveTo(b.x + Math.cos(a) * b.r * 0.7, b.y + Math.sin(a) * b.r * 0.5);
+          ctx.lineTo(b.x - Math.cos(a + 0.6) * b.r * 0.6, b.y - Math.sin(a + 0.6) * b.r * 0.5);
+          ctx.stroke();
+        }
+      }
+    }
   }
   for (const p of World.mudPools) {
     if (!inR(p.x, p.y, p.r * 1.4 + 10)) continue;
@@ -1133,6 +1290,45 @@ function renderGroundRegion(ctx, rx, ry, rw, rh) {
       const x0 = tx * TILE, y0 = ty * TILE;
       const h = hash2(tx * 7 + 3, ty * 13 + 1);
       const ff = clamp((World.forest[i] - 0.28) / 0.3, 0, 1);
+
+      // --- the Wall: rock walls and glittering snow instead of grass ---
+      if (World.snowy) {
+        if (t === T_CLIFF) {
+          // cracked-rock strata + a snow cap where the wall meets open sky above
+          ctx.strokeStyle = 'rgba(20,22,30,0.5)'; ctx.lineWidth = 1;
+          for (let k = 0; k < 2; k++) {
+            const cy = y0 + 4 + hash2(tx * 9 + k, ty * 5 + k * 3) * (TILE - 6);
+            ctx.beginPath();
+            ctx.moveTo(x0 + 2, cy);
+            ctx.lineTo(x0 + TILE - 2, cy + (h - 0.5) * 6);
+            ctx.stroke();
+          }
+          ctx.fillStyle = 'rgba(90,96,110,0.5)';
+          ctx.beginPath(); ctx.arc(x0 + h * TILE, y0 + hash2(tx, ty * 3) * TILE, 1.6, 0, TAU); ctx.fill();
+          // snow settles on the top lip of the wall
+          if (ty > 0 && World.ter[tIdx(tx, ty - 1)] !== T_CLIFF) {
+            ctx.fillStyle = '#eef4fb';
+            ctx.beginPath();
+            ctx.moveTo(x0, y0 + 5);
+            ctx.quadraticCurveTo(x0 + TILE * 0.5, y0 - 2, x0 + TILE + 1, y0 + 4);
+            ctx.lineTo(x0 + TILE + 1, y0);
+            ctx.lineTo(x0, y0); ctx.closePath(); ctx.fill();
+          }
+        } else if (t === T_GRASS || t === T_FOREST) {
+          // snow glitter — a couple of tiny cold sparkles, an occasional rock nub
+          ctx.fillStyle = 'rgba(255,255,255,0.9)';
+          for (let k = 0; k < 2; k++) {
+            const sxp = x0 + hash2(tx * 13 + k * 7, ty * 5 + k) * TILE;
+            const syp = y0 + hash2(tx * 3 + k, ty * 17 + k * 5) * TILE;
+            ctx.fillRect(sxp, syp, 1.3, 1.3);
+          }
+          if (h > 0.95) {
+            ctx.fillStyle = 'rgba(120,128,140,0.55)';
+            ctx.beginPath(); ctx.ellipse(x0 + h * 20, y0 + 14, 2.4, 1.4, 0, 0, TAU); ctx.fill();
+          }
+        }
+        continue;
+      }
 
       if (t === T_GRASS || t === T_FOREST) {
         // layered grass tufts: a base shadow and fanned two-tone blades
@@ -1753,6 +1949,7 @@ const PROP_DIMS = {
   bush: { w: 32, h: 22 }, log: { w: 34, h: 18 }, mushroom: { w: 18, h: 13 },
   tallgrass: { w: 26, h: 22 }, ribcage: { w: 32, h: 18 }, waterrock: { w: 30, h: 16 },
   skull: { w: 34, h: 24 },
+  cavemouth: { w: 64, h: 52 }, snowdrift: { w: 40, h: 20 },
 };
 const PROP_DRAW = {
   bush(c, s, v) {
@@ -1811,6 +2008,54 @@ const PROP_DRAW = {
       c.beginPath(); c.arc(mx * s - 1.4 * ss, -7 * ss, 0.7 * ss, 0, TAU); c.fill();
       c.beginPath(); c.arc(mx * s + 1.2 * ss, -6.4 * ss, 0.5 * ss, 0, TAU); c.fill();
     }
+  },
+  cavemouth(c, s) {
+    // a dark opening in a snow-capped rock face — shelter from the wind
+    drawShadow(c, 0, 0, 22 * s);
+    // rock shoulders
+    c.fillStyle = '#4a4b55'; c.strokeStyle = '#26272e'; c.lineWidth = 1.4;
+    c.beginPath();
+    c.moveTo(-26 * s, 2 * s);
+    c.quadraticCurveTo(-30 * s, -22 * s, -8 * s, -26 * s);
+    c.quadraticCurveTo(14 * s, -30 * s, 26 * s, -20 * s);
+    c.quadraticCurveTo(32 * s, -6 * s, 26 * s, 2 * s);
+    c.closePath(); c.fill(); c.stroke();
+    // snow cap on the crag
+    c.fillStyle = '#eaf1f8';
+    c.beginPath();
+    c.moveTo(-24 * s, -18 * s);
+    c.quadraticCurveTo(-6 * s, -30 * s, 24 * s, -19 * s);
+    c.quadraticCurveTo(6 * s, -24 * s, -8 * s, -23 * s);
+    c.quadraticCurveTo(-18 * s, -22 * s, -24 * s, -18 * s);
+    c.closePath(); c.fill();
+    // the black mouth
+    c.fillStyle = '#0b0c12';
+    c.beginPath();
+    c.moveTo(-13 * s, 2 * s);
+    c.quadraticCurveTo(-16 * s, -18 * s, 0, -20 * s);
+    c.quadraticCurveTo(16 * s, -18 * s, 13 * s, 2 * s);
+    c.closePath(); c.fill();
+    // a faint inner glow so it reads as depth, not a hole
+    c.fillStyle = 'rgba(90,110,150,0.22)';
+    c.beginPath(); c.ellipse(0, -7 * s, 9 * s, 8 * s, 0, 0, TAU); c.fill();
+  },
+  snowdrift(c, s) {
+    // a soft wind-blown mound of snow with a blue shadow side
+    c.fillStyle = 'rgba(120,140,170,0.28)';
+    c.beginPath(); c.ellipse(2 * s, 1 * s, 18 * s, 5 * s, 0, 0, TAU); c.fill();
+    c.fillStyle = '#e7eef7';
+    c.beginPath();
+    c.moveTo(-18 * s, 0);
+    c.quadraticCurveTo(-10 * s, -10 * s, 2 * s, -9 * s);
+    c.quadraticCurveTo(16 * s, -8 * s, 18 * s, 0);
+    c.closePath(); c.fill();
+    c.fillStyle = '#ffffff';
+    c.beginPath();
+    c.moveTo(-14 * s, -1 * s);
+    c.quadraticCurveTo(-8 * s, -8 * s, 0, -7.5 * s);
+    c.quadraticCurveTo(8 * s, -7 * s, 10 * s, -2 * s);
+    c.quadraticCurveTo(-2 * s, -5 * s, -14 * s, -1 * s);
+    c.closePath(); c.fill();
   },
   tallgrass(c, s) {
     c.fillStyle = 'rgba(30,32,12,0.15)';

@@ -303,6 +303,113 @@ const DINO = {
     },
     tailUp: 0.3, fuzz: true, armScale: 1.4, bigClaws: true, clawWeapon: true, pattern: 'dapple',
   },
+  eshano: {
+    // the Wall's shaggy climber: a VERY unique therizinosaur — held nearly
+    // UPRIGHT on short stumpy legs, chest high, tail low, with short arms
+    // ending in outsized scythe claws. A fat feathered pear on ice-picks.
+    name: 'Eshanosaurus', full: 'Eshanosaurus deleensis', diet: 'herb', biped: true, scale: 0.9,
+    L: { body: [29, 26], tail: [19, 7.5], neckLen: 15, neckAng: 1.3, head: [9.5, 6.2], leg: [14, 6] },
+    col: {
+      top: '#5c6672', mid: '#98a2ac', belly: '#eef2f5', line: '#232830',
+      acc: '#d8e4ec', eye: '#e8c25a', pat: '#3f4854', shade: '#7a848e',
+    },
+    tailUp: 0.1, foreLift: 0.55, fuzz: true, armScale: 0.85, armUp: 0.2, bigClaws: true, clawLen: 12, clawWeapon: true, pattern: 'streak',
+  },
+  jianchang: {
+    // eshano's little cousin: slender, rusty, half-upright — the babies climb
+    name: 'Jianchangosaurus', full: 'Jianchangosaurus yixianensis', diet: 'herb', biped: true, scale: 0.72,
+    L: { body: [26, 16], tail: [24, 5.5], neckLen: 13, neckAng: 0.9, head: [9, 6], leg: [19, 4.5] },
+    col: {
+      top: '#7a4a2e', mid: '#b08054', belly: '#f0e2c8', line: '#31200f',
+      acc: '#e8d8c0', eye: '#e8c25a', pat: '#4a2c18', shade: '#8f6a44',
+    },
+    tailUp: 0.24, foreLift: 0.2, fuzz: true, armScale: 1.05, armUp: 0.1, bigClaws: true, clawLen: 8, clawWeapon: true, pattern: 'mask',
+  },
+  kerbero: {
+    // the polar edmontosaur-alike: huge, flat-headed, crestless — a wall of
+    // warm meat the whole mountain huddles beside (carefully)
+    name: 'Kerberosaurus', full: 'Kerberosaurus manakini', diet: 'herb', biped: true, scale: 1.35,
+    L: { body: [46, 24], tail: [40, 8], neckLen: 15, neckAng: 0.7, head: [15, 8.5], leg: [26, 7] },
+    col: {
+      top: '#4e4a44', mid: '#8a8078', belly: '#e8e2d4', line: '#221e1a',
+      acc: '#b8a890', eye: '#3c3222', pat: '#3a3630', shade: '#6e665e',
+    },
+    tailUp: 0.24, armScale: 1.25, arch: 1, forageQuad: true, tailWeapon: true, duckbill: true, pattern: 'band',
+  },
+  beipiao: {
+    // the shaggiest thing on the mountain: a charcoal therizinosaur wearing
+    // half a snowdrift, scythes tucked high like folded shears
+    name: 'Beipiaosaurus', full: 'Beipiaosaurus inexpectus', diet: 'herb', biped: true, scale: 0.8,
+    L: { body: [27, 20], tail: [18, 6.5], neckLen: 14, neckAng: 1.1, head: [9, 6], leg: [16, 5.5] },
+    col: {
+      top: '#38363c', mid: '#6a6870', belly: '#d8d4d8', line: '#1b191e',
+      acc: '#cfc8bc', eye: '#e8c25a', pat: '#26242a', shade: '#54525a',
+    },
+    tailUp: 0.14, foreLift: 0.35, fuzz: true, armScale: 0.95, armUp: 0.15, bigClaws: true, clawLen: 10, clawWeapon: true, pattern: 'streak',
+  },
+  pectino: {
+    // the scavenger gang: snow-white troodontids with sooty masks — you see
+    // the dark eyes before you see the bird
+    name: 'Pectinodon', full: 'Pectinodon bakkeri', diet: 'carn', biped: true, scale: 0.58,
+    L: { body: [20, 10], tail: [22, 3.6], neckLen: 10, neckAng: 0.75, head: [9, 6], leg: [16, 3.2] },
+    col: {
+      top: '#c8ccd4', mid: '#e8eaee', belly: '#ffffff', line: '#26262c',
+      acc: '#3a3a42', eye: '#e8d878', pat: '#8e929c', shade: '#b8bcc4',
+    },
+    tailUp: 0.32, fuzz: true, plume: true, pattern: 'mask',
+  },
+  nanuq: {
+    // the polar tyrant: a compact white-and-slate TYRANNOSAURID — deep boxy
+    // skull, blunt bone-crushing muzzle, rugose snout, stub arms — a fist in
+    // a fur glove, built on the tarbosaurus pattern
+    name: 'Nanuqsaurus', full: 'Nanuqsaurus hoglundi', diet: 'carn', biped: true, scale: 1.3,
+    L: { body: [50, 24], tail: [50, 9], neckLen: 10, neckAng: 0.35, head: [24, 14], leg: [25, 7.5] },
+    col: {
+      top: '#5a6470', mid: '#c2ccd4', belly: '#f2f4f6', line: '#1e222a',
+      acc: '#8a1f1a', eye: '#e8d878', pat: '#42484f', shade: '#98a2ac',
+    },
+    tailUp: 0.2, fuzz: true, armScale: 0.45, snoutBumps: true,
+    snoutW: 0.42, snoutMidW: 0.55, pattern: 'mask',
+  },
+  titanov: {
+    // the titan-killer: a colossal bone-white theropod with a blood-red blade
+    // crest — the only warm color on the whole mountain, and the last one
+    // most things see. Built long and deep like the carcharodontosaurids
+    name: 'Titanovenator', full: 'Titanovenator gelidus (imagined)', diet: 'carn', biped: true, scale: 1.6,
+    L: { body: [58, 26], tail: [56, 10], neckLen: 12, neckAng: 0.35, head: [25, 13], leg: [27, 8] },
+    col: {
+      top: '#7a8494', mid: '#dfe6ec', belly: '#f8fafc', line: '#1a1e26',
+      acc: '#b8231c', eye: '#e8d878', pat: '#525a66', shade: '#aab4be',
+    },
+    tailUp: 0.2, fuzz: true, fanCrest: 0.85, skullArch: true, pattern: 'streak',
+  },
+  korean: {
+    // the snowball underfoot: a tiny round burrowing ornithopod, all fluff
+    // and nerves — the bottom of every food chain on the mountain
+    name: 'Koreanosaurus', full: 'Koreanosaurus boseongensis', diet: 'herb', biped: false, scale: 0.48,
+    L: { body: [20, 12], tail: [14, 4], neckLen: 8, neckAng: 0.6, head: [8, 5.5], leg: [10, 3] },
+    col: {
+      top: '#8a7a66', mid: '#c4b6a2', belly: '#f4eee2', line: '#2e261c',
+      acc: '#e8dcc8', eye: '#3a2e1e', pat: '#6e6052', shade: '#a89a86',
+    },
+    tailUp: 0.2, fuzz: true, bigEye: 1.35, forageQuad: true, pattern: 'band',
+  },
+  nivalo: {
+    // THE FROZEN GIANT: the mountain's namesake, built to the PE Brachiosaurus
+    // silhouette — towering shoulders on long forelimbs, the back plunging to
+    // low hips, a NEAR-VERTICAL neck, a short high-held tail. A glacier on legs
+    name: 'Nivalotitan', full: 'Nivalotitan vallis (imagined)', diet: 'herb', biped: false, scale: 2.1,
+    // the neck IS the animal: 100 units at neckAng 1.35 rises ~97 — twice
+    // the torso's whole keeled depth, and longer than the body itself.
+    // neckGrow keeps hatchlings stubby; the tower is earned at Full Adult
+    L: { body: [76, 34], tail: [44, 10], neckLen: 100, neckAng: 1.35, head: [13, 8], leg: [34, 11] },
+    col: {
+      top: '#4a5c74', mid: '#9fb4c8', belly: '#eef4fa', line: '#1c2430',
+      acc: '#d8e8f4', eye: '#e8c25a', pat: '#3a4a5e', shade: '#7a90a6',
+    },
+    tailUp: 0.3, neckW: 0.78, neckArc: 0.12, sauroHead: true, beak: false, foreLift: 0.8, chest: 1.2, shFwd: 0.08,
+    neckGrow: true, zoomOut: 0.28, snoutW: 0.42, snoutMidW: 0.56, highBrowse: true, tailWeapon: true, pattern: 'dapple',
+  },
   ovi: {
     // crested egg thief: fast, nosy, first to every carcass
     name: 'Oviraptor', full: 'Oviraptor philoceratops', diet: 'omni', biped: true, scale: 0.72,
@@ -827,7 +934,9 @@ function drawDino(ctx, key, o) {
   // on its hind legs to reach the canopy, easing back down afterwards
   const fl = ((d.foreLift || 0) + (o.rear || 0) * 0.7) * bodyH;
   const hipX = -bodyL * 0.22, hipY = cy + bodyH * 0.16;
-  const shX = bodyL * 0.27, shY = cy + bodyH * 0.18 - fl * 0.62;   // quad front shoulder
+  // quad front shoulder — shFwd lets a species carry its forelimbs further
+  // forward on the body (the brachiosaur front-heavy stance)
+  const shX = bodyL * (0.27 + (d.shFwd || 0)), shY = cy + bodyH * 0.18 - fl * 0.62;
   const neckBase = { x: bodyL * 0.36, y: cy - bodyH * 0.14 - fl * 0.6 };
   // foraging quadrupeds keep a gentler neck bend — the lowered body does the rest
   const hdN = hd * (d.forageQuad ? 0.62 : 1);
@@ -838,7 +947,9 @@ function drawDino(ctx, key, o) {
   if (hu > 0.01) nAng = lerp(nAng, 1.3, hu);
   // idle head scanning: standing animals slowly look around
   nAng += Math.sin(G.time * 0.55 + (o.x || 0) * 0.045) * 0.055 * (1 - move) * (1 - hd);
-  const nl = L.neckLen * s;
+  // neckGrow (nivalotitan): hatchlings carry a proportionally SHORT neck and
+  // grow into the full tower — the 2×-body neck is earned, not hatched with
+  const nl = L.neckLen * s * (d.neckGrow ? 0.55 + 0.45 * g : 1);
   const headC = {
     x: neckBase.x + Math.cos(nAng) * nl + (lunge * 5 + ram * 6) * s,
     y: Math.min(neckBase.y - Math.sin(nAng) * nl + hdN * legLen * 0.85 - ram * 3 * s, -3.5 * s),
@@ -985,12 +1096,15 @@ function drawDino(ctx, key, o) {
     });
   }
   // ornithopods carry an arched back, highest over the hips; foreLift slopes
-  // the whole torso up toward high shoulders instead (the atlasaurus stance)
+  // the whole torso up toward high shoulders instead (the atlasaurus stance);
+  // chest deepens the FRONT of the torso into a brachiosaur keel — the body
+  // is at its thickest right under the high shoulders instead of tapering
   const arch = d.arch || 0;
+  const chest = d.chest || 0;
   pts.push({ x: -bodyL * 0.40, y: cy - bodyH * 0.02 + fl * 0.08, w: bodyH * 0.40 });
-  pts.push({ x: -bodyL * 0.16, y: cy - bodyH * 0.09 * arch - fl * 0.12, w: bodyH * (0.5 + 0.06 * arch) });
-  pts.push({ x: bodyL * 0.14, y: cy - bodyH * 0.02 - fl * 0.36, w: bodyH * (0.47 - 0.04 * arch) });
-  pts.push({ x: bodyL * 0.34, y: cy - bodyH * 0.10 - fl * 0.58, w: bodyH * (0.38 - 0.05 * arch) });
+  pts.push({ x: -bodyL * 0.16, y: cy - bodyH * 0.09 * arch - fl * 0.12, w: bodyH * (0.5 + 0.06 * arch + 0.04 * chest) });
+  pts.push({ x: bodyL * 0.14, y: cy - bodyH * 0.02 - fl * 0.36, w: bodyH * (0.47 - 0.04 * arch + 0.15 * chest) });
+  pts.push({ x: bodyL * 0.34, y: cy - bodyH * 0.10 - fl * 0.58, w: bodyH * (0.38 - 0.05 * arch + 0.24 * chest) });
   // neck
   const nSeg = 3;
   const nW = d.neckW || 1;   // sauropods carry slender necks on huge bodies
@@ -1164,7 +1278,9 @@ function drawDino(ctx, key, o) {
   // ---------------- near limbs & arms ----------------
   drawLeg(hipX, hipY, 0, legLen * 0.42, false, false);
   if (quadNow) drawLeg(shX, shY, Math.PI * 0.55, legLen * 0.36, false, true);
-  else if (d.biped) drawArm(ctx, d, C, { x: bodyL * 0.26, y: cy + bodyH * 0.16, s: s * (d.armScale || 1), lineW, key, ph, move, atk });
+  // the shoulder rides the CHEST: a fore-lifted (upright/rearing) body carries
+  // its arms up with it, and armUp raises the socket further per species
+  else if (d.biped) drawArm(ctx, d, C, { x: bodyL * 0.26, y: cy + bodyH * (0.16 - (d.armUp || 0)) - fl * 0.6, s: s * (d.armScale || 1), lineW, key, ph, move, atk });
 
   ctx.restore();
 }
@@ -1847,8 +1963,13 @@ function drawBodyExtras(ctx, key, d, C, a) {
 // heads: mouth, jaw, teeth/beak, eye, brow, nostril, crests
 // ---------------------------------------------------------------------------
 function drawHead(ctx, key, d, C, a) {
-  const { hPt, hl, hh, s, g, lineW, open, hinge, snout, eyeMul, blink } = a;
+  const { hPt, hl, hh, s, g, lineW, open, hinge, snout, eyeMul, blink, headAng } = a;
   const carn = d.diet === 'carn';
+  // one beak decision for the whole head: herbivores/omnivores wear the
+  // horny sheath — except duckbills, whose spoonbill IS their beak (both at
+  // once looked like a sticker on a bill)
+  const beaked = d.beak !== false && !carn && !d.duckbill;
+  const beakFill = key === 'ornitho' ? C.acc : shade(C.belly, 0.88);
 
   // open-mouth interior
   if (open > 0.06) {
@@ -1873,6 +1994,21 @@ function drawHead(ctx, key, d, C, a) {
     ctx.lineTo(jawTip.x - hl * 0.05, jawTip.y + hh * 0.2);
     ctx.quadraticCurveTo(hinge.x, hinge.y + hh * 0.26, hinge.x - hl * 0.1, hinge.y + hh * 0.14);
     ctx.closePath(); ctx.fill(); ctx.stroke();
+    // a beaked lower jaw keeps its horny tip when the mouth opens — without
+    // this the open jaw was a bare fleshy slab hanging under the beak
+    if (beaked || d.duckbill) {
+      const jm = { x: lerp(hinge.x, jawTip.x, 0.55), y: lerp(hinge.y, jawTip.y, 0.55) };
+      ctx.fillStyle = beaked ? beakFill : shade(C.belly, 0.9);
+      ctx.strokeStyle = C.line;
+      ctx.lineWidth = lineW * 0.7;
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(jm.x, jm.y);
+      ctx.lineTo(jawTip.x, jawTip.y);
+      ctx.lineTo(jawTip.x - hl * 0.05, jawTip.y + hh * 0.2);
+      ctx.lineTo(jm.x - hl * 0.03, jm.y + hh * 0.22);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    }
     // teeth on the upper lip
     if (carn && s > 0.4) {
       ctx.fillStyle = '#f2ead4';
@@ -1926,23 +2062,29 @@ function drawHead(ctx, key, d, C, a) {
     }
   }
 
-  // beak for herbivores / ornithomimus — a snug horny tip on the snout
-  if (d.beak !== false && !carn) {
-    const b0 = hPt(0.5, -0.18), b1 = hPt(0.76, -0.02), b2 = hPt(0.64, 0.18), b3 = hPt(0.48, 0.2);
-    ctx.fillStyle = key === 'ornitho' ? C.acc : shade(C.belly, 0.88);
+  // beak for herbivores / ornithomimus — a horny sheath that CAPS the snout:
+  // it rides the top ridge, wraps PROUD of the tip (its own outline replaces
+  // the snout line there) and tucks back under the chin, so the front of the
+  // mouth genuinely sits inside the beak instead of under a floating patch
+  if (beaked) {
+    const bTop = hPt(0.4, -0.34);                                       // rooted on the ridge
+    const bTip = { x: snout.x + hl * 0.075, y: snout.y - hh * 0.05 };   // just beyond the outline
+    const bChin = hPt(0.48, 0.3);                                       // tucked under the jaw
+    ctx.fillStyle = beakFill;
     ctx.strokeStyle = C.line;
-    ctx.lineWidth = lineW * 0.7;
+    ctx.lineWidth = lineW * 0.75;
+    ctx.lineJoin = 'round';
     ctx.beginPath();
-    ctx.moveTo(b0.x, b0.y);
-    ctx.quadraticCurveTo(b1.x, b1.y - hh * 0.1, b1.x, b1.y);
-    ctx.quadraticCurveTo(b1.x - hl * 0.03, b2.y, b2.x, b2.y);
-    ctx.quadraticCurveTo(lerp(b3.x, b2.x, 0.5), lerp(b3.y, b2.y, 0.5) + hh * 0.03, b3.x, b3.y);
+    ctx.moveTo(bTop.x, bTop.y);
+    ctx.quadraticCurveTo(hPt(0.68, -0.32).x, hPt(0.68, -0.32).y, bTip.x, bTip.y);   // over the ridge, out past the tip
+    ctx.quadraticCurveTo(bTip.x + hl * 0.025, snout.y + hh * 0.2, bChin.x, bChin.y); // the rounded crop-hook tip
+    ctx.quadraticCurveTo(hPt(0.5, 0.0).x, hPt(0.5, 0.0).y, bTop.x, bTop.y);          // inner rim, a soft S back up
     ctx.closePath(); ctx.fill(); ctx.stroke();
-    // nostril on the beak
+    // nostril at the beak's base, where horn meets skin
     ctx.fillStyle = C.line;
-    const bn = hPt(0.56, -0.08);
-    ctx.beginPath(); ctx.ellipse(bn.x, bn.y, hl * 0.022, hh * 0.03, 0.3, 0, TAU); ctx.fill();
-  } else if (!d.sauroHead) {
+    const bn = hPt(0.52, -0.16);
+    ctx.beginPath(); ctx.ellipse(bn.x, bn.y, hl * 0.024, hh * 0.032, 0.3, 0, TAU); ctx.fill();
+  } else if (!d.sauroHead && !d.duckbill) {   // duckbills breathe through the bill
     // carnivore nostril — spinosaurs carry theirs as a slit far back up the
     // snout, almost at the eyes (nostrilBack)
     ctx.fillStyle = C.line;
@@ -2215,6 +2357,33 @@ function drawHead(ctx, key, d, C, a) {
     ctx.quadraticCurveTo(hPt(0.1, -0.52).x, hPt(0.1, -0.52).y, hPt(0.05, -0.5).x, hPt(0.05, -0.5).y);
     ctx.closePath(); ctx.fill();
   }
+  if (key === 'nivalo') {
+    // the titanosauriform badge: ONE smooth nasal dome bulging from the
+    // crown, nostril riding high on its face — the giraffatitan profile.
+    // Fill blends into the head; only the TOP arc gets an outline, so no
+    // stray line ever crosses the face.
+    const dc = hPt(0.24, -0.42);
+    ctx.fillStyle = C.mid;
+    ctx.beginPath();
+    ctx.ellipse(dc.x, dc.y, hl * 0.32, hh * 0.6, headAng, 0, TAU);
+    ctx.fill();
+    ctx.strokeStyle = C.line;
+    ctx.lineWidth = lineW * 0.85;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.ellipse(dc.x, dc.y, hl * 0.32, hh * 0.6, headAng, Math.PI * 1.08, Math.PI * 1.92);
+    ctx.stroke();
+    // nostril high on the dome
+    ctx.fillStyle = C.line;
+    const dn = hPt(0.38, -0.6);
+    ctx.beginPath(); ctx.ellipse(dn.x, dn.y, hl * 0.035, hh * 0.05, 0.4 + headAng, 0, TAU); ctx.fill();
+    // cold light on the dome's crown
+    ctx.strokeStyle = 'rgba(255,250,240,0.4)';
+    ctx.lineWidth = lineW * 0.55;
+    ctx.beginPath();
+    ctx.ellipse(dc.x, dc.y, hl * 0.24, hh * 0.44, headAng, Math.PI * 1.15, Math.PI * 1.6);
+    ctx.stroke();
+  }
   if (key === 'campto') {
     // subtle cheek ridge on the long ornithopod face
     ctx.strokeStyle = 'rgba(34,46,20,0.5)';
@@ -2276,7 +2445,9 @@ function drawHead(ctx, key, d, C, a) {
     ctx.fill();
   }
   if (d.duckbill) {
-    // hadrosaur spoonbill: a wide flat keratin beak capping the snout
+    // hadrosaur spoonbill: a wide flat keratin beak capping the snout.
+    // Anchored to the REAL snout point — fixed head-fractions ended mid-nose
+    // and left the dino's own snout poking out past its bill
     const b0 = hPt(0.24, -0.14);
     ctx.fillStyle = shade(C.belly, 0.9);
     ctx.strokeStyle = C.line;
@@ -2284,9 +2455,9 @@ function drawHead(ctx, key, d, C, a) {
     ctx.lineJoin = 'round';
     ctx.beginPath();
     ctx.moveTo(b0.x, b0.y);
-    ctx.quadraticCurveTo(hPt(0.58, -0.24).x, hPt(0.58, -0.24).y, hPt(0.72, 0.02).x, hPt(0.72, 0.02).y); // top edge, out past the snout
-    ctx.quadraticCurveTo(hPt(0.78, 0.22).x, hPt(0.78, 0.22).y, hPt(0.58, 0.34).x, hPt(0.58, 0.34).y);   // rounded bill tip
-    ctx.quadraticCurveTo(hPt(0.38, 0.38).x, hPt(0.38, 0.38).y, hPt(0.22, 0.3).x, hPt(0.22, 0.3).y);     // lower lip back
+    ctx.quadraticCurveTo(hPt(0.55, -0.26).x, hPt(0.55, -0.26).y, snout.x + hl * 0.08, snout.y - hh * 0.04);          // top edge, out past the snout
+    ctx.quadraticCurveTo(snout.x + hl * 0.13, snout.y + hh * 0.2, snout.x + hl * 0.01, snout.y + hh * 0.34);          // rounded bill tip, proud of the outline
+    ctx.quadraticCurveTo(hPt(0.4, 0.4).x, hPt(0.4, 0.4).y, hPt(0.22, 0.3).x, hPt(0.22, 0.3).y);                       // lower lip back
     ctx.closePath(); ctx.fill(); ctx.stroke();
     // bill nostril + a soft shading line where beak meets face
     ctx.fillStyle = shade(C.mid, 0.55);

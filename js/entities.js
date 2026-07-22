@@ -49,6 +49,20 @@ const PLAYER_DEF = {
   // spino's opposite number: the LAND apex. Every bite is a wound that keeps
   // working (bleedMul) — hit, fall back, let the blood do the rest
   tyranno: { hp: 2000, dmg: 185, speed: 118, sprint: 1.7, reach: 36, atkCd: 0.8, diet: 'carn', bleedBite: true, bleedMul: 1.8, stamMax: 150, eco: 'delta', cost: 500, req: 'omni', growthRate: 0.7, wrestler: true },
+  // ---- THE NIVALOTITAN WALL ----
+  // the mountain's first citizen: an ancient shaggy therizinosaur whose
+  // scythe claws double as ice-picks — it CLIMBS the maze walls, and its
+  // claw swipes open bleeding wounds. Thick coat: the cold bites it slower.
+  eshano: { hp: 1300, dmg: 130, speed: 112, sprint: 1.7, reach: 34, atkCd: 0.9, diet: 'herb', bleedBite: true, stamMax: 160, eco: 'wall', cost: 500, req: 'omni', growthRate: 1.0, climb: true, coldResist: 0.55, earnMul: 1.2 },
+  // the cheap way onto the mountain: small, quick, thin-coated — but its
+  // HATCHLINGS can climb the maze walls. Grow up and the gift is gone.
+  jianchang: { hp: 800, dmg: 95, speed: 128, sprint: 1.8, reach: 28, atkCd: 0.7, diet: 'herb', bleedBite: true, stamMax: 150, eco: 'wall', cost: 250, growthRate: 1.2, babyClimb: true, coldResist: 0.35, earnMul: 1.3 },
+  // THE FROZEN GIANT: not for sale at any price — it joins you only if you
+  // find its cave. The biggest animal in the game; the mountain bears its name
+  nivalo: { hp: 3400, dmg: 200, speed: 70, sprint: 1.35, reach: 52, atkCd: 1.8, diet: 'herb', bleedBite: false, stamMax: 190, eco: 'wall', cost: 0, secret: true, growthRate: 0.5, coldResist: 0.85, earnMul: 1.4, trample: true },
+  // play the KING: the polar tyrant itself — thick-coated, bleed-biting,
+  // and strong enough to wrestle anything on the mountain
+  nanuq: { hp: 2100, dmg: 180, speed: 118, sprint: 1.65, reach: 36, atkCd: 0.9, diet: 'carn', bleedBite: true, stamMax: 160, eco: 'wall', cost: 550, req: 'eshano', growthRate: 0.75, coldResist: 0.7, wrestler: true },
 };
 
 const NPC_DEF = {
@@ -137,6 +151,25 @@ const NPC_DEF = {
   onchop: { hp: 500, dmg: 95, atkCd: 1.2, speed: 175, detect: 230, homeR: 400, reach: 26, biome: 'lake', turn: 3.5, fearless: true, aquatic: true, hunts: ['lepisosteus', 'bassb', 'scutelich'] },
   // the great coelacanth: immensely tanky, strong, and goes exactly nowhere
   mawsonia: { hp: 1600, dmg: 110, atkCd: 1.7, speed: 50, detect: 130, homeR: 220, reach: 32, biome: 'sea', turn: 2.2, fearless: true, tank: true, aquatic: true, bleedable: true, melee: { kb: 240 } },
+  // ---- THE NIVALOTITAN WALL ----
+  // the herd on the snowfields: a huge flat-headed polar edmontosaur-alike.
+  // Warm to huddle beside — until the tail comes around
+  kerbero: { hp: 2200, dmg: 155, atkCd: 2.0, speed: 88, fleeSpeed: 128, detect: 170, homeR: 320, reach: 44, biome: 'plains', turn: 1.7, tank: true, bleedable: true, melee: { kb: 260 } },
+  // the shaggy guardian of the pine belt: plants itself and rakes with
+  // feathered scythe arms — the wounds stay open in the cold
+  beipiao: { hp: 900, dmg: 120, atkCd: 1.6, speed: 75, detect: 130, homeR: 220, reach: 34, biome: 'forest', turn: 1.9, fearless: true, tank: true, bleedable: true, melee: { bleed: { dps: 6, dur: 6 }, kb: 200 } },
+  // the scavenger gang: snow-white troodontids that trail every blizzard,
+  // picking at whatever froze — bold in a pack, gone in a blink alone
+  pectino: { hp: 260, dmg: 55, atkCd: 0.9, speed: 132, fleeSpeed: 148, detect: 220, homeR: 420, reach: 24, biome: 'any', turn: 2.6, patience: 6, packCourage: true },
+  // the king of the Wall: the polar tyrant. Fears nothing, hunts everything,
+  // and the mist is on ITS side
+  nanuq: { hp: 2300, dmg: 190, atkCd: 1.5, speed: 118, detect: 330, homeR: 700, reach: 38, biome: 'any', turn: 1.9, fearless: true, bleedable: true, hunts: ['kerbero', 'pectino', 'beipiao', 'korean'] },
+  // the TITAN-KILLER: one single Titanovenator walks the whole mountain, and
+  // it is the one hunter with no upper size limit — a full-grown nivalotitan
+  // is not safe. Its bite opens wounds that refuse the cold's mercy.
+  titanov: { hp: 2600, dmg: 210, atkCd: 1.7, speed: 108, detect: 380, homeR: 900, reach: 42, biome: 'any', turn: 1.7, fearless: true, bleedable: true, biteBleed: { dps: 14, dur: 9 }, hunts: ['kerbero', 'beipiao'] },
+  // the snowball underfoot: a tiny burrowing ornithopod, everyone's lunch
+  korean: { hp: 200, dmg: 25, atkCd: 1.2, speed: 120, fleeSpeed: 155, detect: 200, homeR: 240, reach: 18, biome: 'forest', turn: 3.5 },
 };
 
 let npcSeq = 1;
@@ -158,13 +191,15 @@ function makeNPC(species, x, y, packId) {
 }
 
 function makePlayer(species, gender, skin) {
-  const nest = World.nests[species];
+  // spawn at the species' own nest, or the world's generic spawn, or dead centre
+  const nest = World.nests[species] || World.nests.spawn || { x: WORLD_W / 2, y: WORLD_H / 2 };
   const def = PLAYER_DEF[species];
   gender = GENDER_MOD[gender] ? gender : 'f';
   skin = SKINS[skin] ? skin : 'default';
   return {
     isPlayer: true, species, gender, skin, x: nest.x, y: nest.y + 6, vx: 0, vy: 0,
     growth: 0.0, hp: def.hp * GENDER_MOD[gender].hp * hpFrac(0), food: 80, water: 80, stamina: def.stamMax, hygiene: 100,
+    cold: 0, frozenT: 0,
     facing: 1, phase: 0, move: 0, pitch: 0,
     atkCd: 0, attackT: 0, headDown: 0, hurtT: 0, actionT: 0, action: null,
     bleed: null, exhausted: false, stage: 'Hatchling',
@@ -317,6 +352,7 @@ function terrainSpeedAt(x, y) {
   if (isWaterPx(x, y)) return 0.55;
   if (isMudPx(x, y)) return 0.72;
   if (isLavaPx(x, y)) return 0.8;   // crossable — at a price
+  if (isCliffPx(x, y)) return 0.5;  // climbing a wall is slow, careful going
   return 1;
 }
 function collideStatics(e, r) {
@@ -359,6 +395,12 @@ function collideStatics(e, r) {
     e.x += Math.cos(a) * 3;
     e.y += Math.sin(a) * 3;
   }
+  // a rock wall is impassable — unless you can climb it (some only as babies)
+  if (isCliffPx(e.x, e.y) && !isClimber(e)) {
+    const a = offCliffDir(e.x, e.y);
+    e.x += Math.cos(a) * 3;
+    e.y += Math.sin(a) * 3;
+  }
   // no animal walks into lava — only the player may dare it (and burn)
   if (!e.isPlayer && isLavaPx(e.x, e.y)) {
     const a = coolDir(e.x, e.y);
@@ -373,6 +415,16 @@ function canSwimDeep(e) {
   const nd = NPC_DEF[e.species];
   if (!nd) return !!PLAYER_DEF[e.species].swim;   // mates & babies swim like their kind
   return !!nd.aquatic || !!nd.swims;
+}
+// who can cross the Wall's rock walls. `climb` = always; `babyClimb` = only
+// while small (a hatchling scrambles up a face its grown parent can't) — the
+// escape-upward trick the son wanted.
+function isClimber(e) {
+  const def = e.isPlayer ? PLAYER_DEF[e.species] : (NPC_DEF[e.species] || PLAYER_DEF[e.species]);
+  if (!def) return false;
+  if (def.climb) return true;
+  if (def.babyClimb) return e.isBaby || (e.growth != null && e.growth < 0.35);
+  return false;
 }
 // direction of the nearest non-deep ground (works for the river and for ponds)
 function shallowDir(x, y) {
@@ -552,6 +604,47 @@ function pounceDist(spd) { return clamp(spd * 1.05, 60, 240); }
 // the landing pin: the pouncing body itself, near ground level — combat AND
 // the H overlay consume this same object (the single-source hitbox rule)
 function pounceLandZone(p) { return { x: p.x + p.facing * 6, y: p.y - 12, r: 14 + 12 * p.growth }; }
+// a bite is a strike ARC, not a floating ring: the jaws start at head height
+// and come DOWN — three stacked circles from jaw-line to shin-line, so tiny
+// prey under a tall predator's chin is genuinely bitable. (Found when an
+// adult Nanuqsaurus could not touch a Koreanosaurus at ANY distance: jaw at
+// height 59, prey spine at 8.) Combat AND the H overlay consume these.
+function biteZones(e) {
+  const wz = weaponPos(e);
+  const h = weaponHeight(e);
+  const r = wz.r + 4;
+  return [
+    { x: wz.x, y: wz.y - h, r },
+    { x: wz.x, y: wz.y - h * 0.55, r: r * 0.9 },
+    { x: wz.x, y: wz.y - h * 0.15, r: r * 0.8 },
+  ];
+}
+// the giant's footprint: everything under a walking Nivalotitan is being
+// stepped on — same single-source rule, the overlay draws exactly this
+function trampleZone(p) {
+  const s = DINO[p.species].scale * sizeScale(p.growth);
+  return { x: p.x, y: p.y - 6, r: DINO[p.species].L.body[0] * 0.42 * s };
+}
+
+// ---- one shared bleed tick, for every wounded thing ----
+// The wound drains hp a sliver per frame (dps · dt ≈ 0.1 hp at 60fps), which
+// is far too small to print — 60 overlapping "-0.1"s a second would be mush.
+// So the slivers pile up in b.acc, and once a second the total floats up as
+// one readable blood-red number. Same trick as a shop rounding up pennies.
+function bleedTick(e, dt) {
+  const b = e.bleed;
+  e.hp -= b.dps * dt;
+  b.t -= dt;
+  b.acc = (b.acc || 0) + b.dps * dt;
+  b.tick = (b.tick == null ? 1 : b.tick) - dt;
+  if (b.tick <= 0 && b.acc >= 1) {
+    floatText(e.x + (Math.random() - 0.5) * 8, e.y - 58, '-' + Math.round(b.acc) + ' 🩸', '#d43a2a');
+    b.acc = 0; b.tick = 1;
+  }
+  // the drip that was already there — now it has a number to go with it
+  if (Math.random() < dt * 6) G.particles.push({ x: e.x + (Math.random() - 0.5) * 10, y: e.y - 10, vx: 0, vy: 20, t: 0, life: 0.5, r: 1.2, color: '#8c1f14', grav: 120 });
+  if (b.t <= 0) e.bleed = null;
+}
 // ---- THE combat circles ----
 // The single source of truth: every hit test below AND the H overlay consume
 // these exact objects. The overlay does no geometry of its own, so what it
@@ -635,15 +728,17 @@ function weaponContact(e, target) {
     if (len > 1 && -dx * (e.facing || 1) / len < 0.7071) return null; // outside ±45° of dead-rear
     return pt;
   }
-  // jaws: the mouth zone must touch the victim's body, and the contact must be
-  // on the jaw side of the attacker — nothing behind the head ever counts
-  const wc = weaponCircle(e);
-  const pt = bodyHitPoint(target, wc.x, wc.y, wc.r);
-  if (!pt) return null;
-  const dirX = e.state === 'lunge' && e.lungeA != null ? Math.cos(e.lungeA) : (e.facing || 1);
-  const dirY = e.state === 'lunge' && e.lungeA != null ? Math.sin(e.lungeA) : 0;
-  if ((pt.x - e.x) * dirX + (pt.y - wc.y) * dirY < -2) return null;
-  return pt;
+  // jaws: the strike ARC must touch the victim's body, and the contact must
+  // be on the jaw side of the attacker — nothing behind the head ever counts
+  for (const wc of (d.clawWeapon ? [weaponCircle(e)] : biteZones(e))) {
+    const pt = bodyHitPoint(target, wc.x, wc.y, wc.r);
+    if (!pt) continue;
+    const dirX = e.state === 'lunge' && e.lungeA != null ? Math.cos(e.lungeA) : (e.facing || 1);
+    const dirY = e.state === 'lunge' && e.lungeA != null ? Math.sin(e.lungeA) : 0;
+    if ((pt.x - e.x) * dirX + (pt.y - wc.y) * dirY < -2) continue;
+    return pt;
+  }
+  return null;
 }
 function tryMelee(e, target, def, opts) {
   if (e.atkCd > 0) return;
@@ -1202,6 +1297,36 @@ const NPC_THINK = {
     thinkFish(e, d);
   },
 };
+// --- the Wall's minds, mapped to the shared archetypes ---
+NPC_THINK.kerbero = thinkTank;          // herd guardian: stands, swings the tail
+NPC_THINK.beipiao = thinkTank;          // planted scythe-armed sentry
+NPC_THINK.pectino = thinkPackHunter;    // blizzard-chasing scavenger gang
+NPC_THINK.nanuq = NPC_THINK.grunos;     // the polar tyrant hunts like the prairie bruiser — everything
+NPC_THINK.korean = thinkSkittish;       // tiny, nervous, delicious
+NPC_THINK.titanov = function (e, d) {
+  // the titan-killer: the ONE hunter with no upper size limit. Where every
+  // other predator learns to leave a grown apex alone, this thing commits —
+  // a full-grown nivalotitan reads as DINNER, not danger. (True hatchlings
+  // below 8% growth are beneath its notice; everyone else is on the menu.)
+  const p = G.player;
+  if (p && p.alive && p.growth > 0.08 && playerVisibleTo(e, d.detect)) {
+    e.state = 'chase'; e.target = p; e.stateT = 6; return;
+  }
+  if (e.aggroT > 0 && e.lastAttacker && e.lastAttacker.isPlayer && p.alive) {
+    e.state = 'chase'; e.target = p; e.stateT = 5; return;
+  }
+  if (e.state !== 'chase' && rnd() < 0.3) {
+    for (const o of G.npcs) {
+      if (d.hunts.includes(o.species) && dist(e.x, e.y, o.x, o.y) < d.detect) {
+        e.state = 'chase'; e.target = o; e.stateT = 6; return;
+      }
+    }
+  }
+  if (e.state === 'chase' && e.target) return;
+  const c = nearestCarcass(e.x, e.y, 300, false);
+  if (c && c.meat > 30) { e.state = 'scavenge'; e.carc = c; e.stateT = 6; return; }
+  defaultWander(e, true);
+};
 
 function defaultWander(e, mayDrink) {
   // let any in-progress state (rally, chase, flee, drink…) run its timer out
@@ -1222,7 +1347,7 @@ function defaultWander(e, mayDrink) {
       const a = rnd() * TAU, rr = rrange(40, d.homeR);
       const tx = e.home.x + Math.cos(a) * rr, ty = e.home.y + Math.sin(a) * rr;
       if (tx < 20 || ty < 20 || tx > WORLD_W - 20 || ty > WORLD_H - 20) continue;
-      if (isDeepPx(tx, ty) || isLavaPx(tx, ty)) continue;
+      if (isDeepPx(tx, ty) || isLavaPx(tx, ty) || isCliffPx(tx, ty)) continue;
       if (d.biome === 'plains' && forestShadePx(tx, ty) > 0.4) continue;
       e.tx = tx; e.ty = ty;
       break;
@@ -1385,10 +1510,7 @@ function updateNPC(e, dt) {
     return;
   }
   if (e.bleed) {
-    e.hp -= e.bleed.dps * dt;
-    e.bleed.t -= dt;
-    if (Math.random() < dt * 6) G.particles.push({ x: e.x + (Math.random() - 0.5) * 10, y: e.y - 10, vx: 0, vy: 20, t: 0, life: 0.5, r: 1.2, color: '#8c1f14', grav: 120 });
-    if (e.bleed.t <= 0) e.bleed = null;
+    bleedTick(e, dt);
     if (e.hp <= 0) {
       floatText(e.x, e.y - 26, DINO[e.species].name + ' bled out', '#d43a2a');
       killNPC(e, e.lastAttacker);
@@ -1895,6 +2017,16 @@ const ECO_SPAWNS = {
     { sp: 'onchop', n: 4, min: 3 },
     { sp: 'mawsonia', n: 2, min: 2 },
   ],
+  // the Nivalotitan Wall — herds to huddle with, gangs to fear, one king…
+  // and ONE titan-killer walking the whole mountain
+  wall: [
+    { sp: 'kerbero', pack: 3, sizes: [4, 3, 4, 2], den: 'plains', min: 9 },
+    { sp: 'beipiao', n: 4, min: 3, away: true },
+    { sp: 'pectino', pack: 3, sizes: [3, 4, 3], min: 8 },
+    { sp: 'korean', n: 8, min: 5 },
+    { sp: 'nanuq', n: 2, min: 2, away: true },
+    { sp: 'titanov', n: 1, min: 1, away: true },
+  ],
 };
 function spawnPosFor(sp, i, biomeOverride) {
   const biome = biomeOverride || NPC_DEF[sp].biome;
@@ -1917,7 +2049,9 @@ function spawnPack(species, count, sizes, den) {
   // hunter packs den near the mud pools; herds (den: 'plains') out on the grass
   for (let pk = 0; pk < count; pk++) {
     let cx, cy;
-    if (den === 'plains') {
+    if (den === 'plains' || !World.mudPools.length) {
+      // herds den on the open grass — and so does everyone on worlds
+      // without mud pools (the Wall has snow where the wallows would be)
       const pp = awayFromNests(randPlainsPos);
       cx = pp.x; cy = pp.y;
     } else {
@@ -1929,7 +2063,7 @@ function spawnPack(species, count, sizes, den) {
       let gx = cx, gy = cy;
       for (let k = 0; k < 12; k++) {
         gx = cx + rrange(-60, 60); gy = cy + rrange(-60, 60);
-        if (!isWaterPx(gx, gy) && !isLavaPx(gx, gy)) break;
+        if (!isWaterPx(gx, gy) && !isLavaPx(gx, gy) && !isCliffPx(gx, gy)) break;
       }
       G.npcs.push(makeNPC(species, clamp(gx, 30, WORLD_W - 30), clamp(gy, 30, WORLD_H - 30), pk + 1));
     }
@@ -1973,10 +2107,7 @@ function updatePlayer(dt) {
 
   // bleed on player
   if (p.bleed) {
-    p.hp -= p.bleed.dps * dt;
-    p.bleed.t -= dt;
-    if (Math.random() < dt * 6) G.particles.push({ x: p.x + (Math.random() - 0.5) * 10, y: p.y - 10, vx: 0, vy: 20, t: 0, life: 0.5, r: 1.2, color: '#8c1f14', grav: 120 });
-    if (p.bleed.t <= 0) p.bleed = null;
+    bleedTick(p, dt);
     if (p.hp <= 0) { killPlayer('blood loss'); return; }
   }
 
@@ -2081,6 +2212,64 @@ function updatePlayer(dt) {
     return;
   }
 
+  // ------ THE COLD (the Nivalotitan Wall only) ------
+  // The mountain drains warmth every second you stand in the open: the cold
+  // bar climbs, and the colder you are the SLOWER you move. At 100 you
+  // freeze solid — locked in place, hp draining — and if you live to thaw,
+  // you come out still half-frozen. Shelter is everything: resting lowers
+  // cold, caves cut the wind, and huddling near other dinos shares warmth.
+  p.coldSlow = 1;
+  if (World.snowy) {
+    // frozen solid: like the stun, the freeze owns the whole frame
+    if (p.frozenT > 0) {
+      p.frozenT -= dt;
+      p.move = lerp(p.move, 0, 0.3);
+      p.hp -= 6 * dt;                          // the cold keeps taking
+      if (p.hp <= 0) { killPlayer('the cold'); return; }
+      if (Math.random() < dt * 5) floatText(p.x + rrange(-10, 10), p.y - 46 - rrange(0, 12), '❄', '#cfeefc');
+      if (p.frozenT <= 0) { p.cold = 68; floatText(p.x, p.y - 50, 'thawed… barely', '#a8dcf0'); }
+      collideStatics(p, 6 + 10 * p.growth);
+      G.prompt = 'FROZEN SOLID — hold on…';
+      return;
+    }
+    const resist = def.coldResist || 0;
+    const cave = caveAt(p.x, p.y);
+    // huddling: any warm body close by slows the wind's work
+    let huddle = 0;
+    for (const e of G.npcs) if (Math.abs(e.x - p.x) < 70 && Math.abs(e.y - p.y) < 70 && !DINO[e.species].fish) huddle++;
+    if (G.mate && Math.abs(G.mate.x - p.x) < 70 && Math.abs(G.mate.y - p.y) < 70) huddle++;
+    if (cave || p.resting) {
+      // shelter: the bar runs backwards (faster curled up inside with company)
+      p.cold = Math.max(0, p.cold - (2.6 + (cave ? 2.6 : 0) + huddle * 0.8) * dt);
+    } else {
+      // exposure: worse up high (north), worse at night, softened by a thick
+      // coat (coldResist), by huddling — and multiplied by a blizzard
+      const alt = 1 + 0.8 * (1 - p.y / WORLD_H);
+      const night = 1 + 0.6 * ((G.day && G.day.nightF) || 0);
+      const storm = G.blizzard && G.blizzard.on ? 3.5 : 1;
+      const shelter = Math.max(0.3, 1 - huddle * 0.35);
+      p.cold = Math.min(100, p.cold + 1.35 * alt * night * storm * shelter * (1 - resist) * dt);
+    }
+    p.coldSlow = 1 - 0.4 * Math.pow(p.cold / 100, 1.3);   // cold legs are slow legs
+    if (p.cold >= 100) {
+      p.frozenT = 5 + rnd() * 3;
+      p.resting = false; p.pounce = null;
+      floatText(p.x, p.y - 52, '❄ FROZEN SOLID ❄', '#eaf6ff');
+      G.banner = { str: 'The cold takes you. Hold on…', t: 3, color: '#a8dcf0' };
+    }
+    // ---- THE SECRET ----
+    // One hidden cave holds the frozen giant the mountain is named for.
+    // Stand before it once, and Nivalotitan is yours forever.
+    if (cave && cave.secret && !Save.owned.nivalo) {
+      Save.owned.nivalo = true;
+      saveSave();
+      G.banner = { str: 'THE FROZEN GIANT… Nivalotitan remembers you. NEW DINOSAUR UNLOCKED!', t: 8, color: '#a8dcf0' };
+      floatText(p.x, p.y - 64, '❄ NIVALOTITAN ❄', '#eaf6ff');
+      G.shake = 5;
+      try { SFX.stage(); } catch (e) { }
+    }
+  }
+
   // ------ resting (R): settle down, heal, let the clock run slow ------
   if (input.rest) {
     input.rest = false;
@@ -2173,10 +2362,14 @@ function updatePlayer(dt) {
           P.phase = 'swing'; P.t = 0.01;
         } else {
           P.phase = 'jump'; P.t = 0.26;
-          const spd = pounceDist(def.speed * genderMod(p).speed) / 0.26;
+          // HIGH POUNCE (the Wall): launched off a rock wall, the leap flies
+          // 1.7× farther and the landing bite hits 1.6× harder — death from above
+          P.high = isCliffPx(p.x, p.y);
+          const spd = pounceDist(def.speed * genderMod(p).speed) * (P.high ? 1.7 : 1) / 0.26;
           P.vx = P.dirX * spd; P.vy = P.dirY * spd;
           if (P.dirX) p.facing = P.dirX > 0 ? 1 : -1;
           p.attackT = 1;
+          if (P.high) floatText(p.x, p.y - 54, '⇓ DEATH FROM ABOVE ⇓', '#eaf6ff');
           SFX.bite();
         }
       }
@@ -2194,6 +2387,7 @@ function updatePlayer(dt) {
         // a leap that lands ON the prey buries you in it — the anti-back-bite
         // side guard would reject the overlap, so the landing bite waives it
         p.landBite = true;
+        p.landBiteMul = P.high ? 1.6 : 1;   // height turns into hurt
       }
     } else {
       // swing: locked in place, the tail scythes on a metronome while held —
@@ -2227,7 +2421,7 @@ function updatePlayer(dt) {
       const curve = def.slowStart ? 0.5 + 0.5 * p.growth : 0.62 + 0.38 * p.growth;
       let terr = terrainSpeedAt(p.x, p.y);
       if (def.swim && isWaterPx(p.x, p.y)) terr = def.swimMul || 1.15;   // a swimmer glides through water
-      let sp = def.speed * genderMod(p).speed * curve * terr;
+      let sp = def.speed * genderMod(p).speed * curve * terr * (p.coldSlow || 1);
       if (input.sprint && !p.exhausted && p.stamina > 0) {
         sp *= def.sprint;
         p.stamina -= 20 * dt;
@@ -2291,7 +2485,8 @@ function updatePlayer(dt) {
   }
 
   // ------ growth ------
-  if (p.food > 25 && p.water > 25 && p.growth < 1) {
+  // a dirty dino doesn't grow: hygiene must stay above 60 (mud baths fix it)
+  if (p.food > 25 && p.water > 25 && p.hygiene > 60 && p.growth < 1) {
     const old = p.growth;
     p.growth = Math.min(1, p.growth + dt / 540 * (def.growthRate || 1));
     checkStage(p, old);
@@ -2327,7 +2522,10 @@ function updatePlayer(dt) {
     // Arm-and-jaw fighters (spinosaurus) strike with BOTH: the bite circle
     // at the snout plus the claw sweep over the chest, so point-blank prey
     // that slips inside the long jaws still catches the arms
-    const zones = [weaponCircle(p)];
+    // biters swing the full strike arc (jaw-line down to shin-line);
+    // tail- and claw-fighters keep their single sweep circle
+    const zones = DINO[p.species].tailWeapon || DINO[p.species].clawWeapon
+      ? [weaponCircle(p)] : biteZones(p);
     if (DINO[p.species].armAndJaw) zones.push(clawArcCircle(p));
     // a pounce PINS what it lands on: the underbody is a contact zone too,
     // down near the ground where the prey actually is — the raised jaw circle
@@ -2356,11 +2554,34 @@ function updatePlayer(dt) {
         const bm = def.bleedMul || 1;
         opts.bleed = { dps: (6 + 8 * p.growth) * bm, dur: 10 * Math.min(1.4, bm) };
       }
-      dealDamage(best, playerDmg() * rrange(0.9, 1.1), p, opts);
+      dealDamage(best, playerDmg() * rrange(0.9, 1.1) * (p.landBiteMul || 1), p, opts);
     }
     p.landBite = false;   // the waiver lasts exactly one bite
+    p.landBiteMul = 1;
   } else {
     input.attack = false;
+  }
+
+  // ------ TRAMPLE (nivalotitan): the footsteps ARE the weapon ------
+  // A walking giant crushes whatever it walks over: anything clearly smaller
+  // caught under the footprint takes a stomp (per-victim cooldown so one
+  // pass = one crush, not a blender). The bigger you've grown, the wider
+  // the footprint — a full adult simply strolls through a raptor pack.
+  if (def.trample && p.growth > 0.3 && (input.left || input.right || input.up || input.down)) {
+    const tz = trampleZone(p);
+    const myS = DINO[p.species].scale * sizeScale(p.growth);
+    for (const e of G.npcs) {
+      if (DINO[e.species].fish || e.packAlpha || e.isBaby || e === G.mate) continue;
+      const es = DINO[e.species].scale * sizeScale(e.growth != null ? e.growth : 1);
+      if (es > myS * 0.75) continue;                       // too big to go under
+      if ((e._trampleCd || 0) > G.time) continue;
+      if (dist(e.x, e.y, tz.x, tz.y) < tz.r + bodyRadius(e) * 0.6) {
+        e._trampleCd = G.time + 1.2;
+        dealDamage(e, playerDmg() * 0.65 * rrange(0.9, 1.1), p, { kb: 340, hitX: e.x, hitY: e.y - 8 });
+        floatText(e.x, e.y - 44, 'TRAMPLED!', '#eaf6ff');
+        G.shake = Math.min(5, G.shake + 1.2);
+      }
+    }
   }
 
   // ------ grab & carry (G): dinner to go ------
@@ -2671,9 +2892,8 @@ function updateBurrow(dt) {
   p.hurtT = Math.max(0, p.hurtT - dt);
   p.restT = Math.max(0, (p.restT || 0) - dt * 2.8);
   if (p.bleed) {
-    p.hp -= p.bleed.dps * dt;
-    p.bleed.t -= dt;
-    if (p.bleed.t <= 0) p.bleed = null;
+    bleedTick(p, dt);
+    if (p.hp <= 0) { killPlayer('blood loss'); return; }
   }
   p.x += p.vx * dt; p.y += p.vy * dt;
   p.vx *= Math.pow(0.02, dt); p.vy *= Math.pow(0.02, dt);
@@ -3004,7 +3224,8 @@ function finishAction(p) {
   // the pack eats when the alpha eats, drinks when the alpha drinks
   if (G.pack && G.pack.length && a.kind !== 'mudinfo') G.packMealT = 2.4;
   const grow = (amt) => {
-    if (p.growth < 1) {
+    // same rule as the passive tick: too dirty = no growth (the meal still feeds)
+    if (p.growth < 1 && p.hygiene > 60) {
       const old = p.growth;
       p.growth = Math.min(1, p.growth + amt * (PLAYER_DEF[p.species].growthRate || 1));
       checkStage(p, old);

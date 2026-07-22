@@ -58,6 +58,10 @@
   .ic-leaf  { background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><path d='M10.2 1.8C5.4 2 2.8 4.8 2.4 9.9 7.4 9.5 9.9 6.8 10.2 1.8Z' fill='%23a2c46a'/><path d='M2.4 9.9C4.4 7.4 6.6 5.3 8.6 3.6' stroke='%236d8846' stroke-width='.7' fill='none'/></svg>"); }
   .ic-water { background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><path d='M6 1.2C6 1.2 2.8 5.6 2.8 7.8a3.2 3.2 0 0 0 6.4 0C9.2 5.6 6 1.2 6 1.2Z' fill='%2378bcd8'/></svg>"); }
   .ic-hyg   { background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><path d='M6 1.2 7.1 4.3 10.2 5.4 7.1 6.5 6 9.6 4.9 6.5 1.8 5.4 4.9 4.3Z' fill='%23c1a2e0'/><circle cx='9.6' cy='9.4' r='1' fill='%23c1a2e0'/></svg>"); }
+  .ic-cold  { background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><path d='M6 0.8v10.4M1.5 3.4l9 5.2M10.5 3.4l-9 5.2M6 0.8 4.6 2.2M6 0.8 7.4 2.2M6 11.2 4.6 9.8M6 11.2 7.4 9.8' stroke='%23a8dcf0' stroke-width='1.1' fill='none' stroke-linecap='round'/></svg>"); }
+  #row-cold { display: none; }
+  #fill-cold { background: linear-gradient(90deg, #7ec8e0, #cfeefc); }
+  #fill-cold.low { background: linear-gradient(90deg, #cfeefc, #ffffff); }
   .bar {
     width: 122px; height: 10px;
     background: rgba(9,6,3,0.85);
@@ -88,6 +92,8 @@
     box-shadow: inset 0 1px 2px rgba(0,0,0,0.65);
   }
   #growth-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #7da34a, #e2b23a); }
+  /* growth stalls while hygiene ≤ 60 — the bar goes muddy until you bathe */
+  #growth-fill.stalled { background: linear-gradient(90deg, #6e5a3c, #8a7350); }
   #growth-pct { font-size: 10px; color: #cdbb92; margin-left: 7px; }
   #growthbox .gr { display: flex; align-items: center; }
 
@@ -493,6 +499,7 @@
   }
   button:hover { background: #6a5433; }
   #pause h2 { font-size: 30px; letter-spacing: 8px; color: #ffe9a0; }
+  #pause-lobby { margin-top: 22px; }
   #help .helpbox {
     background: rgba(24,17,9,0.95); border: 3px solid #57452a; padding: 20px 30px;
   }
@@ -521,6 +528,7 @@
       <div class="statrow"><span class="sicon ic-meat" id="ic-food" title="Food"></span><div class="bar"><div class="fill" id="fill-food"></div></div></div>
       <div class="statrow"><span class="sicon ic-water" title="Water"></span><div class="bar"><div class="fill" id="fill-water"></div></div></div>
       <div class="statrow"><span class="sicon ic-hyg" title="Hygiene"></span><div class="bar"><div class="fill" id="fill-hyg"></div></div></div>
+      <div class="statrow" id="row-cold"><span class="sicon ic-cold" title="Cold — full means frozen"></span><div class="bar"><div class="fill" id="fill-cold"></div></div></div>
     </div>
     <canvas id="minimap" width="120" height="120"></canvas>
     <div id="prompt" style="opacity:0"></div>
@@ -551,7 +559,7 @@
     <div id="ecotabs"></div>
     <div id="title-msg"></div>
     <div id="cards-area"></div>
-    <div class="hint">choose your hatchling · survive from hatchling to full adult · ❖ growths are earned every minute you survive</div>
+    <div class="hint">choose your hatchling · reach FULL ADULT to unlock the next dinosaur · ❖ growths buy skins</div>
   </div>
 
   <div id="death" class="screen hidden">
@@ -563,7 +571,9 @@
     </div>
   </div>
 
-  <div id="pause" class="screen trans hidden"><h2>PAUSED</h2></div>
+  <div id="pause" class="screen trans hidden"><h2>PAUSED</h2>
+    <div><button id="pause-lobby" title="Back to species select — your dino keeps its progress">⌂ LOBBY</button></div>
+  </div>
 
   <div id="help" class="screen trans hidden">
     <div class="helpbox">
@@ -581,10 +591,10 @@
         <tr><td>P / I</td><td>aardiraptor: create a pack / invade a burrow</td></tr>
         <tr><td>H</td><td>hitbox X-ray (red = attack, cyan = body)</td></tr>
         <tr><td>Open jaws!</td><td>a predator pausing with open jaws is about to lunge — sidestep!</td></tr>
-        <tr><td>Stand in mud</td><td>restores hygiene</td></tr>
+        <tr><td>Stand in mud</td><td>restores hygiene — below 60% you stop growing</td></tr>
         <tr><td>Water edge</td><td>drink to restore water</td></tr>
         <tr><td>Grow</td><td>eat &amp; drink well and time will do the rest</td></tr>
-        <tr><td>❖ Growths</td><td>earned every minute alive (+ kill bonus) — spend in the lobby</td></tr>
+        <tr><td>❖ Growths</td><td>earned every minute alive (+ kill bonus) — spend on skins in the lobby</td></tr>
         <tr><td>⌂ Lobby</td><td>swap dinosaur any time; your dino keeps its progress</td></tr>
       </table>
     </div>
