@@ -6,6 +6,10 @@ const PLAYER_DEF = {
   // camptosaurus gets double stamina — endurance is its escape plan
   // (and it earns extra growths, because hard mode should pay)
   campto: { hp: 1100, dmg: 70, speed: 118, sprint: 1.8, reach: 26, atkCd: 0.7, diet: 'herb', bleedBite: false, stamMax: 200, eco: 'valley', cost: 0, earnMul: 1.4 },
+  // the valley's late bloomer: a sauropodomorph built like a brawler — fast,
+  // strong, tail-swinging, with a thumb-claw slash (M) that opens wounds.
+  // Grows agonizingly slowly and eats like a landslide: keep the ferns coming
+  rioja: { hp: 1500, dmg: 120, speed: 122, sprint: 1.7, reach: 34, atkCd: 0.9, diet: 'herb', bleedBite: false, stamMax: 150, eco: 'valley', cost: 0, growthRate: 0.5, foodDrain: 1.7, clawSecond: true },
   // --- Skull Prairie playables (bought with growths) ---
   // the swamp swimmer: crosses deep water no one else can, lives on gar
   ichthyo: { hp: 950, dmg: 105, speed: 110, sprint: 1.7, reach: 30, atkCd: 0.6, diet: 'carn', bleedBite: false, stamMax: 130, eco: 'prairie', cost: 10, swim: true },
@@ -73,6 +77,12 @@ const NPC_DEF = {
   ornitho: { hp: 150, dmg: 0, atkCd: 0, speed: 232, detect: 260, homeR: 420, reach: 0, biome: 'plains', turn: 3.6 },
   scelido: { hp: 520, dmg: 85, atkCd: 1.7, speed: 82, fleeSpeed: 118, detect: 170, homeR: 240, reach: 30, biome: 'any', turn: 2.4, bleedable: true },
   huayango: { hp: 1500, dmg: 110, atkCd: 2.1, speed: 55, detect: 95, homeR: 160, reach: 42, biome: 'forest', turn: 1.6, fearless: true, tank: true, bleedable: true, melee: { bleed: { dps: 7, dur: 8 }, kb: 160 } },
+  // the valley's frail assassin: pathetic raw bite, blazing speed, and a wound
+  // that will NOT close. Fears nothing, sometimes runs in small packs, and its
+  // whole game is the bleed — hit, sprint away, wait it out, hit again. Frail
+  // enough that Moros would crush it in a straight fight, but nothing that
+  // underestimates it walks away clean. lungeMul 2.8 = an explosive dart-in
+  lophos: { hp: 260, dmg: 22, atkCd: 1.0, speed: 214, detect: 300, homeR: 620, reach: 26, biome: 'plains', turn: 3.0, fearless: true, bleedable: true, lungeMul: 2.8, biteBleed: { dps: 15, dur: 10 }, hunts: ['ornitho'] },
   // --- Skull Prairie ---
   troodon: { hp: 150, dmg: 30, atkCd: 0.85, speed: 156, detect: 240, homeR: 300, reach: 22, biome: 'forest', turn: 4.5, patience: 6.5, fears: [['eotyrannus', 170], ['grunos', 150], ['kosmo', 120]] },
   eotyrannus: { hp: 430, dmg: 82, atkCd: 1.1, speed: 208, detect: 310, homeR: 600, reach: 28, biome: 'plains', turn: 2.2, fears: [['kosmo', 130]], hunts: ['troodon'] },
@@ -1045,6 +1055,52 @@ const NPC_THINK = {
     if (c && c.meat > 20) { e.state = 'scavenge'; e.carc = c; e.stateT = 6; return; }
     defaultWander(e, true);
   },
+  lophos(e, d) {
+    // THE HIT-AND-RUN BLEEDER: its bite barely stings, but the wound it opens
+    // won't close — so the tactic is to strike, sprint clear, and wait for the
+    // bleed to lapse before darting back in. It fears nothing (a pack whittles
+    // down animals far too big for it, one cut at a time), but a target that's
+    // already bleeding is left alone until the wound heals.
+    const p = G.player;
+    const bleeding = (t) => t && t.bleed && t.bleed.t > 0.5;
+    // still on a target that's bleeding? break off — sprint clear, then hold at
+    // the edge of sight and WATCH, so the moment the wound closes it can blitz
+    // back in. (Fleeing the whole bleed would carry it off the map and it'd
+    // never return — skulk just out of reach instead.)
+    if (bleeding(e.target) && (e.target.isPlayer ? e.target.alive : e.target.hp > 0)) {
+      const dd = dist(e.x, e.y, e.target.x, e.target.y);
+      // short flee bursts out to ~190px, then circle — staying inside detection
+      // range (300) so it can pounce back the instant the wound closes
+      if (dd < 190) { e.state = 'flee'; e.stateT = 0.5; }
+      else { e.state = 'avoid'; e.stateT = 0.8; }
+      return;
+    }
+    // retaliate against a fresh (non-bleeding) attacker — fearless, no size cap
+    if (e.aggroT > 0 && e.lastAttacker && !bleeding(e.lastAttacker) &&
+      (e.lastAttacker.isPlayer ? p.alive : e.lastAttacker.hp > 0)) {
+      e.state = 'chase'; e.target = e.lastAttacker; e.stateT = 5; return;
+    }
+    // hunt the player at any size it isn't already bleeding — the bleed is what
+    // lets this frail thing punch so far above its weight
+    if (p && p.alive && p.growth > 0.08 && !bleeding(p) && playerVisibleTo(e, d.detect) && (e.tiredT || 0) <= 0) {
+      e.state = 'chase'; e.target = p; e.stateT = 5; return;
+    }
+    // hunt its natural prey (ornithomimus) — but never a target mid-bleed
+    if (e.state !== 'chase' && rnd() < 0.35) {
+      let best = null, bd = d.detect;
+      for (const o of G.npcs) {
+        if (!d.hunts.includes(o.species) || bleeding(o)) continue;
+        const dd = dist(e.x, e.y, o.x, o.y);
+        if (dd < bd) { bd = dd; best = o; }
+      }
+      if (best) { e.state = 'chase'; e.target = best; e.stateT = 6; return; }
+    }
+    if (e.state === 'chase' && e.target) return;
+    if (e.state === 'flee') return;   // let a skulk-retreat run its course
+    const c = nearestCarcass(e.x, e.y, 220, true);
+    if (c && c.meat > 20 && rnd() < 0.4) { e.state = 'scavenge'; e.carc = c; e.stateT = 5; return; }
+    defaultWander(e, true);
+  },
   lepisosteus: thinkFish,
   bassb: thinkFish,
   scutelich: thinkFish,
@@ -1959,6 +2015,7 @@ const ECO_SPAWNS = {
     { sp: 'ornitho', n: 6, min: 5 },
     { sp: 'scelido', n: 4, min: 4, away: true },
     { sp: 'huayango', n: 2, min: 2, away: true },
+    { sp: 'lophos', pack: 2, sizes: [2, 3, 1], min: 4 },   // small loose packs — sometimes a duo, a trio, or a lone hunter
   ],
   prairie: [
     { sp: 'troodon', pack: 3, min: 7 },
@@ -2103,6 +2160,8 @@ function updatePlayer(dt) {
 
   p.atkCd = Math.max(0, p.atkCd - dt);
   p.attackT = Math.max(0, p.attackT - dt * 3.2);
+  p.clawCd = Math.max(0, (p.clawCd || 0) - dt);
+  p.clawT = Math.max(0, (p.clawT || 0) - dt * 3.2);
   p.hurtT = Math.max(0, p.hurtT - dt);
 
   // bleed on player
@@ -2456,7 +2515,8 @@ function updatePlayer(dt) {
 
   // ------ needs decay (resting slows the clock) ------
   const drain = 1 - 0.35 * (p.restT || 0);
-  p.food = Math.max(0, p.food - dt * (100 / 300) * drain);
+  // big eaters (riojasaurus) burn through food faster — keep the ferns coming
+  p.food = Math.max(0, p.food - dt * (100 / 300) * drain * (def.foodDrain || 1));
   p.water = Math.max(0, p.water - dt * (100 / 240) * drain);
   p.hygiene = Math.max(0, p.hygiene - dt * (100 / 420) * drain);
   // mud bath restores hygiene
@@ -2674,6 +2734,44 @@ function updatePlayer(dt) {
   }
   if (p.fishing) G.prompt = 'fishing… hold still — SPACE to strike';
   input.fish = false;
+
+  // ------ claw slash (M) — riojasaurus' second weapon ------
+  // The tail is the main argument; the thumb-claws are the closing one: a
+  // forward slash that opens a bleeding wound. Same M key the wrestlers use —
+  // a species has one M-move or the other, never both.
+  if (def.clawSecond && !p.carry && !p.fishing && p.actionT <= 0 && !p.pounce) {
+    let near = 1e9;
+    for (const e of G.npcs) {
+      if (DINO[e.species].fish || e.packAlpha || e.isBaby || e === G.mate) continue;
+      const dd = dist(p.x, p.y, e.x, e.y);
+      if (dd < near) near = dd;
+    }
+    if (near < 150) G.prompt = (G.prompt ? G.prompt + '    ' : '') + 'M — Claw slash';
+    if (input.wrestle && p.clawCd <= 0) {
+      p.clawCd = 1.15;
+      p.clawT = 1;
+      p.resting = false;
+      p.vx += p.facing * 55;
+      SFX.bite();
+      // the slash is EXACTLY the claw arc the H overlay draws (hitbox-truth)
+      const z = clawArcCircle(p);
+      let best = null, bestPt = null, bd = 1e9;
+      for (const e of G.npcs) {
+        if (e.packAlpha || e.isBaby || e === G.mate) continue;
+        const pt = bodyHitPoint(e, z.x, z.y, z.r);
+        if (!pt) continue;
+        if ((pt.x - p.x) * p.facing < -2) continue;   // front side only
+        const dd = dist(z.x, z.y, pt.x, pt.y);
+        if (dd < bd) { bd = dd; best = e; bestPt = pt; }
+      }
+      if (best) {
+        const opts = { hitX: bestPt.x, hitY: bestPt.y, kb: 70 };
+        if ((NPC_DEF[best.species] || {}).bleedable && p.growth > 0.25)
+          opts.bleed = { dps: 6 + 8 * p.growth, dur: 9 };
+        dealDamage(best, playerDmg() * 0.85 * rrange(0.9, 1.1), p, opts);
+      }
+    }
+  }
 
   // ------ wrestle prompt (M) — an apex carnivore sizing someone up ------
   if (def.wrestler && !G.wrestle && !p.carry && !p.fishing && p.actionT <= 0) {
@@ -2918,7 +3016,7 @@ function updateBurrow(dt) {
   p.pitch = lerp(p.pitch, 0, Math.min(1, dt * 8));
   burrowClampEntity(p, 5 + 6 * p.growth);
   // the clock still runs underground
-  p.food = Math.max(0, p.food - dt * (100 / 300));
+  p.food = Math.max(0, p.food - dt * (100 / 300) * (def.foodDrain || 1));
   p.water = Math.max(0, p.water - dt * (100 / 240));
   p.hygiene = Math.max(0, p.hygiene - dt * (100 / 420));
   if (p.food <= 0) p.hp -= 2.2 * dt;

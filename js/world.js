@@ -295,6 +295,7 @@ function genValley() {
   // --- nests ---
   W.nests.raja = { x: 24 * TILE, y: 36 * TILE };
   W.nests.campto = { x: 92 * TILE, y: 60 * TILE };
+  W.nests.rioja = { x: 30 * TILE, y: 90 * TILE };   // the southern fern shade — a big eater lives by its pantry
 
   // --- vegetation & rocks ---
   for (let ty = 1; ty < HT - 1; ty++) {

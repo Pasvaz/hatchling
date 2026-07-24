@@ -140,6 +140,7 @@ over brown flanks with shining lime leaf-flecks dappled down its back.
 **Playable — Fern Valley**
 - **Rajasaurus narmadensis** — carnivore, hatches in the fern forest. Scavenge and hunt. Bites make big prey bleed: bite, run, wait. (Bleeding is visible on anyone it's happening to — a blood-red **-N 🩸** number floats up every second alongside the drips, yours included.)
 - **Camptosaurus** (master Rajasaurus) — herbivore, hatches on the open plains where Moros hunts. Sprint to the fern forest shade to survive. Hard mode. Earns extra growths.
+- **Riojasaurus incertus** (master Camptosaurus — unlocks alongside Ichthyovenator; mastering either carries the ladder on) — a Triassic sauropodomorph and the valley's best brawler, in the spirit of Prior Extinction's Yunnanosaurus: fast, tough, and armed twice over. SPACE swings a real tail; **M slashes with the great thumb-claws** and the wound **bleeds**. The price of all that muscle: it grows agonizingly slowly and eats enormously — its food bar drains 1.7× faster, so it lives next to its pantry in the southern fern shade.
 
 **Playable — Skull Prairie** (opens when Camptosaurus is mastered)
 - **Ichthyovenator** (unlocked with the land) — sail-backed swimmer from the southern swamp. The only dinosaur that can cross deep water. Hunts gar and thirsty drinkers.
@@ -175,6 +176,7 @@ cornered against the lava. (Nests are always safe ground.)
 - **Ornithomimus** — cowardly runner, eats carcasses, never fights.
 - **Scelidosaurus** — armored. Tail-smacks baby Rajasaurus, flees from grown ones. Sneak up while it drinks.
 - **Huayangosaurus** — 1,500 HP tank with a very short detection range. Its tail causes bleeding. Its head takes double damage.
+- **Lophostropheus** *(a close cousin of Liliensternus)* — frail, blazing fast, and its bite barely stings — but the wound it opens **bleeds ferociously (15/s for 10s)** and won't close. It fears nothing and sometimes runs in small packs; its tactic is hit-and-run — strike, sprint clear, wait for the bleed to lapse, then dart back in. It looks like it can only bully Ornithomimus (Moros would crush it in a fair fight) — but nothing that underestimates it gets away clean. A pack staggers its bites so you never stop bleeding.
 
 **Playable — Coastal Scrubs** (opens when Scutellosaurus is mastered)
 - **Metriacanthosaurus** (unlocked with the land) — a storm-grey hunter built to run down Ugrunaaluk herds. Fast, strong, mean.

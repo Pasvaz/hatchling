@@ -29,6 +29,32 @@ const DINO = {
     },
     tailUp: 0.18, armScale: 1.25, arch: 1, forageQuad: true, pattern: 'dapple',
   },
+  rioja: {
+    // the valley's late bloomer: a Triassic sauropodomorph held half-upright —
+    // long neck, small head, heavy tail, two great thumb-claws. An early
+    // draft of the sauropods that could still throw a punch
+    name: 'Riojasaurus', full: 'Riojasaurus incertus', diet: 'herb', biped: true, scale: 1.2,
+    L: { body: [46, 22], tail: [50, 9], neckLen: 30, neckAng: 0.8, head: [12, 7.5], leg: [22, 8] },
+    col: {
+      top: '#4f6236', mid: '#8a9a5c', belly: '#eee8c8', line: '#252a12',
+      acc: '#d8c890', eye: '#3a2d1a', pat: '#39481f', shade: '#6f7f4a',
+    },
+    tailUp: 0.22, foreLift: 0.3, armScale: 1.15, armUp: 0.1, bigClaws: true, clawLen: 8,
+    armSwipe: true, clawSecond: true, sauroHead: true, beak: false, tailWeapon: true,
+    neckArc: 0.08, pattern: 'band',
+  },
+  lophos: {
+    // the valley's frail assassin: a slender coelophysoid (a close cousin of
+    // Liliensternus) — long legs, whip tail, narrow head, a lean wispy killer.
+    // Charcoal slate with a blood-red flash: a warning nobody heeds in time
+    name: 'Lophostropheus', full: 'Lophostropheus airelensis', diet: 'carn', biped: true, scale: 0.9,
+    L: { body: [36, 14], tail: [46, 6], neckLen: 15, neckAng: 0.62, head: [15, 8], leg: [30, 4.5] },
+    col: {
+      top: '#38363f', mid: '#5f5a60', belly: '#cabfae', line: '#161519',
+      acc: '#c2352a', eye: '#e8c25a', pat: '#242229', shade: '#4a4650',
+    },
+    tailUp: 0.3, fuzz: true, snoutW: 0.22, pattern: 'streak',
+  },
   guanlong: {
     name: 'Guanlong', full: 'Guanlong wucaii', diet: 'carn', biped: true, scale: 0.62,
     L: { body: [26, 13], tail: [30, 5], neckLen: 9, neckAng: 0.5, head: [13, 8.5], leg: [18, 4] },
@@ -1280,7 +1306,9 @@ function drawDino(ctx, key, o) {
   if (quadNow) drawLeg(shX, shY, Math.PI * 0.55, legLen * 0.36, false, true);
   // the shoulder rides the CHEST: a fore-lifted (upright/rearing) body carries
   // its arms up with it, and armUp raises the socket further per species
-  else if (d.biped) drawArm(ctx, d, C, { x: bodyL * 0.26, y: cy + bodyH * (0.16 - (d.armUp || 0)) - fl * 0.6, s: s * (d.armScale || 1), lineW, key, ph, move, atk });
+  // clawSecond species (riojasaurus) swing the tail on SPACE and the arm on M:
+  // the arm swipe listens to its own clock (o.clawT), never the tail's attackT
+  else if (d.biped) drawArm(ctx, d, C, { x: bodyL * 0.26, y: cy + bodyH * (0.16 - (d.armUp || 0)) - fl * 0.6, s: s * (d.armScale || 1), lineW, key, ph, move, atk: d.clawSecond ? (o.clawT || 0) : atk });
 
   ctx.restore();
 }

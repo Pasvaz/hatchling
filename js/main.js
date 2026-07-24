@@ -84,7 +84,9 @@ function ecoPaid(key) { return !ECOS[key].cost || !!Save.ecoPaid[key]; }
 // (❖ still exists, but it only buys skins now — dinos are earned, not bought.)
 const CHAIN = [
   ['raja'], ['campto'],                                        // 🌿 Fern Valley
-  ['ichthyo'], ['qianzho'], ['scutello'],                      // 🦴 Skull Prairie
+  // campto's mastery opens a fork: the prairie's swimmer AND the valley's own
+  // late-bloomer sauropodomorph — master either one to reach qianzhousaurus
+  ['ichthyo', 'rioja'], ['qianzho'], ['scutello'],             // 🦴 Skull Prairie (+ rioja back home)
   ['metria'], ['giganto'], ['crista'],                         // 🌊 Coastal Scrubs
   ['linhe'], ['nothro'],                                       // 🌋 Ashfall Ridge
   ['aardi'], ['centro'], ['omni'], ['eotrach'], ['loki'], ['moro'],
@@ -329,6 +331,7 @@ let titleEco = 'valley';
 const CARD_INFO = {
   raja: { desc: 'A predator hatched in the fern forest. Scavenge carcasses, hunt to eat, and one day even the mighty Huayangosaurus may fear your bite.', tag: '◆ CARNIVORE — MODERATE', tagClass: 'mod' },
   campto: { desc: 'Born on the open plains where Moros intrepidus hunts. Run for the fern forest fast — the shade is your only refuge until you grow. Earns extra growths.', tag: '◆ HERBIVORE — HARD', tagClass: 'hard' },
+  rioja: { desc: 'An ancient sauropodomorph and the valley\'s best brawler: swing the tail, then slash with the thumb-claws (M) to open bleeding wounds. Grows very slowly and eats enormously.', tag: '◆ HERBIVORE — BRAWLER', tagClass: 'mod' },
   ichthyo: { desc: 'A sail-backed fish hunter from the southern swamp. The only dinosaur that can swim across deep water — snap up gar and ambush drinkers at the shore.', tag: '◆ CARNIVORE — SWIMMER', tagClass: 'swim' },
   qianzho: { desc: 'The long-snouted “Pinocchio rex”. It grows slowly — but a full-grown Qianzhousaurus is the fastest, toughest hunter on the whole prairie.', tag: '◆ CARNIVORE — SLOW GROWER', tagClass: 'mod' },
   scutello: { desc: 'A little armored runner. Grows fast, earns lots of growths, and its bony scutes resist bleeding wounds. Watch out for Troodon packs.', tag: '◆ HERBIVORE — EARNER', tagClass: 'hard' },
@@ -669,6 +672,7 @@ for (const id of ['btn-lobby', 'btn-respawn', 'btn-title', 'pause-lobby']) {
 const START_BANNERS = {
   raja: 'You hatch in the fern forest. Grow. Hunt. Survive.',
   campto: 'You hatch on the open plains. Reach the ferns before Moros finds you!',
+  rioja: 'You hatch heavy-boned and hungry. Eat everything — greatness takes time.',
   ichthyo: 'You hatch in the southern swamp. The deep water belongs to you alone.',
   qianzho: 'You hatch on Skull Prairie. Grow slowly — become its fastest hunter.',
   scutello: 'You hatch in armor. Eat, earn, and stay clear of the Troodon packs.',
@@ -1910,7 +1914,7 @@ function drawEntityHitboxes(g, e) {
     // biters: the full strike arc, jaw-line down to shin-line — exactly the
     // circles every bite tests
     for (const wc of biteZones(e)) dbgCircle(g, wc.x, wc.y, wc.r, '#ff5040');
-    if (e.isPlayer && d.armAndJaw) {
+    if (e.isPlayer && (d.armAndJaw || d.clawSecond)) {
       const cc = clawArcCircle(e);
       dbgCircle(g, cc.x, cc.y, cc.r, '#ff5040');
     }
