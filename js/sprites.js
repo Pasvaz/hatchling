@@ -397,6 +397,20 @@ const DINO = {
     tailUp: 0.2, fuzz: true, armScale: 0.45, snoutBumps: true,
     snoutW: 0.42, snoutMidW: 0.55, pattern: 'mask',
   },
+  nivarex: {
+    // the end of the ladder: Tyrannotitan's mountain cousin — the same deep
+    // shark-toothed skull and rugose brow bosses, but bigger, heavier, and
+    // wrapped shoulder-to-tail in a deep brown feather blanket. The largest
+    // carnivore on the whole mountain
+    name: 'Nivarex', full: 'Nivarex carcharodon (imagined)', diet: 'carn', biped: true, scale: 1.7,
+    L: { body: [62, 28], tail: [62, 10.5], neckLen: 12, neckAng: 0.3, head: [28, 14], leg: [27, 8.5] },
+    col: {
+      top: '#4e3a26', mid: '#7a5c3a', belly: '#e8dcc2', line: '#221408',
+      acc: '#c8a86a', eye: '#e8c25a', pat: '#362416', shade: '#63492e',
+    },
+    tailUp: 0.3, fuzz: true, featherCoat: true, armScale: 0.6, browRidge: true, skullArch: true,
+    snoutW: 0.19, snoutMidW: 0.52, pattern: 'stripes',
+  },
   titanov: {
     // the titan-killer: a colossal bone-white theropod with a blood-red blade
     // crest — the only warm color on the whole mountain, and the last one

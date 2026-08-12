@@ -67,6 +67,11 @@ const PLAYER_DEF = {
   // play the KING: the polar tyrant itself — thick-coated, bleed-biting,
   // and strong enough to wrestle anything on the mountain
   nanuq: { hp: 2100, dmg: 180, speed: 118, sprint: 1.65, reach: 36, atkCd: 0.9, diet: 'carn', bleedBite: true, stamMax: 160, eco: 'wall', cost: 550, req: 'eshano', growthRate: 0.75, coldResist: 0.7, wrestler: true },
+  // the END of the ladder: a carcharodontosaurid in a winter coat — bigger
+  // and tankier than its delta cousin, with Tyrannotitan's bleed kit and a
+  // feather blanket so deep even the summit's cold barely reaches it. Slow,
+  // heavy, and built to bring down a Kerberosaurus by itself
+  nivarex: { hp: 2800, dmg: 195, speed: 108, sprint: 1.6, reach: 40, atkCd: 0.9, diet: 'carn', bleedBite: true, bleedMul: 1.8, stamMax: 160, eco: 'wall', cost: 650, req: 'nanuq', growthRate: 0.6, coldResist: 0.9, wrestler: true },
 };
 
 const NPC_DEF = {

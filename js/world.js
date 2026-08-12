@@ -708,6 +708,10 @@ function genWall() {
   for (let ty = sy - 17; ty <= sy - 11; ty++) for (let tx = sx + 19; tx <= sx + 25; tx++) {
     if (tx > 0 && ty > 0 && tx < WT - 1 && ty < HT - 1 && W.ter[tIdx(tx, ty)] === T_CLIFF) W.ter[tIdx(tx, ty)] = T_GRASS;
   }
+  W.nests.nivarex = { x: (sx - 24) * TILE, y: (sy - 20) * TILE };    // the summit apex hatches higher still
+  for (let ty = sy - 23; ty <= sy - 17; ty++) for (let tx = sx - 27; tx <= sx - 21; tx++) {
+    if (tx > 0 && ty > 0 && tx < WT - 1 && ty < HT - 1 && W.ter[tIdx(tx, ty)] === T_CLIFF) W.ter[tIdx(tx, ty)] = T_GRASS;
+  }
   // the little climber never hatches inside a wall either
   for (let ty = sy - 2; ty <= sy + 8; ty++) for (let tx = sx - 20; tx <= sx - 12; tx++) {
     if (tx > 0 && ty > 0 && tx < WT - 1 && ty < HT - 1 && W.ter[tIdx(tx, ty)] === T_CLIFF) W.ter[tIdx(tx, ty)] = T_GRASS;

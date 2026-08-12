@@ -91,7 +91,7 @@ const CHAIN = [
   ['linhe'], ['nothro'],                                       // 🌋 Ashfall Ridge
   ['aardi'], ['centro'], ['omni'], ['eotrach'], ['loki'], ['moro'],
   ['tyranno', 'spino'],                                        // 🐟 Delta finale: choose your apex
-  ['jianchang'], ['eshano'], ['nanuq'],                        // 🏔️ The Wall
+  ['jianchang'], ['eshano'], ['nanuq'], ['nivarex'],           // 🏔️ The Wall
 ];
 function chainRung(sp) { return CHAIN.findIndex(r => r.includes(sp)); }
 // a species is playable if: it's the chain's first rung, the rung before it
@@ -352,6 +352,7 @@ const CARD_INFO = {
   jianchang: { desc: 'Small, quick, thin-coated — but its HATCHLINGS can scale the maze walls to escape anything with teeth. A grown Jianchangosaurus is too heavy for the rock. Use the gift while you have it.', tag: '◆ HERBIVORE — BABY CLIMBER', tagClass: 'hard' },
   nivalo: { desc: 'THE FROZEN GIANT. The mountain bears its name, and it cannot be bought — somewhere in the high maze, a hidden cave remembers it. The largest animal that has ever walked this game.', tag: '◆ HERBIVORE — THE LEGEND', tagClass: 'swim' },
   nanuq: { desc: 'Play the KING. The polar tyrant hunts the whiteout in a fur coat — bleed bites, wrestling strength, and every herd on the mountain knows your silhouette. Only the Titanovenator outranks you.', tag: '◆ CARNIVORE — THE KING', tagClass: 'mod' },
+  nivarex: { desc: 'The last rung of the ladder. A shark-toothed giant in a deep feather blanket — the largest carnivore on the mountain, near-immune to the cold, and heavy enough to bring down a Kerberosaurus alone. Every wound it opens keeps working.', tag: '◆ CARNIVORE — THE SUMMIT', tagClass: 'mod' },
 };
 
 // build tabs and cards once from ECOS / PLAYER_DEF / DINO / CARD_INFO
@@ -692,6 +693,7 @@ const START_BANNERS = {
   jianchang: 'You hatch on the cold rock. Climb while you are small — the wall remembers.',
   eshano: 'You hatch beneath the pines. Strange claws, old blood — the mountain is yours to climb.',
   nanuq: 'You hatch in the snow. Grow quietly; the mountain already has a king.',
+  nivarex: 'You hatch wrapped in feathers. The cold gave up on your kind long ago.',
   nivalo: 'You wake from the ice. The wall was named for you. Remind it why.',
 };
 function startGame(species, gender, skin) {

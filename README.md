@@ -31,7 +31,8 @@ you to curl up or shelter (rarely one shakes loose an **avalanche** you must
 outrun), climbing species scale the walls (Eshanosaurus always;
 Jianchangosaurus only as a hatchling), pouncing off a wall flies farther and
 lands harder, Kerberosaurus herds are warm to huddle beside, and Nanuqsaurus
-rules the whiteout (Jianchangosaurus → Eshanosaurus → Nanuqsaurus). Somewhere
+rules the whiteout (Jianchangosaurus → Eshanosaurus → Nanuqsaurus →
+Nivarex). Somewhere
 in the high maze one hidden cave holds the **frozen giant** the mountain is
 named for — find it, and the biggest animal in the game joins your lobby
 forever, outside the ladder. Every locked card and tab tells you exactly which
@@ -328,6 +329,7 @@ and the hatchlings stay safely below until they emerge as sub-adults.
 - **Nivalotitan** *(imagined — THE SECRET)* — the frozen giant the mountain is named for. It cannot be bought at any price: somewhere in the high north maze, one hidden cave holds it, **visibly asleep inside a slab of old blue ice**, and standing before it once unlocks it forever. The largest animal in the game — a brachiosaur silhouette with towering shoulders and a near-vertical neck, a sweeping tail, near-total cold immunity, the slowest growth there is — and it **TRAMPLES**: anything clearly smaller caught under a walking giant's footprint is simply crushed.
 
 - **Nanuqsaurus** (master Eshanosaurus) — play the KING: the polar tyrant itself. Thick coat (70% cold resistance), bleed bites, wrestling strength — every herd on the mountain knows your silhouette.
+- **Nivarex carcharodon** *(imagined)* (master Nanuqsaurus — the last rung of the whole ladder) — Tyrannotitan's mountain cousin: the same deep shark-toothed skull, but bigger, tankier, and wrapped in a heavy brown feather coat that shrugs off even the summit's EXTREME cold (90% resistance). It keeps the carcharodontosaurid bleed kit — wounds bleed nearly twice as hard and longer — and it is the largest carnivore on the mountain, built to bring down a Kerberosaurus single-handed.
 
 **NPCs — The Nivalotitan Wall**
 - **Kerberosaurus** — the herd: a huge flat-headed polar hadrosaur, Prior-Extinction-Edmontosaurus by silhouette. Warm to huddle beside on the open snowfields — until the tail comes around.
