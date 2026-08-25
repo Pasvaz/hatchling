@@ -233,6 +233,7 @@ window.addEventListener('keydown', (e) => {
   // shortcuts — bookmarks, close-tab — and can't be prevented.)
   if (e.code === 'KeyP') G.input.pounceHold = true;
   if (e.code === 'Escape') {
+    if (Spec.open) { toggleSpecimenHall(); return; }
     if (G.started) { G.paused = !G.paused; document.getElementById('pause').classList.toggle('hidden', !G.paused); }
   }
   if (e.code === 'KeyU') {
@@ -240,6 +241,9 @@ window.addEventListener('keydown', (e) => {
     G.banner = { str: m ? 'Sound muted' : 'Sound on', t: 1.5, color: '#cbb' };
   }
   if (e.code === 'KeyH') G.debugHit = !G.debugHit; // hitbox X-ray
+  // the secret door: type the word "bones" and the Specimen Hall opens
+  G._secret = ((G._secret || '') + (e.key.length === 1 ? e.key.toLowerCase() : '')).slice(-5);
+  if (G._secret === 'bones') { G._secret = ''; toggleSpecimenHall(); }
   if (e.code === 'F1') { e.preventDefault(); document.getElementById('help').classList.toggle('hidden'); }
   if (e.code === 'Tab') document.getElementById('statspanel').classList.toggle('hidden');
   if (e.code === 'KeyY' && G.player && G.player.alive) { // growth cheat for testing
@@ -1925,6 +1929,72 @@ function dbgCircle(g, x, y, r, col) {
   g.fill();
   g.globalAlpha = 1;
 }
+// ---------- THE SPECIMEN HALL (secret: type "bones") ----------
+// Every species in the registry on one scrollable field, drawn by the real
+// drawDino and overlaid by the REAL hit geometry (drawEntityHitboxes — the
+// same objects combat tests). The pose controls exist to torture the
+// geometry: pitch sway proves the circles lean with the art.
+const Spec = { open: false, t: 0, raf: 0 };
+function toggleSpecimenHall() {
+  Spec.open = !Spec.open;
+  document.getElementById('specimen').classList.toggle('hidden', !Spec.open);
+  if (Spec.open && !Spec.wired) {
+    Spec.wired = true;
+    document.getElementById('spec-close').addEventListener('click', toggleSpecimenHall);
+  }
+  if (Spec.open) specimenFrame(); else cancelAnimationFrame(Spec.raf);
+}
+function specimenFrame() {
+  Spec.raf = requestAnimationFrame(specimenFrame);
+  Spec.t += 1 / 60;
+  if (!G.started) G.time += 1 / 60;   // the lobby clock is frozen; breathe anyway
+  const cv = document.getElementById('spec-canvas');
+  const wrap = document.getElementById('spec-scroll');
+  const keys = Object.keys(DINO);
+  const COLS = Math.max(3, Math.floor((wrap.clientWidth || 1200) / 190));
+  const CW = Math.floor((wrap.clientWidth || 1200) / COLS), CH = 170;
+  const rows = Math.ceil(keys.length / COLS);
+  if (cv.width !== CW * COLS || cv.height !== rows * CH) { cv.width = CW * COLS; cv.height = rows * CH; }
+  const g = cv.getContext('2d');
+  g.fillStyle = '#141a16';
+  g.fillRect(0, 0, cv.width, cv.height);
+  const growth = parseFloat(document.getElementById('spec-growth').value);
+  const pose = document.getElementById('spec-pose').value;
+  const flip = document.getElementById('spec-flip').checked;
+  keys.forEach((sp, i) => {
+    const d = DINO[sp];
+    const col = i % COLS, row = (i / COLS) | 0;
+    const cx = col * CW + CW / 2, cy = row * CH + CH - 42;
+    // one fake specimen, posed by the controls — same fields the game uses
+    const ent = {
+      species: sp, x: 0, y: 0, growth,
+      facing: flip && Math.sin(Spec.t * 0.35 + i * 1.7) < 0 ? -1 : 1,
+      move: pose === 'walk' ? 1 : pose === 'run' ? 1 : 0,
+      run: pose === 'run' ? 1 : 0,
+      phase: (pose === 'walk' || pose === 'run') ? Spec.t * (pose === 'run' ? 11 : 6) : 0,
+      pitch: pose === 'pitch' ? Math.sin(Spec.t * 0.9 + i) * 0.45 : 0,
+      hurtT: 0, attackT: 0, headDown: 0,
+    };
+    // fit the cell: shrink giants, never inflate the tiny
+    const span = (d.L.body[0] + d.L.tail[0] + d.L.neckLen + d.L.head[0]) * d.scale * sizeScale(growth);
+    const k = Math.min(1, (CW - 26) / (span * 1.35), (CH - 50) / ((d.L.leg[0] + d.L.body[1] + d.L.neckLen * Math.abs(Math.sin(d.L.neckAng)) + 24) * d.scale * sizeScale(growth) * 1.5));
+    g.save();
+    g.translate(cx, cy);
+    g.scale(k, k);
+    // the ground line the anchor stands on
+    g.strokeStyle = 'rgba(160,170,150,0.25)';
+    g.beginPath(); g.moveTo(-CW / 2 / k, 0); g.lineTo(CW / 2 / k, 0); g.stroke();
+    drawDino(g, sp, ent);
+    drawEntityHitboxes(g, ent);
+    g.restore();
+    g.fillStyle = '#cdbb92';
+    g.font = '10px monospace';
+    g.textAlign = 'center';
+    g.fillText(d.name + (d.fish ? ' (fish)' : ''), cx, row * CH + CH - 8);
+    g.textAlign = 'left';
+  });
+}
+
 function drawEntityHitboxes(g, e) {
   const d = DINO[e.species];
   if (!d) return;

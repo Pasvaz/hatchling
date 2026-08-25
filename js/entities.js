@@ -689,10 +689,13 @@ function biteZones(e) {
   const h = weaponHeight(e);
   const r = wz.r + 4;
   return [
-    { x: wz.x, y: wz.y - h, r },
-    { x: wz.x, y: wz.y - h * 0.55, r: r * 0.9 },
-    { x: wz.x, y: wz.y - h * 0.15, r: r * 0.8 },
-  ];
+    [wz.y - h, r],
+    [wz.y - h * 0.55, r * 0.9],
+    [wz.y - h * 0.15, r * 0.8],
+  ].map(([y, rr]) => {
+    const pt = pitchPoint(e, wz.x - e.x, y - e.y);
+    return { x: pt.x, y: pt.y, r: rr };
+  });
 }
 // the giant's footprint: everything under a walking Nivalotitan is being
 // stepped on — same single-source rule, the overlay draws exactly this
@@ -724,13 +727,32 @@ function bleedTick(e, dt) {
 // The single source of truth: every hit test below AND the H overlay consume
 // these exact objects. The overlay does no geometry of its own, so what it
 // draws cannot drift from what combat tests — same function, same numbers.
+// ---- the pitch transform: drawDino tips the whole body around its centre
+// of mass (translate cy · rotate pitch · translate -cy, inside the facing
+// mirror). Every piece of hit geometry runs its offsets through this SAME
+// transform, so the circles lean exactly as far as the art does.
+function pitchPoint(e, offX, offY) {
+  const p = e.pitch || 0;
+  if (!p) return { x: e.x + offX, y: e.y + offY };
+  const d = DINO[e.species];
+  const s = d.scale * sizeScale(e.growth != null ? e.growth : 1) * genderMod(e).size;
+  const f = e.facing || 1;
+  const cy = -(d.L.leg[0] + d.L.body[1] * 0.42) * s;   // the draw's rotation pivot
+  const lx = offX * f, dy = offY - cy;                 // into body-local space
+  const cos = Math.cos(p), sin = Math.sin(p);
+  return {
+    x: e.x + (lx * cos - dy * sin) * f,
+    y: e.y + cy + (lx * sin + dy * cos),
+  };
+}
 function bodyCircles(victim) {
   const d = DINO[victim.species];
   const s = d.scale * sizeScale(victim.growth != null ? victim.growth : 1) * genderMod(victim).size;
   const f = victim.facing || 1;
   const out = [];
   for (const z of hitZonesOf(d)) {
-    out.push({ x: victim.x + f * z.dx * s, y: victim.y + (z.dy || 0) * s - (z.dz || 0) * s, r: z.r * s, part: z.part });
+    const pt = pitchPoint(victim, f * z.dx * s, ((z.dy || 0) - (z.dz || 0)) * s);
+    out.push({ x: pt.x, y: pt.y, r: z.r * s, part: z.part });
   }
   return out;
 }
@@ -738,34 +760,30 @@ function bodyCircles(victim) {
 // smack) — contact pad included, so drawn radius = tested radius
 function weaponCircle(e) {
   const wz = weaponPos(e);
-  return { x: wz.x, y: wz.y - weaponHeight(e), r: wz.r + 4 };
+  const pt = pitchPoint(e, wz.x - e.x, wz.y - weaponHeight(e) - e.y);
+  return { x: pt.x, y: pt.y, r: wz.r + 4 };
 }
 // an NPC tail swing: this circle, restricted to ±45° of dead-rear
 function tailWedgeCircle(e) {
   const d = DINO[e.species];
   const s = d.scale * sizeScale(e.growth != null ? e.growth : 1) * genderMod(e).size;
-  return { x: e.x, y: e.y - weaponHeight(e), r: (d.L.body[0] * 0.42 + d.L.tail[0] * 0.9) * s };
+  const pt = pitchPoint(e, 0, -weaponHeight(e));
+  return { x: pt.x, y: pt.y, r: (d.L.body[0] * 0.42 + d.L.tail[0] * 0.9) * s };
 }
 // the nip jaws of tail-fighters that can ALSO bite (wuerhosaurus)
 function nipCircle(e) {
   const d = DINO[e.species];
   const s = d.scale * sizeScale(e.growth != null ? e.growth : 1) * genderMod(e).size;
   const hl = d.L.head[0] * s;
-  return {
-    x: e.x + (e.facing || 1) * (snoutLen(d, s) - hl * 0.25),
-    y: e.y - zoneHeights(d).head * s,
-    r: Math.max(5, hl * 0.5) + 4,
-  };
+  const pt = pitchPoint(e, (e.facing || 1) * (snoutLen(d, s) - hl * 0.25), -zoneHeights(d).head * s);
+  return { x: pt.x, y: pt.y, r: Math.max(5, hl * 0.5) + 4 };
 }
 // spinosaurus' second strike: the claw sweep arcing over the chest
 function clawArcCircle(e) {
   const d = DINO[e.species];
   const s = d.scale * sizeScale(e.growth != null ? e.growth : 1) * genderMod(e).size;
-  return {
-    x: e.x + (e.facing || 1) * d.L.body[0] * 0.28 * s,
-    y: e.y - zoneHeights(d).spine * s,
-    r: Math.max(8, d.L.body[1] * 0.5 * s) + 4,
-  };
+  const pt = pitchPoint(e, (e.facing || 1) * d.L.body[0] * 0.28 * s, -zoneHeights(d).spine * s);
+  return { x: pt.x, y: pt.y, r: Math.max(8, d.L.body[1] * 0.5 * s) + 4 };
 }
 // the nearest point where the circle (x,y,r) touches any of the victim's
 // body circles — null if it touches none. Any part of the body counts.

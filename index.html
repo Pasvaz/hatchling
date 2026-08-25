@@ -586,6 +586,29 @@
     <div><button id="pause-lobby" title="Back to species select — your dino keeps its progress">⌂ LOBBY</button></div>
   </div>
 
+  <!-- THE SPECIMEN HALL — a secret validation page (type "bones" to open):
+       every species in the game on one field, hitboxes overlaid, posed by
+       the controls so the circles can be checked against the art -->
+  <div id="specimen" class="screen hidden" style="z-index:20; justify-content:flex-start; padding:10px 0;">
+    <div id="spec-bar" style="display:flex; gap:18px; align-items:center; margin-bottom:8px; font-size:11px; letter-spacing:1px; color:#cdbb92;">
+      <b style="color:#ffe9a0; letter-spacing:3px;">SPECIMEN HALL</b>
+      <label>growth <input id="spec-growth" type="range" min="0" max="1" step="0.05" value="1" style="vertical-align:middle;"></label>
+      <label>pose
+        <select id="spec-pose" style="font-family:inherit; background:#2c2113; color:#f5e9c8; border:1px solid #57452a;">
+          <option value="pitch" selected>pitch sway</option>
+          <option value="stand">stand</option>
+          <option value="walk">walk</option>
+          <option value="run">run</option>
+        </select>
+      </label>
+      <label><input id="spec-flip" type="checkbox" checked> auto-flip facing</label>
+      <button id="spec-close" style="padding:4px 12px; font-size:11px;">✕ CLOSE</button>
+    </div>
+    <div id="spec-scroll" style="overflow-y:auto; width:96vw; max-height:86vh; border:1px solid #57452a; background:#141a16;">
+      <canvas id="spec-canvas"></canvas>
+    </div>
+  </div>
+
   <div id="help" class="screen trans hidden">
     <div class="helpbox">
       <h3>HOW TO SURVIVE</h3>
