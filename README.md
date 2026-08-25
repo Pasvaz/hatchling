@@ -23,7 +23,7 @@ land itself is trying to kill you (Linheraptor → Nothronychus), the
 **Lertentous Delta** — a map FOUR TIMES the size of any other, where one great
 river braids into four channels on its way to a drowned southern sea
 (Aardiraptor → Centrosaurus → Omniraptor → Eotrachodon → Lokiceratops →
-Morosaurus, then a **choice of apex**: master Tyrannotitan OR Spinosaurus —
+Morosaurus, then a **choice of apex**: master Tyrannotitan OR Sigilmassasaurus —
 both unlock together, either one opens the endgame), and finally
 **The Nivalotitan Wall** — a misty mountain built as a CLIMBING MAZE of rock
 walls, where a **COLD bar** ticks toward freezing solid, **blizzards** force
@@ -234,7 +234,7 @@ them: every fish in the game lives here, plus two of its own — and to
 sun-glades where orchid drifts bloom; reeds line every bank and ferns carpet
 the understory.
 
-**Fishing (F).** Spinosaurids (Spinosaurus, Cristatusaurus) at the water's
+**Fishing (F).** Spinosaurids (Sigilmassasaurus, Cristatusaurus) at the water's
 edge get a second prompt: *F — go fishing*. You crouch dead-still at the
 waterside and the fish, seeing no danger, drift slowly closer — they take
 their time deciding. When one is close, SPACE one-shots it: an easy meal.
@@ -267,7 +267,7 @@ on purpose). G again drops it (still edible, and its rot pauses while
 carried); **E swallows** what you hold — head thrown back, jaws snapping as
 it goes down.
 
-**Wrestling (M).** Apex carnivores (Spinosaurus maroccanus, Tyrannotitan) can
+**Wrestling (M).** Apex carnivores (Sigilmassasaurus, Tyrannotitan) can
 wrestle any land dinosaur near their own bulk: the prey is clamped neck-and-
 body in your jaws while five keys flash up — press each in time and the fifth
 is the **SLAM** (heavy damage, long stun). The bigger the opponent, the less
@@ -307,8 +307,8 @@ and the hatchlings stay safely below until they emerge as sub-adults.
 - **Eotrachodon** (master Omniraptor) — the oldest duckbill: tough and hardy, resists bleeding, swings a real hadrosaur tail. Earns extra.
 - **Lokiceratops** (master Eotrachodon) — Centrosaurus but cooler: midnight coat, golden blade horns, more of everything.
 - **Morosaurus** (master Lokiceratops) — **the sauropod.** Grows agonizingly slowly; a full adult swings a whip tail, shrugs off nearly everything, and fears exactly one animal in the delta (see below).
-- **Spinosaurus maroccanus** (master Morosaurus — then Tyrannotitan and Spinosaurus unlock TOGETHER: choose your apex, and mastering either opens the Wall) — the end of the spinosaurid road (Ichthyovenator → Cristatusaurus → this), built to its Prior Extinction likeness: an **M-shaped sail**, a throat **dewlap**, an upward-arcing neck, and a skull all its own (nasal crest, rosette snout, interlocking croc teeth, slit nostrils set far back). It attacks with **jaws AND clawed arms together** — point-blank prey inside the long snout still catches the swipe — and its **Wet Wrath** makes it hit 1.2× harder standing in water (and 15% softer on dry land). The fastest swimmer in the game; at adult, the undisputed apex of the water. Getting there is the whole game.
-- **Tyrannotitan** (the other half of the apex choice) — Spinosaurus' opposite number: the LAND apex. A lesser-sung carcharodontosaurid with the deep shark-toothed skull and heavy brow bosses of its famous cousin, and a **bleed-based** kit — its wounds bleed nearly twice as hard and longer. Hit, fall back, and let the blood do the rest.
+- **Sigilmassasaurus** (master Morosaurus — then Tyrannotitan and Sigilmassasaurus unlock TOGETHER: choose your apex, and mastering either opens the Wall) — the end of the spinosaurid road (Ichthyovenator → Cristatusaurus → this), built to its Prior Extinction likeness: an **M-shaped sail**, a throat **dewlap**, an upward-arcing neck, and a skull all its own (nasal crest, rosette snout, interlocking croc teeth, slit nostrils set far back). It attacks with **jaws AND clawed arms together** — point-blank prey inside the long snout still catches the swipe — and its **Wet Wrath** makes it hit 1.2× harder standing in water (and 15% softer on dry land). The fastest swimmer in the game; at adult, the undisputed apex of the water. Getting there is the whole game.
+- **Tyrannotitan** (the other half of the apex choice) — Sigilmassasaurus' opposite number: the LAND apex. A lesser-sung carcharodontosaurid with the deep shark-toothed skull and heavy brow bosses of its famous cousin, and a **bleed-based** kit — its wounds bleed nearly twice as hard and longer. Hit, fall back, and let the blood do the rest.
 
 **NPCs — Lertentous Delta**
 - **Magnapaulia** — a giant hadrosaur that defends its herd *vigorously*: strike one and the whole river bank swings back.
@@ -327,7 +327,7 @@ and the hatchlings stay safely below until they emerge as sub-adults.
 - **Mawsonia** *(fish)* — the greatest coelacanth that ever lived: immensely tanky, strong, and it never, ever flees.
 - …plus **Lepisosteus**, **Black-back Bass**, **Herrietopus** and **Scutelocephalichthyus** — every fish in the game swims the delta.
 
-**Playable — The Nivalotitan Wall** (opens when Tyrannotitan OR Spinosaurus is mastered)
+**Playable — The Nivalotitan Wall** (opens when Tyrannotitan OR Sigilmassasaurus is mastered)
 - **Jianchangosaurus** (unlocked with the land) — the cheap way onto the mountain: a small rusty therizinosaur, quick and thin-coated. Its **hatchlings can climb** the maze walls to escape anything with teeth — a grown one is too heavy for the rock. Use the gift while you have it.
 - **Eshanosaurus** (master Jianchangosaurus) — the oldest therizinosaur, held nearly upright on stumpy legs, short high arms ending in great scythes. Thick-coated (55% cold resistance), claw wounds bleed, and it is the ONLY grown dino that climbs the Wall — the whole maze is its road, and every wall-top a pounce perch.
 - **Nivalotitan** *(imagined — THE SECRET)* — the frozen giant the mountain is named for. It cannot be bought at any price: somewhere in the high north maze, one hidden cave holds it, **visibly asleep inside a slab of old blue ice**, and standing before it once unlocks it forever. The largest animal in the game — a brachiosaur silhouette with towering shoulders and a near-vertical neck, a sweeping tail, near-total cold immunity, the slowest growth there is — and it **TRAMPLES**: anything clearly smaller caught under a walking giant's footprint is simply crushed.

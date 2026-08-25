@@ -226,4 +226,9 @@ const VOICE = {
   sarco:     { style: 'shriek',  f: 340, rasp: 0.3 },                 // the bone-breaker's cry
   drypto:    { style: 'roar',    f: 125, rasp: 0.6 },                 // the long tyrant, low and dry
   gastonia:  { style: 'bellow',  f: 120, rasp: 0.3 },                 // armor with lungs
+  buitre:    { style: 'chatter', f: 470, rasp: 0.15 },                // a wader's clattering rattle
+  hypsi:     { style: 'chatter', f: 540 },                            // thin panic-peeps
+  adratik:   { style: 'bellow',  f: 128, rasp: 0.25 },                // a low wall clearing its throat
+  orkor:     { style: 'shriek',  f: 240, rasp: 0.45 },                // the hook-handed scream
+  neove:     { style: 'roar',    f: 165, rasp: 0.55 },                // the quiet apex, finally loud
 };

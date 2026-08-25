@@ -216,7 +216,7 @@ const DINO = {
   },
   ugru: {
     // medium hadrosaur: herd animal with a heavyweight tail swing
-    name: 'Ugrunaaluk', full: 'Ugrunaaluk kuukpikensis', diet: 'herb', biped: true, scale: 1.0,
+    name: 'Ugrunaaluk', full: 'Ugrunaaluk kuukpikensis', diet: 'herb', biped: false, scale: 1.0,
     L: { body: [46, 26], tail: [46, 10], neckLen: 13, neckAng: 0.45, head: [19.5, 10], leg: [23, 6.5] },
     col: {
       top: '#4e5a2e', mid: '#7e8a48', belly: '#e2ddb0', line: '#1e2610',
@@ -226,7 +226,7 @@ const DINO = {
   },
   charono: {
     // huge tube-crested hadrosaur: lord of the beach, too big for crocodiles
-    name: 'Charonosaurus', full: 'Charonosaurus jiayinensis', diet: 'herb', biped: true, scale: 1.4,
+    name: 'Charonosaurus', full: 'Charonosaurus jiayinensis', diet: 'herb', biped: false, scale: 1.4,
     L: { body: [56, 30], tail: [52, 11], neckLen: 13, neckAng: 0.5, head: [19, 10], leg: [26, 8] },
     col: {
       top: '#4c525e', mid: '#7c828e', belly: '#e5e2d0', line: '#1e222b',
@@ -354,7 +354,7 @@ const DINO = {
   kerbero: {
     // the polar edmontosaur-alike: huge, flat-headed, crestless — a wall of
     // warm meat the whole mountain huddles beside (carefully)
-    name: 'Kerberosaurus', full: 'Kerberosaurus manakini', diet: 'herb', biped: true, scale: 1.35,
+    name: 'Kerberosaurus', full: 'Kerberosaurus manakini', diet: 'herb', biped: false, scale: 1.35,
     L: { body: [46, 24], tail: [40, 8], neckLen: 15, neckAng: 0.7, head: [15, 8.5], leg: [26, 7] },
     col: {
       top: '#4e4a44', mid: '#8a8078', belly: '#e8e2d4', line: '#221e1a',
@@ -476,15 +476,15 @@ const DINO = {
     tailUp: 0.2, frill: true, headButt: true, paddleTail: true, forageQuad: true, pattern: 'band',
   },
   sarco: {
-    // the bone-breaker: a lean early ceratosaur, crested snout, all sinew —
-    // built light so the hammer-hit surprises
+    // the bone-breaker: a true ceratosaurid — deep barrel body slung LOW on
+    // short heavy legs, a long skull, and the little paired horn bosses
     name: 'Sarcosaurus', full: 'Sarcosaurus woodi', diet: 'carn', biped: true, scale: 0.95,
-    L: { body: [40, 19], tail: [42, 7.5], neckLen: 10, neckAng: 0.45, head: [17, 11], leg: [21, 6] },
+    L: { body: [41, 23], tail: [46, 9], neckLen: 9, neckAng: 0.3, head: [21, 13], leg: [16.5, 6.5] },
     col: {
       top: '#5e5448', mid: '#8a7c68', belly: '#e0d6bc', line: '#241e14',
       acc: '#b8543a', eye: '#e8c25a', pat: '#453c30', shade: '#726656',
     },
-    tailUp: 0.3, snoutBumps: true, pattern: 'stripes',
+    tailUp: 0.3, ceratoHorns: true, snoutW: 0.3, snoutMidW: 0.52, pattern: 'stripes',
   },
   drypto: {
     // the long tyrant: everything about it STRETCHED — a low lengthened
@@ -523,7 +523,7 @@ const DINO = {
   },
   telmato: {
     // the marsh dwarf: a small plain crestless hadrosaur, herd prey
-    name: 'Telmatosaurus', full: 'Telmatosaurus transsylvanicus', diet: 'herb', biped: true, scale: 0.85,
+    name: 'Telmatosaurus', full: 'Telmatosaurus transsylvanicus', diet: 'herb', biped: false, scale: 0.85,
     L: { body: [40, 22], tail: [38, 8.5], neckLen: 11, neckAng: 0.45, head: [16, 9], leg: [19, 5.5] },
     col: {
       top: '#5a6050', mid: '#868c74', belly: '#e0dcc4', line: '#242a1e',
@@ -533,7 +533,7 @@ const DINO = {
   },
   tanius: {
     // the flat-head: a sturdy plain heavyweight of the herds
-    name: 'Tanius', full: 'Tanius sinensis', diet: 'herb', biped: true, scale: 1.1,
+    name: 'Tanius', full: 'Tanius sinensis', diet: 'herb', biped: false, scale: 1.1,
     L: { body: [48, 27], tail: [46, 10], neckLen: 12, neckAng: 0.45, head: [19, 9.5], leg: [24, 7] },
     col: {
       top: '#4e5446', mid: '#7a8068', belly: '#dedac0', line: '#1e2418',
@@ -543,7 +543,7 @@ const DINO = {
   },
   secerno: {
     // the separated one: a mid duckbill wandering far from every kin
-    name: 'Secernosaurus', full: 'Secernosaurus koerneri', diet: 'herb', biped: true, scale: 0.95,
+    name: 'Secernosaurus', full: 'Secernosaurus koerneri', diet: 'herb', biped: false, scale: 0.95,
     L: { body: [44, 24], tail: [42, 9], neckLen: 12, neckAng: 0.45, head: [17, 9], leg: [21, 6] },
     col: {
       top: '#5c5648', mid: '#8a8168', belly: '#e4dec2', line: '#26221a',
@@ -675,7 +675,7 @@ const DINO = {
   // ---------------- LERTENTOUS DELTA ----------------
   magnapaulia: {
     // giant Mexican lambeosaurine: a wall of muscle that answers teeth with tail
-    name: 'Magnapaulia', full: 'Magnapaulia laticaudus', diet: 'herb', biped: true, scale: 1.45,
+    name: 'Magnapaulia', full: 'Magnapaulia laticaudus', diet: 'herb', biped: false, scale: 1.45,
     L: { body: [54, 30], tail: [52, 11], neckLen: 14, neckAng: 0.5, head: [19, 10], leg: [26, 8] },
     col: {
       top: '#6e4a30', mid: '#a2764a', belly: '#ecdcb4', line: '#2c1a0c',
@@ -738,7 +738,7 @@ const DINO = {
   oloro: {
     // 'titanic swan': the long-necked lambeosaurine with the fan crest —
     // the delta's answer to Charonosaurus
-    name: 'Olorotitan', full: 'Olorotitan arharensis', diet: 'herb', biped: true, scale: 1.35,
+    name: 'Olorotitan', full: 'Olorotitan arharensis', diet: 'herb', biped: false, scale: 1.35,
     L: { body: [52, 28], tail: [50, 10.5], neckLen: 15, neckAng: 0.55, head: [18, 9.5], leg: [25, 7.5] },
     col: {
       top: '#46525c', mid: '#74828c', belly: '#e2e2d2', line: '#1a2228',
@@ -835,12 +835,12 @@ const DINO = {
     snoutW: 0.44, snoutMidW: 0.58, highBrowse: true, pattern: 'dapple',
   },
   spino: {
-    // the undisputed apex, built to the Prior Extinction maroccanus: scaly
+    // the undisputed apex, built to the Prior Extinction spinosaur: scaly
     // and crocodilian, M-shaped sail, upward-arcing neck with a throat
     // dewlap, its own skull (nasal crest, rosette snout, interlocking teeth,
     // far-back slit nostrils), thick tail base — and it fights with the
     // jaws AND the clawed arms together
-    name: 'Spinosaurus', full: 'Spinosaurus maroccanus', diet: 'carn', biped: true, scale: 1.5,
+    name: 'Sigilmassasaurus', full: 'Sigilmassasaurus brevicollis', diet: 'carn', biped: true, scale: 1.5,
     L: { body: [56, 25], tail: [64, 10], neckLen: 12, neckAng: 0.4, head: [26, 10.5], leg: [20, 7.5] },
     col: {
       top: '#3a4450', mid: '#647084', belly: '#ece4c4', line: '#161c26',
@@ -886,13 +886,154 @@ const DINO = {
   },
   eotrach: {
     // the oldest duckbill: tough, hardy, and built to outlast the delta
-    name: 'Eotrachodon', full: 'Eotrachodon orientalis', diet: 'herb', biped: true, scale: 1.15,
+    name: 'Eotrachodon', full: 'Eotrachodon orientalis', diet: 'herb', biped: false, scale: 1.15,
     L: { body: [48, 27], tail: [46, 10], neckLen: 13, neckAng: 0.45, head: [18, 10], leg: [23, 7] },
     col: {
       top: '#5c5c30', mid: '#8f8c50', belly: '#e8e2b4', line: '#24240f',
       acc: '#c9a03c', eye: '#4a3c22', pat: '#454522', shade: '#787646',
     },
     tailUp: 0.24, armScale: 1.2, arch: 1, forageQuad: true, tailWeapon: true, duckbill: true, pattern: 'dapple',
+  },
+  // ---------------- THE SODDEN REACH ----------------
+  buitre: {
+    // the river ghost: a long light body on absurdly thin BLACK pin legs,
+    // carrying a slender fish-trap of a snout. Feathered nose to tail-tip,
+    // and that tail is nearly half the animal
+    name: 'Buitreraptor', full: 'Buitreraptor gonzalezorum', diet: 'carn', biped: true, scale: 0.66,
+    L: { body: [30, 11], tail: [46, 3.6], neckLen: 15, neckAng: 0.62, head: [19, 5.4], leg: [30, 2.2] },
+    col: {
+      top: '#3f4a52', mid: '#6d7f88', belly: '#d8dcd2', line: '#161c20',
+      acc: '#c26a3a', eye: '#e0b64a', pat: '#2f3a42', shade: '#55656e',
+    },
+    tailUp: 0.3, fuzz: true, featherCoat: true, legCol: '#14181b',
+    armScale: 1.2, armUp: 0.12, snoutW: 0.15, snoutMidW: 0.3, pattern: 'streak',
+  },
+  hypsi: {
+    // the thicket mouse: a palmful of feathers on quick legs, huge eye, and
+    // a little cropping beak — everything on the Reach wants to eat it
+    name: 'Hypsilophodon', full: 'Hypsilophodon foxii', diet: 'herb', biped: true, scale: 0.5,
+    L: { body: [22, 11], tail: [30, 3.4], neckLen: 7, neckAng: 0.5, head: [10, 6.2], leg: [17, 3.2] },
+    col: {
+      top: '#6b5a2e', mid: '#a8924e', belly: '#eee6c4', line: '#2a2210',
+      acc: '#c9563c', eye: '#2e2414', pat: '#4d3f1c', shade: '#8c7840',
+    },
+    tailUp: 0.4, fuzz: true, armScale: 1.05, bigEye: 1.3, pattern: 'dapple',
+  },
+  adratik: {
+    // the oldest stegosaur: a low spiked wall. Narrow plates all down the
+    // spine, heavy shoulder spines, and a tail that ends in four spikes
+    name: 'Adratiklit', full: 'Adratiklit boulahfa', diet: 'herb', biped: false, scale: 1.0,
+    L: { body: [50, 25], tail: [46, 10], neckLen: 11, neckAng: 0.26, head: [14, 8.5], leg: [17, 6.5] },
+    col: {
+      top: '#4c5a36', mid: '#7d8c54', belly: '#ddd8ac', line: '#1e2412',
+      acc: '#b8763c', eye: '#3a2e18', pat: '#3c4a28', shade: '#67764a',
+    },
+    tailUp: 0.16, plates: true, tailWeapon: true, shoulderSpine: true, pattern: 'band',
+  },
+  orkor: {
+    // the last megaraptorid: long low skull, a stretched light frame, and
+    // the hands — great hooked claws it leads every attack with
+    name: 'Orkoraptor', full: 'Orkoraptor burkei', diet: 'carn', biped: true, scale: 1.05,
+    L: { body: [44, 18], tail: [50, 7], neckLen: 13, neckAng: 0.36, head: [23, 9], leg: [27, 6] },
+    col: {
+      top: '#4a3f4e', mid: '#7d6f7c', belly: '#ddd0cc', line: '#1a1418',
+      acc: '#c8863c', eye: '#e8c25a', pat: '#392f3c', shade: '#655a68',
+    },
+    tailUp: 0.3, fuzz: true, armScale: 1.35, armUp: 0.1, bigClaws: true, clawLen: 10,
+    clawWeapon: true, clawSecond: true, snoutW: 0.22, snoutMidW: 0.44, pattern: 'streak',
+  },
+  neove: {
+    // the quiet apex: an allosauroid built long and lean rather than heavy —
+    // low brow ridges, a deep chest, and hands that work with the jaws
+    name: 'Neovenator', full: 'Neovenator salerii', diet: 'carn', biped: true, scale: 1.35,
+    L: { body: [52, 23], tail: [54, 9], neckLen: 12, neckAng: 0.34, head: [26, 12.5], leg: [26, 7.5] },
+    col: {
+      top: '#3d4632', mid: '#6f7a54', belly: '#dcd6b4', line: '#161a10',
+      acc: '#c05a34', eye: '#f0cc58', pat: '#2e3626', shade: '#5b664a',
+    },
+    tailUp: 0.28, browRidge: true, armScale: 1.15, armUp: 0.08, bigClaws: true,
+    clawLen: 9, clawWeapon: true, clawSecond: true, snoutW: 0.2, snoutMidW: 0.46, pattern: 'stripes',
+  },
+  talenk: {
+    // plate-ribbed browser: a light ornithopod carrying a row of thin bony
+    // plates along its flanks — nothing else on the Reach wears them
+    name: 'Talenkauen', full: 'Talenkauen santacrucensis', diet: 'herb', biped: false, scale: 0.92,
+    L: { body: [40, 19], tail: [42, 7], neckLen: 13, neckAng: 0.48, head: [15, 8], leg: [22, 5] },
+    col: {
+      top: '#5d6a3e', mid: '#93a066', belly: '#e6e4bc', line: '#232a14',
+      acc: '#b0864a', eye: '#33291a', pat: '#48542e', shade: '#7b8854',
+    },
+    tailUp: 0.22, forageQuad: true, arch: 0.7, ribPlates: true, pattern: 'dapple',
+  },
+  macrog: {
+    // the big enigma: the same rib plates on a far heavier frame — the
+    // anchor the smaller browsers gather behind
+    name: 'Macrogryphosaurus', full: 'Macrogryphosaurus gondwanicus', diet: 'herb', biped: false, scale: 1.15,
+    L: { body: [48, 24], tail: [46, 9], neckLen: 14, neckAng: 0.44, head: [17, 9], leg: [24, 6] },
+    col: {
+      top: '#55603a', mid: '#8a955e', belly: '#e2ddb2', line: '#20260f',
+      acc: '#a87c44', eye: '#302614', pat: '#414c28', shade: '#727e4c',
+    },
+    tailUp: 0.2, forageQuad: true, arch: 0.8, ribPlates: true, pattern: 'band',
+  },
+  bonita: {
+    // the guillotine beak: a titanosaur that crops the canopy with a
+    // squared-off jaw, on a body too big to care what happens below it
+    name: 'Bonitasaura', full: 'Bonitasaura salgadoi', diet: 'herb', biped: false, scale: 1.35,
+    L: { body: [58, 27], tail: [56, 10], neckLen: 30, neckAng: 0.66, head: [12, 7.5], leg: [24, 8] },
+    col: {
+      top: '#4f5540', mid: '#848a66', belly: '#d8d6b8', line: '#1c2014',
+      acc: '#9a7a46', eye: '#2e2818', pat: '#3d4433', shade: '#6d7458',
+    },
+    tailUp: 0.26, tailWeapon: true, neckW: 0.6, neckArc: 0.06, sauroHead: true,
+    beak: false, highBrowse: true, pattern: 'dapple',
+  },
+  overo: {
+    // the dwarf titanosaur: sauropod bulk squeezed down small enough to
+    // move between the trunks — still far too much animal for most
+    name: 'Overosaurus', full: 'Overosaurus paradasi', diet: 'herb', biped: false, scale: 1.1,
+    L: { body: [50, 24], tail: [48, 9.5], neckLen: 22, neckAng: 0.58, head: [11, 7], leg: [19, 7] },
+    col: {
+      top: '#4a4a3a', mid: '#7e7e60', belly: '#d2d0b4', line: '#1a1a10',
+      acc: '#8e7448', eye: '#2c2616', pat: '#3a3a2c', shade: '#686852',
+    },
+    tailUp: 0.24, tailWeapon: true, neckW: 0.64, neckArc: 0.05, sauroHead: true,
+    beak: false, scutes: true, pattern: 'band',
+  },
+  skorpio: {
+    // the bulldog abelisaur: a short deep skull crusted with rugose bone,
+    // arms that do nothing at all, and a very short temper
+    name: 'Skorpiovenator', full: 'Skorpiovenator bustingorryi', diet: 'carn', biped: true, scale: 1.12,
+    L: { body: [44, 22], tail: [44, 8.5], neckLen: 9, neckAng: 0.24, head: [17, 13], leg: [22, 6.5] },
+    col: {
+      top: '#5a3f34', mid: '#8d6a56', belly: '#ded0bc', line: '#20140e',
+      acc: '#c4502e', eye: '#eec24e', pat: '#452e24', shade: '#75543f',
+    },
+    tailUp: 0.3, armScale: 0.4, snoutBumps: true, hornBoss: true,
+    snoutW: 0.3, snoutMidW: 0.54, pattern: 'stripes',
+  },
+  masiak: {
+    // the hook-toothed oddity: low, quick, and wearing the strangest jaw in
+    // the game — the front teeth jut FORWARD like a grappling hook
+    name: 'Masiakasaurus', full: 'Masiakasaurus knopfleri', diet: 'carn', biped: true, scale: 0.66,
+    L: { body: [26, 11], tail: [32, 4.2], neckLen: 11, neckAng: 0.46, head: [14, 6.4], leg: [19, 3.6] },
+    col: {
+      top: '#4e4230', mid: '#877450', belly: '#e0d6b8', line: '#1e1810',
+      acc: '#c98a3c', eye: '#e6bc4a', pat: '#3c3324', shade: '#6d5d40',
+    },
+    tailUp: 0.34, fuzz: true, hookTeeth: true, armScale: 0.8,
+    snoutW: 0.2, snoutMidW: 0.38, pattern: 'streak',
+  },
+  arari: {
+    // the dog-croc: a crocodile that gave up on rivers — long legs, an
+    // upright walk, and a short blunt muzzle full of odd teeth
+    name: 'Araripesuchus', full: 'Araripesuchus buitreraensis', diet: 'carn', biped: false, scale: 0.6,
+    L: { body: [30, 11], tail: [34, 5], neckLen: 8, neckAng: 0.3, head: [13, 6], leg: [15, 3] },
+    col: {
+      top: '#4a4438', mid: '#7f7660', belly: '#d6cfb4', line: '#1c1810',
+      acc: '#a8763e', eye: '#d8b04a', pat: '#3a3428', shade: '#665f4c',
+    },
+    tailUp: 0.16, scutes: true, snoutW: 0.34, snoutMidW: 0.5, pattern: 'band',
   },
   fluvio: {
     // the river barge: an invented hippo-heavy iguanodont — all belly and
@@ -1267,8 +1408,10 @@ function drawDino(ctx, key, o) {
     const ll1 = reach * 0.6, ll2 = reach * 0.68;
     const f = footPose(off, stride, hx + (front ? 1 : 2.5) * s);
     const ik = legIK(hx, hy, f.x, f.y, ll1, ll2, front ? 0.55 : -0.6); // hind knee forward, front elbow back
-    // near leg: body color so it reads as the same animal; far leg: shaded
-    const body = far ? shade(C.mid, 0.6) : C.mid;
+    // near leg: body color so it reads as the same animal; far leg: shaded.
+    // legCol overrides it outright — some birds wear black stockings
+    const base = d.legCol || C.mid;
+    const body = far ? shade(base, 0.6) : base;
     const dark = far ? shade(C.line, 1.35) : C.line;
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
@@ -1489,15 +1632,30 @@ function drawDino(ctx, key, o) {
   ctx.lineJoin = 'round';
   ctx.stroke(skin.path);
 
-  // dorsal fuzz (feathered species) — jagged fringe along the back
+  // dorsal fuzz (feathered species) — jagged fringe along the back and tail.
+  // Every quill TRAILS: it leaves the skin along the local spine direction and
+  // sweeps toward the tail tip, so the tail streams instead of standing up in
+  // bristles. (skin.top runs tail -> snout, so frac 0 is the tail end, where
+  // the sweep is flattest and longest.)
   if (d.fuzz) {
     ctx.strokeStyle = shade(C.top, 0.8);
     ctx.lineWidth = Math.max(0.6, lineW * 0.7);
+    ctx.lineCap = 'round';
     for (let i = rimA; i < rimB; i += 2) {
       const p = skin.top[i];
+      const a = skin.top[Math.max(0, i - 1)], b = skin.top[Math.min(skin.top.length - 1, i + 1)];
+      let tx = b.x - a.x, ty = b.y - a.y;                 // tangent, pointing headward
+      const tn = Math.hypot(tx, ty) || 1;
+      tx /= tn; ty /= tn;
+      const nx = ty, ny = -tx;                            // outward (up) normal
+      const frac = (i - rimA) / Math.max(1, rimB - rimA); // 0 tail … 1 shoulder
+      const back = lerp(2.3, 0.75, frac), up = lerp(0.5, 1.05, frac);
+      let dx = -tx * back + nx * up, dy = -ty * back + ny * up;
+      const dn = Math.hypot(dx, dy) || 1;
+      const len = s * lerp(2.7, 1.9, frac);
       ctx.beginPath();
       ctx.moveTo(p.x, p.y);
-      ctx.lineTo(p.x - 1 * s, p.y - 1.7 * s);
+      ctx.lineTo(p.x + dx / dn * len, p.y + dy / dn * len);
       ctx.stroke();
     }
   }
@@ -2080,6 +2238,30 @@ function drawBodyExtras(ctx, key, d, C, a) {
       ctx.closePath(); ctx.fill(); ctx.stroke();
     }
   }
+  if (d.ribPlates) {
+    // the elasmarian oddity: a row of thin bony plates lying flat along the
+    // FLANK (not the spine) — overlapping ovals, like a set of shields hung
+    // on the ribcage. Nothing else in the game wears them
+    ctx.lineWidth = lineW * 0.6;
+    for (let k = 0; k < 6; k++) {
+      const t = 0.2 + k * 0.11;
+      const px = -bodyL * 0.36 + bodyL * t * 0.92;
+      const py = cy - bodyH * 0.06 + Math.sin(t * Math.PI) * bodyH * 0.05;
+      ctx.fillStyle = shade(C.belly, 0.9);
+      ctx.strokeStyle = shade(C.line, 1.1);
+      ctx.globalAlpha = 0.85;
+      ctx.beginPath();
+      ctx.ellipse(px, py, bodyH * 0.13, bodyH * 0.2, -0.12, 0, TAU);
+      ctx.fill(); ctx.stroke();
+      // lit upper edge so the plates read as raised, not painted on
+      ctx.globalAlpha = 0.4;
+      ctx.strokeStyle = 'rgba(255,250,232,0.7)';
+      ctx.beginPath();
+      ctx.ellipse(px, py, bodyH * 0.13, bodyH * 0.2, -0.12, Math.PI * 1.1, Math.PI * 1.85);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+  }
   if (d.scutes) {
     // two rows of bony osteoderms following the back line
     const nTop = skin.top.length;
@@ -2230,7 +2412,7 @@ function drawBodyExtras(ctx, key, d, C, a) {
     };
     // skin.top runs tail → snout: low fracs are the tail side
     if (d.mSail) {
-      // the maroccanus signature: a sail shaped like the letter M — two even
+      // the Sigilmassasaurus signature: a sail shaped like the letter M — two even
       // rounded peaks with a saddle between them (per Prior Extinction).
       // Drawn level in world space (see drawLobe's shape mode), so the two
       // peaks match no matter how the back rises beneath them. The span stays
@@ -2606,7 +2788,7 @@ function drawHead(ctx, key, d, C, a) {
     ctx.stroke();
   }
   if (key === 'spino') {
-    // the maroccanus skull is its own thing: a small keeled nasal crest just
+    // the Sigilmassasaurus skull is its own thing: a small keeled nasal crest just
     // ahead of the eyes, and a bulbous notched rosette at the snout tip
     ctx.fillStyle = C.acc;
     ctx.strokeStyle = C.line;
@@ -2678,6 +2860,22 @@ function drawHead(ctx, key, d, C, a) {
       ctx.closePath(); ctx.fill(); ctx.stroke();
     }
   }
+  if (d.hookTeeth) {
+    // Masiakasaurus' grappling hook: the front teeth point FORWARD out of the
+    // snout tip instead of down — procumbent, and unmistakable in profile
+    ctx.fillStyle = '#f4ecd6';
+    ctx.strokeStyle = C.line;
+    ctx.lineWidth = lineW * 0.4;
+    for (let k = 0; k < 3; k++) {
+      const b = hPt(0.6 - k * 0.075, 0.12 + k * 0.015);
+      const tip = hPt(0.78 - k * 0.06, 0.02 - k * 0.02);
+      ctx.beginPath();
+      ctx.moveTo(b.x, b.y - hh * 0.045);
+      ctx.lineTo(tip.x, tip.y);
+      ctx.lineTo(b.x, b.y + hh * 0.045);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    }
+  }
   if (d.tusks) {
     // heterodontosaurid fangs peeking from an otherwise beaked mouth
     ctx.fillStyle = '#f2ead4';
@@ -2709,6 +2907,37 @@ function drawHead(ctx, key, d, C, a) {
     ctx.quadraticCurveTo(hPt(0.1, -0.7).x, hPt(0.1, -0.7).y, hPt(0.15, -0.72).x, hPt(0.15, -0.72).y);
     ctx.quadraticCurveTo(hPt(0.1, -0.52).x, hPt(0.1, -0.52).y, hPt(0.05, -0.5).x, hPt(0.05, -0.5).y);
     ctx.closePath(); ctx.fill();
+  }
+  if (d.ceratoHorns) {
+    // the ceratosaurid horn set: small SEMICIRCLE bosses, never blades — one
+    // on the nose, one over the eye. (There are three on the skull, but the
+    // lacrimal pair runs parallel, so in profile the near one hides its twin
+    // and only two are ever drawn.) Bone, so it takes the pale horn color.
+    ctx.fillStyle = shade(C.belly, 0.86);
+    ctx.strokeStyle = C.line;
+    ctx.lineWidth = lineW * 0.8;
+    // rx/ry are kept in the head's own proportions so each boss stays ROUND
+    const dome = (fx, fy, r) => {
+      const c = hPt(fx, fy);
+      ctx.beginPath();
+      ctx.ellipse(c.x, c.y, hl * r, hh * r * (hl / hh), headAng, Math.PI, TAU);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      // a lit crown so the dome doesn't read flat
+      ctx.save();
+      ctx.clip();
+      ctx.fillStyle = 'rgba(255,244,222,0.34)';
+      const t = hPt(fx - r * 0.35, fy - r * 0.5 * (hl / hh));
+      ctx.beginPath();
+      ctx.ellipse(t.x, t.y, hl * r * 0.42, hh * r * 0.42 * (hl / hh), headAng, 0, TAU);
+      ctx.fill();
+      ctx.restore();
+      ctx.fillStyle = shade(C.belly, 0.86);
+    };
+    // each sits ON the skull's top edge (the outline runs ~-0.46 over the
+    // muzzle and ~-0.60 over the brow), so the flat side is buried and only
+    // the rounded half shows
+    dome(0.44, -0.46, 0.085);   // the nasal boss, riding the muzzle
+    dome(0.05, -0.60, 0.07);    // the lacrimal boss, over the eye
   }
   if (key === 'nivalo') {
     // the titanosauriform badge: ONE smooth nasal dome bulging from the

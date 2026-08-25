@@ -87,6 +87,23 @@ const PLAYER_DEF = {
   // the moor's fortress: a flat oval of armor, shoulder spikes that grow
   // with it, and a long spiked tail that answers everything
   gastonia: { hp: 2000, dmg: 165, speed: 76, sprint: 1.45, reach: 46, atkCd: 1.4, diet: 'herb', bleedBite: false, bleedResist: 0.35, stamMax: 150, eco: 'moor', cost: 650, req: 'drypto', growthRate: 0.75 },
+  // ---- THE SODDEN REACH ----
+  // the river ghost: absurdly long and light on black pin legs, with a
+  // slender fish-catching snout. Wades where others swim — deep water slows
+  // it to a crawl but never stops it — and a fish is worth double to it
+  buitre: { hp: 380, dmg: 46, speed: 168, sprint: 1.95, reach: 22, atkCd: 0.5, diet: 'carn', bleedBite: true, bleedMul: 1.7, stamMax: 170, eco: 'jungle', cost: 300, growthRate: 1.2, earnMul: 1.25, fisher: true, swim: true, swimMul: 0.4, fishFeast: 2 },
+  // the thicket mouse: tiny, feathered, and permanently nervous — but it can
+  // throw itself into the earth, and for ten seconds nothing will touch it
+  hypsi: { hp: 340, dmg: 26, speed: 152, sprint: 1.9, reach: 16, atkCd: 0.6, diet: 'herb', bleedBite: false, stamMax: 160, eco: 'jungle', cost: 400, req: 'buitre', growthRate: 1.3, earnMul: 1.35, digger: true, panicBurrow: 10 },
+  // the oldest stegosaur: a low spiked wall that opens wounds — every plate
+  // edge and tail spike leaves the attacker leaking
+  adratik: { hp: 1900, dmg: 150, speed: 82, sprint: 1.45, reach: 44, atkCd: 1.3, diet: 'herb', bleedBite: true, bleedMul: 1.6, bleedResist: 0.4, stamMax: 150, eco: 'jungle', cost: 550, req: 'hypsi', growthRate: 0.85, tailWeapon: true },
+  // the last megaraptorid: long-armed, blade-toothed, and FAST — it opens
+  // its prey with hooked hands as much as with its jaws
+  orkor: { hp: 1500, dmg: 165, speed: 150, sprint: 1.85, reach: 32, atkCd: 0.6, diet: 'carn', bleedBite: true, bleedMul: 1.9, stamMax: 165, eco: 'jungle', cost: 700, req: 'adratik', growthRate: 0.85, clawSecond: true, wrestler: true },
+  // the quiet apex: it does not chase the way the tyrants chase — it arrives.
+  // Hands and jaws together, and everything it touches bleeds
+  neove: { hp: 2500, dmg: 205, speed: 132, sprint: 1.7, reach: 38, atkCd: 0.8, diet: 'carn', bleedBite: true, bleedMul: 2.0, stamMax: 160, eco: 'jungle', cost: 900, req: 'orkor', growthRate: 0.7, clawSecond: true, wrestler: true },
 };
 
 const NPC_DEF = {
@@ -222,6 +239,28 @@ const NPC_DEF = {
   duria: { hp: 2400, dmg: 200, atkCd: 1.4, speed: 118, detect: 340, homeR: 720, reach: 36, biome: 'any', turn: 1.9, fearless: true, bleedable: true, hunts: ['telmato', 'secerno', 'gracili'], caution: 0.8 },
   // wild dryptosaurus prowl the north — long, fast, and fearless
   drypto: { hp: 1800, dmg: 160, atkCd: 1.2, speed: 135, detect: 320, homeR: 650, reach: 36, biome: 'plains', turn: 2.3, fearless: true, bleedable: true, hunts: ['tanius', 'telmato'], caution: 1.2 },
+  // ---- THE SODDEN REACH ----
+  // plate-ribbed browser: thin bony plates run along its flanks, and it
+  // moves in loose family parties through the undergrowth
+  talenk: { hp: 620, dmg: 78, atkCd: 1.6, speed: 118, fleeSpeed: 152, detect: 215, homeR: 340, reach: 30, biome: 'forest', turn: 2.4, bleedable: true, melee: { kb: 180 }, caution: 1.2 },
+  // the big enigma: the same rib plates on a far heavier frame — the herd's
+  // anchor, and slow to decide that anything is worth fearing
+  macrog: { hp: 1250, dmg: 120, atkCd: 1.7, speed: 96, fleeSpeed: 124, detect: 220, homeR: 360, reach: 38, biome: 'forest', turn: 2.0, fearless: true, bleedable: true, melee: { kb: 230 }, caution: 1.2 },
+  // the guillotine-beaked titanosaur: crops the canopy with a squared jaw
+  // and simply does not notice most of what happens beneath it
+  bonita: { hp: 3200, dmg: 250, atkCd: 2.3, speed: 66, detect: 200, homeR: 320, reach: 50, biome: 'plains', turn: 1.4, fearless: true, tank: true, bleedable: true, melee: { kb: 320 } },
+  // the dwarf titanosaur: sauropod bulk squeezed small enough for the
+  // thickets — still far too much animal for most of the Reach
+  overo: { hp: 2200, dmg: 180, atkCd: 2.1, speed: 74, detect: 190, homeR: 300, reach: 44, biome: 'forest', turn: 1.6, fearless: true, tank: true, bleedable: true, melee: { kb: 270 } },
+  // the bulldog abelisaur: a deep rugose skull, useless arms, and a temper.
+  // It fights entirely with its face
+  skorpio: { hp: 1600, dmg: 170, atkCd: 1.5, speed: 124, detect: 300, homeR: 620, reach: 32, biome: 'any', turn: 2.0, fearless: true, bleedable: true, hunts: ['talenk', 'hypsi'], caution: 0.95 },
+  // the hook-toothed oddity: forward-jutting front teeth for snatching small
+  // prey out of the leaf litter. Quick, low, and strange
+  masiak: { hp: 300, dmg: 52, atkCd: 0.8, speed: 158, detect: 250, homeR: 400, reach: 20, biome: 'forest', turn: 4.0, patience: 7, packCourage: true, caution: 1.1 },
+  // the dog-croc: long-legged, land-going, and utterly at home when the
+  // rivers climb their banks
+  arari: { hp: 420, dmg: 62, atkCd: 1.0, speed: 128, detect: 230, homeR: 380, reach: 22, biome: 'any', turn: 3.0, amphibious: true, swims: true, bleedable: true, hunts: ['hypsi'], caution: 1.1 },
 };
 
 let npcSeq = 1;
@@ -297,7 +336,10 @@ function dealDamage(target, amount, attacker, opts) {
   // simosuchus down its burrow: only the armored backside shows — bites
   // barely scratch it, and the frustrated attacker gives the whole thing up
   if (target.isPlayer && target.hidden) {
-    dmg = Math.max(1, dmg * 0.06);
+    // a panic-burrower vanishes completely — the hole is too tight and too
+    // sudden to be worth digging out (it just cannot stay down for long)
+    const hidDef = PLAYER_DEF[target.species] || {};
+    dmg = hidDef.panicBurrow ? 0 : Math.max(1, dmg * 0.06);
     if (attacker && !attacker.isPlayer) {
       attacker.state = 'return'; attacker.stateT = 6; attacker.target = null;
       attacker.tiredT = Math.max(attacker.tiredT || 0, 9);
@@ -1484,6 +1526,14 @@ NPC_THINK.coahuila = thinkTank;
 NPC_THINK.bravo = thinkTank;
 NPC_THINK.duria = thinkHunter;          // the Dorset hunter wants a real meal
 NPC_THINK.drypto = thinkRunner;         // the long tyrant runs its prey down
+// --- the Reach's minds ---
+NPC_THINK.talenk = thinkHerdFighter;    // plate-ribbed browsers close ranks
+NPC_THINK.macrog = thinkHerdFighter;
+NPC_THINK.bonita = thinkTank;           // the canopy-croppers simply stand
+NPC_THINK.overo = thinkTank;
+NPC_THINK.skorpio = thinkHunter;        // the bulldog abelisaur hunts by face
+NPC_THINK.masiak = thinkPackHunter;     // hook-toothed gangs of the leaf litter
+NPC_THINK.arari = thinkHunter;          // the dog-croc runs its prey down on land
 NPC_THINK.titanov = thinkHunter;        // the titan-killer: caution so low a grown nivalotitan reads as DINNER
 
 function defaultWander(e, mayDrink) {
@@ -2243,6 +2293,19 @@ const ECO_SPAWNS = {
     { sp: 'nanuq', n: 2, min: 2, away: true },
     { sp: 'titanov', n: 1, min: 1, away: true },
   ],
+  // the Reach is CROWDED — land everywhere means room for everything
+  jungle: [
+    { sp: 'talenk', pack: 3, sizes: [3, 4, 2, 3], den: 'plains', min: 8 },
+    { sp: 'macrog', pack: 2, sizes: [2, 3], den: 'plains', min: 4 },
+    { sp: 'bonita', n: 2, min: 2, away: true },
+    { sp: 'overo', n: 3, min: 3, away: true },
+    { sp: 'skorpio', n: 3, min: 3, away: true },
+    { sp: 'masiak', pack: 3, sizes: [3, 4, 3], min: 8 },
+    { sp: 'arari', n: 5, min: 4 },
+    // the channels run thick with fish — a buitreraptor's whole living
+    { sp: 'lepisosteus', n: 12, min: 10 },
+    { sp: 'bassb', n: 7, min: 6 },
+  ],
   moor: [
     { sp: 'gracili', pack: 3, min: 7 },
     { sp: 'telmato', pack: 3, sizes: [3, 4, 2], den: 'plains', min: 7 },
@@ -2797,6 +2860,14 @@ function updatePlayer(dt) {
     p.move = lerp(p.move, 0, 0.3);
     p.headDown = lerp(p.headDown, 0.9, 0.2);
     if (G.myBurrow) { p.x = lerp(p.x, G.myBurrow.x, 0.3); p.y = lerp(p.y, G.myBurrow.y, 0.3); }
+    // the panic burrow is a held breath, not a home — it runs out
+    if (def.panicBurrow) {
+      p.hideT = (p.hideT || 0) - dt;
+      if (p.hideT <= 0) {
+        p.hidden = false;
+        floatText(p.x, p.y - 46, 'you have to come up!', '#ffd23e');
+      }
+    }
     if (input.left || input.right || input.up || input.down || !G.myBurrow) p.hidden = false;
   } else if (p.restT > 0.04) {
     // mid-rise: three unhurried seconds of leg-work — no walking off early
@@ -3751,9 +3822,12 @@ function startAction(p, ctx) {
   if (ctx.kind === 'hide') {
     // head-first down the hole: instant, no clock — a step backs you out
     p.hidden = true;
+    // a panic-burrower gets a short absolute safety instead of a lasting hide
+    const hdef = PLAYER_DEF[p.species] || {};
+    if (hdef.panicBurrow) p.hideT = hdef.panicBurrow;
     p.x = G.myBurrow.x; p.y = G.myBurrow.y;
     p.resting = false; p.fishing = false;
-    floatText(p.x, p.y - 40, 'hidden — only the butt shows', '#cbb98a');
+    floatText(p.x, p.y - 40, hdef.panicBurrow ? 'gone to ground — nothing can reach you!' : 'hidden — only the butt shows', '#cbb98a');
     return;
   }
   p.resting = false;   // you don't eat or drink lying down — up you get
@@ -3807,9 +3881,13 @@ function finishAction(p) {
     if (a.obj.meat <= 0) return;
     const bite = Math.min(30, a.obj.meat);
     a.obj.meat -= bite;
-    p.food = Math.min(100, p.food + bite);
-    grow(0.008);
-    floatText(p.x, p.y - 44, '+food', '#e08a66');
+    // a fish specialist lives on the river: fish feed it far better than
+    // meat does, which is the whole reason to fish instead of hunt
+    const fdef = PLAYER_DEF[p.species] || {};
+    const feast = fdef.fishFeast && DINO[a.obj.species] && DINO[a.obj.species].fish ? fdef.fishFeast : 1;
+    p.food = Math.min(100, p.food + bite * feast);
+    grow(0.008 * (feast > 1 ? 1.5 : 1));
+    floatText(p.x, p.y - 44, feast > 1 ? '+FOOD (fish!)' : '+food', feast > 1 ? '#8fd8e6' : '#e08a66');
     bloodBurst(a.obj.x, a.obj.y, 3);
   } else if (a.kind === 'swallow') {
     // head back, jaws snapping, and down it goes

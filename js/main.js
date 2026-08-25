@@ -93,6 +93,7 @@ const CHAIN = [
   ['tyranno', 'spino'],                                        // 🐟 Delta finale: choose your apex
   ['jianchang'], ['eshano'], ['nanuq'], ['nivarex'],           // 🏔️ The Wall
   ['simo'], ['korea'], ['sarco'], ['drypto'], ['gastonia'],    // 🌫️ The Great Moors of Martulisth
+  ['buitre'], ['hypsi'], ['adratik'], ['orkor'], ['neove'],    // 🌴 The Sodden Reach
 ];
 function chainRung(sp) { return CHAIN.findIndex(r => r.includes(sp)); }
 // a species is playable if: it's the chain's first rung, the rung before it
@@ -345,6 +346,11 @@ let titleEco = 'valley';
 
 // lobby copy per playable — the only thing a new dino needs besides its defs
 const CARD_INFO = {
+  buitre: { desc: 'A long-legged river ghost on black pin legs. Its slender snout is built for fish — and fish feed it DOUBLE. It wades deep water where others must swim, slowly, and its bite will not stop bleeding.', tag: '◆ CARNIVORE — FISHER', tagClass: 'swim' },
+  hypsi: { desc: 'A tiny feathered thicket-mouse. Fast, fragile, and hunted by everything — but it can throw itself into the earth, and for ten seconds nothing on the Reach will touch it.', tag: '◆ HERBIVORE — HARD', tagClass: 'hard' },
+  adratik: { desc: 'The oldest stegosaur of them all: a low spiked wall that opens wounds. Every plate edge and tail spike leaves the attacker leaking. Slow, patient, and very hard to finish.', tag: '◆ HERBIVORE — BLEED TANK', tagClass: 'mod' },
+  orkor: { desc: 'The last of the megaraptorids — long hooked arms, blade teeth, and real speed. It opens prey with its hands as much as its jaws, and the bleeding does the rest.', tag: '◆ CARNIVORE — BLEEDER', tagClass: 'mod' },
+  neove: { desc: 'The quiet apex of the Reach. It does not chase the way the tyrants chase — it arrives. Hands and jaws together, and everything it touches bleeds.', tag: '◆ CARNIVORE — APEX', tagClass: 'hard' },
   raja: { desc: 'A predator hatched in the fern forest. Scavenge carcasses, hunt to eat, and one day even the mighty Huayangosaurus may fear your bite.', tag: '◆ CARNIVORE — MODERATE', tagClass: 'mod' },
   campto: { desc: 'Born on the open plains where Moros intrepidus hunts. Run for the fern forest fast — the shade is your only refuge until you grow. Earns extra growths.', tag: '◆ HERBIVORE — HARD', tagClass: 'hard' },
   rioja: { desc: 'An ancient sauropodomorph and the valley\'s best brawler: swing the tail, then slash with the thumb-claws (M) to open bleeding wounds. Grows very slowly and eats enormously.', tag: '◆ HERBIVORE — BRAWLER', tagClass: 'mod' },
@@ -692,6 +698,11 @@ for (const id of ['btn-lobby', 'btn-respawn', 'btn-title', 'pause-lobby']) {
 }
 
 const START_BANNERS = {
+  buitre: 'You hatch on the riverbank. The fish are yours — the flood is not.',
+  hypsi: 'You hatch in the thicket. When the world comes for you, go underground.',
+  adratik: 'You hatch spiked and slow. Let them come — everything you touch bleeds.',
+  orkor: 'You hatch with hooks for hands. Nothing here outruns you.',
+  neove: 'You hatch in the green dark. Learn to arrive without being seen.',
   raja: 'You hatch in the fern forest. Grow. Hunt. Survive.',
   campto: 'You hatch on the open plains. Reach the ferns before Moros finds you!',
   rioja: 'You hatch heavy-boned and hungry. Eat everything — greatness takes time.',
@@ -1321,6 +1332,83 @@ function spawnAmbient() {
 // cold bar from running away. And rarely, the storm shakes an AVALANCHE
 // loose from the summit: a wall of snow that sweeps DOWN the mountain and
 // buries everything that isn't behind stone, on a rock wall, or fast.
+// ---------------------------------------------------------------------------
+// THE MONSOON — the Sodden Reach's whole personality. Long green calm, then
+// the sky closes, the rain arrives, and the channels climb their banks until
+// the low ground IS the river. Anything caught in the flood gets dragged and
+// battered; the high mud wallows stay put, and so does anything resting in
+// one. Survival here is knowing where the nearest wallow is.
+// ---------------------------------------------------------------------------
+function floodReach(x, y) {
+  // how deep the flood is at a point: 0 clear, 1 the middle of the torrent.
+  // The water grows outward from the permanent channels as `rise` climbs.
+  const M = G.monsoon;
+  if (!M || M.rise <= 0) return 0;
+  const grow = 160 * M.rise;                    // px the banks push outward
+  let best = 0;
+  for (const c of (World.channels || [])) {
+    const d = dist(x, y, c.x, c.y) - c.r;
+    if (d < grow) best = Math.max(best, clamp(1 - d / Math.max(1, grow), 0, 1));
+  }
+  return best * M.rise;
+}
+function inWallow(x, y) {
+  for (const m of World.mudPools) if (dist(x, y, m.x, m.y) < m.r * 1.05) return true;
+  return false;
+}
+function updateMonsoon(dt) {
+  if (!World.monsoonWorld) { G.monsoon = null; return; }
+  if (!G.monsoon) G.monsoon = { phase: 'calm', t: 50 + Math.random() * 40, rise: 0, rain: 0, shove: 0 };
+  const M = G.monsoon;
+  M.t -= dt;
+  // the cycle: calm -> the sky darkens -> the storm -> the water drains away
+  if (M.phase === 'calm' && M.t <= 0) {
+    M.phase = 'building'; M.t = 9;
+    G.banner = { str: 'The light goes green. The rain is coming — find a wallow.', t: 5, color: '#9fd6b0' };
+  } else if (M.phase === 'building' && M.t <= 0) {
+    M.phase = 'storm'; M.t = 26 + Math.random() * 14;
+    G.banner = { str: 'MONSOON! The rivers are climbing — get to the mud!', t: 5, color: '#bfe6ff' };
+  } else if (M.phase === 'storm' && M.t <= 0) {
+    M.phase = 'easing'; M.t = 14;
+    G.banner = { str: 'The rain thins. The water starts to fall back.', t: 4, color: '#cfe6d8' };
+  } else if (M.phase === 'easing' && M.t <= 0) {
+    M.phase = 'calm'; M.t = 70 + Math.random() * 50;
+  }
+  const wantRain = M.phase === 'storm' ? 1 : M.phase === 'building' ? 0.35 : M.phase === 'easing' ? 0.4 : 0;
+  const wantRise = M.phase === 'storm' ? 1 : M.phase === 'easing' ? 0.45 : 0;
+  M.rain = lerp(M.rain, wantRain, Math.min(1, dt * 0.5));
+  M.rise = lerp(M.rise, wantRise, Math.min(1, dt * 0.25));   // water is slow to come AND to go
+  if (M.rise < 0.02) return;
+
+  // --- the flood itself: it drags, it batters, and the wallows are spared ---
+  const hit = (e, isPlayer) => {
+    if (inWallow(e.x, e.y)) return;                 // the mud holds you
+    const f = floodReach(e.x, e.y);
+    if (f < 0.25) return;
+    const heavy = f > 0.6;
+    // shoved downstream — the current always runs with the channel's slope
+    const push = (isPlayer ? 26 : 40) * f * dt * 60;
+    e.x = clamp(e.x + push * 0.9, 20, WORLD_W - 20);
+    e.y = clamp(e.y + Math.sin(e.x * 0.004 + G.time * 0.3) * push * 0.4, 20, WORLD_H - 20);
+    if (heavy && Math.random() < dt * (isPlayer ? 0.5 : 0.35)) {
+      // rare, and violent: caught by the current proper
+      if (isPlayer) {
+        dealDamage(e, playerMaxHp() * 0.06, null, { kb: 0 });
+        G.shake = Math.min(7, G.shake + 3);
+        floatText(e.x, e.y - 40, 'SWEPT!', '#bfe6ff');
+      } else {
+        dealDamage(e, e.maxhp * 0.14, null, { kb: 0 });
+        e.pinT = Math.max(e.pinT || 0, 0.5);        // tumbled, briefly helpless
+        e.thrash = 1;
+        if (Math.random() < 0.5) floatText(e.x, e.y - 34, 'SWEPT!', '#bfe6ff');
+      }
+    }
+  };
+  const p = G.player;
+  if (p && p.alive && !G.burrow) hit(p, true);
+  for (const e of G.npcs) { if (e.hp > 0 && !DINO[e.species].fish) hit(e, false); }
+}
+
 function updateBlizzard(dt) {
   // the Moors have no storms — just a mist that never, ever lifts
   if (World.misty) { G.blizzard = null; G.mist = lerp(G.mist || 0, 0.85, Math.min(1, dt * 0.5)); return; }
@@ -1444,6 +1532,51 @@ function drawAvalanche(camX, camY) {
 }
 // the mist, drawn in screen space: drifting banks under a flat veil.
 // Some days you see the whole ridge; some days shapes loom out of nothing.
+// the storm on screen: a green-dark gloom, slanting rain, and the swollen
+// water drawn as a translucent skin creeping out from every channel
+function drawMonsoon() {
+  const M = G.monsoon;
+  if (!M || (M.rain < 0.01 && M.rise < 0.01)) return;
+  const vw = VIEW_W * G.zoom, vh = VIEW_H * G.zoom;
+  // the risen water, in world space (drawn under the rain, over the ground)
+  if (M.rise > 0.02) {
+    ctx.save();
+    ctx.globalAlpha = 0.42 * M.rise;
+    ctx.fillStyle = '#3f6570';
+    for (const c of (World.channels || [])) {
+      if (c.x < G.camX - 200 || c.x > G.camX + vw + 200 || c.y < G.camY - 200 || c.y > G.camY + vh + 200) continue;
+      ctx.beginPath();
+      ctx.arc(c.x - G.camX, c.y - G.camY, (c.r + 160 * M.rise) / 1, 0, TAU);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  const W = canvas.width, H = canvas.height;
+  // the light goes out — a heavy green-grey lid over everything
+  if (M.rain > 0.01) {
+    ctx.fillStyle = 'rgba(28,44,38,' + (0.34 * M.rain).toFixed(3) + ')';
+    ctx.fillRect(0, 0, W, H);
+  }
+  // rain: fast slanted streaks, seeded off world time so it never repeats
+  if (M.rain > 0.05) {
+    const n = Math.floor(340 * M.rain);
+    ctx.strokeStyle = 'rgba(200,226,236,' + (0.4 * M.rain).toFixed(3) + ')';
+    ctx.lineWidth = 1.1;
+    ctx.beginPath();
+    for (let i = 0; i < n; i++) {
+      const sx = (hash2(i, 3) * W + G.time * 240 * (0.6 + hash2(i, 9) * 0.7)) % (W + 60) - 30;
+      const sy = (hash2(i, 5) * H + G.time * 900 * (0.7 + hash2(i, 11) * 0.6)) % (H + 80) - 40;
+      const len = 14 + hash2(i, 13) * 16;
+      ctx.moveTo(sx, sy);
+      ctx.lineTo(sx - len * 0.28, sy + len);
+    }
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
 function drawMist() {
   if (!(World.snowy || World.misty) || !G.mist) return;
   const m = G.mist;
@@ -1792,6 +1925,7 @@ function simTick(dt) {
   updateWorldStuff(dt);
   updateEruption(dt);
   updateBlizzard(dt);
+  updateMonsoon(dt);
   updateNesting(dt);
   G.input.action = false;   // F is read by the player, the den AND the courtship
   G.input.claw = false; G.input.dig = false;
@@ -2285,6 +2419,7 @@ function render() {
   ctx.globalAlpha = 1;
   ctx.drawImage(vignette, 0, 0, VIEW_W, VIEW_H);
   drawMist();
+  drawMonsoon();
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, Math.floor(Math.random() * -30), Math.floor(Math.random() * -30));
   ctx.fillStyle = grainPattern;
