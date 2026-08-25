@@ -317,13 +317,21 @@ function animatePreview(canvasId, species, gender, growth, skinId) {
 // every key in PLAYER_DEF is a playable — add an entry there (+ DINO art +
 // CARD_INFO copy below) and its card, previews and purchase flow just appear
 const ALL_PLAYABLES = Object.keys(PLAYER_DEF);
+// the whole world scrolls as one journey now, so "which previews animate" is
+// decided by the viewport: an observer keeps this set to the on-screen cards
+// (plus a little margin) — 30 dinos still won't burn CPU
+const previewVisible = new Set();
+const previewObserver = new IntersectionObserver((entries) => {
+  for (const en of entries) {
+    const sp = en.target.id.slice(5);      // 'prev-<sp>'
+    if (en.isIntersecting) previewVisible.add(sp); else previewVisible.delete(sp);
+  }
+  animateAllPreviews();
+}, { rootMargin: '160px 0px' });
 function animateAllPreviews() {
   previewGen++;
-  // only the visible ecosystem's previews animate — 30 dinos won't burn CPU.
-  // Each hatchling wears the loadout currently selected on its card.
-  for (const sp of ALL_PLAYABLES) {
-    if ((PLAYER_DEF[sp].eco || 'valley') === titleEco) animatePreview('prev-' + sp, sp, cardGender(sp), undefined, cardSkin(sp));
-  }
+  // each hatchling wears the loadout currently selected on its card
+  for (const sp of previewVisible) animatePreview('prev-' + sp, sp, cardGender(sp), undefined, cardSkin(sp));
 }
 
 const needMsg = (cost) => ' — you need ' + (cost - Save.growths) + ' more.';
@@ -382,29 +390,269 @@ const CARD_INFO = {
   gastonia: { desc: 'A flat oval of living armor: ankylosaur head, shoulder spikes that grow as it does, and a long spiked tail swinging behind. Nothing on the moor opens it — most stop trying.', tag: '◆ HERBIVORE — THE FORTRESS', tagClass: 'hard' },
 };
 
+// ---------- chapter backdrops: each land's wallpaper ----------
+// every biome gets a repeating pattern tile — a few quiet motifs in its own
+// tint, scattered like a botanical print — that papers that land's entire
+// stretch of the journey. Motifs draw around their origin ("ground" at y=0,
+// growing upward) and bdAt() places them in the tile at any scale/rotation.
+function bdAt(x, tx, ty, sc, rot, fn) {
+  x.save(); x.translate(tx, ty); x.rotate(rot); x.scale(sc, sc); fn(x); x.restore();
+}
+function bdFern(x) {
+  const p1 = [95, -270], p2 = [215, -410];
+  const q = (t, i) => 2 * (1 - t) * t * p1[i] + t * t * p2[i];
+  const dq = (t, i) => 2 * (1 - t) * p1[i] + 2 * t * (p2[i] - p1[i]);
+  x.lineWidth = 7;
+  x.beginPath(); x.moveTo(0, 0); x.quadraticCurveTo(p1[0], p1[1], p2[0], p2[1]); x.stroke();
+  x.lineWidth = 9;
+  for (let t = 0.12; t < 0.95; t += 0.09) {
+    const px = q(t, 0), py = q(t, 1), a = Math.atan2(dq(t, 1), dq(t, 0)), len = 74 * (1 - t) + 14;
+    for (const side of [-1, 1]) {
+      x.beginPath(); x.moveTo(px, py);
+      x.lineTo(px + Math.cos(a + side * 1.15) * len, py + Math.sin(a + side * 1.15) * len);
+      x.stroke();
+    }
+  }
+}
+function bdBone(x) {
+  x.fillRect(-105, -13, 210, 26);
+  for (const [dx, dy] of [[-105, -15], [-105, 15], [105, -15], [105, 15]])
+    { x.beginPath(); x.arc(dx, dy, 23, 0, Math.PI * 2); x.fill(); }
+}
+function bdSkull(x) {
+  x.beginPath(); x.arc(0, 0, 66, 0, Math.PI * 2); x.fill();
+  x.fillRect(-36, 44, 74, 36);
+  x.save(); x.globalCompositeOperation = 'destination-out';
+  for (const ex of [-28, 24]) { x.beginPath(); x.arc(ex, -7, 13, 0, Math.PI * 2); x.fill(); }
+  x.restore();
+}
+function bdRibs(x) {
+  x.lineWidth = 9;
+  for (let i = 0; i < 4; i++)
+    { x.beginPath(); x.arc(i * 34, 0, 46, Math.PI * 1.15, Math.PI * 1.85); x.stroke(); }
+}
+function bdVolcano(x) {
+  x.beginPath(); x.moveTo(-290, 0); x.lineTo(-46, -360); x.lineTo(46, -360); x.lineTo(290, 0);
+  x.closePath(); x.fill();
+  x.save(); x.globalCompositeOperation = 'destination-out';
+  x.beginPath(); x.moveTo(-46, -360); x.lineTo(46, -360); x.lineTo(0, -302); x.closePath(); x.fill();
+  x.restore();
+}
+function bdFish(x) {
+  x.beginPath(); x.ellipse(0, 0, 70, 27, 0, 0, Math.PI * 2); x.fill();
+  x.beginPath(); x.moveTo(-62, 0); x.lineTo(-105, -26); x.lineTo(-105, 26); x.closePath(); x.fill();
+  x.beginPath(); x.moveTo(-8, -22); x.lineTo(18, -46); x.lineTo(30, -20); x.closePath(); x.fill();
+  x.save(); x.globalCompositeOperation = 'destination-out';
+  x.beginPath(); x.arc(42, -7, 5, 0, Math.PI * 2); x.fill();
+  x.restore();
+}
+function bdReeds(x) {
+  x.lineWidth = 7;
+  for (let i = 0; i < 4; i++) {
+    const bx = i * 26;
+    x.beginPath(); x.moveTo(bx, 0); x.quadraticCurveTo(bx + 12, -90, bx + 4, -138 + i * 12); x.stroke();
+    x.beginPath(); x.ellipse(bx + 4, -148 + i * 12, 7, 17, 0.1, 0, Math.PI * 2); x.fill();
+  }
+}
+function bdPeaks(x) {
+  x.beginPath(); x.moveTo(-330, 0); x.lineTo(-110, -345); x.lineTo(30, -145);
+  x.lineTo(205, -405); x.lineTo(370, -125); x.lineTo(490, 0);
+  x.closePath(); x.fill();
+}
+function bdPine(x) {
+  for (const [w, y0, y1] of [[30, 95, 40], [40, 60, 0]]) {
+    x.beginPath(); x.moveTo(0, -y0);
+    x.lineTo(-w, -y1); x.lineTo(w, -y1);
+    x.closePath(); x.fill();
+  }
+}
+function bdMist(x, w) {
+  x.beginPath();
+  if (x.roundRect) x.roundRect(0, 0, w, 24, 12); else x.rect(0, 0, w, 24);
+  x.fill();
+}
+function bdTree(x) {
+  x.lineWidth = 10;
+  x.beginPath(); x.moveTo(0, 0); x.quadraticCurveTo(2, -120, 12, -230); x.stroke();
+  x.lineWidth = 7;
+  x.beginPath(); x.moveTo(8, -168); x.lineTo(-44, -242); x.stroke();
+  x.beginPath(); x.moveTo(10, -198); x.lineTo(62, -272); x.stroke();
+  x.beginPath(); x.moveTo(5, -108); x.lineTo(-52, -158); x.stroke();
+}
+function bdPalm(x) {
+  x.lineWidth = 16;
+  x.beginPath(); x.moveTo(53, 0); x.quadraticCurveTo(20, -130, 0, -248); x.stroke();
+  x.lineWidth = 9;
+  for (const [ex, ey, cx2, cy2] of [[-120, -308, -70, -318], [-94, -216, -60, -258], [90, -318, 40, -328],
+    [124, -226, 60, -268], [-50, -336, -28, -326], [54, -346, 24, -328]])
+    { x.beginPath(); x.moveTo(0, -252); x.quadraticCurveTo(cx2, cy2, ex, ey); x.stroke(); }
+  for (const [nx, ny] of [[-14, -236], [11, -230]])
+    { x.beginPath(); x.arc(nx, ny, 11, 0, Math.PI * 2); x.fill(); }
+}
+function bdLeaf(x) {
+  x.lineWidth = 6;
+  x.beginPath(); x.ellipse(0, 0, 105, 34, 0, 0, Math.PI * 2); x.fill();
+  x.beginPath(); x.moveTo(-105, 0); x.lineTo(-160, 26); x.stroke();
+}
+function bdGull(x) {
+  x.lineWidth = 5;
+  x.beginPath(); x.moveTo(-26, 0);
+  x.quadraticCurveTo(-13, -16, 0, 0); x.quadraticCurveTo(13, -16, 26, 0);
+  x.stroke();
+}
+// one tile per land (640×560, repeated): motifs alternate corner to corner
+// and flip up/down like a wallpaper print so the repeat reads as texture
+const ECO_ART = {
+  valley(x) {
+    bdAt(x, 100, 520, 0.72, -0.08, bdFern);
+    bdAt(x, 520, 60, 0.5, Math.PI - 0.15, bdFern);   // hanging frond
+    bdAt(x, 420, 545, 0.36, 0.25, bdFern);
+  },
+  prairie(x) {
+    bdAt(x, 165, 130, 0.8, -0.45, bdBone);
+    bdAt(x, 470, 420, 0.55, 0.35, bdBone);
+    bdAt(x, 460, 130, 0.62, 0.1, bdSkull);
+    bdAt(x, 130, 430, 0.8, 0, bdRibs);
+  },
+  coast(x) {
+    x.lineWidth = 7; x.lineCap = 'butt';
+    for (const y of [110, 290, 470]) {
+      x.beginPath(); x.moveTo(0, y);
+      for (let wx = 0; wx < 640; wx += 80) x.quadraticCurveTo(wx + 40, y - 34, wx + 80, y);
+      x.stroke();
+    }
+    x.lineCap = 'round';
+    bdAt(x, 180, 205, 1, 0.1, bdGull);
+    bdAt(x, 450, 385, 0.8, -0.1, bdGull);
+  },
+  ash(x) {
+    bdAt(x, 170, 320, 0.55, 0, bdVolcano);
+    bdAt(x, 480, 552, 0.38, 0, bdVolcano);
+    for (const [fx, fy, r] of [[300, 90, 8], [420, 50, 11], [520, 130, 6], [80, 60, 7], [600, 340, 6], [60, 480, 8]])
+      { x.beginPath(); x.arc(fx, fy, r, 0, Math.PI * 2); x.fill(); }
+  },
+  delta(x) {
+    bdAt(x, 190, 120, 0.7, 0.06, bdFish);
+    bdAt(x, 460, 330, 0.5, -0.06, (c) => { c.scale(-1, 1); bdFish(c); });
+    bdAt(x, 110, 545, 0.9, 0, bdReeds);
+    bdAt(x, 500, 545, 0.6, 0, bdReeds);
+    for (const [bx, by, r] of [[320, 230, 7], [340, 200, 5], [330, 260, 4]])
+      { x.beginPath(); x.arc(bx, by, r, 0, Math.PI * 2); x.fill(); }
+  },
+  wall(x) {
+    bdAt(x, 200, 240, 0.5, 0, bdPeaks);
+    bdAt(x, 480, 330, 0.85, 0, bdPine);
+    bdAt(x, 545, 345, 0.6, 0, bdPine);
+    bdAt(x, 130, 545, 0.75, 0, bdPine);
+    bdAt(x, 520, 545, 0.45, 0, bdPine);
+  },
+  moor(x) {
+    for (const [mx, my, w] of [[40, 70, 300], [300, 180, 280], [70, 300, 260], [360, 420, 240], [130, 500, 300]])
+      bdAt(x, mx, my, 1, 0, (c) => bdMist(c, w));
+    bdAt(x, 520, 300, 0.6, 0.05, bdTree);
+  },
+  jungle(x) {
+    bdAt(x, 150, 400, 0.62, 0.04, bdPalm);
+    bdAt(x, 480, 120, 0.55, -0.35, bdLeaf);
+    bdAt(x, 430, 500, 0.45, 0.5, bdLeaf);
+    bdAt(x, 560, 555, 0.34, -0.06, (c) => { c.scale(-1, 1); bdPalm(c); });
+  },
+};
+function ecoBackdrop(key, tint) {
+  const painter = ECO_ART[key];
+  if (!painter) return '';
+  const cv = document.createElement('canvas');
+  cv.width = 640; cv.height = 560;
+  const x = cv.getContext('2d');
+  x.strokeStyle = x.fillStyle = tint;
+  x.lineCap = x.lineJoin = 'round';
+  painter(x);
+  return cv.toDataURL();
+}
+
 // build tabs and cards once from ECOS / PLAYER_DEF / DINO / CARD_INFO
 function buildTitleUI() {
   const tabs = document.getElementById('ecotabs');
   tabs.innerHTML = '';
   const area = document.getElementById('cards-area');
   area.innerHTML = '';
+  // the branch side alternates all the way down the trail, across biome
+  // borders, so the journey sways left-right like real switchbacks
+  let flip = 0;
+  const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
   for (const key of Object.keys(ECOS)) {
     const eco = ECOS[key];
+    // the jump-to dot on the screen's left edge — its name floats on hover
     const tab = document.createElement('div');
     tab.className = 'ecotab';
     tab.id = 'tab-' + key;
-    tab.innerHTML = '<h3></h3><div class="tabsub"></div>';
-    tab.querySelector('h3').textContent = eco.emoji + ' ' + eco.name.toUpperCase();
+    tab.textContent = eco.emoji;
+    const tname = document.createElement('span');
+    tname.className = 'tabname';
+    tname.textContent = eco.name.toUpperCase();
+    tab.appendChild(tname);
     tab.addEventListener('click', () => tryEcoTab(key));
     tabs.appendChild(tab);
 
-    const wrap = document.createElement('div');
-    wrap.className = 'cards hidden';
-    wrap.id = 'cards-' + key;
-    // cards read left-to-right in ladder order (secrets and forks keep their spot)
+    // the waypoint camp on the trail, then its dinos as rungs beneath it:
+    // one rung per chain step, forks flanking the trail on a shared rung,
+    // secrets on a ★ rung of their own (hidden until the world gives them)
+    const sect = document.createElement('div');
+    sect.className = 'ecosect';
+    sect.id = 'sect-' + key;
+    sect.innerHTML = '<div class="ecohead"><div class="medal"></div>' +
+      '<div class="ecotxt"><h2></h2><div class="ecosub"></div><div class="ecomast"></div></div></div>';
+    sect.querySelector('.medal').textContent = eco.emoji;
+    sect.querySelector('h2').textContent = eco.name.toUpperCase();
+    // the land's signature color washes its whole chapter of the trail
+    const tint = eco.tint || '#7a6034';
+    sect.style.setProperty('--ecoline', tint);
+    const tr = parseInt(tint.slice(1, 3), 16), tg = parseInt(tint.slice(3, 5), 16), tb = parseInt(tint.slice(5, 7), 16);
+    sect.style.setProperty('--ecoglow', 'rgba(' + tr + ',' + tg + ',' + tb + ',0.15)');
+    const art = ecoBackdrop(key, tint);
+    if (art) sect.style.setProperty('--ecoart', 'url(' + art + ')');
     const roster = ALL_PLAYABLES.filter(sp => (PLAYER_DEF[sp].eco || 'valley') === key)
       .sort((a, b) => (chainRung(a) + 1 || 99) - (chainRung(b) + 1 || 99));
+    const rungs = [];
     for (const sp of roster) {
+      const rk = PLAYER_DEF[sp].secret ? 'secret-' + sp : chainRung(sp);
+      const last = rungs[rungs.length - 1];
+      if (last && last.rk === rk) last.sps.push(sp);
+      else rungs.push({ rk, sps: [sp] });
+    }
+    let step = 0;
+    for (const rung of rungs) {
+      const secret = String(rung.rk).startsWith('secret');
+      if (!secret) step++;
+      const duo = rung.sps.length > 1;
+      const row = document.createElement('div');
+      row.className = 'rung ' + (duo ? 'duo' : (flip++ % 2 ? 'right' : 'left'));
+      row.dataset.sps = rung.sps.join(',');
+      const node = document.createElement('div');
+      node.className = 'rungnode';
+      node.textContent = secret ? '★' : (ROMAN[step - 1] || step);
+      row.appendChild(node);
+      const holder = document.createElement('div');
+      holder.className = 'rungcards';
+      row.appendChild(holder);
+      for (const sp of rung.sps) buildCard(sp, holder);
+      sect.appendChild(row);
+    }
+    area.appendChild(sect);
+  }
+  // the trail doesn't end — it just hasn't been walked yet
+  const te = document.createElement('div');
+  te.id = 'trailend';
+  te.innerHTML = '<div class="tenode">· · ·</div><div class="tetext">the trail goes on…</div>';
+  area.appendChild(te);
+  // hand every preview canvas to the viewport observer
+  previewObserver.disconnect();
+  previewVisible.clear();
+  for (const cv of area.querySelectorAll('.card canvas')) previewObserver.observe(cv);
+  // the trail-spy: whichever camp owns the middle of the screen lights its dot
+  document.getElementById('journey').addEventListener('scroll', updateTrailSpot, { passive: true });
+
+  function buildCard(sp, holder) {
       const info = CARD_INFO[sp] || { desc: '', tag: '', tagClass: 'mod' };
       const card = document.createElement('div');
       card.className = 'card';
@@ -414,15 +662,15 @@ function buildTitleUI() {
       // chosen loadout's growth sits under the difficulty tag; skins are their
       // own swatch row lower down. Clicking the dino/body launches — the gender
       // bar and skin row swallow their own clicks.
-      card.innerHTML = '<div class="prevwrap"><canvas width="200" height="120"></canvas><span class="ownbadge"></span></div>' +
+      card.innerHTML = '<div class="side"><div class="prevwrap"><canvas width="200" height="120"></canvas><span class="ownbadge"></span></div>' +
         '<div class="gsel">' +
         '<span class="gseg" data-g="f">♀ Female<span class="tip"></span></span>' +
         '<span class="gseg" data-g="m">♂ Male<span class="tip"></span></span>' +
-        '</div>' +
-        '<h2></h2><div class="latin"></div><p></p>' +
-        '<div class="diff"></div><div class="prog"></div>' +
+        '</div></div>' +
+        '<div class="info"><h2></h2><div class="latin"></div><p></p>' +
+        '<div class="meta"><div class="diff"></div><div class="prog"></div></div>' +
         '<div class="price"></div>' +
-        '<div class="skinsel"></div>';
+        '<div class="skinsel"></div></div>';
       card.querySelector('canvas').id = 'prev-' + sp;
       card.querySelector('h2').textContent = DINO[sp].name.toUpperCase();
       card.querySelector('.latin').textContent = DINO[sp].full;
@@ -456,9 +704,7 @@ function buildTitleUI() {
       card.querySelector('.skinsel').addEventListener('click', (ev) => ev.stopPropagation());
       buildCardSkins(sp, card.querySelector('.skinsel'));
       card.addEventListener('click', () => tryPlay(sp));
-      wrap.appendChild(card);
-    }
-    area.appendChild(wrap);
+      holder.appendChild(card);
   }
 }
 
@@ -470,16 +716,28 @@ function refreshTitle() {
   nm.textContent = '🦖 ' + (Profiles.current || '—');
   bal.appendChild(nm);
   bal.appendChild(document.createTextNode('  ·  ❖ ' + Save.growths));
-  // ecosystem tabs + their card sets
+  // waypoint camps: lock state, subtitle, and how far each ladder is climbed
   for (const key of Object.keys(ECOS)) {
     const eco = ECOS[key];
-    const tab = document.getElementById('tab-' + key);
     const paid = ecoPaid(key);
-    tab.classList.toggle('locked', !paid);
-    tab.querySelector('.tabsub').textContent =
-      paid ? eco.sub : '🔒 ' + ecoUnlockHint(key);
-    tab.classList.toggle('sel', titleEco === key);
-    document.getElementById('cards-' + key).classList.toggle('hidden', titleEco !== key);
+    document.getElementById('tab-' + key).classList.toggle('locked', !paid);
+    const sect = document.getElementById('sect-' + key);
+    sect.classList.toggle('locked', !paid);
+    sect.querySelector('.ecosub').textContent = paid ? eco.sub : '🔒 ' + ecoUnlockHint(key);
+    const roster = ALL_PLAYABLES.filter(sp => (PLAYER_DEF[sp].eco || 'valley') === key
+      && (!PLAYER_DEF[sp].secret || Save.owned[sp]));
+    const done = roster.filter(sp => Save.mastery[sp]).length;
+    sect.querySelector('.ecomast').textContent = done + ' / ' + roster.length + ' mastered';
+  }
+  // rung nodes: green once a member is mastered, gold while playable, dim before
+  for (const row of document.querySelectorAll('#cards-area .rung')) {
+    const sps = row.dataset.sps.split(',');
+    const done = sps.some(sp => Save.mastery[sp]);
+    row.classList.toggle('done', done);
+    row.classList.toggle('open', !done && sps.some(spUnlocked));
+    // a secret's whole rung stays off the ladder until the world gives it
+    if (sps.every(sp => PLAYER_DEF[sp].secret))
+      row.style.display = sps.some(sp => Save.owned[sp]) ? '' : 'none';
   }
   // per-card ownership badge / price / progress state
   for (const sp of ALL_PLAYABLES) {
@@ -492,6 +750,7 @@ function refreshTitle() {
       if (!Save.owned[sp]) continue;
     }
     const owned = spUnlocked(sp);
+    card.classList.toggle('locked', !owned);
     // ownership is a corner badge on the preview now — ✓ unlocked, 🔒 not yet
     const badge = card.querySelector('.ownbadge');
     badge.textContent = owned ? '✓' : '🔒';
@@ -507,6 +766,7 @@ function refreshTitle() {
     // balance (they're first built at boot, before a profile is even chosen)
     buildCardSkins(sp, card.querySelector('.skinsel'));
   }
+  updateTrailSpot();
 }
 // the selected gender's saved growth, e.g. "♂ 100% Full Adult" (blank if new)
 function cardProgText(sp) {
@@ -598,15 +858,27 @@ function refreshCardOpts(sp) {
   animateAllPreviews();
 }
 
+// which camp owns the middle of the screen right now — its dot gets the glow
+function updateTrailSpot() {
+  const jr = document.getElementById('journey');
+  const probe = jr.getBoundingClientRect().top + jr.clientHeight * 0.38;
+  let cur = Object.keys(ECOS)[0];
+  for (const key of Object.keys(ECOS)) {
+    const sect = document.getElementById('sect-' + key);
+    if (sect && sect.getBoundingClientRect().top <= probe) cur = key;
+  }
+  titleEco = cur;
+  for (const key of Object.keys(ECOS))
+    document.getElementById('tab-' + key).classList.toggle('sel', key === cur);
+}
+
 function tryEcoTab(key) {
   const eco = ECOS[key];
-  if (!ecoPaid(key)) {
-    flashTitleMsg('To discover ' + eco.name + ': ' + ecoUnlockHint(key) + '!');
-    return;
-  }
+  // locked camps still scroll into view — seeing the padlocked waypoint IS
+  // the answer — but the dot also says out loud what opens the land
+  if (!ecoPaid(key)) flashTitleMsg('To discover ' + eco.name + ': ' + ecoUnlockHint(key) + '!');
   titleEco = key;
-  refreshTitle();
-  animateAllPreviews();
+  document.getElementById('sect-' + key).scrollIntoView({ block: 'start' });
 }
 // UI transition guard: SPACE-mashing must never re-click a focused button, and
 // the second click of a double-click must never land on the screen that just
@@ -677,7 +949,10 @@ function exitToLobby() {
   document.getElementById('title').classList.remove('hidden');
   document.getElementById('hud').classList.add('hidden');
   G.started = false;
-  titleEco = World.eco;
+  // reopen the journey at the land you were just walking (refreshTitle's
+  // trail-spy reads the scroll position, so scroll first, then refresh)
+  const sect = document.getElementById('sect-' + World.eco);
+  if (sect) sect.scrollIntoView({ block: 'start', behavior: 'instant' });
   refreshTitle();
   animateAllPreviews();
 }
@@ -892,6 +1167,7 @@ function selectProfile(name) {
   document.getElementById('title').classList.remove('hidden');
   titleEco = 'valley';
   refreshTitle();
+  document.getElementById('journey').scrollTop = 0;
   animateAllPreviews();
 }
 function createProfile() {
@@ -2271,17 +2547,11 @@ function render() {
           // a submerged croc is only a shadow under the surface — no hp bar,
           // no outline, just a dark shape and two eyes
           if (e.submerged && isWaterPx(e.x, e.y)) { drawCrocShadow(ctx, e); return; }
-          // THE MOORS: anything past arm's length is a SILHOUETTE — darkened
-          // to a shape, and lying about its size (each animal drifts through
-          // the mist a fixed, personal amount bigger or smaller than it is)
+          // THE MOORS: anything past arm's length is a SILHOUETTE —
+          // darkened to a shape in the grey, drawn at its true size
           const far = World.misty ? clamp((dist(e.x, e.y, p.x, p.y) - 150) / 130, 0, 1) : 0;
           if (far > 0.01) {
-            if (!e.mistS) e.mistS = 0.72 + hash2(e.id * 7 + 3, 13) * 0.7;
             ctx.save();
-            ctx.translate(e.x, e.y);
-            const sc = lerp(1, e.mistS, far);
-            ctx.scale(sc, sc);
-            ctx.translate(-e.x, -e.y);
             ctx.filter = 'brightness(' + (1 - 0.72 * far).toFixed(2) + ') saturate(' + (1 - 0.85 * far).toFixed(2) + ')';
             drawDino(ctx, e.species, e);
             ctx.filter = 'none';

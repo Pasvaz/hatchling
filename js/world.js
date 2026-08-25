@@ -39,42 +39,42 @@ const FORD_TYS = [30, 62, 100];
 // ============================================================================
 const ECOS = {
   valley: {
-    name: 'Fern Valley', emoji: '🌿', sub: 'forest · river · plains',
+    name: 'Fern Valley', tint: '#7ba03f', emoji: '🌿', sub: 'forest · river · plains',
     seed: 20260704, cost: 0,
     gen: () => genValley(),
   },
   prairie: {
-    name: 'Skull Prairie', emoji: '🦴', sub: 'bones · ponds · swamp',
+    name: 'Skull Prairie', tint: '#c9b98a', emoji: '🦴', sub: 'bones · ponds · swamp',
     seed: 20260705, cost: 100,          // unlocked by any Full Adult, then paid once
     gen: () => genPrairie(),
   },
   coast: {
-    name: 'Coastal Scrubs', emoji: '🌊', sub: 'scrubland · lake · the beach',
+    name: 'Coastal Scrubs', tint: '#5da3bd', emoji: '🌊', sub: 'scrubland · lake · the beach',
     seed: 20260706, cost: 250,
     gen: () => genCoast(),
   },
   ash: {
-    name: 'Ashfall Ridge', emoji: '🌋', sub: 'lava · hot springs · eruptions',
+    name: 'Ashfall Ridge', tint: '#d06a3a', emoji: '🌋', sub: 'lava · hot springs · eruptions',
     seed: 20260707, cost: 500,
     gen: () => genAsh(),
   },
   delta: {
-    name: 'Lertentous Delta', emoji: '🐟', sub: 'rainforest · a hundred islands · the drowned south',
+    name: 'Lertentous Delta', tint: '#4fae8f', emoji: '🐟', sub: 'rainforest · a hundred islands · the drowned south',
     seed: 20260711, cost: 1000, size: 256,   // the engine's maximum — tile packing caps at 256
     gen: () => genDelta(),
   },
   wall: {
-    name: 'The Nivalotitan Wall', emoji: '🏔️', sub: 'the climbing maze · giant pines · the frozen dark',
+    name: 'The Nivalotitan Wall', tint: '#a8c8dc', emoji: '🏔️', sub: 'the climbing maze · giant pines · the frozen dark',
     seed: 20260718, cost: 2000, size: 256,
     gen: () => genWall(),
   },
   moor: {
-    name: 'The Great Moors of Martulisth', emoji: '🌫️', sub: 'mist · silhouettes · the grey waste',
+    name: 'The Great Moors of Martulisth', tint: '#9a93ad', emoji: '🌫️', sub: 'mist · silhouettes · the grey waste',
     seed: 20260824, cost: 2500, size: 200,
     gen: () => genMoor(),
   },
   jungle: {
-    name: 'The Sodden Reach', emoji: '🌴', sub: 'deep jungle · swollen rivers · the monsoon',
+    name: 'The Sodden Reach', tint: '#3fae57', emoji: '🌴', sub: 'deep jungle · swollen rivers · the monsoon',
     seed: 20260825, cost: 3000, size: 240,
     gen: () => genJungle(),
   },

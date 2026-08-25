@@ -174,13 +174,12 @@
     z-index: 10;
   }
   .screen.trans { background: rgba(16,12,7,0.75); }
-  #title h1, #profiles h1 {
+  #profiles h1 {
     font-size: 42px; letter-spacing: 10px; color: #ffe9a0;
     text-shadow: 3px 3px 0 #6a3a1a, 6px 6px 0 rgba(0,0,0,0.4);
     margin-bottom: 4px;
   }
-  #title .sub, #profiles .sub { font-size: 12px; letter-spacing: 4px; color: #a5936c; margin-bottom: 14px; text-transform: uppercase; }
-  #profiles .sub { margin-bottom: 26px; }
+  #profiles .sub { font-size: 12px; letter-spacing: 4px; color: #a5936c; margin-bottom: 26px; text-transform: uppercase; }
   #gr-balance {
     position: absolute; right: 22px; top: 18px;
     font-size: 15px; letter-spacing: 1px; color: #ffd23e;
@@ -226,60 +225,186 @@
   }
   #new-name:focus { border-color: #d8a534; }
   #profile-msg { min-height: 16px; margin-top: 12px; font-size: 12px; color: #ffd23e; letter-spacing: 1px; opacity: 0; transition: opacity 0.25s; }
-  #ecotabs { display: flex; gap: 12px; margin-bottom: 16px; }
+  /* ---------- the lobby: one long expedition scroll ----------
+     no panels: a single trail spine runs down the middle of the screen from
+     the wordmark to the edge of the known world. Biomes are waypoint camps ON
+     the trail; their dinos hang off it left and right like a field journal's
+     timeline. A quiet dot column on the left edge jumps between camps. */
+  #title { display: block; }
+  #journey { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; scroll-behavior: smooth; }
+  #jhead { text-align: center; padding: 30px 0 4px; }
+  #title h1 {
+    font-size: 36px; letter-spacing: 9px; color: #ffe9a0;
+    text-shadow: 3px 3px 0 #6a3a1a, 6px 6px 0 rgba(0,0,0,0.4);
+  }
+  #title .sub { font-size: 11px; letter-spacing: 4px; color: #a5936c; text-transform: uppercase; margin-top: 4px; }
+  #title .hint { font-size: 10px; color: #7d6c4c; letter-spacing: 1px; margin-top: 10px; }
+  #cards-area { position: relative; width: min(880px, 92vw); margin: 0 auto; padding: 6px 0 10px; }
+  /* the trail itself — one stitched line through every land */
+  #cards-area::before {
+    content: ''; position: absolute; left: 50%; top: 34px; bottom: 6px;
+    border-left: 2px dashed #3a2d18; transform: translateX(-1px);
+  }
+
+  /* the jump-to dots: a bare column of camps on the screen's left edge */
+  #ecotabs {
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 9px; z-index: 12;
+  }
   .ecotab {
-    cursor: pointer; text-align: center;
-    background: rgba(35,26,14,0.85);
-    border: 2px solid #57452a; border-radius: 9px;
-    padding: 7px 20px 6px;
-    transition: border-color 0.12s, transform 0.12s;
+    position: relative; cursor: pointer;
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    background: radial-gradient(circle at 35% 30%, #3a2d18, #1d1409);
+    border: 2px solid #57452a;
+    transition: border-color 0.12s, transform 0.12s, box-shadow 0.12s;
   }
-  .ecotab:hover { transform: translateY(-2px); }
-  .ecotab.sel { border-color: #d8a534; background: rgba(58,44,22,0.95); }
-  .ecotab h3 { font-size: 13px; letter-spacing: 3px; color: #ffe9a0; }
-  .ecotab .tabsub { font-size: 9px; letter-spacing: 1px; color: #a5936c; margin-top: 3px; }
-  .ecotab.locked h3 { color: #8d7c58; }
+  .ecotab:hover { transform: scale(1.12); border-color: #7a6034; }
+  .ecotab.sel { border-color: #d8a534; box-shadow: 0 0 10px rgba(216,165,52,0.45); }
+  .ecotab.locked { filter: grayscale(0.85) brightness(0.65); }
+  /* the camp's name floats out on hover — no panel, just a whisper of text */
+  .ecotab .tabname {
+    position: absolute; left: 120%; top: 50%; transform: translateY(-50%);
+    white-space: nowrap; pointer-events: none;
+    font-size: 10px; letter-spacing: 2px; color: #ffe9a0;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.9);
+    opacity: 0; transition: opacity 0.12s;
+  }
+  .ecotab:hover .tabname { opacity: 1; }
+  .ecotab.locked .tabname { color: #8d7c58; }
+
+  /* the flash line floats over everything, a quiet banner up top */
   #title-msg {
-    min-height: 16px; font-size: 12px; color: #ffd23e; letter-spacing: 1px;
-    margin-bottom: 8px; opacity: 0; transition: opacity 0.25s;
-    text-shadow: 0 1px 0 rgba(0,0,0,0.6);
+    position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+    z-index: 13; pointer-events: none;
+    max-width: 74vw; text-align: center;
+    font-size: 12px; color: #ffd23e; letter-spacing: 1px;
+    padding: 6px 16px; border-radius: 8px;
+    background: rgba(16,11,5,0.88);
+    opacity: 0; transition: opacity 0.25s;
   }
-  /* card sets wrap and scroll — built to hold 30+ dinos per ecosystem */
-  .cards {
-    display: flex; flex-wrap: wrap; justify-content: center;
-    gap: 18px; margin-bottom: 18px;
-    max-width: 76vw; max-height: 56vh;
-    overflow-y: auto; padding: 8px;
+
+  /* ---------- a biome waypoint: a CHAPTER of the trail ----------
+     every land opens like a new chapter: a big medallion on the spine, a
+     full-width divider stitched through it, and the land's signature color
+     (--ecoline / --ecoglow, set from ECOS.tint) washing its whole stretch
+     of the journey. A locked land stays sepia — the color arrives the day
+     you discover it. */
+  .ecosect { position: relative; padding: 56px 0 34px; --ecoline: #7a6034; --ecoglow: rgba(122,96,52,0.1); }
+  /* the ambient wash: widest at the waypoint, bleeding up into the end of
+     the previous chapter so the color arrives gradually, not at a line */
+  .ecosect::after {
+    content: ''; position: absolute; top: -150px; bottom: 0;
+    left: 50%; width: 100vw; transform: translateX(-50%);
+    background: radial-gradient(ellipse 58% 380px at 50% 224px, var(--ecoglow), transparent 78%);
+    pointer-events: none; z-index: -1;   /* under the cards, over the ground */
   }
+  /* the land's scenery, sketched big and washed nearly into the dark:
+     the drawing itself comes from ecoBackdrop() in js/main.js */
+  .ecosect::before {
+    content: ''; position: absolute; top: 0; bottom: 0;
+    left: 50%; width: 100vw; transform: translateX(-50%);
+    background-image: var(--ecoart, none);
+    background-repeat: repeat; background-position: center top;
+    background-size: 640px 560px;
+    opacity: 0.07; pointer-events: none; z-index: -1;
+  }
+  .ecosect.locked::before { opacity: 0.05; filter: grayscale(0.9); }
+  .ecohead { position: relative; text-align: center; margin-bottom: 14px; z-index: 1; }
+  /* the divider: a colored seam across the whole screen, through the medal */
+  .ecohead::before {
+    content: ''; position: absolute; top: 39px; height: 2px;
+    left: 50%; width: min(100vw, 1400px); transform: translateX(-50%);
+    background: linear-gradient(90deg, transparent, var(--ecoline) 30%, var(--ecoline) 70%, transparent);
+    opacity: 0.28; filter: blur(2px);
+  }
+  .ecohead .medal {
+    position: relative;
+    width: 78px; height: 78px; border-radius: 50%; margin: 0 auto 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+    background: radial-gradient(circle at 35% 30%, #3a2d18, #1d1409);
+    border: 2px solid var(--ecoline);
+    box-shadow: 0 0 0 7px rgba(22,17,10,0.9), 0 0 30px var(--ecoglow), inset 0 -4px 8px rgba(0,0,0,0.4);
+  }
+  .ecohead h2 { font-size: 27px; letter-spacing: 7px; color: #ffe9a0; text-shadow: 2px 2px 0 rgba(0,0,0,0.55); }
+  .ecohead .ecosub { font-size: 10px; letter-spacing: 3px; color: #a5936c; text-transform: uppercase; margin-top: 4px; }
+  .ecohead .ecomast { font-size: 10px; letter-spacing: 1px; color: #a3bf58; margin-top: 5px; }
+  .ecosect.locked::after { background: radial-gradient(ellipse 58% 380px at 50% 224px, rgba(90,78,55,0.07), transparent 78%); }
+  .ecosect.locked .ecohead::before { background: linear-gradient(90deg, transparent, #3a2d18 30%, #3a2d18 70%, transparent); opacity: 0.6; }
+  .ecosect.locked .medal { filter: grayscale(0.85) brightness(0.7); border-color: #57452a; box-shadow: 0 0 0 7px rgba(22,17,10,0.9); }
+  .ecosect.locked h2 { color: #8d7c58; }
+  .ecosect.locked .ecosub { color: #8d7c58; text-transform: none; letter-spacing: 1px; }
+  .ecosect.locked .ecomast { color: #6a5c40; }
+
+  /* ---------- a rung: one dino hung off the trail ---------- */
+  .rung { position: relative; display: flex; padding: 9px 0; }
+  .rung.right { justify-content: flex-end; }
+  .rungcards { display: flex; gap: 12px; width: calc(50% - 46px); min-width: 0; }
+  .rungnode {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; z-index: 1;
+    background: #1d1409; border: 2px solid #57452a; color: #8d7c58;
+    box-shadow: 0 0 0 5px rgba(22,17,10,0.9);
+  }
+  .rung.open .rungnode { border-color: #d8a534; color: #ffd23e; }
+  .rung.done .rungnode { border-color: #5c8a3a; color: #8fdc6a; }
+  /* a mastered rung inks its stretch of the trail in green, over the stitches */
+  .rung.done::before {
+    content: ''; position: absolute; left: 50%; top: 0; bottom: 0;
+    border-left: 2px solid #4f6a33; transform: translateX(-1px);
+  }
+  /* the little branch from the trail to the card */
+  .rung::after { content: ''; position: absolute; top: 50%; width: 30px; border-top: 2px dashed #3a2d18; }
+  .rung.left::after { right: calc(50% + 15px); }
+  .rung.right::after { left: calc(50% + 15px); }
+  .rung.open::after, .rung.done::after { border-color: #57452a; }
+  /* a fork rung: the two choices flank the trail, one node between them */
+  .rung.duo .rungcards { width: 100%; justify-content: space-between; }
+  .rung.duo .card { flex: none; width: calc(50% - 46px); }
+  .rung.duo::after { left: calc(50% - 46px); right: auto; width: 92px; }
+
+  /* ---------- the species card: a field-journal entry ---------- */
   .card {
-    width: 218px; cursor: pointer;
+    flex: 1; min-width: 0; cursor: pointer;
+    display: flex; gap: 12px; text-align: left;
     background: rgba(35,26,14,0.9);
-    border: 3px solid #57452a;
-    padding: 12px;
-    text-align: center;
-    transition: transform 0.12s, border-color 0.12s;
+    border: 2px solid #57452a;
+    padding: 11px;
+    transition: transform 0.12s, border-color 0.12s, box-shadow 0.12s;
   }
-  .card:hover { transform: translateY(-4px) scale(1.02); border-color: #d8a534; }
+  .card:hover { transform: scale(1.02); border-color: #d8a534; box-shadow: 0 4px 18px rgba(0,0,0,0.45); }
+  .card .side { flex: none; width: 148px; }
+  .card .info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
   .card .prevwrap { position: relative; line-height: 0; }
-  .card canvas { width: 100%; height: 120px; background: #1d1912; border: 1px solid #3a2d18; }
+  .card canvas { width: 100%; height: 90px; background: #1d1912; border: 1px solid #3a2d18; }
+  .card.locked canvas { filter: grayscale(0.55) brightness(0.8); }
   /* ownership badge in the preview's top-right corner: ✓ owned, 🔒 still locked */
   .ownbadge {
-    position: absolute; top: 6px; right: 6px; pointer-events: none;
-    width: 22px; height: 22px; line-height: 21px; text-align: center;
-    font-size: 12px; border-radius: 50%;
+    position: absolute; top: 5px; right: 5px; pointer-events: none;
+    width: 20px; height: 20px; line-height: 19px; text-align: center;
+    font-size: 11px; border-radius: 50%;
     background: rgba(10,7,3,0.82); border: 1px solid #57452a;
   }
   .ownbadge.owned { color: #8fdc6a; border-color: #5c8a3a; }
   .ownbadge.locked { color: #d6c088; }
-  .card h2 { font-size: 15px; letter-spacing: 2px; margin: 8px 0 2px; color: #ffe9a0; }
-  .card .latin { font-size: 10px; font-style: italic; color: #a5936c; margin-bottom: 8px; }
-  .card p { font-size: 10.5px; line-height: 1.5; color: #cdbb92; text-align: left; }
-  .card .diff { margin-top: 8px; font-size: 10px; letter-spacing: 2px; }
+  .card h2 { font-size: 13.5px; letter-spacing: 1.5px; color: #ffe9a0; }
+  .card .latin { font-size: 9.5px; font-style: italic; color: #a5936c; margin: 2px 0 6px; }
+  .card p { font-size: 10px; line-height: 1.5; color: #cdbb92; }
+  .card .meta { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; margin-top: auto; padding-top: 7px; }
+  .card .diff { font-size: 9.5px; letter-spacing: 1.5px; }
   .diff.mod { color: #d8a534; } .diff.hard { color: #e05a4a; } .diff.swim { color: #6cadc4; }
-  .card .prog { margin-top: 3px; font-size: 10px; letter-spacing: 1px; color: #a3bf58; min-height: 13px; }
-  .card .price { margin-top: 8px; font-size: 10px; letter-spacing: 1px; color: #ffd23e; }
+  .card .prog { font-size: 9.5px; letter-spacing: 1px; color: #a3bf58; }
+  .card .price { margin-top: 5px; font-size: 9.5px; letter-spacing: 1px; color: #ffd23e; }
   .card .price.poor { color: #8d7c58; }
-  #title .hint { font-size: 11px; color: #7d6c4c; letter-spacing: 1px; }
+
+  /* the end of the known world — for now */
+  #trailend { text-align: center; padding: 18px 0 34px; }
+  #trailend .tenode { font-size: 14px; letter-spacing: 6px; color: #57452a; }
+  #trailend .tetext { font-size: 10px; letter-spacing: 2px; color: #7d6c4c; margin-top: 8px; }
 
   /* ---------- gender segmented toggle (under the preview) ---------- */
   .gsel { display: flex; margin: 9px 0 2px; border: 1px solid #4a3a22; border-radius: 6px; overflow: hidden; }
@@ -304,7 +429,7 @@
   }
   .gseg:hover .tip { display: block; }
   /* ---------- skin swatches (their own row lower down) ---------- */
-  .skinsel { display: flex; gap: 7px; justify-content: center; margin-top: 10px; }
+  .skinsel { display: flex; gap: 7px; justify-content: flex-start; margin-top: 8px; }
   .cskin {
     position: relative; cursor: pointer;
     border: 2px solid #4a3a22; border-radius: 6px; padding: 2px;
@@ -436,33 +561,57 @@
   body.touch #btn-lobby { font-size: 11px; padding: 9px 18px; }
 
   /* ---------- compact lobby for touch screens ----------
-     phone screens are ~half the height the lobby was designed for: smaller
-     logo/tabs, tighter cards (the blurb hides — the preview and name carry
-     it), and everything hover-gated becomes always-visible */
-  body.touch #title h1, body.touch #profiles h1 { font-size: 22px; letter-spacing: 5px; text-shadow: 2px 2px 0 #6a3a1a; margin-bottom: 2px; }
-  body.touch #title .sub, body.touch #profiles .sub { font-size: 9px; letter-spacing: 2px; margin-bottom: 8px; }
-  body.touch #gr-balance { right: 8px; top: 8px; font-size: 12px; padding: 5px 10px; }
-  body.touch #ecotabs { gap: 8px; margin-bottom: 8px; }
-  body.touch .ecotab { padding: 5px 12px 4px; }
-  body.touch .ecotab h3 { font-size: 11px; letter-spacing: 2px; }
-  body.touch .ecotab .tabsub { font-size: 8px; }
-  body.touch #title-msg { margin-bottom: 4px; font-size: 11px; }
-  body.touch .cards { gap: 10px; max-width: 96vw; max-height: 58vh; padding: 4px; margin-bottom: 4px; touch-action: pan-y; }
-  body.touch .card { width: 168px; padding: 8px; border-width: 2px; }
-  body.touch .card canvas { height: 86px; }
-  body.touch .card h2 { font-size: 12px; letter-spacing: 1px; margin: 6px 0 1px; }
-  body.touch .card .latin { font-size: 8.5px; margin-bottom: 4px; }
+     phone screens are narrow: the trail moves to the left edge, every card
+     hangs off its right side, the waypoint camps sit on the trail, and the
+     jump-dots shrink into the far left margin. Blurbs hide — the preview
+     and the name carry the card. */
+  body.touch #profiles h1 { font-size: 22px; letter-spacing: 5px; text-shadow: 2px 2px 0 #6a3a1a; margin-bottom: 2px; }
+  body.touch #profiles .sub { font-size: 9px; letter-spacing: 2px; margin-bottom: 8px; }
+  body.touch #gr-balance { right: 8px; top: 8px; font-size: 12px; padding: 5px 10px; z-index: 14; }
+  body.touch #jhead { padding: calc(14px + env(safe-area-inset-top)) 0 2px; }
+  body.touch #title h1 { font-size: 22px; letter-spacing: 5px; text-shadow: 2px 2px 0 #6a3a1a; }
+  body.touch #title .sub { font-size: 8.5px; letter-spacing: 2px; margin-top: 2px; }
+  body.touch #title .hint { display: none; }
+  body.touch #journey { touch-action: pan-y; }
+  body.touch #cards-area { width: auto; margin: 0 6px 0 calc(44px + env(safe-area-inset-left)); }
+  body.touch #cards-area::before { left: 14px; transform: none; }
+  body.touch #ecotabs { left: calc(2px + env(safe-area-inset-left)); gap: 6px; }
+  body.touch .ecotab { width: 30px; height: 30px; font-size: 13px; }
+  body.touch .ecotab .tabname { display: none; }
+  body.touch .ecosect { padding: 30px 0 8px; }
+  body.touch .ecosect::after { background: radial-gradient(ellipse 70% 280px at 30% 194px, var(--ecoglow), transparent 78%); }
+  body.touch .ecosect::before { background-size: 440px 385px; }
+  body.touch .ecohead { display: flex; align-items: center; gap: 12px; text-align: left; margin-bottom: 6px; }
+  body.touch .ecohead::before { top: 26px; left: 0; width: 100%; transform: none;
+    background: linear-gradient(90deg, var(--ecoline), transparent 85%); opacity: 0.3; }
+  body.touch .ecohead .medal { width: 52px; height: 52px; font-size: 23px; margin: 0 0 0 -11px; box-shadow: 0 0 0 5px rgba(22,17,10,0.9), 0 0 20px var(--ecoglow); }
+  body.touch .ecohead h2 { font-size: 16px; letter-spacing: 3px; }
+  body.touch .ecohead .ecosub { font-size: 8px; letter-spacing: 1px; margin-top: 2px; }
+  body.touch .ecohead .ecomast { font-size: 8px; margin-top: 2px; }
+  body.touch .rung { justify-content: flex-end; padding: 6px 0; }
+  body.touch .rungcards { width: calc(100% - 40px); }
+  body.touch .rungnode { left: 14px; width: 24px; height: 24px; font-size: 9px; box-shadow: 0 0 0 4px rgba(22,17,10,0.9); }
+  body.touch .rung.done::before { left: 14px; transform: none; }
+  body.touch .rung::after, body.touch .rung.left::after, body.touch .rung.right::after,
+  body.touch .rung.duo::after { left: 26px; right: auto; width: 14px; }
+  body.touch .rung.duo .rungcards { flex-direction: column; gap: 8px; }
+  body.touch .rung.duo .card { width: 100%; }
+  body.touch .card { gap: 9px; padding: 8px; }
+  body.touch .card .side { width: 128px; }
+  body.touch .card canvas { height: 76px; }
+  body.touch .card h2 { font-size: 11.5px; letter-spacing: 1px; }
+  body.touch .card .latin { font-size: 8px; margin: 1px 0 3px; }
   body.touch .card p { display: none; }
-  body.touch .card .diff { margin-top: 4px; font-size: 9px; letter-spacing: 1px; }
-  body.touch .card .prog { font-size: 9px; min-height: 11px; margin-top: 2px; }
-  body.touch .card .price { margin-top: 4px; font-size: 9px; }
-  body.touch .gsel { margin: 6px 0 2px; }
+  body.touch .card .diff { font-size: 8.5px; letter-spacing: 1px; }
+  body.touch .card .prog { font-size: 8.5px; }
+  body.touch .card .price { margin-top: 2px; font-size: 8.5px; }
+  body.touch .card .meta { padding-top: 3px; gap: 8px; }
+  body.touch .gsel { margin: 5px 0 0; }
   /* finger-sized targets (~44px) — same look, just more room to hit */
-  body.touch .gseg { padding: 16px 0; font-size: 10px; }
-  body.touch .skinsel { gap: 9px; margin-top: 6px; }
+  body.touch .gseg { padding: 12px 0; font-size: 10px; }
+  body.touch .skinsel { gap: 9px; margin-top: 5px; }
   body.touch .cskin { padding: 4px; }
   body.touch .cskin canvas { width: 34px; height: 34px; }
-  body.touch #title .hint { display: none; }
   body.touch .profcard { padding: 9px 14px; }
   /* no hover on touch — delete is always visible, and big enough to hit */
   body.touch .profcard .pdel { opacity: 1; font-size: 14px; padding: 13px 15px; }
@@ -470,7 +619,7 @@
      stick, and the lobby screens scroll from the top instead of clipping */
   body.touch .card:hover, body.touch .ecotab:hover, body.touch .profcard:hover,
   body.touch #gr-balance:hover, body.touch .cskin:hover, body.touch .gseg:hover { transform: none; }
-  body.touch #title, body.touch #profiles {
+  body.touch #profiles {
     justify-content: flex-start;
     overflow-y: auto; touch-action: pan-y;
     padding: calc(8px + env(safe-area-inset-top)) env(safe-area-inset-right)
@@ -564,13 +713,21 @@
 
   <div id="title" class="screen hidden">
     <div id="gr-balance">❖ 0</div>
-    <h1>HATCHLING</h1>
-    <div class="sub">a dinosaur survival game</div>
-    <!-- tabs and dino cards are generated from the ECOS / PLAYER_DEF registries -->
+    <!-- the lobby is ONE long expedition scroll: the trail spine runs from the
+         wordmark to the bottom of the world, each biome is a waypoint ON the
+         trail, and its dinos hang off the spine left and right like a
+         timeline. The dot column on the left edge is just a jump-to map.
+         Everything is generated from the ECOS / PLAYER_DEF registries. -->
     <div id="ecotabs"></div>
     <div id="title-msg"></div>
-    <div id="cards-area"></div>
-    <div class="hint">choose your hatchling · reach FULL ADULT to unlock the next dinosaur · ❖ growths buy skins</div>
+    <div id="journey">
+      <div id="jhead">
+        <h1>HATCHLING</h1>
+        <div class="sub">a dinosaur survival game</div>
+        <div class="hint">choose your hatchling · reach FULL ADULT to unlock the next dinosaur · ❖ growths buy skins</div>
+      </div>
+      <div id="cards-area"></div>
+    </div>
   </div>
 
   <div id="death" class="screen hidden">

@@ -34,7 +34,7 @@ lands harder, Kerberosaurus herds are warm to huddle beside, and Nanuqsaurus
 rules the whiteout (Jianchangosaurus → Eshanosaurus → Nanuqsaurus →
 Nivarex) — and beyond the Wall, **The Great Moors of Martulisth**: a grey,
 sunless heath where mist rings the screen and everything beyond arm's length
-is a silhouette lying about its size (Simosuchus → Koreaceratops →
+is a dark silhouette (Simosuchus → Koreaceratops →
 Sarcosaurus → Dryptosaurus → Gastonia). Somewhere
 in the high maze one hidden cave holds the **frozen giant** the mountain is
 named for — find it, and the biggest animal in the game joins your lobby
@@ -338,10 +338,9 @@ and the hatchlings stay safely below until they emerge as sub-adults.
 **Playable — The Great Moors of Martulisth** (opens when Nivarex is mastered — or when a Nivalotitan reaches ADULT; the giant needn't finish growing)
 
 The moors are grey, gloomy and NEVER sunny: mist lingers in a heavy ring at
-the edge of the screen, and anything past arm's length is a dark **silhouette
-that lies about its size** — each animal looms through the mist a fixed,
-personal amount bigger or smaller than it really is. Guess wrong at your
-peril.
+the edge of the screen, and anything past arm's length is a dark
+**silhouette** — a shape in the grey with no name, no health bar and no
+shadow. Guess what it is at your peril.
 
 - **Simosuchus** (unlocked with the land) — weird and wonderful: a tiny, quadrupedal, square-faced armored digger (Protoceratops-sized). Press **B** anywhere (not while resting) and it digs its OWN burrow — press **E** at it to hide head-first, backside out: attackers deal next to nothing to the armored butt and give up. One burrow at a time — B beside it collapses it so you can dig a wiser one.
 - **Koreaceratops** (master Simosuchus) — a small horned swimmer with a deep paddle tail: the only moor-dweller at home in the black meres' deep water.
