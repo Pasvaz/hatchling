@@ -65,8 +65,13 @@ const ECOS = {
   },
   wall: {
     name: 'The Nivalotitan Wall', emoji: '🏔️', sub: 'the climbing maze · giant pines · the frozen dark',
-    seed: 20260718, cost: 2000, size: 256,   // the new endgame — biggest, coldest, deadliest
+    seed: 20260718, cost: 2000, size: 256,
     gen: () => genWall(),
+  },
+  moor: {
+    name: 'The Great Moors of Martulisth', emoji: '🌫️', sub: 'mist · silhouettes · the grey waste',
+    seed: 20260824, cost: 2500, size: 200,
+    gen: () => genMoor(),
   },
 };
 // the river only ever occupies this x window (px) — used to cull river passes
@@ -231,6 +236,7 @@ function genWorld(eco) {
   W.ashy = false;       // volcanic ecosystems tint the whole palette
   W.lush = false;       // rainforest ecosystems deepen every green
   W.snowy = false;      // the Wall whitens the land and hides it in mist
+  W.misty = false;      // the Moors grey the land and RING the screen in mist
   W.caves = [];         // wind-shadow shelters (the Wall) — one hides the giant
 
   ECOS[eco].gen();
@@ -727,6 +733,14 @@ function genWall() {
   const ponds = [{ x: 48, y: 196, r: 3.4 }, { x: 176, y: 210, r: 3.8 }, { x: 118, y: 150, r: 3.0 }, { x: 82, y: 96, r: 2.6 }];
   for (const p of ponds) addWaterBlob(p.x, p.y, p.r, false);
 
+  // mud wallows — thawed ground in the sheltered pine belt (and one hardy
+  // spring-fed patch higher up): without mud, hygiene dies and growth stalls
+  const muds = [
+    { x: 100, y: 210, r: 3.4 }, { x: 160, y: 190, r: 3.2 },
+    { x: 70, y: 150, r: 3.0 }, { x: 190, y: 100, r: 2.8 },
+  ];
+  for (const m of muds) addMudPool(m);
+
   // caves: wind-shadow shelters tucked against the walls. The last one, buried
   // deep in the high north maze, is SECRET — it holds the frozen Nivalotitan.
   const caveSpots = [
@@ -769,6 +783,97 @@ function genWall() {
     if (!isWaterPx(px, py) && terAtPx(px, py) !== T_CLIFF)
       W.ferns.push({ x: px, y: py, food: 1, regrow: 0, s: rrange(0.8, 1.3) });
   }
+}
+
+// ---------------------------------------------------------------------------
+// THE GREAT MOORS OF MARTULISTH — grey rolling heath under a mist that never
+// lifts. Black meres pock the waste (some deep-hearted — Koreaceratops water),
+// gnarled snags claw at a sunless sky, and everything beyond a stone's throw
+// is a silhouette that may be lying about its size. Gloom is the whole point.
+// ---------------------------------------------------------------------------
+function genMoor() {
+  const W = World;
+  W.misty = true;
+  W.nests = {
+    simo: { x: 60 * TILE, y: 150 * TILE },      // a soft hollow in the south-west heath
+    korea: { x: 140 * TILE, y: 162 * TILE },    // beside the big southern mere
+    sarco: { x: 44 * TILE, y: 60 * TILE },      // the bone-strewn north-west
+    drypto: { x: 150 * TILE, y: 52 * TILE },    // the open north hunting ground
+    gastonia: { x: 100 * TILE, y: 108 * TILE }, // dead centre — armored and unbothered
+  };
+  // black meres: still pools with deep hearts scattered over the waste
+  const meres = [
+    { x: 146, y: 156, r: 5.4, deep: true }, { x: 40, y: 40, r: 4.0, deep: true },
+    { x: 168, y: 96, r: 4.4, deep: true }, { x: 84, y: 66, r: 3.4, deep: false },
+    { x: 30, y: 120, r: 3.6, deep: false }, { x: 120, y: 40, r: 3.2, deep: false },
+    { x: 66, y: 184, r: 3.8, deep: true }, { x: 180, y: 172, r: 3.4, deep: false },
+  ];
+  const muds = [
+    { x: 52, y: 136, r: 3.6 }, { x: 128, y: 120, r: 3.4 }, { x: 172, y: 60, r: 3.2 },
+    { x: 92, y: 176, r: 3.4 }, { x: 36, y: 76, r: 3.0 },
+  ];
+
+  // --- base terrain: open heath; thin gnarled copses gather on the wet ground ---
+  for (let ty = 0; ty < HT; ty++) {
+    for (let tx = 0; tx < WT; tx++) {
+      const i = tIdx(tx, ty);
+      let ff = clamp((fbm(tx * 0.08 + 131, ty * 0.08 + 71) - 0.62) * 1.7, 0, 1) * 0.5;
+      for (const m of muds) {
+        const dd = Math.hypot(tx - m.x, ty - m.y);
+        ff = Math.max(ff, clamp(1.2 - dd / (m.r + 8), 0, 1) * 0.85);
+      }
+      W.forest[i] = ff;
+      W.ter[i] = ff > 0.45 ? T_FOREST : T_GRASS;
+    }
+  }
+
+  for (const m of meres) addWaterBlob(m.x, m.y, m.r, m.deep);
+  for (const m of muds) addMudPool(m);
+
+  // --- vegetation: heath tussocks everywhere, dead snags, sparse grim pines ---
+  for (let ty = 1; ty < HT - 1; ty++) {
+    for (let tx = 1; tx < WT - 1; tx++) {
+      const i = tIdx(tx, ty), t = W.ter[i];
+      if (t === T_WATER || t === T_DEEP || t === T_MUD) continue;
+      const px = tx * TILE + rrange(2, TILE - 2), py = ty * TILE + rrange(2, TILE - 2);
+      const nestClear = nearAnyNest(px, py, 70);
+      const ff = W.forest[i];
+      const r = rnd();
+      if (!nestClear && ff > 0.5 && r < 0.02 + 0.12 * clamp((ff - 0.5) * 3, 0, 1)) {
+        // wet-ground copses: half the trees here died standing
+        const kind = rnd() < 0.45 ? 2 : 0;
+        W.trees.push({ x: px, y: py, s: rrange(0.7, 1.4), kind, v: rnd() < 0.5 ? 0 : 1 });
+      } else if (!nestClear && t === T_GRASS && ff < 0.3 && r < 0.0035) {
+        W.trees.push({ x: px, y: py, s: rrange(0.8, 1.5), kind: 2 });   // lone clawing snags
+      } else if (ff > 0.42 && r > 0.9 && r < 0.95) {
+        W.ferns.push({ x: px, y: py, food: 1, regrow: 0, s: rrange(0.8, 1.25) });
+      } else if (t === T_SAND && r > 0.94) {
+        W.horsetails.push({ x: px, y: py, food: 1, regrow: 0, s: rrange(0.7, 1.15) });
+      } else if (!nestClear && r > 0.994) {
+        W.rocks.push({ x: px, y: py, s: rrange(0.8, 1.9) });   // grey standing stones
+      } else if (!nestClear) {
+        const r2 = rnd();
+        if (t === T_GRASS && ff < 0.35 && r2 < 0.05) W.props.push({ kind: 'tallgrass', x: px, y: py, s: rrange(0.85, 1.45) });
+        else if (t === T_GRASS && ff < 0.35 && r2 > 0.9965) W.props.push({ kind: 'ribcage', x: px, y: py, s: rrange(0.9, 1.5), flip: rnd() < 0.5 ? 1 : -1 });
+        else if (t === T_GRASS && ff < 0.35 && r2 > 0.9935 && r2 < 0.9945) W.props.push({ kind: 'skull', x: px, y: py, s: rrange(0.9, 1.4), flip: rnd() < 0.5 ? 1 : -1 });
+        else if (ff > 0.45 && r2 < 0.012) W.props.push({ kind: 'log', x: px, y: py, s: rrange(0.8, 1.2), flip: rnd() < 0.5 ? 1 : -1 });
+        else if (ff > 0.5 && r2 < 0.017) W.props.push({ kind: 'mushroom', x: px, y: py, s: rrange(0.8, 1.3) });
+      }
+    }
+  }
+
+  // grazing for the herds: fern clumps strewn across the open heath
+  for (let k = 0; k < 44; k++) {
+    const px = rrange(8, WT - 8) * TILE, py = rrange(8, HT - 8) * TILE;
+    if (!isWaterPx(px, py) && !isMudPx(px, py)) W.ferns.push({ x: px, y: py, food: 1, regrow: 0, s: rrange(0.8, 1.25) });
+  }
+
+  // worn trails between the meres — every silhouette walks these
+  addTrail(W.nests.simo.x, W.nests.simo.y, muds[0].x * TILE, muds[0].y * TILE);
+  addTrail(meres[0].x * TILE, meres[0].y * TILE, muds[1].x * TILE, muds[1].y * TILE);
+  addTrail(W.nests.drypto.x, W.nests.drypto.y, meres[2].x * TILE, meres[2].y * TILE);
+  addTrail(W.nests.gastonia.x, W.nests.gastonia.y, muds[1].x * TILE, muds[1].y * TILE);
+  addTrail(meres[1].x * TILE, meres[1].y * TILE, muds[4].x * TILE, muds[4].y * TILE);
 }
 
 // ---------------------------------------------------------------------------
@@ -997,6 +1102,7 @@ function buildPaintData() {
     const alpha = 0.05 + crnd() * 0.055;
     let rgb;
     if (World.snowy) rgb = warm < 0.5 ? '210,224,238' : warm < 0.8 ? '176,196,216' : '150,172,196';
+    else if (World.misty) rgb = warm < 0.5 ? '96,102,94' : warm < 0.8 ? '120,124,112' : '138,138,124';
     else if (World.ashy) rgb = warm < 0.4 ? '74,70,62' : warm < 0.75 ? '128,120,104' : '156,120,84';
     else if (World.lush) rgb = ff > 0.42
       ? (warm < 0.45 ? '24,58,30' : warm < 0.8 ? '52,104,52' : '88,128,58')
@@ -1009,14 +1115,18 @@ function buildPaintData() {
   // brush-stroke grass blades (ash-grey tussocks on the ridge)
   const FOREST_BLADES = World.ashy
     ? ['#4c5238', '#5c6242', '#6d7350', '#424836']
-    : World.lush
-      ? ['#2a5c30', '#376e3a', '#468248', '#204c28']
-      : ['#46572c', '#586b36', '#6d8246', '#3c4c26'];
+    : World.misty
+      ? ['#4a5246', '#565e50', '#636b5a', '#40483e']    // drowned moor-greens
+      : World.lush
+        ? ['#2a5c30', '#376e3a', '#468248', '#204c28']
+        : ['#46572c', '#586b36', '#6d8246', '#3c4c26'];
   const PLAINS_BLADES = World.ashy
     ? ['#84806c', '#948e76', '#a39a80', '#726e5c']
-    : World.lush
-      ? ['#5c8a42', '#6e9c4c', '#82ae58', '#4c7838']
-      : ['#8f8a48', '#a89a54', '#bbaf62', '#7d7a40'];
+    : World.misty
+      ? ['#767c6c', '#848a78', '#929684', '#666c5e']    // grey heath tussocks
+      : World.lush
+        ? ['#5c8a42', '#6e9c4c', '#82ae58', '#4c7838']
+        : ['#8f8a48', '#a89a54', '#bbaf62', '#7d7a40'];
   for (let k = 0; World.snowy ? false : k < Math.round(2800 * areaMul); k++) {
     const x = crnd() * WORLD_W, y = crnd() * WORLD_H;
     const t = terAtPx(x, y);
@@ -1119,6 +1229,8 @@ function renderGroundRegion(ctx, rx, ry, rw, rh) {
       if (World.ashy) ground = mixHex(ground, '#736c60', 0.55 - ff * 0.25);
       // rainforest: everything sinks toward deep wet green, jungle deepest
       else if (World.lush) ground = mixHex(ground, '#3d6b38', 0.34 + ff * 0.22);
+      // the Moors: every color drowns in grey — a heath the sun forgot
+      else if (World.misty) ground = mixHex(ground, '#787c70', 0.58 - ff * 0.18);
       // the Wall: deep snow, a hair bluer up high (north), a hair warmer under pines
       else if (World.snowy) {
         const alt = 1 - ty / HT;
@@ -1344,8 +1456,10 @@ function renderGroundRegion(ctx, rx, ry, rw, rh) {
           const gx = x0 + hx * TILE, gy = y0 + 4 + hy * (TILE - 4);
           const tall = 3 + hy * 3;
           const darkG = World.ashy ? (ff > 0.5 ? '#4a5038' : '#6e6a5a')
+            : World.misty ? (ff > 0.5 ? '#464e42' : '#62685a')
             : World.lush ? (ff > 0.5 ? '#2c5a32' : '#4c7a3c') : ff > 0.5 ? '#4c5c30' : '#7d7a40';
           const liteG = World.ashy ? (ff > 0.5 ? '#6d7350' : '#98917c')
+            : World.misty ? (ff > 0.5 ? '#5e665a' : '#84887a')
             : World.lush ? (ff > 0.5 ? '#4a8a4c' : '#78a858') : ff > 0.5 ? '#7f9150' : '#bcb56a';
           ctx.fillStyle = 'rgba(30,32,12,0.13)';
           ctx.beginPath(); ctx.ellipse(gx, gy + 0.5, 3, 1.1, 0, 0, TAU); ctx.fill();
@@ -1369,6 +1483,7 @@ function renderGroundRegion(ctx, rx, ry, rw, rh) {
             // on the ridge the drifts are rare orange firelilies; in the
             // rainforest they bloom hot pink and white like wild orchids
             ctx.fillStyle = World.ashy ? (k % 2 ? '#d8763a' : '#c9553a')
+              : World.misty ? (k % 2 ? '#9a8ea8' : '#c8c4ce')       // ghost-heather, the moor's one color
               : World.lush ? (k % 2 ? '#e87ab8' : '#f2ecd8')
                 : (drift > 0.5) === (k % 2 === 0) ? '#ece6c6' : '#d9c05e';
             ctx.fillRect(fx - 1, fy - 1, 2, 2);

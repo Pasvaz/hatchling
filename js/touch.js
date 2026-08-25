@@ -128,7 +128,7 @@
   // ---- context actions: the game's own prompts become buttons ----
   // G.prompt strings look like 'E — Drink' (several joined by wide spaces);
   // the leading letter tells us which input flag the action wants.
-  const KEYACT = { E: 'interact', N: 'nest', F: 'fish', M: 'wrestle', P: 'pack', I: 'burrow', R: 'rest' };
+  const KEYACT = { E: 'interact', N: 'nest', F: 'fish', M: 'wrestle', P: 'pack', I: 'burrow', R: 'rest', B: 'bathe', 1: 'call1', 2: 'call2', 3: 'call3' };
   let lastPrompt = null;
   function buildCtx(prompt) {
     ctxBox.innerHTML = '';
@@ -136,7 +136,7 @@
     // with the right icon — everything else stays a labelled pill
     let grabOn = false, eatIcon = null;
     if (prompt) for (const seg of prompt.split(/\s{3,}/)) {
-      const m = seg.match(/^([A-Z])\s*—\s*(.+)$/);
+      const m = seg.match(/^([A-Z0-9])\s*—\s*(.+)$/);
       if (!m) continue;
       if (m[1] === 'G') { grabOn = true; continue; }
       if (m[1] === 'E' && /Drink/i.test(m[2])) { eatIcon = '💧'; continue; }

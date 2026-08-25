@@ -13,7 +13,7 @@ to switch players.
 The game is one long **mastery ladder**: you start as Rajasaurus, and every
 time you grow a dinosaur to Full Adult the **next dinosaur on the ladder
 unlocks** — and when you master the last dinosaur of an ecosystem, the **next
-land opens** with its first dinosaur. The chain runs through six ecosystems:
+land opens** with its first dinosaur. The chain runs through seven ecosystems:
 **Fern Valley** (Rajasaurus → Camptosaurus), **Skull Prairie** — a wide
 bone-strewn grassland with ponds and a southern swamp (Ichthyovenator →
 Qianzhousaurus → Scutellosaurus), **Coastal Scrubs** — a sea of waving grass
@@ -32,7 +32,10 @@ outrun), climbing species scale the walls (Eshanosaurus always;
 Jianchangosaurus only as a hatchling), pouncing off a wall flies farther and
 lands harder, Kerberosaurus herds are warm to huddle beside, and Nanuqsaurus
 rules the whiteout (Jianchangosaurus → Eshanosaurus → Nanuqsaurus →
-Nivarex). Somewhere
+Nivarex) — and beyond the Wall, **The Great Moors of Martulisth**: a grey,
+sunless heath where mist rings the screen and everything beyond arm's length
+is a silhouette lying about its size (Simosuchus → Koreaceratops →
+Sarcosaurus → Dryptosaurus → Gastonia). Somewhere
 in the high maze one hidden cave holds the **frozen giant** the mountain is
 named for — find it, and the biggest animal in the game joins your lobby
 forever, outside the ladder. Every locked card and tab tells you exactly which
@@ -61,10 +64,12 @@ No build step, no dependencies — plain HTML5 canvas + JavaScript.
 | SPACE | Bite / attack |
 | P (hold) + direction | **Pounce** — the dino coils (bigger = longer), leaps (faster = farther) and bites where it lands. Tail-fighters instead hold P to **tail-swing**: continuous hits on a metronome, but the feet are planted until you let go. (P still creates an aardiraptor pack on a quick tap — hold + direction is the pounce.) |
 | E | Eat ferns · drink · feed on carcass · swallow what you carry |
-| R | Rest — sit down eyes closed, heal faster, needs drain slower (moving, eating or drinking gets you up) |
+| R | Rest — a deliberate **3-second** settle onto folded legs (you stop moving first). Heal faster, needs drain slower. You're committed: sit at least **1 second**, then a step (or R) starts the equally slow **3-second** rise — no popping up. |
+| B | **Bathe** (while resting in a mud pool) — roll, wriggle and kick the mud clean in a real scrub animation: the fast way to restore hygiene. Just standing in mud still works, but VERY slowly. |
 | G | Grab a carcass to carry (hold: tear off a chunk) · press again to drop |
 | M | Wrestle a dino your own size (apex carnivores) |
-| P / I | Aardiraptor: create a pack / invade a protoceratops burrow |
+| P / I | Aardiraptor: pounce-hold / invade a protoceratops burrow |
+| 1 / 2 / 3 | **Calls** — every playable has its OWN voice, matched to its playstyle (the `VOICE` registry, js/util.js): carnivores rasp and roar, duckbills and horned dinos trumpet, sauropods answer with sub-bass booms, raptors scream, the pack species yips, croc-snouts gurgle, and the Wall's dinos cry over the wind — all pitched up while young, and each call type is that same voice in a different mood. **1 Broadcast:** head craned to the sky, a long droning call — a carnivore claims every carcass in earshot (⚑): NPCs outside your pack must kill you before they may eat it. Most back off… rarely one defies the claim and hunts you TO THE DEATH. **2 Friendly:** short and smooth, a soft bow — this is how an aardiraptor invites its kin to the pack now. **3 Aggressive:** long, jagged, full of sharp sudden movements — smaller dinosaurs scatter, bolder ones may be provoked into attacking, and aimed at a close packmate it casts them out of the pack. |
 | F / N | Go fishing (spinosaurids) / nest |
 | TAB | Health menu |
 | ESC / U / F1 | Pause / mute / help |
@@ -330,6 +335,41 @@ and the hatchlings stay safely below until they emerge as sub-adults.
 
 - **Nanuqsaurus** (master Eshanosaurus) — play the KING: the polar tyrant itself. Thick coat (70% cold resistance), bleed bites, wrestling strength — every herd on the mountain knows your silhouette.
 - **Nivarex carcharodon** *(imagined)* (master Nanuqsaurus — the last rung of the whole ladder) — Tyrannotitan's mountain cousin: the same deep shark-toothed skull, but bigger, tankier, and wrapped in a heavy brown feather coat that shrugs off even the summit's EXTREME cold (90% resistance). It keeps the carcharodontosaurid bleed kit — wounds bleed nearly twice as hard and longer — and it is the largest carnivore on the mountain, built to bring down a Kerberosaurus single-handed.
+
+**Playable — The Great Moors of Martulisth** (opens when Nivarex is mastered — or when a Nivalotitan reaches ADULT; the giant needn't finish growing)
+
+The moors are grey, gloomy and NEVER sunny: mist lingers in a heavy ring at
+the edge of the screen, and anything past arm's length is a dark **silhouette
+that lies about its size** — each animal looms through the mist a fixed,
+personal amount bigger or smaller than it really is. Guess wrong at your
+peril.
+
+- **Simosuchus** (unlocked with the land) — weird and wonderful: a tiny, quadrupedal, square-faced armored digger (Protoceratops-sized). Press **B** anywhere (not while resting) and it digs its OWN burrow — press **E** at it to hide head-first, backside out: attackers deal next to nothing to the armored butt and give up. One burrow at a time — B beside it collapses it so you can dig a wiser one.
+- **Koreaceratops** (master Simosuchus) — a small horned swimmer with a deep paddle tail: the only moor-dweller at home in the black meres' deep water.
+- **Sarcosaurus** (master Koreaceratops) — a small ceratosaurid: fast, mediocre health, hammer damage. It cannot bleed prey — it **BREAKS BONES** (see below).
+- **Dryptosaurus** (master Sarcosaurus) — the long tyrant: a stretched skull on a stretched frame, very big yet fast and agile, with the bone-breaking jaws turned up to full.
+- **Gastonia** (master Dryptosaurus) — a horizontal oval of visible armor: ankylosaurid-style head, shoulder spikes that grow with it, and a long spiked tail-swing.
+
+**Bone breaks.** Bone-breaking hunters (Sarcosaurus, Dryptosaurus — and
+Nanuqsaurus on the Wall) can CRACK the bone their bite lands on. The chance
+scales with the blow's damage against the prey's total bulk (so big prey
+resist small jaws), and depends on where it landed: **thigh** (the hip
+zone) — they can no longer run; **tail** — they occasionally bolt in the
+wrong direction (or hobble there, if the thigh's gone too); **head** — every
+attack they make weakens; **body** (much the hardest to crack) — all of the
+above at once. More bone-breakers will join the roster in future biomes.
+
+**NPCs — The Great Moors of Martulisth**
+- **Graciliraptor** — spindly microraptorine ghosts; glass-fragile, all legs, bold in packs.
+- **Telmatosaurus** — the marsh-dwarf hadrosaur: small herd prey that still swings back.
+- **Tanius** — the flat-headed heavyweight of the herds.
+- **Secernosaurus** — the wanderer separated from its kin; a mid herd duckbill.
+- **Spiclypeus** — the spiked shield: gnarled curling frill blades, a fearless tank.
+- **Mercuriceratops** — the winged helm: elegant frill fins looming in the grey.
+- **Coahuilaceratops** — possibly the longest brow horns ever grown, with a telegraphed charge behind them. Fearless.
+- **Bravoceratops** — the vast frill: big body, bigger temper. Fearless.
+- **Duriavenator** — the Dorset hunter: the moor's tireless terror. Hunts through the mist and never routs.
+- **Dryptosaurus** — wild long-tyrants prowl the north. Fearless, fast, and exactly the silhouette you don't want to misjudge.
 
 **NPCs — The Nivalotitan Wall**
 - **Kerberosaurus** — the herd: a huge flat-headed polar hadrosaur, Prior-Extinction-Edmontosaurus by silhouette. Warm to huddle beside on the open snowfields — until the tail comes around.

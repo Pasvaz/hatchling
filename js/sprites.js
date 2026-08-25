@@ -450,6 +450,160 @@ const DINO = {
     tailUp: 0.3, neckW: 0.78, neckArc: 0.12, sauroHead: true, beak: false, foreLift: 0.8, chest: 1.2, shFwd: 0.08,
     neckGrow: true, zoomOut: 0.28, snoutW: 0.42, snoutMidW: 0.56, highBrowse: true, tailWeapon: true, pattern: 'dapple',
   },
+  // ---------------- THE GREAT MOORS OF MARTULISTH ----------------
+  simo: {
+    // the pug of the Cretaceous: absolutely tiny, quadrupedal, armored in
+    // little scutes, and wearing the most adorable SQUARE face in the game —
+    // a snub blunt muzzle that ends like a box
+    name: 'Simosuchus', full: 'Simosuchus clarki', diet: 'herb', biped: false, scale: 0.55,
+    L: { body: [23, 11], tail: [10, 4.5], neckLen: 6, neckAng: 0.35, head: [9.5, 7.5], leg: [9, 3.4] },
+    col: {
+      top: '#565c4e', mid: '#7e8468', belly: '#d8d4b8', line: '#22261a',
+      acc: '#a6ac86', eye: '#362e18', pat: '#404638', shade: '#6a7056',
+    },
+    tailUp: 0.12, forageQuad: true, scutes: true, bigEye: 1.25,
+    snoutW: 0.66, snoutMidW: 0.74, pattern: 'band',
+  },
+  korea: {
+    // the horned swimmer: a protoceratops-grade frame with a DEEP finned
+    // paddle tail — half ceratopsian, half oar
+    name: 'Koreaceratops', full: 'Koreaceratops hwaseongensis', diet: 'herb', biped: false, scale: 0.68,
+    L: { body: [30, 15], tail: [26, 7], neckLen: 6, neckAng: 0.2, head: [14, 10], leg: [11, 4.2] },
+    col: {
+      top: '#4a5658', mid: '#71807e', belly: '#d2d8c8', line: '#1c2426',
+      acc: '#98b4a8', eye: '#3c3218', pat: '#38444a', shade: '#5c6a68',
+    },
+    tailUp: 0.2, frill: true, headButt: true, paddleTail: true, forageQuad: true, pattern: 'band',
+  },
+  sarco: {
+    // the bone-breaker: a lean early ceratosaur, crested snout, all sinew —
+    // built light so the hammer-hit surprises
+    name: 'Sarcosaurus', full: 'Sarcosaurus woodi', diet: 'carn', biped: true, scale: 0.95,
+    L: { body: [40, 19], tail: [42, 7.5], neckLen: 10, neckAng: 0.45, head: [17, 11], leg: [21, 6] },
+    col: {
+      top: '#5e5448', mid: '#8a7c68', belly: '#e0d6bc', line: '#241e14',
+      acc: '#b8543a', eye: '#e8c25a', pat: '#453c30', shade: '#726656',
+    },
+    tailUp: 0.3, snoutBumps: true, pattern: 'stripes',
+  },
+  drypto: {
+    // the long tyrant: everything about it STRETCHED — a low lengthened
+    // skull on a lengthened frame, big grasping arms, mist-grey over bone
+    name: 'Dryptosaurus', full: 'Dryptosaurus aquilunguis', diet: 'carn', biped: true, scale: 1.45,
+    L: { body: [64, 24], tail: [58, 9.5], neckLen: 13, neckAng: 0.32, head: [30, 12], leg: [28, 7.5] },
+    col: {
+      top: '#4e5258', mid: '#7a7e82', belly: '#e2e0d2', line: '#1c1e22',
+      acc: '#9a4a3a', eye: '#e8d878', pat: '#3a3e44', shade: '#65696e',
+    },
+    tailUp: 0.26, armScale: 0.85, fuzz: true, snoutW: 0.24, snoutMidW: 0.48, pattern: 'streak',
+  },
+  gastonia: {
+    // the fortress: a HORIZONTAL OVAL of a body slung low on short legs,
+    // visible armor scutes all over, an ankylosaurid box of a head, swept
+    // shoulder spikes that grow with it, and a long spiked tail — no club,
+    // the whole tail is the argument
+    name: 'Gastonia', full: 'Gastonia burgei', diet: 'herb', biped: false, scale: 1.15,
+    L: { body: [56, 24], tail: [50, 9], neckLen: 7, neckAng: 0.15, head: [15, 10], leg: [12, 5.5] },
+    col: {
+      top: '#4c5044', mid: '#767a62', belly: '#ccc8ac', line: '#1e2018',
+      acc: '#b0a878', eye: '#3c3018', pat: '#363a2e', shade: '#626650',
+    },
+    tailUp: 0.12, scutes: true, shoulderSpine: true, tailWeapon: true,
+    snoutW: 0.5, snoutMidW: 0.62, pattern: 'band',
+  },
+  gracili: {
+    // the mist-pack: spindly microraptorine ghosts, all legs and tail
+    name: 'Graciliraptor', full: 'Graciliraptor lujiatunensis', diet: 'carn', biped: true, scale: 0.5,
+    L: { body: [20, 9], tail: [24, 3.5], neckLen: 7, neckAng: 0.55, head: [9, 6], leg: [14, 3] },
+    col: {
+      top: '#565060', mid: '#7e7888', belly: '#d8d4dc', line: '#201c26',
+      acc: '#a89ab8', eye: '#e8d878', pat: '#403a4c', shade: '#686274',
+    },
+    tailUp: 0.3, fuzz: true, plume: true, pattern: 'mask',
+  },
+  telmato: {
+    // the marsh dwarf: a small plain crestless hadrosaur, herd prey
+    name: 'Telmatosaurus', full: 'Telmatosaurus transsylvanicus', diet: 'herb', biped: true, scale: 0.85,
+    L: { body: [40, 22], tail: [38, 8.5], neckLen: 11, neckAng: 0.45, head: [16, 9], leg: [19, 5.5] },
+    col: {
+      top: '#5a6050', mid: '#868c74', belly: '#e0dcc4', line: '#242a1e',
+      acc: '#a8845c', eye: '#4a3c22', pat: '#454c3c', shade: '#707660',
+    },
+    tailUp: 0.24, armScale: 1.15, arch: 1, forageQuad: true, tailWeapon: true, duckbill: true, pattern: 'band',
+  },
+  tanius: {
+    // the flat-head: a sturdy plain heavyweight of the herds
+    name: 'Tanius', full: 'Tanius sinensis', diet: 'herb', biped: true, scale: 1.1,
+    L: { body: [48, 27], tail: [46, 10], neckLen: 12, neckAng: 0.45, head: [19, 9.5], leg: [24, 7] },
+    col: {
+      top: '#4e5446', mid: '#7a8068', belly: '#dedac0', line: '#1e2418',
+      acc: '#8c6c44', eye: '#4a3c22', pat: '#3c4234', shade: '#646a56',
+    },
+    tailUp: 0.26, armScale: 1.2, arch: 1, forageQuad: true, tailWeapon: true, duckbill: true, pattern: 'dapple',
+  },
+  secerno: {
+    // the separated one: a mid duckbill wandering far from every kin
+    name: 'Secernosaurus', full: 'Secernosaurus koerneri', diet: 'herb', biped: true, scale: 0.95,
+    L: { body: [44, 24], tail: [42, 9], neckLen: 12, neckAng: 0.45, head: [17, 9], leg: [21, 6] },
+    col: {
+      top: '#5c5648', mid: '#8a8168', belly: '#e4dec2', line: '#26221a',
+      acc: '#a08a54', eye: '#4a3c22', pat: '#484236', shade: '#726a56',
+    },
+    tailUp: 0.25, armScale: 1.15, arch: 1, forageQuad: true, tailWeapon: true, duckbill: true, pattern: 'band',
+  },
+  spiclypeus: {
+    // the spiked shield: frill blades jutting sideways and curling — a
+    // gnarled crown looming grey out of the mist
+    name: 'Spiclypeus', full: 'Spiclypeus shipporum', diet: 'herb', biped: false, scale: 1.1,
+    L: { body: [52, 26], tail: [30, 9], neckLen: 8, neckAng: 0.15, head: [21, 13], leg: [17, 6.5] },
+    col: {
+      top: '#565248', mid: '#807a6a', belly: '#d8d2ba', line: '#221e16',
+      acc: '#b07a52', eye: '#4a3218', pat: '#443f34', shade: '#6a6456',
+    },
+    tailUp: 0.1, frill: true, headButt: true, pattern: 'dapple',
+  },
+  mercuri: {
+    // the winged helm: elegant frill fins like the god's own hat
+    name: 'Mercuriceratops', full: 'Mercuriceratops gemini', diet: 'herb', biped: false, scale: 1.0,
+    L: { body: [48, 24], tail: [28, 8.5], neckLen: 8, neckAng: 0.15, head: [20, 12], leg: [16, 6] },
+    col: {
+      top: '#4c5254', mid: '#747c7e', belly: '#d6d8cc', line: '#1e2224',
+      acc: '#92aab0', eye: '#4a3218', pat: '#3a4244', shade: '#5e6668',
+    },
+    tailUp: 0.1, frill: true, headButt: true, pattern: 'band',
+  },
+  coahuila: {
+    // the horns: possibly the longest brow horns anything ever grew — and a
+    // committed charge on the far end of them
+    name: 'Coahuilaceratops', full: 'Coahuilaceratops magnacuerna', diet: 'herb', biped: false, scale: 1.25,
+    L: { body: [56, 28], tail: [32, 10], neckLen: 9, neckAng: 0.15, head: [23, 14], leg: [18, 7] },
+    col: {
+      top: '#585044', mid: '#847862', belly: '#dcd4b8', line: '#241e14',
+      acc: '#d0c49a', eye: '#4a3218', pat: '#463e30', shade: '#6e6452',
+    },
+    tailUp: 0.1, frill: true, headButt: true, pattern: 'dapple',
+  },
+  bravo: {
+    // the vast frill: a huge poorly-known chasmosaurine — big everything
+    name: 'Bravoceratops', full: 'Bravoceratops polyphemus', diet: 'herb', biped: false, scale: 1.35,
+    L: { body: [58, 29], tail: [34, 10], neckLen: 9, neckAng: 0.15, head: [24, 15], leg: [19, 7.5] },
+    col: {
+      top: '#504c42', mid: '#7a745e', belly: '#d8d0b4', line: '#201c12',
+      acc: '#b89468', eye: '#4a3218', pat: '#403a2c', shade: '#645e4c',
+    },
+    tailUp: 0.1, frill: true, headButt: true, pattern: 'band',
+  },
+  duria: {
+    // the Dorset hunter: a heavy megalosaur the color of wet slate — the
+    // moor's tireless, routless terror
+    name: 'Duriavenator', full: 'Duriavenator hesperis', diet: 'carn', biped: true, scale: 1.35,
+    L: { body: [54, 27], tail: [50, 10], neckLen: 11, neckAng: 0.32, head: [23, 13], leg: [25, 8] },
+    col: {
+      top: '#3e4448', mid: '#646c70', belly: '#d4d4c8', line: '#161c20',
+      acc: '#8a5a3a', eye: '#e8d878', pat: '#2e3438', shade: '#525a5e',
+    },
+    tailUp: 0.3, snoutBumps: true, pattern: 'stripes',
+  },
   ovi: {
     // crested egg thief: fast, nosy, first to every carcass
     name: 'Oviraptor', full: 'Oviraptor philoceratops', diet: 'omni', biped: true, scale: 0.72,
@@ -926,30 +1080,87 @@ function drawDino(ctx, key, o) {
   const headMul = 1 + 0.95 * Math.pow(1 - g, 1.4);
   const eyeMul = 1 + 1.9 * Math.pow(1 - g, 1.6);
   const move = o.move || 0, ph = o.phase || 0;
-  const breathe = Math.sin(G.time * 2.1 + (o.x || 0) * 0.05) * 0.5 * (1 - move);
-  const bob = Math.sin(ph * 2) * 1.1 * move * Math.min(1, s) + breathe * Math.min(1, s);
   const atk = o.attackT || 0;
   const hd = o.headDown || 0;
+  // ---- performance blends: the updaters lerp these 0..1; the MOTION inside
+  // each is keyed to o.actT (a per-animal clock) so every act starts on cue
+  const run = o.run || 0, drink = o.drink || 0, chew = o.chew || 0, tear = o.tear || 0;
+  const strain = o.strain || 0, thrash = o.thrash || 0;
+  const aT = o.actT || 0;
+  // DRINKING (2s loop): stretch low to the water, lap in quick sips, then
+  // throw the head back and swallow — nothing like a graze
+  const dCyc = aT % 2.0;
+  const dSwal = drink * clamp(Math.min((dCyc - 1.45) / 0.14, (2.0 - dCyc) / 0.25) * 1.4, 0, 1);
+  const dDip = drink * clamp(Math.min(dCyc / 0.3, (1.55 - dCyc) / 0.12), 0, 1) * (1 - dSwal);
+  const lap = dDip * Math.max(0, Math.sin(aT * 11));
+  // HERBIVORE MEAL (1.9s loop): pluck at the stems head-down, then lift to
+  // mid height and GRIND — the jaw visibly works the mouthful
+  const cCyc = aT % 1.9;
+  const cDown = chew * clamp(Math.min(cCyc / 0.25, (0.85 - cCyc) / 0.15), 0, 1);
+  const cMid = chew * clamp(Math.min((cCyc - 0.85) / 0.18, (1.9 - cCyc) / 0.2), 0, 1);
+  const pluck = cDown * Math.max(0, Math.sin(aT * 12));
+  const grind = cMid * (0.5 + 0.5 * Math.sin(aT * 14));
+  // CARNIVORE FEED (1.5s loop): jaws buried and sawing at it, then one
+  // violent WRENCH up-and-back with the mouthful, and a fast gulp
+  const tCyc = aT % 1.5;
+  const tDown = tear * clamp(Math.min(tCyc / 0.18, (0.62 - tCyc) / 0.1), 0, 1);
+  const tRip = tDown * Math.max(0, Math.sin(aT * 13));
+  const wrench = tear * (tCyc > 0.62 ? Math.exp(-(tCyc - 0.62) * 5.5) : 0);
+  const tGulp = tear * (tCyc > 0.78 && tCyc < 1.35 ? 1 : 0);
+  // ---- CALLS: broadcast cranes to the sky and drones; friendly is one
+  // soft bow-and-coo; aggressive is a jagged, stamping threat display
+  const callB = o.callB || 0, callK = o.callK || 0, cT = o.callT || 0;
+  const callUp = callK === 1 ? callB : 0;
+  const callBow = callK === 2 ? callB * Math.sin(clamp(cT / 0.7, 0, 1) * Math.PI) : 0;
+  const callJerk = callK === 3 ? callB : 0;
+  const callJaw = callK === 1 ? callB * (0.32 + 0.12 * Math.sin(G.time * 6.5))
+    : callK === 2 ? callBow * 0.2
+    : callJerk * (Math.sin(cT * 21) > 0 ? 0.45 : 0.06);
+
+  // the effective head-drop: the performances drive the neck themselves
+  const hdA = Math.max(hd, dDip * 1.08, cDown, tDown * 1.05);
+
+  const breathe = Math.sin(G.time * 2.1 + (o.x || 0) * 0.05) * 0.5 * (1 - move);
+  // running adds spring: a deeper bob plus an airborne beat between strides
+  const bob = Math.sin(ph * 2) * 1.1 * (1 + 0.5 * run) * move * Math.min(1, s)
+    + (0.5 - Math.abs(Math.sin(ph))) * 1.8 * run * move * Math.min(1.2, s)
+    + breathe * Math.min(1, s);
   // tail-fighters whip the tail, claw-fighters swipe the arms, headbutters
   // (ceratopsians) toss the whole head — jaws shut for all three; only true
-  // biters lunge with open mouths
-  let lunge = d.tailWeapon || d.clawWeapon || d.headButt ? 0 : Math.sin(atk * Math.PI);
+  // biters lunge with open mouths. The bite is a SNAP, not a wave: the head
+  // strikes out in the first quarter of the swing and recovers slowly.
+  const q = 1 - atk;
+  let lunge = d.tailWeapon || d.clawWeapon || d.headButt || atk <= 0 ? 0 :
+    (q < 0.22 ? Math.sin((q / 0.22) * Math.PI / 2) : Math.cos(((q - 0.22) / 0.78) * Math.PI / 2));
   // a browsing sauropod nibbles at the canopy — a soft jaw flutter, head high
   if (o.headUp > 0.3) lunge = Math.max(lunge, (0.5 + 0.5 * Math.sin(G.time * 6)) * 0.18 * o.headUp);
   // swallowing: head thrown back, jaws snapping fast as the food goes down
-  if (o.gulp) lunge = Math.max(lunge, (0.5 + 0.5 * Math.sin(G.time * 13)) * 0.5);
+  if (o.gulp || tGulp > 0) lunge = Math.max(lunge, (0.5 + 0.5 * Math.sin(G.time * 13)) * 0.5 * Math.max(o.gulp ? 1 : 0, tGulp));
   const tailAtk = d.tailWeapon ? atk : 0;
   // the horn toss: driven fully forward-up at the hit frame (damage is
   // instant), recoiling through and settling — same profile as the tail whip
   const ramPh = d.headButt && atk > 0 ? 1 - atk : -1;
   const ram = ramPh >= 0 ? (1 - ramPh) * Math.sin((0.25 + ramPh * 1.1) * TAU) : 0;
+  // ---- the whole body works every attack: these drives feed the weight
+  // shift, the crouch and the lean, not just the weapon itself
+  const swingPh = tailAtk > 0 ? 1 - tailAtk : 0;                        // 0 → 1 across the tail slam
+  const swingDrive = tailAtk > 0 ? Math.sin(swingPh * Math.PI) : 0;     // hips loading into the whip
+  const clawA = d.clawWeapon ? atk : d.clawSecond ? (o.clawT || 0) : 0;
+  const clawDrive = clawA > 0 ? Math.sin((1 - clawA) * Math.PI) : 0;    // shoulders through the swipe
+  const bth = o.bathe || 0;                                             // rolling in the mud bath
 
   const bodyL = L.body[0] * s, bodyH = L.body[1] * s;
   const legLen = L.leg[0] * s, legW = Math.max(1.3, L.leg[1] * s);
   // resting: the whole body settles toward the ground; the legs, whose
   // segment lengths derive from hip height, fold under it on their own
   const rest = o.restT || 0;
-  const cy = -(legLen + bodyH * 0.42) + bob + rest * legLen * 0.62;
+  // strain crouches the wrestler low over braced feet; thrash jolts the
+  // pinned body up and down as it fights the hold
+  const cy = -(legLen + bodyH * 0.42) + bob + rest * legLen * 0.62
+    + strain * legLen * 0.13 + thrash * Math.sin(G.time * 11) * 1.2
+    + callJerk * Math.abs(Math.sin(cT * 11)) * 1.5    // the threat display stamps
+    + swingDrive * legLen * 0.1 + clawDrive * legLen * 0.06   // sinking into the swing
+    + bth * Math.sin(G.time * 6.5) * 1.5;             // the wallowing wriggle
   const lineW = Math.max(0.75, Math.min(1.5, 1.05 * s));
 
   ctx.save();
@@ -958,13 +1169,28 @@ function drawDino(ctx, key, o) {
   // heading pitch: the nose leads into diagonal/vertical movement,
   // rotating around the body's centre of mass with a hint of foreshortening
   // (foraging quadrupeds also rock forward when their head goes down)
-  const pitch = (o.pitch || 0) + (d.forageQuad ? hd * 0.12 : 0);
+  // run leans the whole body into the sprint; the feed-wrench and the
+  // wrestle-thrash both rock it around the centre of mass
+  // …and every attack tips the whole animal: nose into the bite, forward
+  // lean as the ram commences, shoulders rolling through the claw swipe,
+  // the front end dipping as the tail comes around. Bathing rolls the body.
+  const pitch = (o.pitch || 0) + (d.forageQuad ? hdA * 0.12 : 0)
+    + run * 0.06 * move - wrench * 0.18 + thrash * Math.sin(G.time * 10.3) * 0.1
+    + callJerk * Math.sin(cT * 23) * 0.05
+    + lunge * 0.07 + ram * 0.12 + clawDrive * 0.09 + swingDrive * 0.06
+    + bth * Math.sin(G.time * 5.5) * 0.15;
+  // weight shift: the body DRIVES forward into bites, rams and claw swipes,
+  // and rocks back onto the hips as the tail whips through
+  ctx.translate((lunge * 3.5 + ram * 4 + clawDrive * 2.5 - swingDrive * 2.2) * s, 0);
   if (pitch) {
     ctx.scale(1 - 0.1 * Math.min(1, Math.abs(pitch) / 0.45), 1);
     ctx.translate(0, cy);
     ctx.rotate(pitch);
     ctx.translate(0, -cy);
   }
+  // wrestling: both animals ride the same 8Hz tug — facing opposite ways,
+  // the shared clock stretches the pair apart and slams them back together
+  if (strain > 0.01 || thrash > 0.01) ctx.translate(Math.sin(G.time * 8) * (strain * 1.8 + thrash * 2.6) * Math.min(1.4, s), 0);
   if (o.hurtT > 0 && Math.floor(o.hurtT * 24) % 2 === 0) ctx.globalAlpha = 0.55;
 
   // ---------------- skeleton anchors ----------------
@@ -979,14 +1205,22 @@ function drawDino(ctx, key, o) {
   const shX = bodyL * (0.27 + (d.shFwd || 0)), shY = cy + bodyH * 0.18 - fl * 0.62;
   const neckBase = { x: bodyL * 0.36, y: cy - bodyH * 0.14 - fl * 0.6 };
   // foraging quadrupeds keep a gentler neck bend — the lowered body does the rest
-  const hdN = hd * (d.forageQuad ? 0.62 : 1);
+  const hdN = hdA * (d.forageQuad ? 0.62 : 1);
   let nAng = lerp(L.neckAng, -0.6, hdN);
   // canopy browsing (sauropods): the neck cranes UP into the trees instead —
   // its own animation, nothing like the head-down graze
-  const hu = o.headUp || 0;
+  const hu = Math.max(o.headUp || 0, callUp);   // the broadcast cranes skyward
   if (hu > 0.01) nAng = lerp(nAng, 1.3, hu);
   // idle head scanning: standing animals slowly look around
-  nAng += Math.sin(G.time * 0.55 + (o.x || 0) * 0.045) * 0.055 * (1 - move) * (1 - hd);
+  nAng += Math.sin(G.time * 0.55 + (o.x || 0) * 0.045) * 0.055 * (1 - move) * (1 - hdA);
+  // the drink stretches the neck OUT as well as down — deeper than any
+  // graze — and the swallow throws it back up, snout tipped skyward.
+  // A run reaches the neck forward into the sprint.
+  nAng -= dDip * 0.14;
+  nAng = lerp(nAng, L.neckAng * 0.5 + 0.85, dSwal);
+  nAng -= Math.min(0.38, Math.abs(nAng) * 0.4 + 0.1) * run * move * (1 - hdA);
+  nAng -= callBow * 0.4;                          // the friendly bow dips smooth
+  nAng += callJerk * Math.sin(cT * 19) * 0.26;    // the threat flings side to side
   // neckGrow (nivalotitan): hatchlings carry a proportionally SHORT neck and
   // grow into the full tower — the 2×-body neck is earned, not hatched with
   const nl = L.neckLen * s * (d.neckGrow ? 0.55 + 0.45 * g : 1);
@@ -994,7 +1228,14 @@ function drawDino(ctx, key, o) {
     x: neckBase.x + Math.cos(nAng) * nl + (lunge * 5 + ram * 6) * s,
     y: Math.min(neckBase.y - Math.sin(nAng) * nl + hdN * legLen * 0.85 - ram * 3 * s, -3.5 * s),
   };
-  const headAng = -nAng * 0.35 + hdN * 0.8 - ram * 0.55;  // head pitch (the ram tips the horn up)
+  // the performances move the head itself: sips bob it at the water, the
+  // pluck tugs it against the stems, the wrench heaves it up and back
+  headC.x += (pluck * 1.3 - wrench * 3) * s;
+  headC.y += (lap * 1.5 - dSwal * 2.5 - wrench * 4.5) * s;
+  // head pitch: the ram tips the horn up, the swallow and the wrench throw
+  // the snout skyward, the pluck angles it down into the stems
+  const headAng = -nAng * 0.35 + hdN * 0.8 - ram * 0.55 - dSwal * 0.8 - wrench * 0.5 + pluck * 0.08
+    + callBow * 0.3 + callJerk * Math.sin(cT * 27) * 0.28;
   const hl = L.head[0] * s * headMul, hh = L.head[1] * s * headMul;
   const cosH = Math.cos(headAng), sinH = Math.sin(headAng);
   const hPt = (fx, fy) => ({                              // head-local -> local
@@ -1005,10 +1246,19 @@ function drawDino(ctx, key, o) {
 
   // ---------------- legs ----------------
   function footPose(off, stride, baseX) {
-    const sw = Math.sin(ph + off);
+    // running stretches the stride and snaps the feet higher; a pinned
+    // victim scrabbles — short frantic strokes on its own fast clock; a
+    // straining wrestler digs its feet in wide and stays planted
+    const kick = Math.max(thrash, bth * 0.5);   // pinned scrabble, or a lazy bath-kick
+    const mvL = Math.max(move, kick * 0.9);
+    const phL = ph + G.time * (12 - 5 * bth) * kick;
+    const str = stride * (1 + 0.5 * run) * (1 - 0.5 * kick);
+    const sw = Math.sin(phL + off);
     // planted foot (sw < 0) travels backward under the body; lifted foot swings forward
-    const fx = baseX - Math.cos(ph + off) * stride * move + (1 - move) * (off > 2 ? -1.5 : 3.5) * s;
-    const lift = Math.max(0, sw) * 3.2 * move * Math.min(1.2, s);
+    const fx = baseX - Math.cos(phL + off) * str * mvL
+      + (1 - mvL) * (off > 2 ? -1.5 : 3.5) * s
+      + strain * (off > 2 ? -2.6 : 2.6) * s;
+    const lift = Math.max(0, sw) * 3.2 * (1 + 0.9 * run) * mvL * Math.min(1.2, s);
     return { x: fx, y: -lift };
   }
   function drawLeg(hx, hy, off, stride, far, front) {
@@ -1103,24 +1353,28 @@ function drawDino(ctx, key, o) {
   }
 
   // far-side limbs (foraging quadrupeds put their forelimbs down to graze)
-  const quadNow = !d.biped || (d.forageQuad && hd > 0.4);
+  const quadNow = !d.biped || (d.forageQuad && hdA > 0.4);
   drawLeg(hipX, hipY, Math.PI, legLen * 0.42, true, false);
   if (quadNow) drawLeg(shX, shY, Math.PI * 1.55, legLen * 0.36, true, true);
 
   // ---------------- spine & silhouette ----------------
   const tailLen = L.tail[0] * s;
   const tailBaseW = bodyH * 0.34;
-  // walking sway plus a slow idle swish so standing dinos stay alive
-  const sway = (t) => Math.sin(ph * 0.85 + t * 2.4) * 1.2 * Math.min(1.3, s) * t
-    + Math.sin(G.time * 1.5 + t * 2.1 + (o.x || 0) * 0.05) * 1.7 * Math.min(1.3, s) * t * (1 - move);
+  // walking sway plus a slow idle swish so standing dinos stay alive — a
+  // run stiffens the tail into a rudder, a pinned victim LASHES it
+  const sway = (t) => (Math.sin(ph * 0.85 + t * 2.4) * 1.2 * Math.min(1.3, s) * t
+    + Math.sin(G.time * 1.5 + t * 2.1 + (o.x || 0) * 0.05) * 1.7 * Math.min(1.3, s) * t * (1 - move))
+    * (1 - 0.55 * run * move)
+    + Math.sin(G.time * 9.5 + t * 3.2) * 3.6 * Math.min(1.3, s) * t * thrash;
   // the tail whip: starts already wound up high the instant the attack lands,
   // slams down through neutral, follows through below and settles — amplitude
   // grows toward the tip so the whole tail (thagomizer and all) visibly swings
-  const swingPh = tailAtk > 0 ? 1 - tailAtk : 0;   // 0 → 1 across the swing
+  // swingPh (0 → 1 across the swing) is hoisted above with the body drives
   const swingY = (t) => tailAtk > 0
     ? -(1 - swingPh) * Math.sin((0.25 + swingPh * 1.1) * TAU) * bodyH * 0.62 * Math.pow(t, 1.3)
     : 0;
-  const tailY = (t) => cy - d.tailUp * tailLen * 0.34 * t + sway(t) + t * t * 1.5 * s + swingY(t);
+  const tailY = (t) => cy - d.tailUp * tailLen * 0.34 * t + sway(t) + t * t * 1.5 * s + swingY(t)
+    - run * move * tailLen * 0.05 * t;   // streamed out level behind the sprint
   const pts = [];
   for (let i = 5; i >= 1; i--) {
     const t = i / 5;
@@ -1169,8 +1423,9 @@ function drawDino(ctx, key, o) {
 
   const skin = skinPath(pts);
 
-  // lower jaw (behind mouth wedge, drawn after body so it shows as chin/open jaw)
-  const open = lunge * 0.55;
+  // lower jaw (behind mouth wedge, drawn after body so it shows as chin/open
+  // jaw) — the rip saws it, the chew grinds it, the lap sips with it
+  const open = clamp(lunge * 0.55 + tRip * 0.5 + grind * 0.3 + lap * 0.15 + callJaw, 0, 0.9);
   const hinge = hPt(-0.02, 0.32);
 
   // silhouette fill + layered shading (clipped)
@@ -1310,7 +1565,7 @@ function drawDino(ctx, key, o) {
 
   // ---------------- head details ----------------
   // a settled-down dino sleeps with its eyes closed (restT rides in on o)
-  const blink = (o.restT || 0) > 0.55 || (!hd && ((G.time + (o.x || 0) * 0.137 + ph * 0.05) % 3.8) < 0.13);
+  const blink = (o.restT || 0) > 0.55 || (hdA < 0.05 && ((G.time + (o.x || 0) * 0.137 + ph * 0.05) % 3.8) < 0.13);
   drawHead(ctx, key, d, C, {
     hPt, hl, hh, s, g, lineW, open, hinge, snout, eyeMul, headAng, blink,
   });
@@ -1323,6 +1578,62 @@ function drawDino(ctx, key, o) {
   // clawSecond species (riojasaurus) swing the tail on SPACE and the arm on M:
   // the arm swipe listens to its own clock (o.clawT), never the tail's attackT
   else if (d.biped) drawArm(ctx, d, C, { x: bodyL * 0.26, y: cy + bodyH * (0.16 - (d.armUp || 0)) - fl * 0.6, s: s * (d.armScale || 1), lineW, key, ph, move, atk: d.clawSecond ? (o.clawT || 0) : atk });
+
+  // ---------------- weapon trails: every attack paints its own signature ----
+  // a crescent chasing the tail sweep, twin slashes for the claws, a radial
+  // burst off the ram, and a snap-flash streak behind closing jaws — all in
+  // the species' own accent color, brightest at the hit frame
+  const trailCol = mixHex(C.acc || '#ffe9a0', '#fff6dc', 0.55);
+  ctx.lineCap = 'round';
+  if (d.tailWeapon && atk > 0.2) {
+    const fade = (atk - 0.2) / 0.8;
+    ctx.globalAlpha = 0.8 * fade;
+    ctx.strokeStyle = trailCol;
+    const rr = bodyL * 0.42 + tailLen * 0.72;
+    ctx.lineWidth = 4.5 * s * fade + 0.8;
+    ctx.beginPath();
+    ctx.arc(-bodyL * 0.2, cy - bodyH * 0.1, rr, Math.PI * 0.62, Math.PI * (0.98 + swingPh * 0.3));
+    ctx.stroke();
+    ctx.lineWidth *= 0.45; ctx.globalAlpha *= 0.6;   // a thinner echo inside the sweep
+    ctx.beginPath();
+    ctx.arc(-bodyL * 0.2, cy - bodyH * 0.1, rr * 0.8, Math.PI * 0.66, Math.PI * (0.94 + swingPh * 0.3));
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  } else if (clawA > 0.25) {
+    const fade = (clawA - 0.25) / 0.75, sw = 1 - clawA;   // sw sweeps the slash down-forward
+    ctx.globalAlpha = 0.85 * fade;
+    ctx.strokeStyle = trailCol;
+    const cx0 = bodyL * 0.34, cy0 = cy - bodyH * 0.05, rr = L.leg[0] * s * 1.05;
+    for (const off of [0, 0.22]) {                        // twin claw marks
+      ctx.lineWidth = (3.4 - off * 6) * s * fade + 0.7;
+      ctx.beginPath();
+      ctx.arc(cx0, cy0, rr * (1 - off * 0.7), -1.3 + sw * 1.7, -0.55 + sw * 1.7);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  } else if (d.headButt && ram > 0.25) {
+    // impact burst: speed-lines radiating off the horn at the toss
+    ctx.globalAlpha = 0.85 * ram;
+    ctx.strokeStyle = trailCol;
+    ctx.lineWidth = 1.7 * s;
+    for (const aa of [-0.5, -0.15, 0.2]) {
+      ctx.beginPath();
+      ctx.moveTo(snout.x + Math.cos(aa) * 3 * s, snout.y + Math.sin(aa) * 3 * s);
+      ctx.lineTo(snout.x + Math.cos(aa) * (3 + 7 * ram) * s, snout.y + Math.sin(aa) * (3 + 7 * ram) * s);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  } else if (lunge > 0.35 && !d.tailWeapon && !d.clawWeapon && !d.headButt) {
+    // the snap-flash: a streak trailing the striking jaws
+    ctx.globalAlpha = 0.75 * (lunge - 0.35) / 0.65;
+    ctx.strokeStyle = trailCol;
+    ctx.lineWidth = 2.6 * s;
+    ctx.beginPath();
+    ctx.moveTo(snout.x - lunge * 14 * s, snout.y + 1);
+    ctx.lineTo(snout.x + 2 * s, snout.y);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
 
   ctx.restore();
 }
@@ -2699,6 +3010,46 @@ function drawBurrow(ctx, b) {
   ctx.restore();
 }
 
+// simosuchus' hand-dug burrow: an earthen dome with a dark mouth. When the
+// digger hides, this draws AFTER him (y-sorted +2) so the mound swallows his
+// front half and only the armored backside pokes out at the world.
+function drawMyBurrow(ctx, b, p) {
+  const hiding = p && p.alive && p.hidden;
+  const f = hiding ? p.facing : 1;
+  const s = hiding ? DINO[p.species].scale * sizeScale(p.growth) : 0.6;
+  const r = 16 + 10 * s;
+  ctx.save();
+  ctx.translate(b.x, b.y);
+  // the dome sits over the digger's front half (the hole side faces his nose)
+  const dx = hiding ? f * r * 0.55 : 0;
+  ctx.fillStyle = '#5a4a38';
+  ctx.strokeStyle = '#2e2418';
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.ellipse(dx, -r * 0.28, r, r * 0.62, 0, Math.PI, 0);
+  ctx.quadraticCurveTo(dx + r, 2, dx + r * 0.7, 2);
+  ctx.lineTo(dx - r * 0.7, 2);
+  ctx.quadraticCurveTo(dx - r, 2, dx - r, -r * 0.28);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+  // freshly-turned earth speckle
+  ctx.fillStyle = 'rgba(30,22,12,0.35)';
+  for (let i = 0; i < 6; i++) {
+    const h1 = hash2(i * 7 + 1, Math.round(b.x)), h2 = hash2(i * 3, Math.round(b.y));
+    ctx.beginPath();
+    ctx.ellipse(dx + (h1 - 0.5) * r * 1.5, -h2 * r * 0.4, 1.6, 1, 0, 0, TAU);
+    ctx.fill();
+  }
+  // the dark mouth — empty when he's out, plugged by him when he's in
+  if (!hiding) {
+    ctx.fillStyle = '#1c1409';
+    ctx.beginPath();
+    ctx.ellipse(0, -r * 0.16, r * 0.42, r * 0.3, 0, 0, TAU);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
 function drawCarcass(ctx, c) {
   // carried things ride at the carrier's mouth — lifted for the draw only
   const lift = c.carried ? (c.liftY || 0) + Math.sin(G.time * 9) * 0.8 : 0;
@@ -2897,6 +3248,17 @@ function drawCarcass(ctx, c) {
   for (let i = 0; i < 3; i++) {
     const t = G.time * (2 + i * 0.7) + i * 2.1;
     ctx.fillRect(c.x + Math.cos(t) * (6 + i * 3), c.y - bh * 0.6 + Math.sin(t * 1.7) * 4, 1, 1);
+  }
+  // CLAIMED: the broadcaster's pennant, planted over the meat — a warning
+  if (c.claim) {
+    const px2 = c.x, py2 = c.y - bh * 1.1 - 10 + Math.sin(G.time * 2.2) * 1.2;
+    const pulse = 0.7 + 0.3 * Math.sin(G.time * 3.4);
+    ctx.strokeStyle = '#5c4620'; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.moveTo(px2, py2 + 12); ctx.lineTo(px2, py2); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,210,62,' + (0.55 + 0.35 * pulse).toFixed(2) + ')';
+    ctx.beginPath();
+    ctx.moveTo(px2, py2); ctx.lineTo(px2 + 9, py2 + 3); ctx.lineTo(px2, py2 + 6);
+    ctx.closePath(); ctx.fill();
   }
 }
 

@@ -92,6 +92,7 @@ const CHAIN = [
   ['aardi'], ['centro'], ['omni'], ['eotrach'], ['loki'], ['moro'],
   ['tyranno', 'spino'],                                        // 🐟 Delta finale: choose your apex
   ['jianchang'], ['eshano'], ['nanuq'], ['nivarex'],           // 🏔️ The Wall
+  ['simo'], ['korea'], ['sarco'], ['drypto'], ['gastonia'],    // 🌫️ The Great Moors of Martulisth
 ];
 function chainRung(sp) { return CHAIN.findIndex(r => r.includes(sp)); }
 // a species is playable if: it's the chain's first rung, the rung before it
@@ -103,16 +104,23 @@ function spUnlocked(sp) {
   if (Save.owned[sp]) return true;
   const i = chainRung(sp);
   if (i < 0) return false;
-  return i === 0 || CHAIN[i - 1].some(m => Save.mastery[m]);
+  return i === 0 || CHAIN[i - 1].some(m => Save.mastery[m])
+    // the Moors' gate has a second key: an ADULT frozen giant will do
+    || (CHAIN[i - 1].includes('nivarex') && !!Save.nivaloAdult);
 }
 // "grow X to FULL ADULT" — the species (or fork pair) guarding this rung
 function rungGuardNames(i) {
   return CHAIN[i - 1].map(m => DINO[m].name.toUpperCase()).join(' or ');
 }
+function rungHint(i) {
+  if (CHAIN[i - 1] && CHAIN[i - 1].includes('nivarex'))
+    return 'grow NIVAREX to FULL ADULT — or NIVALOTITAN to ADULT';
+  return 'grow ' + rungGuardNames(i) + ' to FULL ADULT';
+}
 function spUnlockHint(sp) {
   const i = chainRung(sp);
   if (i <= 0) return '';
-  return 'grow ' + rungGuardNames(i) + ' to FULL ADULT';
+  return rungHint(i);
 }
 // an eco opens with its first chain species; the hint names that rung's guard
 function ecoFirstRung(key) {
@@ -120,7 +128,7 @@ function ecoFirstRung(key) {
 }
 function ecoUnlockHint(key) {
   const i = ecoFirstRung(key);
-  return i > 0 ? 'grow ' + rungGuardNames(i) + ' to FULL ADULT' : '';
+  return i > 0 ? rungHint(i) : '';
 }
 // ladder unlocks are free: when an eco's first species becomes playable the
 // land opens with it. Returns the names of any lands that just opened.
@@ -213,7 +221,12 @@ window.addEventListener('keydown', (e) => {
   if (G.wrestle && WRESTLE_KEYS.includes(e.code)) G.wrestle.pressed = e.code;
   if (e.code === 'KeyP') G.input.pack = true;
   if (e.code === 'KeyI') G.input.burrow = true;
+  // the CALLS: 1 broadcast (claim), 2 friendly (invite), 3 aggressive (threat)
+  if (e.code === 'Digit1') G.input.call1 = true;
+  if (e.code === 'Digit2') G.input.call2 = true;
+  if (e.code === 'Digit3') G.input.call3 = true;
   if (e.code === 'KeyR') G.input.rest = true;
+  if (e.code === 'KeyB') G.input.bathe = true;
   if (e.code === 'KeyG') G.input.grab = true;
   // hold P (+ a direction) to pounce — tail-fighters hold it to swing.
   // (CTRL was tried first and abandoned: Ctrl+letter combos are browser
@@ -352,7 +365,12 @@ const CARD_INFO = {
   jianchang: { desc: 'Small, quick, thin-coated — but its HATCHLINGS can scale the maze walls to escape anything with teeth. A grown Jianchangosaurus is too heavy for the rock. Use the gift while you have it.', tag: '◆ HERBIVORE — BABY CLIMBER', tagClass: 'hard' },
   nivalo: { desc: 'THE FROZEN GIANT. The mountain bears its name, and it cannot be bought — somewhere in the high maze, a hidden cave remembers it. The largest animal that has ever walked this game.', tag: '◆ HERBIVORE — THE LEGEND', tagClass: 'swim' },
   nanuq: { desc: 'Play the KING. The polar tyrant hunts the whiteout in a fur coat — bleed bites, wrestling strength, and every herd on the mountain knows your silhouette. Only the Titanovenator outranks you.', tag: '◆ CARNIVORE — THE KING', tagClass: 'mod' },
-  nivarex: { desc: 'The last rung of the ladder. A shark-toothed giant in a deep feather blanket — the largest carnivore on the mountain, near-immune to the cold, and heavy enough to bring down a Kerberosaurus alone. Every wound it opens keeps working.', tag: '◆ CARNIVORE — THE SUMMIT', tagClass: 'mod' },
+  nivarex: { desc: 'The Wall\'s final apex. A shark-toothed giant in a deep feather blanket — the largest carnivore on the mountain, near-immune to the cold, and heavy enough to bring down a Kerberosaurus alone. Every wound it opens keeps working.', tag: '◆ CARNIVORE — THE SUMMIT', tagClass: 'mod' },
+  simo: { desc: 'Weird and wonderful: a pug-faced, square-headed little digger. Press B and it builds its OWN burrow — dive in and attackers gnaw an armored backside until they give up. One burrow at a time: choose the spot wisely.', tag: '◆ HERBIVORE — THE DIGGER', tagClass: 'hard' },
+  korea: { desc: 'The horned swimmer: a small ceratopsian with a deep paddle tail. The black meres hide it, feed it, and drown whatever follows it in — the only moor-dweller at home in the deep water.', tag: '◆ HERBIVORE — SWIMMER', tagClass: 'swim' },
+  sarco: { desc: 'Fast, deadly, and never bleeding — BREAKING. Its bites can crack the very bone they land on: a thigh ends the chase, a tail sends prey veering wrong, a skull takes the force out of everything.', tag: '◆ CARNIVORE — BONE BREAKER', tagClass: 'mod' },
+  drypto: { desc: 'The long tyrant: stretched skull, stretched frame, and the same bone-cracking jaws turned up to full. Big, fast, agile — the mist\'s worst silhouette to guess wrong about.', tag: '◆ CARNIVORE — BONE BREAKER', tagClass: 'mod' },
+  gastonia: { desc: 'A flat oval of living armor: ankylosaur head, shoulder spikes that grow as it does, and a long spiked tail swinging behind. Nothing on the moor opens it — most stop trying.', tag: '◆ HERBIVORE — THE FORTRESS', tagClass: 'hard' },
 };
 
 // build tabs and cards once from ECOS / PLAYER_DEF / DINO / CARD_INFO
@@ -694,6 +712,11 @@ const START_BANNERS = {
   eshano: 'You hatch beneath the pines. Strange claws, old blood — the mountain is yours to climb.',
   nanuq: 'You hatch in the snow. Grow quietly; the mountain already has a king.',
   nivarex: 'You hatch wrapped in feathers. The cold gave up on your kind long ago.',
+  simo: 'You hatch small and square-faced. Dig deep — the mist hides worse things.',
+  korea: 'You hatch by a black mere. The deep water is the one place they can\'t follow.',
+  sarco: 'You hatch hungry on the grey heath. What you bite, you break.',
+  drypto: 'You hatch long-shadowed. One day the mist will make YOU the bad silhouette.',
+  gastonia: 'You hatch armored. Let the moor gnaw — it will tire before you do.',
   nivalo: 'You wake from the ice. The wall was named for you. Remind it why.',
 };
 function startGame(species, gender, skin) {
@@ -729,6 +752,7 @@ function respawn(species, gender, skin) {
   G.wrestle = null;
   G.pack = [];
   G.burrow = null;
+  G.myBurrow = null;   // the digger starts homeless
   G.carcasses.length = 0;
   G.particles.length = 0;
   G.floats.length = 0;
@@ -945,6 +969,7 @@ function buildMinimap() {
       else if (t === T_SAND) col = [186, 170, 128];
       else if (t === T_MUD) col = [100, 74, 52];
       else if (t === T_LAVA) col = [216, 74, 30];
+      else if (World.misty) col = ff > 0.42 ? [78, 84, 74] : [112, 116, 106];
       else if (ff > 0.42) col = World.lush ? [46, 88, 44] : [92, 104, 58];
       else if (World.ashy) col = [128, 122, 108];
       else if (World.lush) col = [96, 128, 62];
@@ -1294,6 +1319,8 @@ function spawnAmbient() {
 // loose from the summit: a wall of snow that sweeps DOWN the mountain and
 // buries everything that isn't behind stone, on a rock wall, or fast.
 function updateBlizzard(dt) {
+  // the Moors have no storms — just a mist that never, ever lifts
+  if (World.misty) { G.blizzard = null; G.mist = lerp(G.mist || 0, 0.85, Math.min(1, dt * 0.5)); return; }
   if (!World.snowy) { G.blizzard = null; return; }
   if (!G.blizzard) G.blizzard = { nextT: 45 + Math.random() * 30, warnT: 0, on: false, t: 0, av: null };
   const B = G.blizzard;
@@ -1415,20 +1442,33 @@ function drawAvalanche(camX, camY) {
 // the mist, drawn in screen space: drifting banks under a flat veil.
 // Some days you see the whole ridge; some days shapes loom out of nothing.
 function drawMist() {
-  if (!World.snowy || !G.mist) return;
+  if (!(World.snowy || World.misty) || !G.mist) return;
   const m = G.mist;
+  // moor mist is grey-green and heavier; Wall mist is blue-white snowlight
+  const MC = World.misty ? '196,200,190' : '232,240,248';
   for (let i = 0; i < 3; i++) {
     const t = G.time * (5 + i * 2.4);
     const fx = ((t + i * 340) % (VIEW_W + 360)) - 180;
     const fy = VIEW_H * (0.2 + 0.28 * i) + Math.sin(G.time * 0.11 + i * 2) * 26;
     const g = ctx.createRadialGradient(fx, fy, 20, fx, fy, 230);
-    g.addColorStop(0, 'rgba(232,240,248,' + (0.16 * m).toFixed(3) + ')');
-    g.addColorStop(1, 'rgba(232,240,248,0)');
+    g.addColorStop(0, 'rgba(' + MC + ',' + (0.16 * m).toFixed(3) + ')');
+    g.addColorStop(1, 'rgba(' + MC + ',0)');
     ctx.fillStyle = g;
     ctx.fillRect(fx - 240, fy - 240, 480, 480);
   }
-  ctx.fillStyle = 'rgba(226,236,246,' + (0.3 * m).toFixed(3) + ')';
+  ctx.fillStyle = 'rgba(' + MC + ',' + ((World.misty ? 0.16 : 0.3) * m).toFixed(3) + ')';
   ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+  // the Moors' signature: mist LINGERS AT THE EDGE of the screen — a heavy
+  // ring closing in, so the world you can trust is only the middle of it
+  if (World.misty) {
+    const g2 = ctx.createRadialGradient(VIEW_W / 2, VIEW_H / 2, Math.min(VIEW_W, VIEW_H) * 0.3,
+      VIEW_W / 2, VIEW_H / 2, Math.max(VIEW_W, VIEW_H) * 0.62);
+    g2.addColorStop(0, 'rgba(' + MC + ',0)');
+    g2.addColorStop(0.7, 'rgba(' + MC + ',' + (0.42 * m).toFixed(3) + ')');
+    g2.addColorStop(1, 'rgba(' + MC + ',' + (0.85 * m).toFixed(3) + ')');
+    ctx.fillStyle = g2;
+    ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+  }
 }
 
 function updateAmbient(dt) {
@@ -2003,12 +2043,34 @@ function render() {
           // a submerged croc is only a shadow under the surface — no hp bar,
           // no outline, just a dark shape and two eyes
           if (e.submerged && isWaterPx(e.x, e.y)) { drawCrocShadow(ctx, e); return; }
+          // THE MOORS: anything past arm's length is a SILHOUETTE — darkened
+          // to a shape, and lying about its size (each animal drifts through
+          // the mist a fixed, personal amount bigger or smaller than it is)
+          const far = World.misty ? clamp((dist(e.x, e.y, p.x, p.y) - 150) / 130, 0, 1) : 0;
+          if (far > 0.01) {
+            if (!e.mistS) e.mistS = 0.72 + hash2(e.id * 7 + 3, 13) * 0.7;
+            ctx.save();
+            ctx.translate(e.x, e.y);
+            const sc = lerp(1, e.mistS, far);
+            ctx.scale(sc, sc);
+            ctx.translate(-e.x, -e.y);
+            ctx.filter = 'brightness(' + (1 - 0.72 * far).toFixed(2) + ') saturate(' + (1 - 0.85 * far).toFixed(2) + ')';
+            drawDino(ctx, e.species, e);
+            ctx.filter = 'none';
+            ctx.restore();
+            return;   // no shadow, no hp bar — just the shape in the grey
+          }
           drawShadow(ctx, e.x, e.y, bodyRadius(e) * 1.4);
           drawDino(ctx, e.species, e);
           if (e.hurtT > 0 || e.hp < e.maxhp * 0.999 && dist(e.x, e.y, p.x, p.y) < 130) drawHpBar(e);
         }
       });
     }
+  }
+  // simosuchus' own burrow: mound behind, and drawn OVER the hidden digger
+  // (y + 2) so only the backside shows sticking out of the earth
+  if (G.myBurrow && G.myBurrow.x > x0 && G.myBurrow.x < x1 && G.myBurrow.y > y0 && G.myBurrow.y < y1) {
+    draws.push({ y: G.myBurrow.y + 2, fn: () => drawMyBurrow(ctx, G.myBurrow, p) });
   }
   if (p.alive) {
     draws.push({

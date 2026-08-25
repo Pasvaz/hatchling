@@ -115,5 +115,115 @@ const SFX = (() => {
     buy() { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => tone(f, 0.12, 'triangle', 0.06), i * 80)); },
     die() { tone(180, 0.6, 'sawtooth', 0.1, 40); },
     kill() { noise(0.18, 0.12, 800); tone(90, 0.3, 'square', 0.07, 45); },
+    // ---- calls: every playable has its OWN voice (see VOICE below) ----
+    // kind 1 broadcast · 2 friendly · 3 aggressive
+    call(kind, sp, growth) {
+      const a = ctx(); if (!a || muted) return;
+      const v = VOICE[sp] || { style: 'roar', f: 200 };
+      const wave = v.wave || VOICE_WAVE[v.style] || 'sawtooth';
+      const f = v.f * (1.5 - 0.55 * (growth == null ? 1 : growth));   // babies pipe, adults boom
+      const rasp = v.rasp || 0;
+      // one voiced note at time t0: tone + vibrato + optional gravel underneath
+      const note = (t0, fm, dur, vol, bend, r) => {
+        const at = a.currentTime + t0;
+        const o = a.createOscillator(), g = a.createGain();
+        o.type = wave;
+        o.frequency.setValueAtTime(f * fm, at);
+        if (bend) o.frequency.exponentialRampToValueAtTime(Math.max(24, f * fm * bend), at + dur);
+        if (v.vib) {
+          const l = a.createOscillator(), lg = a.createGain();
+          l.frequency.value = v.vibR || 5;
+          lg.gain.value = f * fm * v.vib;
+          l.connect(lg); lg.connect(o.frequency);
+          l.start(at); l.stop(at + dur + 0.05);
+        }
+        g.gain.setValueAtTime(0.0001, at);
+        g.gain.exponentialRampToValueAtTime(vol, at + Math.min(0.09, dur * 0.35));
+        g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+        o.connect(g); g.connect(a.destination);
+        o.start(at); o.stop(at + dur + 0.06);
+        const rr = r == null ? rasp : r;
+        if (rr > 0) {
+          const len = Math.floor(a.sampleRate * dur);
+          const buf = a.createBuffer(1, len, a.sampleRate);
+          const dd = buf.getChannelData(0);
+          for (let i = 0; i < len; i++) dd[i] = (Math.random() * 2 - 1) * (1 - i / len);
+          const src = a.createBufferSource(); src.buffer = buf;
+          const fl = a.createBiquadFilter(); fl.type = 'bandpass';
+          fl.frequency.value = f * fm * 2.2; fl.Q.value = 0.7;
+          const ng = a.createGain(); ng.gain.value = vol * rr;
+          src.connect(fl); fl.connect(ng); ng.connect(a.destination);
+          src.start(at);
+        }
+      };
+      const S = v.style;
+      if (kind === 1) {          // BROADCAST: the long claim, in this body's voice
+        if (S === 'roar') note(0, 1, 2.1, 0.075, 0.78);
+        else if (S === 'bellow') note(0, 1, 2.0, 0.07, 0.85);
+        else if (S === 'honk') { note(0, 1, 1.0, 0.07, 1.06); note(0.95, 1.25, 1.1, 0.065, 0.92); }
+        else if (S === 'boom') { note(0, 1, 2.4, 0.09, 0.9); note(0.15, 2.01, 2.0, 0.02, 0.9); }
+        else if (S === 'shriek') note(0, 1, 1.8, 0.06, 0.55);
+        else if (S === 'chatter') { for (let i = 0; i < 6; i++) note(i * 0.24, 1 + i * 0.06, 0.16, 0.055, 1.1); note(1.5, 1.4, 0.6, 0.06, 0.85); }
+        else if (S === 'hiss') { note(0, 1, 2.0, 0.06, 0.85, rasp + 0.7); note(0.1, 0.5, 1.8, 0.05, 0.9); }
+        else if (S === 'howl') { note(0, 0.85, 1.1, 0.07, 1.35); note(1.05, 1.15, 1.15, 0.07, 0.72); }
+      } else if (kind === 2) {   // FRIENDLY: the same voice, short and soft
+        if (S === 'honk') note(0, 1.1, 0.3, 0.05, 1.2);
+        else if (S === 'chatter') { for (let i = 0; i < 3; i++) note(i * 0.16, 1.1 + i * 0.12, 0.11, 0.045, 1.15); }
+        else if (S === 'boom') note(0, 1.2, 0.6, 0.05, 1.1);
+        else if (S === 'hiss') { note(0, 0.9, 0.18, 0.045, 1.1, 0.3); note(0.22, 1.1, 0.24, 0.045, 1.15, 0.2); }
+        else note(0, 1.15, 0.4, 0.05, 1.25, rasp * 0.3);   // a soft rising version of itself
+      } else {                   // AGGRESSIVE: the voice torn into sharp edges
+        if (S === 'roar') { [1, 1.2, 0.9].forEach((m, i) => note(i * 0.28, m, 0.2, 0.08, 0.8, rasp + 0.3)); note(0.95, 1.1, 0.6, 0.085, 0.6, rasp + 0.4); }
+        else if (S === 'bellow') { [1, 0.9, 1.1].forEach((m, i) => note(i * 0.42, m, 0.32, 0.08, 0.75, rasp + 0.3)); }
+        else if (S === 'honk') { [1, 1.35, 1, 1.4, 0.95].forEach((m, i) => note(i * 0.24, m, 0.15, 0.075, 0.95)); }
+        else if (S === 'boom') { [1, 0.92, 1.05].forEach((m, i) => note(i * 0.5, m, 0.44, 0.1, 0.8)); }
+        else if (S === 'shriek') { [1, 1.5, 0.8, 1.6, 0.9].forEach((m, i) => note(i * 0.24, m, 0.16, 0.07, 0.62, rasp + 0.2)); }
+        else if (S === 'chatter') { [1, 1.5, 0.9, 1.6, 1.1, 1.7, 0.8, 1.4].forEach((m, i) => note(i * 0.17, m, 0.1, 0.065, 0.9, 0.25)); }
+        else if (S === 'hiss') { [1, 0.85, 1.1, 0.9].forEach((m, i) => note(i * 0.34, m, 0.24, 0.075, 0.8, rasp + 0.8)); }
+        else if (S === 'howl') { [1, 1.35, 0.85, 1.25].forEach((m, i) => note(i * 0.36, m, 0.3, 0.075, i % 2 ? 0.7 : 1.3, rasp + 0.2)); }
+      }
+    },
   };
 })();
+
+// ---------------------------------------------------------------------------
+// VOICE REGISTRY — every playable's calls in its own voice, matched to how it
+// plays. style picks the vocal archetype, f the adult pitch (growth raises
+// it), rasp adds gravel, vib/vibR a waver. New playables fall back to a roar.
+//   roar    — carnivore's tearing cry        bellow — big herbivore's chest blast
+//   honk    — ornithopod/ceratopsian trumpet boom   — sauropod sub-bass
+//   shriek  — raptor scream                  chatter— small social yipping
+//   hiss    — croc-snout gurgle              howl   — polar wind-cry
+// ---------------------------------------------------------------------------
+const VOICE_WAVE = { roar: 'sawtooth', bellow: 'triangle', honk: 'triangle', boom: 'sine', shriek: 'sawtooth', chatter: 'square', hiss: 'square', howl: 'sawtooth' };
+const VOICE = {
+  raja:      { style: 'roar',    f: 200, rasp: 0.5 },                 // the classic hunter's rasp
+  campto:    { style: 'honk',    f: 320 },                            // the plains runner's alarm
+  rioja:     { style: 'bellow',  f: 150, rasp: 0.35 },                // the brawler's chest
+  ichthyo:   { style: 'hiss',    f: 170 },                            // swamp gurgle
+  qianzho:   { style: 'shriek',  f: 260, rasp: 0.3 },                 // the long snout keens
+  scutello:  { style: 'chatter', f: 420 },                            // quick nervous trills
+  metria:    { style: 'roar',    f: 230, rasp: 0.6 },                 // the herd-runner's bark
+  giganto:   { style: 'bellow',  f: 110, vib: 0.02, vibR: 3.5 },      // a foghorn on legs
+  crista:    { style: 'hiss',    f: 140, rasp: 0.3 },                 // the shoreline croc-rumble
+  linhe:     { style: 'shriek',  f: 380 },                            // the ridge's knife-scream
+  nothro:    { style: 'bellow',  f: 160, rasp: 0.5 },                 // a huffing pot-bellied blast
+  aardi:     { style: 'chatter', f: 360 },                            // the pack's yipping tongue
+  centro:    { style: 'honk',    f: 190, wave: 'square' },            // a nose-horn blast
+  omni:      { style: 'shriek',  f: 320, rasp: 0.4 },                 // the working raptor's snarl
+  eotrach:   { style: 'honk',    f: 150, vib: 0.015, vibR: 4 },       // the old duckbill's crest-trumpet
+  loki:      { style: 'honk',    f: 160, wave: 'square', rasp: 0.2 }, // the trickster's war-horn
+  moro:      { style: 'boom',    f: 70 },                             // the ground answers
+  spino:     { style: 'hiss',    f: 110, rasp: 0.7 },                 // gurgling thunder off the water
+  tyranno:   { style: 'roar',    f: 130, rasp: 0.7 },                 // the land apex, full throat
+  jianchang: { style: 'chatter', f: 450 },                            // thin mountain peeping
+  eshano:    { style: 'howl',    f: 240, vib: 0.04, vibR: 6.5 },      // the climber's reedy warble
+  nanuq:     { style: 'howl',    f: 160, rasp: 0.5, vib: 0.02, vibR: 4.5 },  // the whiteout king's wind-cry
+  nivalo:    { style: 'boom',    f: 55, vib: 0.01, vibR: 2.5 },       // old ice, groaning
+  nivarex:   { style: 'roar',    f: 105, rasp: 0.85 },                // the abyss with teeth
+  simo:      { style: 'chatter', f: 440 },                            // squeaks from the square face
+  korea:     { style: 'honk',    f: 260, wave: 'square' },            // a wet little horn-blast
+  sarco:     { style: 'shriek',  f: 340, rasp: 0.3 },                 // the bone-breaker's cry
+  drypto:    { style: 'roar',    f: 125, rasp: 0.6 },                 // the long tyrant, low and dry
+  gastonia:  { style: 'bellow',  f: 120, rasp: 0.3 },                 // armor with lungs
+};
