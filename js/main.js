@@ -2036,9 +2036,9 @@ function drawEntityHitboxes(g, e) {
     const nc = nipCircle(e);
     dbgCircle(g, nc.x, nc.y, nc.r, '#ffb03e');
   }
-  // mid-pounce, the landing pin rides along under the body — the same object
-  // the landing bite will test the moment the leap ends
-  if (e.isPlayer && e.pounce && e.pounce.phase === 'jump') {
+  // mid-pounce (and through the landing grace) the flying-body pin rides
+  // along under the dino — the same object pounceStrike tests every step
+  if (e.isPlayer && ((e.pounce && e.pounce.phase === 'jump') || e.pounceGrace)) {
     const pz = pounceLandZone(e);
     dbgCircle(g, pz.x, pz.y, pz.r, '#ff5040');
   }

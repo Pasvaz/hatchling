@@ -679,6 +679,30 @@ function pounceDist(spd) { return clamp(spd * 1.05, 60, 240); }
 // the landing pin: the pouncing body itself, near ground level — combat AND
 // the H overlay consume this same object (the single-source hitbox rule)
 function pounceLandZone(p) { return { x: p.x + p.facing * 6, y: p.y - 12, r: 14 + 12 * p.growth }; }
+// ---- the pounce is a weapon for its WHOLE flight: jaws + the flying body
+// are tested every step of the leap, and for a beat after it lands. Each
+// victim is struck at most once per pounce (bag.hit remembers).
+function pounceStrike(p, bag) {
+  const def = PLAYER_DEF[p.species];
+  const zones = [...biteZones(p), pounceLandZone(p)];
+  for (const e of G.npcs) {
+    if (e.packAlpha || e.isBaby || e === G.mate) continue;
+    if (bag.hit.has(e.id)) continue;
+    let pt = null;
+    for (const z of zones) { pt = bodyHitPoint(e, z.x, z.y, z.r); if (pt) break; }
+    if (!pt) continue;
+    bag.hit.add(e.id);
+    const opts = { hitX: pt.x, hitY: pt.y, kb: 130 };
+    if (def.bleedBite && (NPC_DEF[e.species] || {}).bleedable && p.growth > 0.25) {
+      const bm = def.bleedMul || 1;
+      opts.bleed = { dps: (6 + 8 * p.growth) * bm, dur: 10 * Math.min(1.4, bm) };
+    }
+    dealDamage(e, playerDmg() * rrange(0.9, 1.1) * (bag.mul || 1), p, opts);
+    if (def.boneBreak && p.growth > 0.2) tryBoneBreak(p, e, pt.part, playerDmg());
+    SFX.bite();
+    p.attackT = Math.max(p.attackT, 0.8);   // the jaws visibly snap on contact
+  }
+}
 // a bite is a strike ARC, not a floating ring: the jaws start at head height
 // and come DOWN — three stacked circles from jaw-line to shin-line, so tiny
 // prey under a tall predator's chin is genuinely bitable. (Found when an
@@ -2559,6 +2583,13 @@ function updatePlayer(dt) {
   p.strain = lerp(p.strain || 0, 0, 0.2);
   p.callB = lerp(p.callB || 0, 0, 0.2);
 
+  // pounce afterglow: the leap's hit zones stay live a few ms after landing
+  if (p.pounceGrace) {
+    pounceStrike(p, p.pounceGrace);
+    p.pounceGrace.t -= dt;
+    if (p.pounceGrace.t <= 0) p.pounceGrace = null;
+  }
+
   // which verb F means this frame (see resolveAction)
   p.fAct = resolveAction(p, def);
 
@@ -2709,6 +2740,7 @@ function updatePlayer(dt) {
           P.phase = 'swing'; P.t = 0.01;
         } else {
           P.phase = 'jump'; P.t = 0.26;
+          P.hitBag = new Set();   // one strike per victim per pounce
           // HIGH POUNCE (the Wall): launched off a rock wall, the leap flies
           // 1.7× farther and the landing bite hits 1.6× harder — death from above
           P.high = isCliffPx(p.x, p.y);
@@ -2721,20 +2753,25 @@ function updatePlayer(dt) {
         }
       }
     } else if (P.phase === 'jump') {
-      // airborne: committed like an NPC lunge — the bite waits at the landing
+      // airborne — and ARMED the whole way: the hit zones fly with the body,
+      // striking anything crossed from the first inch of the leap to the
+      // last. Two substeps per frame so a fast pounce can't tunnel through
+      // a small body between frames.
       P.t -= dt;
-      p.x += P.vx * dt; p.y += P.vy * dt;
+      const bag = { hit: P.hitBag, mul: P.high ? 1.6 : 1 };
+      for (let sub = 0; sub < 2; sub++) {
+        p.x += P.vx * dt / 2; p.y += P.vy * dt / 2;
+        pounceStrike(p, bag);
+      }
       p.move = 1;
       p.phase += dt * Math.hypot(P.vx, P.vy) * 0.055;
       pitchTarget = P.dirY * 0.35;
       if (P.t <= 0) {
         p.pounce = null;
-        input.attack = true;   // the landing bite: the normal attack, right here
-        p.atkCd = 0;
-        // a leap that lands ON the prey buries you in it — the anti-back-bite
-        // side guard would reject the overlap, so the landing bite waives it
-        p.landBite = true;
-        p.landBiteMul = P.high ? 1.6 : 1;   // height turns into hurt
+        // the zones stay live a few ms after the body stops — a landing ON
+        // prey still pins it, then the weapon goes cold
+        p.pounceGrace = { t: 0.12, hit: P.hitBag, mul: P.high ? 1.6 : 1 };
+        p.atkCd = 0.3;
       }
     } else {
       // swing: locked in place, the tail scythes on a metronome while held —
