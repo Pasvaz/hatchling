@@ -66,7 +66,7 @@ const PLAYER_DEF = {
   nivalo: { hp: 3400, dmg: 200, speed: 70, sprint: 1.35, reach: 52, atkCd: 1.8, diet: 'herb', bleedBite: false, stamMax: 190, eco: 'wall', cost: 0, secret: true, growthRate: 0.5, coldResist: 0.85, earnMul: 1.4, trample: true },
   // play the KING: the polar tyrant itself — thick-coated, bleed-biting,
   // and strong enough to wrestle anything on the mountain
-  nanuq: { hp: 2100, dmg: 180, speed: 118, sprint: 1.65, reach: 36, atkCd: 0.9, diet: 'carn', bleedBite: true, stamMax: 160, eco: 'wall', cost: 550, req: 'eshano', growthRate: 0.75, coldResist: 0.7, wrestler: true, boneBreak: true },
+  nanuq: { hp: 2100, dmg: 180, speed: 118, sprint: 1.65, reach: 36, atkCd: 0.9, diet: 'carn', bleedBite: true, stamMax: 160, eco: 'wall', cost: 550, req: 'eshano', growthRate: 0.75, coldResist: 0.7, wrestler: true, boneBreak: true, caution: 0.8 },
   // the END of the ladder: a carcharodontosaurid in a winter coat — bigger
   // and tankier than its delta cousin, with Tyrannotitan's bleed kit and a
   // feather blanket so deep even the summit's cold barely reaches it. Slow,
@@ -83,7 +83,7 @@ const PLAYER_DEF = {
   sarco: { hp: 950, dmg: 150, speed: 136, sprint: 1.85, reach: 28, atkCd: 0.6, diet: 'carn', bleedBite: false, boneBreak: true, stamMax: 140, eco: 'moor', cost: 300, req: 'korea' },
   // the long tyrant: big, fast, agile — a stretched skull on a stretched
   // frame, with the same bone-cracking jaws turned up to full
-  drypto: { hp: 2300, dmg: 190, speed: 128, sprint: 1.75, reach: 38, atkCd: 0.75, diet: 'carn', bleedBite: false, boneBreak: true, stamMax: 155, eco: 'moor', cost: 550, req: 'sarco', growthRate: 0.7, wrestler: true },
+  drypto: { hp: 2300, dmg: 190, speed: 128, sprint: 1.75, reach: 38, atkCd: 0.75, diet: 'carn', bleedBite: false, boneBreak: true, stamMax: 155, eco: 'moor', cost: 550, req: 'sarco', growthRate: 0.7, wrestler: true, caution: 1.2 },
   // the moor's fortress: a flat oval of armor, shoulder spikes that grow
   // with it, and a long spiked tail that answers everything
   gastonia: { hp: 2000, dmg: 165, speed: 76, sprint: 1.45, reach: 46, atkCd: 1.4, diet: 'herb', bleedBite: false, bleedResist: 0.35, stamMax: 150, eco: 'moor', cost: 650, req: 'drypto', growthRate: 0.75 },
@@ -95,7 +95,7 @@ const NPC_DEF = {
   guanlong: { hp: 130, dmg: 26, atkCd: 0.9, speed: 148, detect: 230, homeR: 280, reach: 22, biome: 'forest', turn: 4.2, patience: 6.5, fears: [['moros', 170], ['huayango', 135]] },
   moros: { hp: 360, dmg: 70, atkCd: 1.1, speed: 200, detect: 300, homeR: 560, reach: 26, biome: 'plains', turn: 2.3, fears: [['huayango', 125]], hunts: ['guanlong'] },
   ornitho: { hp: 150, dmg: 0, atkCd: 0, speed: 232, detect: 260, homeR: 420, reach: 0, biome: 'plains', turn: 3.6 },
-  scelido: { hp: 520, dmg: 85, atkCd: 1.7, speed: 82, fleeSpeed: 118, detect: 170, homeR: 240, reach: 30, biome: 'any', turn: 2.4, bleedable: true },
+  scelido: { hp: 520, dmg: 85, atkCd: 1.7, speed: 82, fleeSpeed: 118, detect: 170, homeR: 240, reach: 30, biome: 'any', turn: 2.4, bleedable: true, caution: 1.5 },
   huayango: { hp: 1500, dmg: 110, atkCd: 2.1, speed: 55, detect: 95, homeR: 160, reach: 42, biome: 'forest', turn: 1.6, fearless: true, tank: true, bleedable: true, melee: { bleed: { dps: 7, dur: 8 }, kb: 160 } },
   // the valley's frail assassin: pathetic raw bite, blazing speed, and a wound
   // that will NOT close. Fears nothing, sometimes runs in small packs, and its
@@ -106,7 +106,7 @@ const NPC_DEF = {
   // --- Skull Prairie ---
   troodon: { hp: 150, dmg: 30, atkCd: 0.85, speed: 156, detect: 240, homeR: 300, reach: 22, biome: 'forest', turn: 4.5, patience: 6.5, fears: [['eotyrannus', 170], ['grunos', 150], ['kosmo', 120]] },
   eotyrannus: { hp: 430, dmg: 82, atkCd: 1.1, speed: 208, detect: 310, homeR: 600, reach: 28, biome: 'plains', turn: 2.2, fears: [['kosmo', 130]], hunts: ['troodon'] },
-  grunos: { hp: 780, dmg: 100, atkCd: 1.3, speed: 118, detect: 260, homeR: 520, reach: 30, biome: 'plains', turn: 2.6, fearless: true, hunts: ['archeo', 'leaellyna', 'troodon'] },
+  grunos: { hp: 780, dmg: 100, atkCd: 1.3, speed: 118, detect: 260, homeR: 520, reach: 30, biome: 'plains', turn: 2.6, fearless: true, hunts: ['archeo', 'leaellyna', 'troodon'], caution: 0.9 },
   archeo: { hp: 120, dmg: 0, atkCd: 0, speed: 215, detect: 250, homeR: 400, reach: 0, biome: 'plains', turn: 3.8 },
   leaellyna: { hp: 110, dmg: 0, atkCd: 0, speed: 195, detect: 240, homeR: 350, reach: 0, biome: 'plains', turn: 3.9 },
   kosmo: { hp: 950, dmg: 125, atkCd: 1.9, speed: 72, detect: 160, homeR: 260, reach: 36, biome: 'plains', turn: 1.8, fearless: true, tank: true, bleedable: true, melee: { kb: 210 } },
@@ -117,7 +117,7 @@ const NPC_DEF = {
   // itself briefly mid-strike without the fish position-revert snapping it back
   megoro: { hp: 900, dmg: 95, atkCd: 2.5, speed: 62, detect: 240, homeR: 420, reach: 30, biome: 'sea', turn: 2.2, fearless: true, aquatic: true, amphibious: true },
   // herd hadrosaur: metria's staple prey, but the herd swings back — hard
-  ugru: { hp: 620, dmg: 95, atkCd: 1.6, speed: 105, fleeSpeed: 142, detect: 210, homeR: 340, reach: 34, biome: 'plains', turn: 2.2, bleedable: true, melee: { kb: 200 } },
+  ugru: { hp: 620, dmg: 95, atkCd: 1.6, speed: 105, fleeSpeed: 142, detect: 210, homeR: 340, reach: 34, biome: 'plains', turn: 2.2, bleedable: true, melee: { kb: 200 }, caution: 1.2 },
   // the coast's true king: too big for crocodiles, flattens almost anything
   charono: { hp: 2400, dmg: 160, atkCd: 2.0, speed: 62, detect: 150, homeR: 300, reach: 46, biome: 'beach', turn: 1.5, fearless: true, tank: true, bleedable: true, melee: { kb: 260 } },
   // ornithomimid that kicks back when cornered, and takes a real beating
@@ -125,7 +125,7 @@ const NPC_DEF = {
   // the azure raider: hesperaptor fills guanlong's niche around the mud grove
   hesper: { hp: 150, dmg: 28, atkCd: 0.9, speed: 150, detect: 235, homeR: 290, reach: 22, biome: 'forest', turn: 4.3, patience: 6.5, fears: [['concav', 160], ['charono', 130]] },
   // pack-brave claw hunter: swims deep water, and a pack never routs
-  concav: { hp: 560, dmg: 88, atkCd: 1.0, speed: 165, detect: 280, homeR: 480, reach: 30, biome: 'plains', turn: 2.5, swims: true, packCourage: true, hunts: ['archaomim', 'ugru'] },
+  concav: { hp: 560, dmg: 88, atkCd: 1.0, speed: 165, detect: 280, homeR: 480, reach: 30, biome: 'plains', turn: 2.5, swims: true, packCourage: true, hunts: ['archaomim', 'ugru'], caution: 1.1, scavR: 240, scavPicky: true },
   // the lake's bass: harmless, quick, and tanky for its size
   bassb: { hp: 220, dmg: 0, atkCd: 0, speed: 150, detect: 130, homeR: 260, reach: 0, biome: 'lake', turn: 5.5, aquatic: true },
   // the coelacanth that rules the surf: slow, huge, and its tail slap hurts.
@@ -135,7 +135,7 @@ const NPC_DEF = {
   scutelich: { hp: 130, dmg: 0, atkCd: 0, speed: 165, detect: 150, homeR: 300, reach: 0, biome: 'sea', turn: 5, aquatic: true, headArmor: 0.4 },
   // --- Ashfall Ridge ---
   // the apex of the ash: hunts nearly everything, up to and including near-adults
-  tarbo: { hp: 2000, dmg: 170, atkCd: 1.4, speed: 122, detect: 330, homeR: 700, reach: 36, biome: 'plains', turn: 1.9, fearless: true, bleedable: true, hunts: ['ovi', 'shuv', 'linhe'] },
+  tarbo: { hp: 2000, dmg: 170, atkCd: 1.4, speed: 122, detect: 330, homeR: 700, reach: 36, biome: 'plains', turn: 1.9, fearless: true, bleedable: true, hunts: ['ovi', 'shuv', 'linhe'], scavR: 300 },
   // wild raptor packs den in the spring groves — rivals even to a played raptor
   linhe: { hp: 200, dmg: 42, atkCd: 0.8, speed: 192, detect: 260, homeR: 320, reach: 22, biome: 'forest', turn: 4.4, patience: 8, fears: [['tarbo', 210], ['nothro', 150]] },
   // slow, colossal, and armed: claw swipes leave bleeding wounds
@@ -148,12 +148,12 @@ const NPC_DEF = {
   // --- Lertentous Delta ---
   // the giant lambeosaurine: placid until anything threatens the herd — then
   // the whole river bank swings back, vigorously
-  magnapaulia: { hp: 1800, dmg: 150, atkCd: 1.8, speed: 92, fleeSpeed: 120, detect: 240, homeR: 380, reach: 42, biome: 'plains', turn: 1.9, bleedable: true, melee: { kb: 260 } },
+  magnapaulia: { hp: 1800, dmg: 150, atkCd: 1.8, speed: 92, fleeSpeed: 120, detect: 240, homeR: 380, reach: 42, biome: 'plains', turn: 1.9, bleedable: true, melee: { kb: 260 }, caution: 1.2 },
   // the nodosaur: a medium tank in a bone coat — no club, no need
   panoplo: { hp: 1100, dmg: 110, atkCd: 1.9, speed: 60, detect: 130, homeR: 220, reach: 34, biome: 'any', turn: 1.7, fearless: true, tank: true, melee: { kb: 240 } },
   // the crested menace: knee-high and furious — it starts fights it has
   // no business starting, and wins more than it should
-  proto: { hp: 380, dmg: 55, atkCd: 1.1, speed: 96, detect: 180, homeR: 260, reach: 24, biome: 'forest', turn: 3.0, melee: { kb: 140 } },
+  proto: { hp: 380, dmg: 55, atkCd: 1.1, speed: 96, detect: 180, homeR: 260, reach: 24, biome: 'forest', turn: 3.0, melee: { kb: 140 }, caution: 0.75 },
   // the walking mountain: kills almost any predator with relative ease
   atlas: { hp: 4200, dmg: 360, atkCd: 2.4, speed: 66, detect: 210, homeR: 320, reach: 52, biome: 'plains', turn: 1.3, fearless: true, tank: true, bleedable: true, melee: { kb: 340 } },
   // pack raptor that fears not one playable: no fears list, and while a
@@ -162,9 +162,9 @@ const NPC_DEF = {
   // the son's invention: small, weak, scruffy — but never alone for long
   aardi: { hp: 240, dmg: 38, atkCd: 0.8, speed: 168, detect: 250, homeR: 320, reach: 20, biome: 'forest', turn: 4.4, patience: 7, packCourage: true, fears: [['lourinha', 160], ['yuty', 140]] },
   // fast, robust-headed, and its bite has a reputation
-  yuty: { hp: 1200, dmg: 140, atkCd: 1.2, speed: 150, detect: 300, homeR: 600, reach: 32, biome: 'plains', turn: 2.2, fearless: true, bleedable: true, hunts: ['proto', 'dakota'] },
+  yuty: { hp: 1200, dmg: 140, atkCd: 1.2, speed: 150, detect: 300, homeR: 600, reach: 32, biome: 'plains', turn: 2.2, fearless: true, bleedable: true, hunts: ['proto', 'dakota'], caution: 0.8, scavR: 280, scavPicky: true },
   // the big fan-crested lambeosaurine — charonosaurus' niche, delta edition
-  oloro: { hp: 1500, dmg: 130, atkCd: 1.9, speed: 80, fleeSpeed: 110, detect: 220, homeR: 340, reach: 44, biome: 'plains', turn: 1.7, bleedable: true, melee: { kb: 240 } },
+  oloro: { hp: 1500, dmg: 130, atkCd: 1.9, speed: 80, fleeSpeed: 110, detect: 220, homeR: 340, reach: 44, biome: 'plains', turn: 1.7, bleedable: true, melee: { kb: 240 }, caution: 1.2 },
   // massive flat-plated tank: smacks with the tail, occasionally bites
   // whatever stands at its face (the nip)
   wuerho: { hp: 2800, dmg: 175, atkCd: 2.2, speed: 52, detect: 120, homeR: 220, reach: 48, biome: 'any', turn: 1.4, fearless: true, tank: true, bleedable: true, melee: { kb: 300 }, nip: { dmg: 70, cd: 3 } },
@@ -176,7 +176,7 @@ const NPC_DEF = {
   sino: { hp: 1600, dmg: 145, atkCd: 2.0, speed: 88, detect: 200, homeR: 300, reach: 38, biome: 'plains', turn: 1.8, fearless: true, tank: true, bleedable: true, melee: { kb: 300 }, chargeR: 170, lungeT: 0.7, lungeMul: 3.4 },
   // the delta's terror: hunts the player at EVERY size — even a full-grown
   // morosaurus checks the tree line for this one. Its bite doesn't close
-  lourinha: { hp: 1700, dmg: 160, atkCd: 1.3, speed: 128, detect: 320, homeR: 650, reach: 34, biome: 'plains', turn: 2.0, fearless: true, bleedable: true, biteBleed: { dps: 13, dur: 8 }, hunts: ['proto', 'dakota', 'oloro'] },
+  lourinha: { hp: 1700, dmg: 160, atkCd: 1.3, speed: 128, detect: 320, homeR: 650, reach: 34, biome: 'plains', turn: 2.0, fearless: true, bleedable: true, biteBleed: { dps: 13, dur: 8 }, hunts: ['proto', 'dakota', 'oloro'], caution: 0.75, scavR: 300 },
   // the sawfish: lethal and angry — anything that touches its water is prey
   onchop: { hp: 500, dmg: 95, atkCd: 1.2, speed: 175, detect: 230, homeR: 400, reach: 26, biome: 'lake', turn: 3.5, fearless: true, aquatic: true, hunts: ['lepisosteus', 'bassb', 'scutelich'] },
   // the great coelacanth: immensely tanky, strong, and goes exactly nowhere
@@ -190,25 +190,25 @@ const NPC_DEF = {
   beipiao: { hp: 900, dmg: 120, atkCd: 1.6, speed: 75, detect: 130, homeR: 220, reach: 34, biome: 'forest', turn: 1.9, fearless: true, tank: true, bleedable: true, melee: { bleed: { dps: 6, dur: 6 }, kb: 200 } },
   // the scavenger gang: snow-white troodontids that trail every blizzard,
   // picking at whatever froze — bold in a pack, gone in a blink alone
-  pectino: { hp: 260, dmg: 55, atkCd: 0.9, speed: 132, fleeSpeed: 148, detect: 220, homeR: 420, reach: 24, biome: 'any', turn: 2.6, patience: 6, packCourage: true },
+  pectino: { hp: 260, dmg: 55, atkCd: 0.9, speed: 132, fleeSpeed: 148, detect: 220, homeR: 420, reach: 24, biome: 'any', turn: 2.6, patience: 6, packCourage: true, caution: 1.1 },
   // the king of the Wall: the polar tyrant. Fears nothing, hunts everything,
   // and the mist is on ITS side
   nanuq: { hp: 2300, dmg: 190, atkCd: 1.5, speed: 118, detect: 330, homeR: 700, reach: 38, biome: 'any', turn: 1.9, fearless: true, bleedable: true, hunts: ['kerbero', 'pectino', 'beipiao', 'korean'] },
   // the TITAN-KILLER: one single Titanovenator walks the whole mountain, and
   // it is the one hunter with no upper size limit — a full-grown nivalotitan
   // is not safe. Its bite opens wounds that refuse the cold's mercy.
-  titanov: { hp: 2600, dmg: 210, atkCd: 1.7, speed: 108, detect: 380, homeR: 900, reach: 42, biome: 'any', turn: 1.7, fearless: true, bleedable: true, biteBleed: { dps: 14, dur: 9 }, hunts: ['kerbero', 'beipiao'] },
+  titanov: { hp: 2600, dmg: 210, atkCd: 1.7, speed: 108, detect: 380, homeR: 900, reach: 42, biome: 'any', turn: 1.7, fearless: true, bleedable: true, biteBleed: { dps: 14, dur: 9 }, hunts: ['kerbero', 'beipiao'], caution: 0.7, scavR: 300, scavMin: 30 },
   // the snowball underfoot: a tiny burrowing ornithopod, everyone's lunch
   korean: { hp: 200, dmg: 25, atkCd: 1.2, speed: 120, fleeSpeed: 155, detect: 200, homeR: 240, reach: 18, biome: 'forest', turn: 3.5 },
   // ---- THE GREAT MOORS OF MARTULISTH ----
   // spindly microraptorine ghosts — glass-fragile, all legs, bold in packs
-  gracili: { hp: 120, dmg: 24, atkCd: 0.85, speed: 172, detect: 240, homeR: 300, reach: 20, biome: 'forest', turn: 4.4, patience: 7, fears: [['duria', 180], ['drypto', 160]] },
+  gracili: { hp: 120, dmg: 24, atkCd: 0.85, speed: 172, detect: 240, homeR: 300, reach: 20, biome: 'forest', turn: 4.4, patience: 7, fears: [['duria', 180], ['drypto', 160]], caution: 1.1 },
   // the marsh-dwarf hadrosaur: small herd prey that still swings back
-  telmato: { hp: 480, dmg: 70, atkCd: 1.7, speed: 98, fleeSpeed: 132, detect: 200, homeR: 320, reach: 30, biome: 'plains', turn: 2.3, bleedable: true, melee: { kb: 180 } },
+  telmato: { hp: 480, dmg: 70, atkCd: 1.7, speed: 98, fleeSpeed: 132, detect: 200, homeR: 320, reach: 30, biome: 'plains', turn: 2.3, bleedable: true, melee: { kb: 180 }, caution: 1.2 },
   // the flat-headed heavyweight of the herds
-  tanius: { hp: 900, dmg: 105, atkCd: 1.7, speed: 88, fleeSpeed: 118, detect: 210, homeR: 330, reach: 36, biome: 'plains', turn: 2.0, bleedable: true, melee: { kb: 220 } },
+  tanius: { hp: 900, dmg: 105, atkCd: 1.7, speed: 88, fleeSpeed: 118, detect: 210, homeR: 330, reach: 36, biome: 'plains', turn: 2.0, bleedable: true, melee: { kb: 220 }, caution: 1.2 },
   // the wanderer separated from its kin — a mid herd duckbill
-  secerno: { hp: 700, dmg: 90, atkCd: 1.6, speed: 95, fleeSpeed: 126, detect: 205, homeR: 340, reach: 33, biome: 'plains', turn: 2.1, bleedable: true, melee: { kb: 200 } },
+  secerno: { hp: 700, dmg: 90, atkCd: 1.6, speed: 95, fleeSpeed: 126, detect: 205, homeR: 340, reach: 33, biome: 'plains', turn: 2.1, bleedable: true, melee: { kb: 200 }, caution: 1.2 },
   // the spiked shield: gnarled frill blades, a tank that holds its ground
   spiclypeus: { hp: 1300, dmg: 130, atkCd: 1.9, speed: 74, detect: 170, homeR: 260, reach: 36, biome: 'plains', turn: 1.8, fearless: true, tank: true, bleedable: true, melee: { kb: 240 } },
   // the winged helm: elegant, wary, and heavier than it looks in the mist
@@ -219,7 +219,7 @@ const NPC_DEF = {
   bravo: { hp: 2000, dmg: 175, atkCd: 2.1, speed: 66, detect: 170, homeR: 250, reach: 42, biome: 'plains', turn: 1.6, fearless: true, tank: true, bleedable: true, melee: { kb: 280 } },
   // the Dorset hunter: the moor's fearless terror — it hunts through the
   // mist and never, ever routs
-  duria: { hp: 1900, dmg: 175, atkCd: 1.4, speed: 118, detect: 340, homeR: 720, reach: 36, biome: 'any', turn: 1.9, fearless: true, bleedable: true, hunts: ['telmato', 'secerno', 'gracili'] },
+  duria: { hp: 1900, dmg: 175, atkCd: 1.4, speed: 118, detect: 340, homeR: 720, reach: 36, biome: 'any', turn: 1.9, fearless: true, bleedable: true, hunts: ['telmato', 'secerno', 'gracili'], caution: 0.8 },
   // wild dryptosaurus prowl the north — long, fast, and fearless
   drypto: { hp: 1800, dmg: 160, atkCd: 1.2, speed: 135, detect: 320, homeR: 650, reach: 36, biome: 'plains', turn: 2.3, fearless: true, bleedable: true, hunts: ['tanius', 'telmato'] },
 };
@@ -259,10 +259,11 @@ function makePlayer(species, gender, skin) {
   };
 }
 function hpFrac(g) { return 0.12 + 0.88 * g; }
+function dmgFrac(g) { return 0.15 + 0.85 * g; }
 function playerMaxHp() { return Math.round(PLAYER_DEF[G.player.species].hp * genderMod(G.player).hp * hpFrac(G.player.growth)); }
 function playerDmg() {
   const p = G.player, def = PLAYER_DEF[p.species];
-  let dmg = def.dmg * genderMod(p).dmg * (0.15 + 0.85 * p.growth);
+  let dmg = def.dmg * genderMod(p).dmg * dmgFrac(p.growth);
   // Wet Wrath (spinosaurus): a semi-aquatic hunter hits 1.2× harder standing
   // in water — and 15% softer on dry land
   if (def.wetWrath) dmg *= isWaterPx(p.x, p.y) ? 1.2 : 0.85;
@@ -292,7 +293,7 @@ function dealDamage(target, amount, attacker, opts) {
   let crit = false;
   let glance = false;
   // a broken skull (or body) takes the force out of every attack it makes
-  if (attacker && !attacker.isPlayer && attacker.bones && (attacker.bones.head || attacker.bones.body)) dmg *= 0.6;
+  if (attacker && !attacker.isPlayer) dmg *= crippleBiteMul(attacker);
   // simosuchus down its burrow: only the armored backside shows — bites
   // barely scratch it, and the frustrated attacker gives the whole thing up
   if (target.isPlayer && target.hidden) {
@@ -559,6 +560,87 @@ function packmates(e, radius) {
     if (o !== e && o.species === e.species && dist(e.x, e.y, o.x, o.y) < radius) out.push(o);
   }
   return out;
+}
+
+// ---------- the power model ----------
+// One linear scale behind every attack decision: a dino attacks when it
+// believes its side's power beats the target's. Power falls as hp falls,
+// so wounds (and broken skulls) make anything look takeable.
+const TRIVIAL_PREY = 0.22;   // prey below this fraction of my power isn't worth the chase
+const MERCY_MUL = 2;         // pack hunters treat prey below half their power as "small"
+const DISENGAGE_MUL = 0.7;   // already committed: only break off if odds get THIS bad
+const RETALIATE_MUL = 0.8;   // wounded pride: retaliation accepts worse odds than ambition
+const SKITTISH_FLEE_MUL = 2; // harmless prey only bothers fleeing a hunter at 2× its power
+const FEARLESS_ROUT_MUL = 2; // even the fearless walk away from a titan at 2× their power
+const GROUP_DECAY = 0.9;     // each extra packmate helps a little less than the last
+const ALLY_R = 300;          // how near an ally must be to count toward group power
+const RALLY_R = 700;         // how far a routed pack-courage fighter runs to find its kin
+const ENGAGED_STATES = new Set(['chase', 'windup', 'lunge', 'recover', 'fight', 'stalk', 'strike', 'gripping']);
+
+// stat block for any entity, whatever it is: NPC, mate/baby (mateDef), player
+function defOf(e) { return NPC_DEF[e.species] || e.mateDef || PLAYER_DEF[e.species] || {}; }
+// a broken skull bites at 0.6× — shared with dealDamage, so predators value
+// a cripple exactly as weak as its bite has become
+function crippleBiteMul(e) { return e.bones && (e.bones.head || e.bones.body) ? 0.6 : 1; }
+// the one formula, so the Specimen Hall readout can never drift from the AI:
+// toothless bulk still counts (an ornithomimus is hard to kill, not dangerous)
+function powerFromStats(hp, dmg) { return Math.sqrt(Math.max(1, hp) * Math.max(dmg, hp * 0.06)); }
+function powerOf(e) {
+  if (e.isPlayer) return powerFromStats(e.hp, playerDmg());
+  const d = defOf(e);
+  return powerFromStats(e.hp, (d.dmg || 0) * crippleBiteMul(e));
+}
+function alliesOf(e, r) {
+  if (e.isPlayer) return G.npcs.filter(o => isFamily(o) && o.hp > 0 && dist(e.x, e.y, o.x, o.y) < r);
+  return packmates(e, r).filter(o => !isFamily(o) && o.hp > 0);
+}
+function groupPower(e, r) {
+  const powers = [powerOf(e)];
+  for (const o of alliesOf(e, r || ALLY_R)) powers.push(powerOf(o));
+  powers.sort((a, b) => b - a);
+  let sum = 0, w = 1;
+  for (const pw of powers) { sum += pw * w; w *= GROUP_DECAY; }
+  return sum;
+}
+// the one question: "can my side take theirs?" — caution is the species'
+// personality knob (bold apex < 1 < wary browser), and the bar drops once
+// engaged (hysteresis: no dithering at the threshold) or when retaliating
+function confident(att, tgt, opts) {
+  let bar = defOf(att).caution || 1;
+  if (att.target === tgt && ENGAGED_STATES.has(att.state)) bar *= DISENGAGE_MUL;
+  else if (opts && opts.retaliate) bar *= RETALIATE_MUL;
+  return groupPower(att) > groupPower(tgt) * bar;
+}
+// hatchlings aren't worth a titan's energy — until hunger says otherwise.
+// Only shields the player and their family; curated hunts lists stay fair game
+function trivialPrey(att, tgt) {
+  if (!(tgt.isPlayer || tgt.isMate || tgt.isBaby)) return false;
+  return powerOf(tgt) < TRIVIAL_PREY * powerOf(att);
+}
+// the one retaliation rule, replacing every per-brain variant. Returns true
+// if it decided the state. atkState: how this species answers (tanks stand
+// and fight; hunters run the quarry down)
+function retaliationCheck(e, d, atkState) {
+  if (e.aggroT <= 0 || !e.lastAttacker) return false;
+  const t = e.lastAttacker;
+  if (t.isPlayer ? !t.alive : t.hp <= 0) return false;
+  const atk = atkState || (d.tank ? 'fight' : 'chase');
+  const bold = d.fearless || d.tank;
+  // even the fearless know a lost cause: badly outmatched by another
+  // titan, walk away from the nip (the player is always answered)
+  if (bold && !t.isPlayer && groupPower(t) > groupPower(e) * FEARLESS_ROUT_MUL) {
+    e.state = 'return'; e.target = null; e.stateT = 4; return true;
+  }
+  if (bold || confident(e, t, { retaliate: true })) {
+    e.state = atk; e.target = t; e.stateT = atk === 'fight' ? (bold ? 1.5 : 3) : 4;
+    return true;
+  }
+  if (d.packCourage) {
+    const far = packmates(e, RALLY_R);
+    if (far.length) { e.state = 'rally'; e.target = far[0]; e.stateT = 3; return true; }
+  }
+  e.state = 'flee'; e.target = t; e.stateT = 2.5;
+  return true;
 }
 // where this dino's weapon actually is (ground plane): jaws at the snout,
 // or the tail arc for tail-fighters — an attack only lands if this zone
@@ -952,7 +1034,7 @@ function thinkPackHunter(e, d) {
   // drawn is blood answered, handled by the aggro block below
   const kin = p && p.species === e.species;
   if (!kin && p && p.alive && pd < d.detect && playerVisibleTo(e, d.detect) && (e.tiredT || 0) <= 0) {
-    const small = p.growth < 0.22;
+    const small = powerOf(p) < powerOf(e) * MERCY_MUL;
     if (small) {
       // babies face lone hunters only — the pack never gangs up on a hatchling
       const othersHunting = G.npcs.some(o => o !== e && o.species === e.species && o.target === p &&
@@ -964,7 +1046,9 @@ function thinkPackHunter(e, d) {
     // once engaged, the pack stays committed even while fanned out circling
     const mates = packmates(e, e.state === 'chase' ? 300 : 130);
     if (mates.length >= 2) {
-      e.state = 'chase'; e.target = p; e.stateT = 4; return;
+      if (confident(e, p)) { e.state = 'chase'; e.target = p; e.stateT = 4; return; }
+      // gathered, still outmatched: shadow the prey and wait for weakness
+      e.state = 'avoid'; e.target = p; e.stateT = 2; return;
     }
     // run to packmates and band together
     const far = packmates(e, 620);
@@ -973,10 +1057,7 @@ function thinkPackHunter(e, d) {
     }
     e.state = 'avoid'; e.target = p; e.stateT = 2; return;
   }
-  if (e.aggroT > 0 && e.lastAttacker && e.lastAttacker.isPlayer && p.alive) {
-    if (p.growth < 0.22 || packmates(e, 130).length >= 2) { e.state = 'chase'; e.target = p; e.stateT = 3; return; }
-    e.state = 'flee'; e.target = p; e.stateT = 2.5; return;
-  }
+  if (retaliationCheck(e, d)) return;
   // scavenge nearby carcass
   const c = nearestCarcass(e.x, e.y, 200, true);
   if (c && c.meat > 20) { e.state = 'scavenge'; e.carc = c; e.stateT = 6; return; }
@@ -1016,16 +1097,14 @@ function thinkRunner(e, d) {
   if (e.target && e.target.isPlayer && forestShadePx(e.target.x, e.target.y) > 0.5) {
     e.state = 'return'; e.target = null; e.stateT = 4;
   }
-  if (p && p.alive && p.growth < 0.32 && playerVisibleTo(e, d.detect) && forestShadePx(p.x, p.y) <= 0.5) {
+  if (p && p.alive && playerVisibleTo(e, d.detect) && forestShadePx(p.x, p.y) <= 0.5 && !trivialPrey(e, p) && confident(e, p)) {
     e.state = 'chase'; e.target = p; e.stateT = 5; return;
   }
-  if (e.aggroT > 0 && e.lastAttacker && e.lastAttacker.isPlayer && p.alive && p.growth < 0.5) {
-    e.state = 'chase'; e.target = p; e.stateT = 4; return;
-  }
+  if (retaliationCheck(e, d)) return;
   // hunt smaller predators occasionally
   if (d.hunts && e.state !== 'chase' && rnd() < 0.25) {
     for (const o of G.npcs) {
-      if (d.hunts.includes(o.species) && dist(e.x, e.y, o.x, o.y) < d.detect && forestShadePx(o.x, o.y) < 0.45) {
+      if (d.hunts.includes(o.species) && dist(e.x, e.y, o.x, o.y) < d.detect && forestShadePx(o.x, o.y) < 0.45 && confident(e, o)) {
         e.state = 'chase'; e.target = o; e.stateT = 5; return;
       }
     }
@@ -1038,7 +1117,7 @@ function thinkRunner(e, d) {
 function thinkSkittish(e, d) {
   const p = G.player;
   let threat = null, td = 1e9;
-  if (p && p.alive && PLAYER_DEF[p.species].diet === 'carn' && p.growth > 0.08) {
+  if (p && p.alive && PLAYER_DEF[p.species].diet === 'carn' && powerOf(p) > powerOf(e) * SKITTISH_FLEE_MUL) {
     const dd = dist(e.x, e.y, p.x, p.y);
     if (dd < d.detect) { threat = p; td = dd; }
   }
@@ -1064,7 +1143,7 @@ function thinkSkittish(e, d) {
 function tankThreat(e, d) {
   let threat = null, td = 1e9;
   const p = G.player;
-  if (p && p.alive && PLAYER_DEF[p.species].diet === 'carn' && p.growth > 0.2) {
+  if (p && p.alive && PLAYER_DEF[p.species].diet === 'carn' && !trivialPrey(e, p)) {
     const dd = dist(e.x, e.y, p.x, p.y);
     if (dd < d.detect) { threat = p; td = dd; }
   }
@@ -1090,12 +1169,7 @@ function thinkTank(e, d) {
 // then the whole herd swings back, hard
 function thinkHerdFighter(e, d) {
   const p = G.player;
-  if (e.aggroT > 0 && e.lastAttacker) {
-    const t = e.lastAttacker;
-    const big = t.isPlayer ? p.growth > 0.55 : (NPC_DEF[t.species] || {}).tank;
-    if (packmates(e, 300).length >= 1 || !big) { e.state = 'fight'; e.target = t; e.stateT = 3; return; }
-    e.state = 'flee'; e.target = t; e.stateT = 3; return;
-  }
+  if (retaliationCheck(e, d, 'fight')) return;
   // a herd-mate under attack pulls the herd in
   for (const o of G.npcs) {
     if (o !== e && o.species === e.species && o.state === 'fight' && o.target && dist(e.x, e.y, o.x, o.y) < 260) {
@@ -1103,10 +1177,47 @@ function thinkHerdFighter(e, d) {
     }
   }
   // a stalking carnivore gets the tail before it can strike
-  if (p && p.alive && PLAYER_DEF[p.species].diet === 'carn' && p.growth > 0.25 && dist(e.x, e.y, p.x, p.y) < d.detect * 0.55) {
-    e.state = packmates(e, 260).length >= 1 ? 'fight' : 'guard';
+  if (p && p.alive && PLAYER_DEF[p.species].diet === 'carn' && !trivialPrey(e, p) && dist(e.x, e.y, p.x, p.y) < d.detect * 0.55) {
+    e.state = confident(e, p) ? 'fight' : 'guard';
     e.target = p; e.stateT = 1.6; return;
   }
+  defaultWander(e, true);
+}
+
+// the generic apex/mid hunter (grunos, tarbo, yuty, lourinha, titanov, concav,
+// nanuq, duria): one brain, personality in the def — caution sets how far up
+// the food chain its ambition reaches, scavR/scavMin/scavPicky its table manners
+function thinkHunter(e, d) {
+  const p = G.player;
+  if (fearCheck(e, d)) return;
+  if (retaliationCheck(e, d)) return;
+  const kin = p && p.species === e.species;
+  if (!kin && p && p.alive && playerVisibleTo(e, d.detect) && (e.tiredT || 0) <= 0 &&
+    !trivialPrey(e, p) && confident(e, p)) {
+    e.state = 'chase'; e.target = p; e.stateT = 5; return;
+  }
+  // hunt its natural prey (cheap distance cut first — confident scans the map)
+  if (d.hunts && e.state !== 'chase' && rnd() < 0.3) {
+    let best = null, bd = d.detect;
+    for (const o of G.npcs) {
+      if (!d.hunts.includes(o.species) || isFamily(o) || o.hp <= 0) continue;
+      const dd = dist(e.x, e.y, o.x, o.y);
+      if (dd < bd && confident(e, o)) { bd = dd; best = o; }
+    }
+    if (best) { e.state = 'chase'; e.target = best; e.stateT = 6; return; }
+  }
+  if (e.state === 'chase' && e.target) {
+    // the hysteresis exit: odds collapsed mid-hunt (their friends arrived,
+    // or the wound is mine) — break off rather than dither at the line
+    const t = e.target;
+    if ((t.isPlayer ? t.alive : t.hp > 0) && !confident(e, t)) {
+      e.state = 'return'; e.target = null; e.stateT = 4;
+      e.tiredT = Math.max(e.tiredT || 0, 4);
+    }
+    return;
+  }
+  const c = nearestCarcass(e.x, e.y, d.scavR || 260, !!d.scavPicky);
+  if (c && c.meat > (d.scavMin || 20)) { e.state = 'scavenge'; e.carc = c; e.stateT = 6; return; }
   defaultWander(e, true);
 }
 
@@ -1144,44 +1255,18 @@ const NPC_THINK = {
     const detect = drinking ? 42 : d.detect;
     const pd = dist(e.x, e.y, p.x, p.y);
     const carnPlayer = PLAYER_DEF[p.species].diet === 'carn';
-    if (e.aggroT > 0 && e.lastAttacker && e.lastAttacker.isPlayer) {
-      if (p.growth >= 0.25) { e.state = 'flee'; e.target = p; e.stateT = 3; return; }
-      e.state = 'fight'; e.target = p; e.stateT = 3; return;
-    }
+    if (retaliationCheck(e, d, 'fight')) return;
     if (pd < detect && carnPlayer) {
-      if (p.growth < 0.2) { // smacks babies with its tail
-        e.state = 'fight'; e.target = p; e.stateT = 2.5; return;
-      }
-      if (p.growth >= 0.3) { e.state = 'flee'; e.target = p; e.stateT = 3; return; }
-      // adolescent: stands its ground
+      // smacks the clearly weaker with its tail; the wary thing runs from
+      // anything approaching its own strength, standing ground in between
+      // (the flee bar is deliberately individual-scale — herds don't embolden it)
+      if (confident(e, p)) { e.state = 'fight'; e.target = p; e.stateT = 2.5; return; }
+      if (powerOf(p) > powerOf(e) * 0.75) { e.state = 'flee'; e.target = p; e.stateT = 3; return; }
       e.state = 'guard'; e.target = p; e.stateT = 1.5; return;
     }
     defaultWander(e, true);
   },
-  grunos(e, d) {
-    // the prairie's apex bruiser: fears nothing and hunts even other dinosaurs
-    // (hatchlings are beneath its notice — it wants a real meal)
-    const p = G.player;
-    if (p && p.alive && p.growth > 0.12 && p.growth < 0.75 && playerVisibleTo(e, d.detect)) {
-      e.state = 'chase'; e.target = p; e.stateT = 5; return;
-    }
-    if (e.aggroT > 0 && e.lastAttacker && e.lastAttacker.isPlayer && p.alive) {
-      e.state = 'chase'; e.target = p; e.stateT = 4; return;
-    }
-    if (e.state !== 'chase' && rnd() < 0.3) {
-      let best = null, bd = d.detect;
-      for (const o of G.npcs) {
-        if (!d.hunts.includes(o.species)) continue;
-        const dd = dist(e.x, e.y, o.x, o.y);
-        if (dd < bd) { bd = dd; best = o; }
-      }
-      if (best) { e.state = 'chase'; e.target = best; e.stateT = 6; return; }
-    }
-    if (e.state === 'chase' && e.target) return;
-    const c = nearestCarcass(e.x, e.y, 260, false);   // dines wherever it pleases
-    if (c && c.meat > 20) { e.state = 'scavenge'; e.carc = c; e.stateT = 6; return; }
-    defaultWander(e, true);
-  },
+  grunos: thinkHunter,   // the prairie's apex bruiser: bold, but adults outgrow its ambition
   lophos(e, d) {
     // THE HIT-AND-RUN BLEEDER: its bite barely stings, but the wound it opens
     // won't close — so the tactic is to strike, sprint clear, and wait for the
@@ -1273,60 +1358,9 @@ const NPC_THINK = {
     thinkSkittish(e, d);
   },
   hesper: thinkPackHunter,
-  concav(e, d) {
-    // pack-brave claw hunter: alone it picks on the small; outmatched, it
-    // falls back to the pack — and a pack fears nothing at all
-    const p = G.player;
-    const mates = packmates(e, 360);
-    if (e.aggroT > 0 && e.lastAttacker) {
-      const t = e.lastAttacker;
-      const big = t.isPlayer ? p.growth > 0.6 : (NPC_DEF[t.species] || {}).tank;
-      if (big && !mates.length) {
-        const far = packmates(e, 700);
-        if (far.length) { e.state = 'rally'; e.target = far[0]; e.stateT = 3; return; }
-        e.state = 'flee'; e.target = t; e.stateT = 2.5; return;
-      }
-      e.state = 'chase'; e.target = t; e.stateT = 5; return;
-    }
-    if (p && p.alive && p.growth > 0.1 && p.growth < 0.7 && playerVisibleTo(e, d.detect) && (e.tiredT || 0) <= 0) {
-      e.state = 'chase'; e.target = p; e.stateT = 5; return;
-    }
-    if (e.state !== 'chase' && rnd() < 0.25) {
-      for (const o of G.npcs) {
-        if (d.hunts.includes(o.species) && dist(e.x, e.y, o.x, o.y) < d.detect) {
-          e.state = 'chase'; e.target = o; e.stateT = 5; return;
-        }
-      }
-    }
-    if (e.state === 'chase' && e.target) return;
-    const c = nearestCarcass(e.x, e.y, 240, true);
-    if (c && c.meat > 20) { e.state = 'scavenge'; e.carc = c; e.stateT = 6; return; }
-    defaultWander(e, true);
-  },
+  concav: thinkHunter,   // pack-brave claw hunter: its courage is counted in packmates
   // --- Ashfall Ridge ---
-  tarbo(e, d) {
-    // the tyrant: hunts the player almost to adulthood, and everything smaller
-    const p = G.player;
-    if (p && p.alive && p.growth > 0.1 && p.growth < 0.9 && playerVisibleTo(e, d.detect) && (e.tiredT || 0) <= 0) {
-      e.state = 'chase'; e.target = p; e.stateT = 5; return;
-    }
-    if (e.aggroT > 0 && e.lastAttacker && e.lastAttacker.isPlayer && p.alive) {
-      e.state = 'chase'; e.target = p; e.stateT = 4; return;
-    }
-    if (e.state !== 'chase' && rnd() < 0.3) {
-      let best = null, bd = d.detect;
-      for (const o of G.npcs) {
-        if (!d.hunts.includes(o.species)) continue;
-        const dd = dist(e.x, e.y, o.x, o.y);
-        if (dd < bd) { bd = dd; best = o; }
-      }
-      if (best) { e.state = 'chase'; e.target = best; e.stateT = 6; return; }
-    }
-    if (e.state === 'chase' && e.target) return;
-    const c = nearestCarcass(e.x, e.y, 300, false);   // the tyrant dines where it pleases
-    if (c && c.meat > 20) { e.state = 'scavenge'; e.carc = c; e.stateT = 6; return; }
-    defaultWander(e, true);
-  },
+  tarbo: thinkHunter,    // the tyrant: hunts anything weaker than itself — which is most things
   linhe: thinkPackHunter,
   nothro: thinkTank,
   ovi: thinkSkittish,
@@ -1372,68 +1406,21 @@ const NPC_THINK = {
     // the crested menace: picks fights with anything its own size or a
     // little bigger, and never forgives a slight
     const p = G.player;
-    if (e.aggroT > 0 && e.lastAttacker) {
-      e.state = 'fight'; e.target = e.lastAttacker; e.stateT = 2.5; return;
-    }
-    if (p && p.alive && p.growth < 0.55 && dist(e.x, e.y, p.x, p.y) < d.detect) {
+    if (retaliationCheck(e, d, 'fight')) return;
+    if (p && p.alive && !trivialPrey(e, p) && confident(e, p) && dist(e.x, e.y, p.x, p.y) < d.detect) {
       e.state = 'fight'; e.target = p; e.stateT = 2; return;
     }
     defaultWander(e, true);
   },
-  yuty(e, d) {
-    // the feathered tyrant: fast, bold, hunts most of the delta's mid-sizes
-    const p = G.player;
-    if (p && p.alive && p.growth > 0.12 && p.growth < 0.85 && playerVisibleTo(e, d.detect) && (e.tiredT || 0) <= 0) {
-      e.state = 'chase'; e.target = p; e.stateT = 5; return;
-    }
-    if (e.aggroT > 0 && e.lastAttacker && e.lastAttacker.isPlayer && p.alive && p.growth < 0.9) {
-      e.state = 'chase'; e.target = p; e.stateT = 4; return;
-    }
-    if (e.state !== 'chase' && rnd() < 0.3) {
-      let best = null, bd = d.detect;
-      for (const o of G.npcs) {
-        if (!d.hunts.includes(o.species)) continue;
-        const dd = dist(e.x, e.y, o.x, o.y);
-        if (dd < bd) { bd = dd; best = o; }
-      }
-      if (best) { e.state = 'chase'; e.target = best; e.stateT = 6; return; }
-    }
-    if (e.state === 'chase' && e.target) return;
-    const c = nearestCarcass(e.x, e.y, 280, true);
-    if (c && c.meat > 20) { e.state = 'scavenge'; e.carc = c; e.stateT = 6; return; }
-    defaultWander(e, true);
-  },
-  lourinha(e, d) {
-    // the delta's terror: the ONE predator with no upper size limit — a
-    // full-grown morosaurus is still on its menu. Its bite doesn't close
-    const p = G.player;
-    if (p && p.alive && p.growth > 0.1 && playerVisibleTo(e, d.detect) && (e.tiredT || 0) <= 0) {
-      e.state = 'chase'; e.target = p; e.stateT = 5; return;
-    }
-    if (e.aggroT > 0 && e.lastAttacker && e.lastAttacker.isPlayer && p.alive) {
-      e.state = 'chase'; e.target = p; e.stateT = 4; return;
-    }
-    if (e.state !== 'chase' && rnd() < 0.3) {
-      let best = null, bd = d.detect;
-      for (const o of G.npcs) {
-        if (!d.hunts.includes(o.species)) continue;
-        const dd = dist(e.x, e.y, o.x, o.y);
-        if (dd < bd) { bd = dd; best = o; }
-      }
-      if (best) { e.state = 'chase'; e.target = best; e.stateT = 6; return; }
-    }
-    if (e.state === 'chase' && e.target) return;
-    const c = nearestCarcass(e.x, e.y, 300, false);   // dines wherever it pleases
-    if (c && c.meat > 20) { e.state = 'scavenge'; e.carc = c; e.stateT = 6; return; }
-    defaultWander(e, true);
-  },
+  yuty: thinkHunter,     // the feathered tyrant: fast, bold, hunts the delta's mid-sizes
+  lourinha: thinkHunter, // the delta's terror: caution so low even adults stay on the menu
   sino(e, d) {
     // the charger: guards like a tank, but answers threats at a dead run —
     // 'chase' hands it to the windup→lunge machinery, and its lungeT/lungeMul
     // turn that lunge into a full ceratopsian charge
     let threat = null, td = 1e9;
     const p = G.player;
-    if (p && p.alive && PLAYER_DEF[p.species].diet === 'carn' && p.growth > 0.2) {
+    if (p && p.alive && PLAYER_DEF[p.species].diet === 'carn' && !trivialPrey(e, p)) {
       const dd = dist(e.x, e.y, p.x, p.y);
       if (dd < d.detect) { threat = p; td = dd; }
     }
@@ -1484,7 +1471,7 @@ const NPC_THINK = {
 NPC_THINK.kerbero = thinkTank;          // herd guardian: stands, swings the tail
 NPC_THINK.beipiao = thinkTank;          // planted scythe-armed sentry
 NPC_THINK.pectino = thinkPackHunter;    // blizzard-chasing scavenger gang
-NPC_THINK.nanuq = NPC_THINK.grunos;     // the polar tyrant hunts like the prairie bruiser — everything
+NPC_THINK.nanuq = thinkHunter;          // the polar tyrant hunts like the prairie bruiser — everything
 NPC_THINK.korean = thinkSkittish;       // tiny, nervous, delicious
 // --- the Moors' minds, mapped to the shared archetypes ---
 NPC_THINK.gracili = thinkPackHunter;    // mist-pack of glass knives
@@ -1495,32 +1482,9 @@ NPC_THINK.spiclypeus = thinkTank;       // the horned silhouettes hold their gro
 NPC_THINK.mercuri = thinkTank;
 NPC_THINK.coahuila = thinkTank;
 NPC_THINK.bravo = thinkTank;
-NPC_THINK.duria = NPC_THINK.grunos;     // the Dorset hunter wants a real meal
+NPC_THINK.duria = thinkHunter;          // the Dorset hunter wants a real meal
 NPC_THINK.drypto = thinkRunner;         // the long tyrant runs its prey down
-NPC_THINK.titanov = function (e, d) {
-  // the titan-killer: the ONE hunter with no upper size limit. Where every
-  // other predator learns to leave a grown apex alone, this thing commits —
-  // a full-grown nivalotitan reads as DINNER, not danger. (True hatchlings
-  // below 8% growth are beneath its notice; everyone else is on the menu.)
-  const p = G.player;
-  if (p && p.alive && p.growth > 0.08 && playerVisibleTo(e, d.detect)) {
-    e.state = 'chase'; e.target = p; e.stateT = 6; return;
-  }
-  if (e.aggroT > 0 && e.lastAttacker && e.lastAttacker.isPlayer && p.alive) {
-    e.state = 'chase'; e.target = p; e.stateT = 5; return;
-  }
-  if (e.state !== 'chase' && rnd() < 0.3) {
-    for (const o of G.npcs) {
-      if (d.hunts.includes(o.species) && dist(e.x, e.y, o.x, o.y) < d.detect) {
-        e.state = 'chase'; e.target = o; e.stateT = 6; return;
-      }
-    }
-  }
-  if (e.state === 'chase' && e.target) return;
-  const c = nearestCarcass(e.x, e.y, 300, false);
-  if (c && c.meat > 30) { e.state = 'scavenge'; e.carc = c; e.stateT = 6; return; }
-  defaultWander(e, true);
-};
+NPC_THINK.titanov = thinkHunter;        // the titan-killer: caution so low a grown nivalotitan reads as DINNER
 
 function defaultWander(e, mayDrink) {
   // let any in-progress state (rally, chase, flee, drink…) run its timer out
@@ -1802,11 +1766,17 @@ function updateNPC(e, dt) {
       e.headDown = 0;
       if (!e.target || e.target.hp <= 0) { e.state = 'idle'; e.stateT = 0.5; break; }
       stepToward(e, e.target.x, e.target.y, sp, dt);
-      const mates = packmates(e, 130);
-      if (mates.length >= 2) {
-        e.state = 'chase'; e.target = G.player; e.stateT = 5;
-        // rouse the pack
-        for (const m of mates) { m.state = 'chase'; m.target = G.player; m.stateT = 5; }
+      // gathered — but the pack only commits if its summed power says so
+      // (checked at think cadence, not every frame: confident scans the map)
+      e.rallyEvalT = (e.rallyEvalT || 0) - dt;
+      if (e.rallyEvalT <= 0) {
+        e.rallyEvalT = 0.25;
+        const mates = packmates(e, 130);
+        if (mates.length >= 2 && G.player && G.player.alive && confident(e, G.player)) {
+          e.state = 'chase'; e.target = G.player; e.stateT = 5;
+          // rouse the pack
+          for (const m of mates) { m.state = 'chase'; m.target = G.player; m.stateT = 5; }
+        }
       }
       if (e.stateT <= 0) { e.state = 'avoid'; e.target = G.player; e.stateT = 2; }
       break;
@@ -2007,9 +1977,9 @@ function updateNPC(e, dt) {
         e.tear = lerp(e.tear || 0, 1, 0.2);      // the bury-saw-wrench feed
         e.headDown = lerp(e.headDown, 0, 0.15);
         c.meat -= dt * 6;
-        // spooked off the carcass by the player
+        // spooked off the carcass by a player that outpowers it
         const p = G.player;
-        if (p && p.alive && dist(e.x, e.y, p.x, p.y) < 60 && p.growth > 0.25) { e.state = 'flee'; e.target = p; e.stateT = 2; }
+        if (p && p.alive && dist(e.x, e.y, p.x, p.y) < 60 && powerOf(p) > powerOf(e)) { e.state = 'flee'; e.target = p; e.stateT = 2; }
       }
       if (e.stateT <= 0) { e.state = 'idle'; e.stateT = 1; e.carc = null; }
       break;
@@ -2561,7 +2531,8 @@ function updatePlayer(dt) {
   // coil and nothing happens. A tail-fighter plants instead of leaping: the
   // tail scythes continuously until release, but the feet never move.
   const tailPow = !!DINO[p.species].tailWeapon;
-  if (input.pounceHold && !p.pounce && !p.pounceLatch &&
+  // the leap is an athletic burst: it costs stamina, and spent legs can't coil
+  if (input.pounceHold && !p.pounce && !p.pounceLatch && !p.exhausted &&
       p.atkCd <= 0 && p.actionT <= 0 && !p.fishing && !G.wrestle) {
     let pdx = (input.right ? 1 : 0) - (input.left ? 1 : 0);
     let pdy = (input.down ? 1 : 0) - (input.up ? 1 : 0);
@@ -2736,6 +2707,9 @@ function updatePlayer(dt) {
       if (!input.pounceHold) {
         p.pounce = null;   // let go mid-coil: cancelled, no leap
       } else if (P.t <= 0) {
+        // the spring releases — pay for it (a cancelled coil costs nothing)
+        p.stamina = Math.max(0, p.stamina - 25);
+        if (p.stamina <= 0) p.exhausted = true;
         if (tailPow) {
           P.phase = 'swing'; P.t = 0.01;
         } else {
@@ -3654,12 +3628,13 @@ function fireCall(p, k) {
       G.banner = { str: 'You drove a packmate out of the pack.', t: 3, color: '#ff6a5e' };
       return;
     }
-    const pm = playerMass(p);
+    const pw = powerOf(p);
     for (const e of G.npcs) {
       if (isFamily(e) || DINO[e.species].fish || e.hp <= 0) continue;
       const nd = NPC_DEF[e.species];
       if (!nd || dist(p.x, p.y, e.x, e.y) > 300) continue;
-      const ratio = silhouetteMass(DINO[e.species], e.growth, 1) / pm;
+      // intimidation runs on the same power scale as every attack decision
+      const ratio = powerOf(e) / pw;
       if (ratio < 0.75 && !nd.fearless) {
         e.state = 'flee'; e.target = p; e.stateT = rrange(3.5, 6);
         e.tiredT = Math.max(e.tiredT || 0, 8);

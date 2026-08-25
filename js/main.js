@@ -1746,43 +1746,18 @@ function loop(now) {
   if (!G.started) return;
   if (G.paused) { render(); return; }
 
-  G.time += dt;
-  // underground, the burrow owns the whole frame — the world above waits
-  if (G.burrow) {
-    updateBurrow(dt);
-    updateWorldStuff(dt);
-    if (G.banner) { G.banner.t -= dt; if (G.banner.t <= 0) G.banner = null; }
-    G.shake = Math.max(0, G.shake - dt * 14);
+  if (simTick(dt)) {
+    // the burrow owned this step — render the den (or the world, if the
+    // burrow was exited mid-step) and skip the surface-only frame work
     if (G.burrow) renderBurrow(); else render();
     updateHUD();
     return;
   }
-  updatePlayer(dt);
-  // just slipped underground THIS frame: the world halts right here — no NPC
-  // update may touch the pack at its burrow-local coordinates, and no world
-  // render may flash the map corner
-  if (G.burrow) {
-    updateWorldStuff(dt);
-    if (G.banner) { G.banner.t -= dt; if (G.banner.t <= 0) G.banner = null; }
-    G.shake = Math.max(0, G.shake - dt * 14);
-    renderBurrow();
-    updateHUD();
-    return;
-  }
-  for (const e of G.npcs) updateNPC(e, dt);
-  updateWorldStuff(dt);
-  updateEruption(dt);
-  updateBlizzard(dt);
-  updateNesting(dt);
-  G.input.action = false;   // F is read by the player, the den AND the courtship
-  G.input.claw = false; G.input.dig = false;
   updateAmbient(dt);
   popT += dt;
   if (popT > 10) { popT = 0; maintainPopulation(); }
   autosaveT += dt;
   if (autosaveT > 10) { autosaveT = 0; saveDinoSnapshot(); }
-  if (G.banner) { G.banner.t -= dt; if (G.banner.t <= 0) G.banner = null; }
-  G.shake = Math.max(0, G.shake - dt * 14);
 
   // camera — with the GROW-ZOOM: the view very slowly pulls back as your
   // dino grows (bigger species pull back further), so a hatchling lives in
@@ -1801,6 +1776,44 @@ function loop(now) {
   updateHUD();
 }
 requestAnimationFrame(loop);
+
+// one fixed step of the simulation — shared by loop() and the dev stepper so
+// the two can never drift apart. Returns true when the burrow owned the step
+// (the caller then skips the surface-only frame work and renders the den).
+function simTick(dt) {
+  G.time += dt;
+  // underground, the burrow owns the whole frame — the world above waits
+  if (G.burrow) { updateBurrow(dt); updateWorldStuff(dt); decayFx(dt); return true; }
+  updatePlayer(dt);
+  // just slipped underground THIS frame: the world halts right here — no NPC
+  // update may touch the pack at its burrow-local coordinates
+  if (G.burrow) { updateWorldStuff(dt); decayFx(dt); return true; }
+  for (const e of G.npcs) updateNPC(e, dt);
+  updateWorldStuff(dt);
+  updateEruption(dt);
+  updateBlizzard(dt);
+  updateNesting(dt);
+  G.input.action = false;   // F is read by the player, the den AND the courtship
+  G.input.claw = false; G.input.dig = false;
+  decayFx(dt);
+  return false;
+}
+function decayFx(dt) {
+  if (G.banner) { G.banner.t -= dt; if (G.banner.t <= 0) G.banner = null; }
+  G.shake = Math.max(0, G.shake - dt * 14);
+}
+
+// ---------- deterministic dev stepper (console: step(120)) ----------
+// rAF suspends whenever the pane loses the thread, so scripted tests can't
+// rely on wall-clock frames — step(n) advances the simulation n fixed 1/60s
+// frames synchronously instead. hold=true skips the final render for speed.
+window.step = function (n, hold) {
+  for (let i = 0; i < (n || 1); i++) {
+    if (!G.started || !G.player) break;
+    simTick(1 / 60);
+  }
+  if (!hold) { if (G.burrow) renderBurrow(); else render(); updateHUD(); }
+};
 
 // ---------- burrow render: the little world under the delta ----------
 function renderBurrow() {
@@ -1990,7 +2003,17 @@ function specimenFrame() {
     g.fillStyle = '#cdbb92';
     g.font = '10px monospace';
     g.textAlign = 'center';
-    g.fillText(d.name + (d.fish ? ' (fish)' : ''), cx, row * CH + CH - 8);
+    g.fillText(d.name + (d.fish ? ' (fish)' : ''), cx, row * CH + CH - 19);
+    // the power readout: the food chain at a glance, at this slider growth —
+    // same powerFromStats the AI runs on, so the number here can never lie
+    // (decorative species carry no def and get no number)
+    const pdef = NPC_DEF[sp] || PLAYER_DEF[sp];
+    if (pdef && pdef.hp) {
+      const pw = powerFromStats(pdef.hp * hpFrac(growth), (pdef.dmg || 0) * dmgFrac(growth));
+      g.fillStyle = '#8fae8a';
+      g.font = '9px monospace';
+      g.fillText('pwr ' + Math.round(pw), cx, row * CH + CH - 8);
+    }
     g.textAlign = 'left';
   });
 }
