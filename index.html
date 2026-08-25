@@ -106,6 +106,17 @@
     opacity: 0.94;
     box-shadow: 0 3px 10px rgba(0,0,0,0.45);
   }
+  /* each offer is its own chip, with the key as a little keycap: at a glance
+     you can see E does one thing here and F another */
+  #prompt .pchip { display: inline-flex; align-items: center; gap: 6px; margin: 0 7px; }
+  #prompt .pchip.note { color: #cdbb92; font-size: 11px; }
+  #prompt .pkey {
+    display: inline-block; min-width: 17px; padding: 1px 4px;
+    font-size: 11px; text-align: center; color: #1a1008;
+    background: linear-gradient(180deg, #ffe9a0, #d8a534);
+    border: 1px solid #8a6a40; border-radius: 4px;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.5);
+  }
   #prompt {
     position: absolute; left: 50%; bottom: 68px; transform: translateX(-50%);
     font-size: 13px; letter-spacing: 1px; color: #ffe9a0;
@@ -533,7 +544,7 @@
     <canvas id="minimap" width="120" height="120"></canvas>
     <div id="prompt" style="opacity:0"></div>
     <div id="banner" style="opacity:0"></div>
-    <div id="keys">WASD move &nbsp;·&nbsp; SHIFT sprint<br>SPACE bite &nbsp;·&nbsp; E eat / drink<br>TAB health menu &nbsp;·&nbsp; F1 help</div>
+    <div id="keys">WASD move &nbsp;·&nbsp; SHIFT sprint<br>SPACE bite &nbsp;·&nbsp; E / F do what the prompt says<br>TAB health menu &nbsp;·&nbsp; F1 help</div>
     <div id="statspanel" class="hidden">
       <h3>HEALTH MENU</h3>
       <div id="sp-body"></div>
@@ -582,18 +593,19 @@
         <tr><td>WASD / Arrows</td><td>move</td></tr>
         <tr><td>SHIFT</td><td>sprint (drains stamina)</td></tr>
         <tr><td>SPACE</td><td>bite / attack</td></tr>
-        <tr><td>E</td><td>eat · drink · feed on carcass</td></tr>
+        <tr><td>E</td><td>interact — eat · drink · feed on a carcass · swallow · hide · enter a burrow · nest</td></tr>
+        <tr><td>F</td><td>action — fish · grab a carcass (hold: tear a chunk) · wrestle · bathe · court a mate · leave a den</td></tr>
+        <tr><td colspan="2" style="color:#a5936c;padding-top:6px">E and F are CONTEXT keys: they only ever do what the prompt at the bottom of the screen says. Moves you can make anywhere have their own key:</td></tr>
+        <tr><td>C</td><td>claw slash (riojasaurus' second weapon)</td></tr>
+        <tr><td>B</td><td>dig your burrow, anywhere (simosuchus) — B beside it collapses it</td></tr>
         <tr><td>TAB</td><td>health menu</td></tr>
         <tr><td>ESC / U</td><td>pause / mute</td></tr>
-        <tr><td>R</td><td>rest — a slow 3s settle; heal faster, drain slower (sit 1s, then move to rise)</td></tr>
-        <tr><td>B</td><td>bathe (resting in mud) — the real scrub; standing in mud barely cleans. Simosuchus instead DIGS its burrow (B afield · B beside it destroys)</td></tr>
-        <tr><td>G</td><td>grab a carcass (hold: tear off a chunk) · G drops · E swallows</td></tr>
-        <tr><td>M</td><td>wrestle a dino your size (apex carnivores)</td></tr>
-        <tr><td>P / I</td><td>aardiraptor: pounce-hold / invade a burrow</td></tr>
+        <tr><td>R</td><td>rest — a 3s settle; heal faster, drain slower (sit 1s, then move to rise)</td></tr>
+        <tr><td>P</td><td>hold + a direction to pounce (tail-fighters: hold to spin)</td></tr>
         <tr><td>1 / 2 / 3</td><td>calls — broadcast (claim a carcass) · friendly (invite the pack) · aggressive (threaten)</td></tr>
         <tr><td>H</td><td>hitbox X-ray (red = attack, cyan = body)</td></tr>
         <tr><td>Open jaws!</td><td>a predator pausing with open jaws is about to lunge — sidestep!</td></tr>
-        <tr><td>Stand in mud</td><td>restores hygiene — below 60% you stop growing</td></tr>
+        <tr><td>Mud</td><td>standing in it barely cleans — REST in it, then bathe (F). Below 60% hygiene you stop growing</td></tr>
         <tr><td>Water edge</td><td>drink to restore water</td></tr>
         <tr><td>Grow</td><td>eat &amp; drink well and time will do the rest</td></tr>
         <tr><td>❖ Growths</td><td>earned every minute alive (+ kill bonus) — spend on skins in the lobby</td></tr>

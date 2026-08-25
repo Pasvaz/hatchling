@@ -215,23 +215,22 @@ window.addEventListener('keydown', (e) => {
   if (KEYMAP[e.code]) G.input[KEYMAP[e.code]] = true;
   if (e.code === 'Space') G.input.attack = true;
   if (e.code === 'KeyE') G.input.interact = true;
-  if (e.code === 'KeyF') G.input.fish = true;
-  if (e.code === 'KeyN') G.input.nest = true;
-  if (e.code === 'KeyM') G.input.wrestle = true;
+  // F is the SECOND context key: fish · grab · wrestle · claw · bathe · dig ·
+  // court · leave a den — whichever one the situation offers (resolveAction)
+  if (e.code === 'KeyF') G.input.action = true;
+  // ALWAYS-AVAILABLE moves keep their own keys — they have no situational cue
+  // to hang a prompt on, so they must never share the context keys
+  if (e.code === 'KeyC') G.input.claw = true;   // second weapon (riojasaurus)
+  if (e.code === 'KeyB') G.input.dig = true;    // the digger's burrow, anywhere
   if (G.wrestle && WRESTLE_KEYS.includes(e.code)) G.wrestle.pressed = e.code;
-  if (e.code === 'KeyP') G.input.pack = true;
-  if (e.code === 'KeyI') G.input.burrow = true;
   // the CALLS: 1 broadcast (claim), 2 friendly (invite), 3 aggressive (threat)
   if (e.code === 'Digit1') G.input.call1 = true;
   if (e.code === 'Digit2') G.input.call2 = true;
   if (e.code === 'Digit3') G.input.call3 = true;
   if (e.code === 'KeyR') G.input.rest = true;
-  if (e.code === 'KeyB') G.input.bathe = true;
-  if (e.code === 'KeyG') G.input.grab = true;
   // hold P (+ a direction) to pounce — tail-fighters hold it to swing.
   // (CTRL was tried first and abandoned: Ctrl+letter combos are browser
-  // shortcuts — bookmarks, close-tab — and can't be prevented. P doubles as
-  // the aardiraptor's pack key; tap = pack, hold-with-direction = pounce.)
+  // shortcuts — bookmarks, close-tab — and can't be prevented.)
   if (e.code === 'KeyP') G.input.pounceHold = true;
   if (e.code === 'Escape') {
     if (G.started) { G.paused = !G.paused; document.getElementById('pause').classList.toggle('hidden', !G.paused); }
@@ -353,7 +352,7 @@ const CARD_INFO = {
   crista: { desc: 'The shoreline king: a croc-snouted heavyweight that swims deep water and hits like a slammed door. Slow — but far too strong for Megorontosuchus to hold.', tag: '◆ CARNIVORE — TANK', tagClass: 'mod' },
   linhe: { desc: 'Nothing on the ridge outruns you — and nothing forgives a mistake. Dodge the falling fire, dodge Tarbosaurus, and remember: the wild packs hunt here too.', tag: '◆ CARNIVORE — SPEED', tagClass: 'hard' },
   nothro: { desc: 'A pot-bellied giant that stands tall and swings great scythe claws. Eats only plants; slashes anything that forgets that. Claw wounds bleed.', tag: '◆ HERBIVORE — CLAWS', tagClass: 'mod' },
-  aardi: { desc: 'Small, weak, and it looks like a dumb pick — until you meet your kin. Press P and lead the pack: raid Protoceratops burrows, claim them, and rule the undergrowth.', tag: '◆ CARNIVORE — PACK ALPHA', tagClass: 'hard' },
+  aardi: { desc: 'Small, weak, and it looks like a dumb pick — until you meet your kin. Press 2 to call the pack together: raid Protoceratops burrows, claim them, and rule the undergrowth.', tag: '◆ CARNIVORE — PACK ALPHA', tagClass: 'hard' },
   centro: { desc: 'One great nose horn and no sense of retreat. Grows slowly, but a grown Centrosaurus is a wall — cheap to hatch, hard to move.', tag: '◆ HERBIVORE — TANK', tagClass: 'mod' },
   omni: { desc: 'Fast, strong, and cheap: the working raptor of the delta islands. Bleed your prey, cross at the sandbars, and never swim where the saw hunts.', tag: '◆ CARNIVORE — RAIDER', tagClass: 'mod' },
   eotrach: { desc: 'The oldest duckbill — tough, hardy, and built to outlast the delta. Its scarred hide resists bleeding and its tail swings like a river gate.', tag: '◆ HERBIVORE — HARDY', tagClass: 'hard' },
@@ -366,7 +365,7 @@ const CARD_INFO = {
   nivalo: { desc: 'THE FROZEN GIANT. The mountain bears its name, and it cannot be bought — somewhere in the high maze, a hidden cave remembers it. The largest animal that has ever walked this game.', tag: '◆ HERBIVORE — THE LEGEND', tagClass: 'swim' },
   nanuq: { desc: 'Play the KING. The polar tyrant hunts the whiteout in a fur coat — bleed bites, wrestling strength, and every herd on the mountain knows your silhouette. Only the Titanovenator outranks you.', tag: '◆ CARNIVORE — THE KING', tagClass: 'mod' },
   nivarex: { desc: 'The Wall\'s final apex. A shark-toothed giant in a deep feather blanket — the largest carnivore on the mountain, near-immune to the cold, and heavy enough to bring down a Kerberosaurus alone. Every wound it opens keeps working.', tag: '◆ CARNIVORE — THE SUMMIT', tagClass: 'mod' },
-  simo: { desc: 'Weird and wonderful: a pug-faced, square-headed little digger. Press B and it builds its OWN burrow — dive in and attackers gnaw an armored backside until they give up. One burrow at a time: choose the spot wisely.', tag: '◆ HERBIVORE — THE DIGGER', tagClass: 'hard' },
+  simo: { desc: 'Weird and wonderful: a pug-faced, square-headed little digger. Press B and it digs its OWN burrow — dive in and attackers gnaw an armored backside until they give up. One burrow at a time: choose the spot wisely.', tag: '◆ HERBIVORE — THE DIGGER', tagClass: 'hard' },
   korea: { desc: 'The horned swimmer: a small ceratopsian with a deep paddle tail. The black meres hide it, feed it, and drown whatever follows it in — the only moor-dweller at home in the deep water.', tag: '◆ HERBIVORE — SWIMMER', tagClass: 'swim' },
   sarco: { desc: 'Fast, deadly, and never bleeding — BREAKING. Its bites can crack the very bone they land on: a thigh ends the chase, a tail sends prey veering wrong, a skull takes the force out of everything.', tag: '◆ CARNIVORE — BONE BREAKER', tagClass: 'mod' },
   drypto: { desc: 'The long tyrant: stretched skull, stretched frame, and the same bone-cracking jaws turned up to full. Big, fast, agile — the mist\'s worst silhouette to guess wrong about.', tag: '◆ CARNIVORE — BONE BREAKER', tagClass: 'mod' },
@@ -1013,10 +1012,10 @@ function drawMinimap() {
 // female until they're grown — and every one raised pays out ❖ 150.
 function updateNesting(dt) {
   const p = G.player, ns = G.nesting;
-  if (!G.started || !p || !p.alive || !ns) { if (G.input) G.input.nest = false; return; }
+  if (!G.started || !p || !p.alive || !ns) return;
   const nest = World.nests[p.species];
-  const nPressed = G.input.nest;
-  G.input.nest = false;
+  // courtship is an F verb like any other (the loop clears the flag)
+  const nPressed = G.input.action;
 
   // mate housekeeping: a fallen mate ends the courtship — but eggs already
   // laid and babies already hatched carry on under the survivor's guard
@@ -1042,7 +1041,7 @@ function updateNesting(dt) {
       if (dd < cd) { cd = dd; cand = e; }
     }
     if (cand) {
-      G.prompt = (G.prompt ? G.prompt + '    ' : '') + 'N — Take ' + (cand.gender === 'm' ? 'him' : 'her') + ' as your mate';
+      G.prompt = (G.prompt ? G.prompt + '    ' : '') + 'F — Take ' + (cand.gender === 'm' ? 'him' : 'her') + ' as your mate';
       if (nPressed) {
         const def = PLAYER_DEF[p.species];
         G.mate = cand;
@@ -1091,7 +1090,7 @@ function updateNesting(dt) {
     if (p.gender === 'f') {
       // he displays — the female judges, and N beside him is a yes
       if (G.mate.state === 'display' && mateDist < 140) {
-        if (!G.prompt) G.prompt = 'N — accept his display';
+        if (!G.prompt) G.prompt = 'F — accept his display';
         if (nPressed) {
           ns.stage = 'accepted';
           SFX.stage();
@@ -1124,7 +1123,7 @@ function updateNesting(dt) {
   } else if (ns.stage === 'accepted') {
     ns.reNestT = Math.max(0, (ns.reNestT || 0) - dt);
     if (dist(p.x, p.y, nest.x, nest.y) < 100 && ns.reNestT <= 0) {
-      if (!G.prompt) G.prompt = 'N — nest here';
+      if (!G.prompt) G.prompt = 'F — nest here';
       if (nPressed) {
         ns.stage = 'eggs'; ns.eggs = 3; ns.hatchT = 120;
         ns.raidT = rrange(18, 30); ns.eatT = 0;
@@ -1771,6 +1770,8 @@ function loop(now) {
   updateEruption(dt);
   updateBlizzard(dt);
   updateNesting(dt);
+  G.input.action = false;   // F is read by the player, the den AND the courtship
+  G.input.claw = false; G.input.dig = false;
   updateAmbient(dt);
   popT += dt;
   if (popT > 10) { popT = 0; maintainPopulation(); }
@@ -2251,7 +2252,31 @@ function updateHUD() {
   const elGr = document.getElementById('growthscount');
   const grLabel = '❖ ' + Save.growths + (Profiles.current ? ' · ' + Profiles.current : '');
   if (elGr && elGr._v !== grLabel) { elGr._v = grLabel; elGr.textContent = grLabel; }
-  elPrompt.textContent = G.prompt;
+  // the prompt bar is the ONLY place a player learns what E and F do here, so
+  // each offer becomes its own chip with the key drawn as a keycap. (Plain
+  // text collapsed the wide-space separator and ran the offers together:
+  // "E — Drink F — Go fishing" read as one unparseable line.)
+  if (elPrompt._v !== G.prompt) {
+    elPrompt._v = G.prompt;
+    elPrompt.innerHTML = '';
+    for (const seg of (G.prompt || '').split(/\s{3,}/)) {
+      if (!seg) continue;
+      const mk = seg.match(/^([A-Z0-9])\s*—\s*(.+)$/);
+      const chip = document.createElement('span');
+      chip.className = 'pchip';
+      if (mk) {
+        const cap = document.createElement('b');
+        cap.className = 'pkey';
+        cap.textContent = mk[1];
+        chip.appendChild(cap);
+        chip.appendChild(document.createTextNode(mk[2]));
+      } else {
+        chip.className = 'pchip note';
+        chip.textContent = seg;
+      }
+      elPrompt.appendChild(chip);
+    }
+  }
   elPrompt.style.opacity = G.prompt ? 1 : 0;
   if (G.banner) {
     elBanner.textContent = G.banner.str;

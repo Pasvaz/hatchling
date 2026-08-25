@@ -62,15 +62,14 @@ No build step, no dependencies — plain HTML5 canvas + JavaScript.
 | WASD / Arrows | Move |
 | SHIFT | Sprint (drains stamina) |
 | SPACE | Bite / attack |
-| P (hold) + direction | **Pounce** — the dino coils (bigger = longer), leaps (faster = farther) and bites where it lands. Tail-fighters instead hold P to **tail-swing**: continuous hits on a metronome, but the feet are planted until you let go. (P still creates an aardiraptor pack on a quick tap — hold + direction is the pounce.) |
-| E | Eat ferns · drink · feed on carcass · swallow what you carry |
+| | *E and F are **context** keys: they do **only** what the on-screen prompt says, and nothing at all when there is no prompt. Moves you can make anywhere — a weapon, a species power — always get their own key instead.* |
+| **E** | **Interact** — the primary CONTEXT key: eat ferns/horsetails · browse the canopy · feed on a carcass · drink · swallow what you carry · hide in your own burrow · enter or invade a den · nest underground |
+| **F** | **Action** — the secondary CONTEXT key: go fishing · grab a carcass (hold: tear off a chunk) or drop it · wrestle · bathe · court and take a mate · leave a den |
+| C | Claw slash — riojasaurus' second weapon |
+| B | Dig your burrow, anywhere (simosuchus) — press it beside the burrow to collapse it |
+| P (hold) + direction | **Pounce** — the dino coils (bigger = longer), leaps (faster = farther) and bites where it lands. Tail-fighters instead hold P to **tail-swing**: continuous hits on a metronome, but the feet are planted until you let go. |
 | R | Rest — a deliberate **3-second** settle onto folded legs (you stop moving first). Heal faster, needs drain slower. You're committed: sit at least **1 second**, then a step (or R) starts the equally slow **3-second** rise — no popping up. |
-| B | **Bathe** (while resting in a mud pool) — roll, wriggle and kick the mud clean in a real scrub animation: the fast way to restore hygiene. Just standing in mud still works, but VERY slowly. |
-| G | Grab a carcass to carry (hold: tear off a chunk) · press again to drop |
-| M | Wrestle a dino your own size (apex carnivores) |
-| P / I | Aardiraptor: pounce-hold / invade a protoceratops burrow |
 | 1 / 2 / 3 | **Calls** — every playable has its OWN voice, matched to its playstyle (the `VOICE` registry, js/util.js): carnivores rasp and roar, duckbills and horned dinos trumpet, sauropods answer with sub-bass booms, raptors scream, the pack species yips, croc-snouts gurgle, and the Wall's dinos cry over the wind — all pitched up while young, and each call type is that same voice in a different mood. **1 Broadcast:** head craned to the sky, a long droning call — a carnivore claims every carcass in earshot (⚑): NPCs outside your pack must kill you before they may eat it. Most back off… rarely one defies the claim and hunts you TO THE DEATH. **2 Friendly:** short and smooth, a soft bow — this is how an aardiraptor invites its kin to the pack now. **3 Aggressive:** long, jagged, full of sharp sudden movements — smaller dinosaurs scatter, bolder ones may be provoked into attacking, and aimed at a close packmate it casts them out of the pack. |
-| F / N | Go fishing (spinosaurids) / nest |
 | TAB | Health menu |
 | ESC / U / F1 | Pause / mute / help |
 | H | Hitbox X-ray — red = attack zone, cyan = hittable body, orange = nip jaws |
@@ -87,7 +86,7 @@ ease well back toward the center). On the right, an **icon button cluster**:
 💤 rest, and two buttons that only exist when the world offers them — ✊ grab
 appears beside a carcass (tap to carry, hold to tear a chunk) and a fourth
 slot appears as 💧/🌿/🍖 to drink or eat whatever you're standing at. Rarer
-prompts — nest, wrestle, fish, burrows — stay as labelled pills above the
+prompts — nest, wrestle, fish, dig — stay as labelled pills above the
 cluster. During a wrestle the right half of the
 screen becomes a **swipe pad** (the QTE shows which way). Landscape is the
 intended orientation: portrait shows a "turn your phone" screen, and the first

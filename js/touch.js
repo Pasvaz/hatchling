@@ -110,11 +110,12 @@
   press(pncBtn,
     () => { G.input.pounceHold = true; },
     () => { G.input.pounceHold = false; });
-  // grab is HOLD-sensitive (hold to tear a chunk) — mirror the real key state
+  // the F button: grabbing is HOLD-sensitive (hold to tear a chunk), so it
+  // mirrors the real key state the way the keyboard does
   const grabBtn = document.getElementById('btn-grab');
   press(grabBtn,
-    () => { G.input.grab = true; G.keys.KeyG = true; },
-    () => { G.keys.KeyG = false; });
+    () => { G.input.action = true; G.keys.KeyF = true; },
+    () => { G.keys.KeyF = false; });
   // the 4th slot: eat / drink, whenever the world offers a meal
   const eatBtn = document.getElementById('btn-eat');
   press(eatBtn, () => { G.input.interact = true; });
@@ -127,18 +128,20 @@
 
   // ---- context actions: the game's own prompts become buttons ----
   // G.prompt strings look like 'E — Drink' (several joined by wide spaces);
-  // the leading letter tells us which input flag the action wants.
-  const KEYACT = { E: 'interact', N: 'nest', F: 'fish', M: 'wrestle', P: 'pack', I: 'burrow', R: 'rest', B: 'bathe', 1: 'call1', 2: 'call2', 3: 'call3' };
+  // the leading letter tells us which input flag the action wants. Only E, F
+  // and the three call digits exist now — the rest folded into those.
+  const KEYACT = { E: 'interact', F: 'action', R: 'rest', B: 'dig', C: 'claw', 1: 'call1', 2: 'call2', 3: 'call3' };
   let lastPrompt = null;
   function buildCtx(prompt) {
     ctxBox.innerHTML = '';
-    // G-actions light up the GRAB button; drink/eat light up the 4th slot
-    // with the right icon — everything else stays a labelled pill
+    // grabbing and dropping light up the ✊ button (it is hold-sensitive);
+    // drink/eat light up the 4th slot with the right icon — every other F
+    // verb stays a labelled pill that says what it does
     let grabOn = false, eatIcon = null;
     if (prompt) for (const seg of prompt.split(/\s{3,}/)) {
       const m = seg.match(/^([A-Z0-9])\s*—\s*(.+)$/);
       if (!m) continue;
-      if (m[1] === 'G') { grabOn = true; continue; }
+      if (m[1] === 'F' && /Grab|Drop/i.test(m[2])) { grabOn = true; continue; }
       if (m[1] === 'E' && /Drink/i.test(m[2])) { eatIcon = '💧'; continue; }
       if (m[1] === 'E' && /Eat|Feed|Swallow|Browse/i.test(m[2])) {
         eatIcon = /carcass|Swallow/i.test(m[2]) ? '🍖' : '🌿';

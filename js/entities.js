@@ -33,7 +33,7 @@ const PLAYER_DEF = {
   nothro: { hp: 1600, dmg: 140, speed: 88, sprint: 1.5, reach: 40, atkCd: 1.1, diet: 'herb', bleedBite: true, stamMax: 130, eco: 'ash', cost: 300, req: 'giganto' },
   // --- Lertentous Delta playables ---
   // the cheap tank: grows slowly, but a grown centrosaurus argues with anything
-  // small, weak, and it LOOKS like a dumb pick — until you press P and the
+  // small, weak, and it LOOKS like a dumb pick — until you sound the call and the
   // jungle starts moving with you (packs, burrow raids, the works)
   aardi: { hp: 380, dmg: 45, speed: 152, sprint: 1.9, reach: 22, atkCd: 0.45, diet: 'carn', bleedBite: false, stamMax: 160, eco: 'delta', cost: 25, growthRate: 1.3 },
   centro: { hp: 1400, dmg: 100, speed: 95, sprint: 1.6, reach: 32, atkCd: 1.0, diet: 'herb', bleedBite: false, stamMax: 140, eco: 'delta', cost: 50, growthRate: 0.7 },
@@ -2541,16 +2541,24 @@ function updatePlayer(dt) {
   p.strain = lerp(p.strain || 0, 0, 0.2);
   p.callB = lerp(p.callB || 0, 0, 0.2);
 
-  // ------ SIMOSUCHUS' OWN BURROW (B, not while resting): dig it anywhere,
-  // one at a time — B beside the old one collapses it so a new one can go
+  // which verb F means this frame (see resolveAction)
+  p.fAct = resolveAction(p, def);
+
+  // ------ SIMOSUCHUS' OWN BURROW (B — its own key: it works ANYWHERE, so it
+  // never rides the context keys): dig it on the spot, one at a time —
+  // B beside the old one collapses it so a new one can go
   // somewhere wiser. Hiding leaves only the armored backside showing. ------
-  if (input.bathe && def.digger && !p.resting && !p.bathing && p.actionT <= 0 && !p.hidden) {
-    input.bathe = false;
-    if (G.myBurrow && dist(p.x, p.y, G.myBurrow.x, G.myBurrow.y) < 60) {
+  const bVerb = burrowVerb(p, def);
+  if (bVerb) G.bPrompt = bVerb === 'undig' ? 'B — Collapse this burrow'
+    : bVerb === 'digfar' ? 'B — Your burrow is elsewhere' : 'B — Dig a burrow';
+  else G.bPrompt = null;
+  if (input.dig && bVerb) {
+    input.dig = false;
+    if (bVerb === 'undig') {
       G.myBurrow = null;
       floatText(p.x, p.y - 44, 'burrow collapsed', '#cbb98a');
-    } else if (G.myBurrow) {
-      floatText(p.x, p.y - 44, 'one burrow only — B beside the old one to destroy it', '#cbb98a');
+    } else if (bVerb === 'digfar') {
+      floatText(p.x, p.y - 44, 'one burrow only — return to it to move house', '#cbb98a');
     } else if (isWaterPx(p.x, p.y) || isMudPx(p.x, p.y) || isCliffPx(p.x, p.y)) {
       floatText(p.x, p.y - 44, 'the ground here won’t take a burrow', '#cbb98a');
     } else {
@@ -2719,7 +2727,7 @@ function updatePlayer(dt) {
       if (!input.pounceHold) p.pounce = null;
     }
   } else if (p.bathing) {
-    // ------ BATHING (B, while resting in mud): rolling, wriggling, kicking —
+    // ------ BATHING (F, while resting in mud): rolling, wriggling, kicking —
     // the fast way to get clean. drawDino plays the roll off p.bathe ------
     p.bathing.t -= dt;
     p.bathe = lerp(p.bathe || 0, 1, 0.2);
@@ -2735,7 +2743,8 @@ function updatePlayer(dt) {
     const wantUp = input.left || input.right || input.up || input.down;
     if (wantUp && p.restT >= 1 && p.sitT >= 1) p.resting = false;
     // the mud bath proper: B starts a real scrub (prompt shows below)
-    if (input.bathe && isMudPx(p.x, p.y) && p.hygiene < 100 && p.restT >= 1) {
+    if (input.action && p.fAct === 'bathe') {
+      input.action = false;
       p.bathing = { t: 3.0 };
       SFX.splash();
       floatText(p.x, p.y - 48, 'bathing…', '#c8a2e0');
@@ -2805,7 +2814,6 @@ function updatePlayer(dt) {
   // 3 seconds each way (bathing keeps the body settled)
   p.restT = clamp((p.restT || 0) + (p.resting || p.bathing ? 1 / 3 : -1 / 3) * dt, 0, 1);
   p.bathe = p.bathing ? (p.bathe || 0) : lerp(p.bathe || 0, 0, 0.15);
-  input.bathe = false;
   if (!G.input.sprinting) {
     p.stamina = Math.min(def.stamMax, p.stamina + 13 * dt);
     if (p.exhausted && p.stamina > 20) p.exhausted = false;
@@ -2965,8 +2973,8 @@ function updatePlayer(dt) {
       c.liftY = p.y - hw.y - 2;
     }
   }
-  if (input.grab) {
-    input.grab = false;
+  if (input.action && (p.fAct === 'grab' || p.fAct === 'drop')) {
+    input.action = false;
     if (p.carry) {
       // drop it at your feet — still perfectly edible
       const c = p.carry.c;
@@ -2983,7 +2991,7 @@ function updatePlayer(dt) {
     const c = p.grabC;
     if (!c || c.meat <= 0 || G.carcasses.indexOf(c) < 0 || dist(p.x, p.y, c.x, c.y) > 64) {
       p.grabT = -1;
-    } else if (G.keys.KeyG) {
+    } else if (G.keys.KeyF) {
       // still holding: a long press tears a chunk straight off
       p.grabT += dt;
       if (p.grabT >= 0.45) { tearChunk(p, c); p.grabT = -1; }
@@ -3007,7 +3015,7 @@ function updatePlayer(dt) {
   G.prompt = '';
   if (p.carry) {
     // jaws full: E swallows what you hold
-    G.prompt = 'E — Swallow    G — Drop';
+    G.prompt = 'E — Swallow    F — Drop';
     if (input.interact && p.actionT <= 0) {
       p.action = { kind: 'swallow' };
       p.actionT = 1.3;
@@ -3022,47 +3030,36 @@ function updatePlayer(dt) {
       startAction(p, ctx);
     }
   }
-  // an uncarried carcass nearby can also be grabbed
-  if (!p.carry && ctx && ctx.kind === 'carcass' && !ctx.obj.carried) {
-    G.prompt += '    G — Grab (hold: tear a chunk)';
-  }
+  // whatever F means right now, named once (resolveAction picked it)
+  const fLabel = p.carry ? null : actionPrompt(p);
+  if (fLabel) G.prompt = (G.prompt ? G.prompt + '    ' : '') + 'F — ' + fLabel;
+  if (G.bPrompt) G.prompt = (G.prompt ? G.prompt + '    ' : '') + G.bPrompt;
   input.interact = false;
 
-  // ------ fishing prompt (F) — spinosaurids at the water's edge ------
-  const canFish = def.fisher && !p.fishing && p.actionT <= 0 &&
-    ((isWaterPx(p.x, p.y) && !isDeepPx(p.x, p.y)) || nearWaterPx(p.x, p.y, 22));
-  if (canFish) {
-    G.prompt = (G.prompt ? G.prompt + '    ' : '') + 'F — go fishing';
-    if (input.fish) {
-      p.fishing = true;
-      G.banner = { str: 'You settle at the waterside. Hold still — let the fish come.', t: 4, color: '#9cc4d0' };
-    }
+  // ------ fishing (F) — spinosaurids at the water's edge ------
+  if (input.action && p.fAct === 'fish') {
+    input.action = false;
+    p.fishing = true;
+    G.banner = { str: 'You settle at the waterside. Hold still — let the fish come.', t: 4, color: '#9cc4d0' };
   }
   // a carnivore can CLAIM nearby meat with the broadcast call (1)
   if (def.diet === 'carn' && !p.call && p.actionT <= 0) {
     const cc = nearestCarcass(p.x, p.y, 70);
     if (cc && cc.meat > 0 && !cc.claim) G.prompt = (G.prompt ? G.prompt + '    ' : '') + '1 — Broadcast call: claim it';
   }
-  // settled in a mud pool: the real bath is one key away
-  if (p.resting && !p.bathing && p.restT >= 1 && isMudPx(p.x, p.y) && p.hygiene < 100)
-    G.prompt = (G.prompt ? G.prompt + '    ' : '') + 'B — Bathe and clean yourself';
   if (p.bathing) G.prompt = 'scrubbing into the mud…';
   if (p.fishing) G.prompt = 'fishing… hold still — SPACE to strike';
-  input.fish = false;
 
   // ------ claw slash (M) — riojasaurus' second weapon ------
   // The tail is the main argument; the thumb-claws are the closing one: a
-  // forward slash that opens a bleeding wound. Same M key the wrestlers use —
-  // a species has one M-move or the other, never both.
+  // forward slash that opens a bleeding wound. Same F key the wrestlers use —
+  // a species has one F-move or the other, never both.
   if (def.clawSecond && !p.carry && !p.fishing && p.actionT <= 0 && !p.pounce) {
-    let near = 1e9;
     for (const e of G.npcs) {
       if (DINO[e.species].fish || e.packAlpha || e.isBaby || e === G.mate) continue;
-      const dd = dist(p.x, p.y, e.x, e.y);
-      if (dd < near) near = dd;
+      if (dist(p.x, p.y, e.x, e.y) < 150) { G.prompt = (G.prompt ? G.prompt + '    ' : '') + 'C — Claw slash'; break; }
     }
-    if (near < 150) G.prompt = (G.prompt ? G.prompt + '    ' : '') + 'M — Claw slash';
-    if (input.wrestle && p.clawCd <= 0) {
+    if (input.claw && p.clawCd <= 0) {
       p.clawCd = 1.15;
       p.clawT = 1;
       p.resting = false;
@@ -3089,14 +3086,10 @@ function updatePlayer(dt) {
   }
 
   // ------ wrestle prompt (M) — an apex carnivore sizing someone up ------
-  if (def.wrestler && !G.wrestle && !p.carry && !p.fishing && p.actionT <= 0) {
-    const wt = wrestleTarget(p);
-    if (wt) {
-      G.prompt = (G.prompt ? G.prompt + '    ' : '') + 'M — Wrestle ' + DINO[wt.species].name;
-      if (input.wrestle) startWrestle(p, wt);
-    }
+  if (input.action && p.fAct === 'wrestle' && p.fActObj) {
+    input.action = false;
+    startWrestle(p, p.fActObj);
   }
-  input.wrestle = false;
 
   // ------ pack (P): wild kin fall in behind a bold aardiraptor ------
   G.packMealT = Math.max(0, (G.packMealT || 0) - dt);
@@ -3111,21 +3104,8 @@ function updatePlayer(dt) {
       G.prompt = (G.prompt ? G.prompt + '    ' : '') + '2 — Friendly call: invite the pack';
     }
   }
-  input.pack = false;
 
-  // ------ burrow prompt (I): only an aardiraptor fits down the hole ------
-  if (p.species === 'aardi' && World.burrows && World.burrows.length) {
-    let nb = null, nd = 44;
-    for (const b of World.burrows) {
-      const dd = dist(p.x, p.y, b.x, b.y);
-      if (dd < nd) { nd = dd; nb = b; }
-    }
-    if (nb) {
-      G.prompt = (G.prompt ? G.prompt + '    ' : '') + (nb.owned ? 'I — Enter your den' : 'I — Invade burrow');
-      if (input.burrow) enterBurrow(nb);
-    }
-  }
-  input.burrow = false;
+  input.action = false;
 }
 
 // ---------- burrows: the protoceratops warrens under the delta ----------
@@ -3455,20 +3435,24 @@ function updateBurrow(dt) {
       }
     }
   }
+  // a fallen resident is dinner (resolved first: E prefers food over nesting)
+  let nearC = null;
+  for (const c of B.carcs) {
+    if (c.meat > 0 && dist(p.x, p.y, c.x, c.y) < 30) { nearC = c; break; }
+  }
   // nesting in your own den: the deepest chamber, accepted pairs only
   const ns = G.nesting;
   const deep = B.rooms[B.rooms.length - 1];
   let denNest = false;
   if (B.b.owned && ns && ns.stage === 'accepted' && (ns.reNestT || 0) <= 0 && dist(p.x, p.y, deep.x, deep.y) < deep.r) {
     denNest = true;
-    if (input.nest) {
+    if (input.interact && !nearC) {
       ns.stage = 'eggs'; ns.eggs = 3; ns.hatchT = 120; ns.den = B.b; ns.eatT = 0;
       SFX.stage();
       G.banner = { str: 'THREE EGGS, safe underground. They will hatch in their own time.', t: 6, color: '#ffd23e' };
       denNest = false;
     }
   }
-  input.nest = false;
   // den eggs and babies keep ticking while you visit
   tickDenBrood(dt);
   // den babies toddle about their chamber
@@ -3482,11 +3466,6 @@ function updateBurrow(dt) {
       burrowClampEntity(bb, 4);
     }
   }
-  // a fallen resident is dinner
-  let nearC = null;
-  for (const c of B.carcs) {
-    if (c.meat > 0 && dist(p.x, p.y, c.x, c.y) < 30) { nearC = c; break; }
-  }
   if (nearC && input.interact) {
     const bite = Math.min(30, nearC.meat);
     nearC.meat -= bite;
@@ -3495,16 +3474,16 @@ function updateBurrow(dt) {
     SFX.eat();
   }
   input.interact = false;
-  G.prompt = (B.b.owned ? 'I — leave the den' : 'I — flee the burrow') +
+  G.prompt = (B.b.owned ? 'F — leave the den' : 'F — flee the burrow') +
     (B.b.left > 0 ? '    ' + B.b.left + ' resident' + (B.b.left > 1 ? 's' : '') + ' below' : '') +
     (nearC ? '    E — eat' : '') +
-    (denNest ? '    N — nest here' : '');
-  if (input.burrow) {
-    input.burrow = false;
+    (denNest && !nearC ? '    E — nest here' : '');
+  if (input.action) {
+    input.action = false;
     exitBurrow();
     return;
   }
-  input.grab = false; input.wrestle = false; input.pack = false; input.fish = false; input.rest = false;
+  input.action = false; input.rest = false;
 }
 
 // silhouette mass — the scale behind "can I lift this?" and wrestling odds
@@ -3639,8 +3618,58 @@ function fireCall(p, k) {
   }
 }
 
+// ---------- F, the one secondary-action key ----------
+// Every "special" verb the game used to spread over G/M/N/I/B lives here.
+// They are mutually exclusive in practice, so this resolves the single verb
+// that is live right now, in priority order, and the HUD names it. Stashes
+// the object it applies to (a wrestle target, a carcass) on p.fActObj.
+function resolveAction(p, def) {
+  p.fActObj = null;
+  if (p.bathing || p.fishing || p.hidden || p.actionT > 0) return null;
+  // settled in mud: the scrub is the only thing you can do lying down
+  if (p.resting) return (p.restT >= 1 && isMudPx(p.x, p.y) && p.hygiene < 100) ? 'bathe' : null;
+  if (p.carry) return 'drop';
+  // a live opponent outranks a dead one: the carcass will keep
+  if (def.wrestler && !G.wrestle) {
+    const wt = wrestleTarget(p);
+    if (wt) { p.fActObj = wt; return 'wrestle'; }
+  }
+  if (def.diet === 'carn') {
+    const c = nearestCarcass(p.x, p.y, 40);
+    if (c && c.meat > 0 && !c.carried) { p.fActObj = c; return 'grab'; }
+  }
+  if (def.fisher && ((isWaterPx(p.x, p.y) && !isDeepPx(p.x, p.y)) || nearWaterPx(p.x, p.y, 22))) return 'fish';
+  return null;
+}
+// B — the digger's burrow. Available anywhere it can stand, so it gets a key
+// of its own rather than riding the context key; the prompt is only a hint.
+function burrowVerb(p, def) {
+  if (!def.digger || p.resting || p.bathing || p.hidden || p.actionT > 0) return null;
+  if (G.myBurrow) return dist(p.x, p.y, G.myBurrow.x, G.myBurrow.y) < 60 ? 'undig' : 'digfar';
+  return 'dig';
+}
+function actionPrompt(p) {
+  switch (p.fAct) {
+    case 'bathe': return 'Bathe and clean yourself';
+    case 'grab': return 'Grab (hold: tear a chunk)';
+    case 'wrestle': return 'Wrestle ' + DINO[p.fActObj.species].name;
+    case 'fish': return 'Go fishing';
+    default: return null;
+  }
+}
+
 function interactContext(p) {
   const def = PLAYER_DEF[p.species];
+  // a burrow mouth under your feet is the loudest thing the ground offers
+  if (p.species === 'aardi' && World.burrows) {
+    for (const b of World.burrows) {
+      if (dist(p.x, p.y, b.x, b.y) < 44)
+        return { kind: 'burrow', obj: b, prompt: b.owned ? 'E — Enter your den' : 'E — Invade burrow' };
+    }
+  }
+  // the digger's own burrow: dive in and leave them your armored backside
+  if (def.digger && !p.hidden && G.myBurrow && dist(p.x, p.y, G.myBurrow.x, G.myBurrow.y) < 42)
+    return { kind: 'hide', prompt: 'E — Hide (backside out)' };
   if (def.diet === 'carn') {
     const c = nearestCarcass(p.x, p.y, 34);
     if (c && c.meat > 0) return { kind: 'carcass', obj: c, prompt: 'E — Feed on carcass' };
@@ -3672,15 +3701,13 @@ function interactContext(p) {
   if (!isWaterPx(p.x, p.y) && nearWaterPx(p.x, p.y, 22) || (isWaterPx(p.x, p.y) && !isDeepPx(p.x, p.y))) {
     if (p.water < 99) return { kind: 'drink', prompt: 'E — Drink' };
   }
-  // the digger's own burrow: dive in and leave them your armored backside
-  if (def.digger && !p.hidden && G.myBurrow && dist(p.x, p.y, G.myBurrow.x, G.myBurrow.y) < 42)
-    return { kind: 'hide', prompt: 'E — Hide (backside out)' };
   if (isMudPx(p.x, p.y) && p.hygiene < 99) return { kind: 'mudinfo', prompt: 'Standing in mud… barely helps — rest here, then bathe' };
   return null;
 }
 
 function startAction(p, ctx) {
   if (ctx.kind === 'mudinfo') return;
+  if (ctx.kind === 'burrow') { enterBurrow(ctx.obj); return; }
   if (ctx.kind === 'hide') {
     // head-first down the hole: instant, no clock — a step backs you out
     p.hidden = true;
