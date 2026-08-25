@@ -66,7 +66,7 @@ const PLAYER_DEF = {
   nivalo: { hp: 3400, dmg: 200, speed: 70, sprint: 1.35, reach: 52, atkCd: 1.8, diet: 'herb', bleedBite: false, stamMax: 190, eco: 'wall', cost: 0, secret: true, growthRate: 0.5, coldResist: 0.85, earnMul: 1.4, trample: true },
   // play the KING: the polar tyrant itself — thick-coated, bleed-biting,
   // and strong enough to wrestle anything on the mountain
-  nanuq: { hp: 2100, dmg: 180, speed: 118, sprint: 1.65, reach: 36, atkCd: 0.9, diet: 'carn', bleedBite: true, stamMax: 160, eco: 'wall', cost: 550, req: 'eshano', growthRate: 0.75, coldResist: 0.7, wrestler: true, boneBreak: true, caution: 0.8 },
+  nanuq: { hp: 2100, dmg: 180, speed: 118, sprint: 1.65, reach: 36, atkCd: 0.9, diet: 'carn', bleedBite: true, stamMax: 160, eco: 'wall', cost: 550, req: 'eshano', growthRate: 0.75, coldResist: 0.7, wrestler: true, boneBreak: true },
   // the END of the ladder: a carcharodontosaurid in a winter coat — bigger
   // and tankier than its delta cousin, with Tyrannotitan's bleed kit and a
   // feather blanket so deep even the summit's cold barely reaches it. Slow,
@@ -83,7 +83,7 @@ const PLAYER_DEF = {
   sarco: { hp: 950, dmg: 150, speed: 136, sprint: 1.85, reach: 28, atkCd: 0.6, diet: 'carn', bleedBite: false, boneBreak: true, stamMax: 140, eco: 'moor', cost: 300, req: 'korea' },
   // the long tyrant: big, fast, agile — a stretched skull on a stretched
   // frame, with the same bone-cracking jaws turned up to full
-  drypto: { hp: 2300, dmg: 190, speed: 128, sprint: 1.75, reach: 38, atkCd: 0.75, diet: 'carn', bleedBite: false, boneBreak: true, stamMax: 155, eco: 'moor', cost: 550, req: 'sarco', growthRate: 0.7, wrestler: true, caution: 1.2 },
+  drypto: { hp: 2300, dmg: 190, speed: 128, sprint: 1.75, reach: 38, atkCd: 0.75, diet: 'carn', bleedBite: false, boneBreak: true, stamMax: 155, eco: 'moor', cost: 550, req: 'sarco', growthRate: 0.7, wrestler: true },
   // the moor's fortress: a flat oval of armor, shoulder spikes that grow
   // with it, and a long spiked tail that answers everything
   gastonia: { hp: 2000, dmg: 165, speed: 76, sprint: 1.45, reach: 46, atkCd: 1.4, diet: 'herb', bleedBite: false, bleedResist: 0.35, stamMax: 150, eco: 'moor', cost: 650, req: 'drypto', growthRate: 0.75 },
@@ -148,7 +148,7 @@ const NPC_DEF = {
   // --- Lertentous Delta ---
   // the giant lambeosaurine: placid until anything threatens the herd — then
   // the whole river bank swings back, vigorously
-  magnapaulia: { hp: 1800, dmg: 150, atkCd: 1.8, speed: 92, fleeSpeed: 120, detect: 240, homeR: 380, reach: 42, biome: 'plains', turn: 1.9, bleedable: true, melee: { kb: 260 }, caution: 1.2 },
+  magnapaulia: { hp: 1800, dmg: 150, atkCd: 1.8, speed: 92, fleeSpeed: 120, detect: 240, homeR: 380, reach: 42, biome: 'plains', turn: 1.9, fearless: true, bleedable: true, melee: { kb: 260 }, caution: 1.2 },
   // the nodosaur: a medium tank in a bone coat — no club, no need
   panoplo: { hp: 1100, dmg: 110, atkCd: 1.9, speed: 60, detect: 130, homeR: 220, reach: 34, biome: 'any', turn: 1.7, fearless: true, tank: true, melee: { kb: 240 } },
   // the crested menace: knee-high and furious — it starts fights it has
@@ -164,7 +164,7 @@ const NPC_DEF = {
   // fast, robust-headed, and its bite has a reputation
   yuty: { hp: 1200, dmg: 140, atkCd: 1.2, speed: 150, detect: 300, homeR: 600, reach: 32, biome: 'plains', turn: 2.2, fearless: true, bleedable: true, hunts: ['proto', 'dakota'], caution: 0.8, scavR: 280, scavPicky: true },
   // the big fan-crested lambeosaurine — charonosaurus' niche, delta edition
-  oloro: { hp: 1500, dmg: 130, atkCd: 1.9, speed: 80, fleeSpeed: 110, detect: 220, homeR: 340, reach: 44, biome: 'plains', turn: 1.7, bleedable: true, melee: { kb: 240 }, caution: 1.2 },
+  oloro: { hp: 1500, dmg: 130, atkCd: 1.9, speed: 80, fleeSpeed: 110, detect: 220, homeR: 340, reach: 44, biome: 'plains', turn: 1.7, fearless: true, bleedable: true, melee: { kb: 240 }, caution: 1.2 },
   // massive flat-plated tank: smacks with the tail, occasionally bites
   // whatever stands at its face (the nip)
   wuerho: { hp: 2800, dmg: 175, atkCd: 2.2, speed: 52, detect: 120, homeR: 220, reach: 48, biome: 'any', turn: 1.4, fearless: true, tank: true, bleedable: true, melee: { kb: 300 }, nip: { dmg: 70, cd: 3 } },
@@ -184,7 +184,7 @@ const NPC_DEF = {
   // ---- THE NIVALOTITAN WALL ----
   // the herd on the snowfields: a huge flat-headed polar edmontosaur-alike.
   // Warm to huddle beside — until the tail comes around
-  kerbero: { hp: 2200, dmg: 155, atkCd: 2.0, speed: 88, fleeSpeed: 128, detect: 170, homeR: 320, reach: 44, biome: 'plains', turn: 1.7, tank: true, bleedable: true, melee: { kb: 260 } },
+  kerbero: { hp: 2200, dmg: 155, atkCd: 2.0, speed: 88, fleeSpeed: 128, detect: 170, homeR: 320, reach: 44, biome: 'plains', turn: 1.7, fearless: true, tank: true, bleedable: true, melee: { kb: 260 } },
   // the shaggy guardian of the pine belt: plants itself and rakes with
   // feathered scythe arms — the wounds stay open in the cold
   beipiao: { hp: 900, dmg: 120, atkCd: 1.6, speed: 75, detect: 130, homeR: 220, reach: 34, biome: 'forest', turn: 1.9, fearless: true, tank: true, bleedable: true, melee: { bleed: { dps: 6, dur: 6 }, kb: 200 } },
@@ -193,7 +193,7 @@ const NPC_DEF = {
   pectino: { hp: 260, dmg: 55, atkCd: 0.9, speed: 132, fleeSpeed: 148, detect: 220, homeR: 420, reach: 24, biome: 'any', turn: 2.6, patience: 6, packCourage: true, caution: 1.1 },
   // the king of the Wall: the polar tyrant. Fears nothing, hunts everything,
   // and the mist is on ITS side
-  nanuq: { hp: 2300, dmg: 190, atkCd: 1.5, speed: 118, detect: 330, homeR: 700, reach: 38, biome: 'any', turn: 1.9, fearless: true, bleedable: true, hunts: ['kerbero', 'pectino', 'beipiao', 'korean'] },
+  nanuq: { hp: 2300, dmg: 190, atkCd: 1.5, speed: 118, detect: 330, homeR: 700, reach: 38, biome: 'any', turn: 1.9, fearless: true, bleedable: true, hunts: ['kerbero', 'pectino', 'beipiao', 'korean'], caution: 0.8 },
   // the TITAN-KILLER: one single Titanovenator walks the whole mountain, and
   // it is the one hunter with no upper size limit — a full-grown nivalotitan
   // is not safe. Its bite opens wounds that refuse the cold's mercy.
@@ -206,7 +206,7 @@ const NPC_DEF = {
   // the marsh-dwarf hadrosaur: small herd prey that still swings back
   telmato: { hp: 480, dmg: 70, atkCd: 1.7, speed: 98, fleeSpeed: 132, detect: 200, homeR: 320, reach: 30, biome: 'plains', turn: 2.3, bleedable: true, melee: { kb: 180 }, caution: 1.2 },
   // the flat-headed heavyweight of the herds
-  tanius: { hp: 900, dmg: 105, atkCd: 1.7, speed: 88, fleeSpeed: 118, detect: 210, homeR: 330, reach: 36, biome: 'plains', turn: 2.0, bleedable: true, melee: { kb: 220 }, caution: 1.2 },
+  tanius: { hp: 900, dmg: 105, atkCd: 1.7, speed: 88, fleeSpeed: 118, detect: 210, homeR: 330, reach: 36, biome: 'plains', turn: 2.0, fearless: true, bleedable: true, melee: { kb: 220 }, caution: 1.2 },
   // the wanderer separated from its kin — a mid herd duckbill
   secerno: { hp: 700, dmg: 90, atkCd: 1.6, speed: 95, fleeSpeed: 126, detect: 205, homeR: 340, reach: 33, biome: 'plains', turn: 2.1, bleedable: true, melee: { kb: 200 }, caution: 1.2 },
   // the spiked shield: gnarled frill blades, a tank that holds its ground
@@ -219,9 +219,9 @@ const NPC_DEF = {
   bravo: { hp: 2000, dmg: 175, atkCd: 2.1, speed: 66, detect: 170, homeR: 250, reach: 42, biome: 'plains', turn: 1.6, fearless: true, tank: true, bleedable: true, melee: { kb: 280 } },
   // the Dorset hunter: the moor's fearless terror — it hunts through the
   // mist and never, ever routs
-  duria: { hp: 1900, dmg: 175, atkCd: 1.4, speed: 118, detect: 340, homeR: 720, reach: 36, biome: 'any', turn: 1.9, fearless: true, bleedable: true, hunts: ['telmato', 'secerno', 'gracili'], caution: 0.8 },
+  duria: { hp: 2400, dmg: 200, atkCd: 1.4, speed: 118, detect: 340, homeR: 720, reach: 36, biome: 'any', turn: 1.9, fearless: true, bleedable: true, hunts: ['telmato', 'secerno', 'gracili'], caution: 0.8 },
   // wild dryptosaurus prowl the north — long, fast, and fearless
-  drypto: { hp: 1800, dmg: 160, atkCd: 1.2, speed: 135, detect: 320, homeR: 650, reach: 36, biome: 'plains', turn: 2.3, fearless: true, bleedable: true, hunts: ['tanius', 'telmato'] },
+  drypto: { hp: 1800, dmg: 160, atkCd: 1.2, speed: 135, detect: 320, homeR: 650, reach: 36, biome: 'plains', turn: 2.3, fearless: true, bleedable: true, hunts: ['tanius', 'telmato'], caution: 1.2 },
 };
 
 let npcSeq = 1;
@@ -2331,6 +2331,7 @@ function updatePlayer(dt) {
 
   p.atkCd = Math.max(0, p.atkCd - dt);
   p.attackT = Math.max(0, p.attackT - dt * 3.2);
+  p.pounceCd = Math.max(0, (p.pounceCd || 0) - dt);
   p.clawCd = Math.max(0, (p.clawCd || 0) - dt);
   p.clawT = Math.max(0, (p.clawT || 0) - dt * 3.2);
   p.hurtT = Math.max(0, p.hurtT - dt);
@@ -2531,8 +2532,9 @@ function updatePlayer(dt) {
   // coil and nothing happens. A tail-fighter plants instead of leaping: the
   // tail scythes continuously until release, but the feet never move.
   const tailPow = !!DINO[p.species].tailWeapon;
-  // the leap is an athletic burst: it costs stamina, and spent legs can't coil
-  if (input.pounceHold && !p.pounce && !p.pounceLatch && !p.exhausted &&
+  // the leap is an athletic burst: it costs real stamina, spent legs can't
+  // coil, and the spring needs a couple of seconds to reload between leaps
+  if (input.pounceHold && !p.pounce && !p.pounceLatch && !p.exhausted && p.pounceCd <= 0 &&
       p.atkCd <= 0 && p.actionT <= 0 && !p.fishing && !G.wrestle) {
     let pdx = (input.right ? 1 : 0) - (input.left ? 1 : 0);
     let pdy = (input.down ? 1 : 0) - (input.up ? 1 : 0);
@@ -2554,11 +2556,19 @@ function updatePlayer(dt) {
   p.strain = lerp(p.strain || 0, 0, 0.2);
   p.callB = lerp(p.callB || 0, 0, 0.2);
 
-  // pounce afterglow: the leap's hit zones stay live a few ms after landing
+  // pounce afterglow: the leap's hit zones stay live a few ms after landing.
+  // When the weapon goes cold the leap settles its bill — a missed pounce
+  // burns HALF the stamina bar, a connecting one only a quarter
   if (p.pounceGrace) {
     pounceStrike(p, p.pounceGrace);
     p.pounceGrace.t -= dt;
-    if (p.pounceGrace.t <= 0) p.pounceGrace = null;
+    if (p.pounceGrace.t <= 0) {
+      const landed = p.pounceGrace.hit && p.pounceGrace.hit.size > 0;
+      p.stamina = Math.max(0, p.stamina - def.stamMax * (landed ? 0.25 : 0.5));
+      if (p.stamina <= 0) p.exhausted = true;
+      p.pounceCd = 2;
+      p.pounceGrace = null;
+    }
   }
 
   // which verb F means this frame (see resolveAction)
@@ -2707,10 +2717,10 @@ function updatePlayer(dt) {
       if (!input.pounceHold) {
         p.pounce = null;   // let go mid-coil: cancelled, no leap
       } else if (P.t <= 0) {
-        // the spring releases — pay for it (a cancelled coil costs nothing)
-        p.stamina = Math.max(0, p.stamina - 25);
-        if (p.stamina <= 0) p.exhausted = true;
         if (tailPow) {
+          // the spin plants and pays up front (a cancelled coil costs nothing)
+          p.stamina = Math.max(0, p.stamina - def.stamMax * 0.25);
+          if (p.stamina <= 0) p.exhausted = true;
           P.phase = 'swing'; P.t = 0.01;
         } else {
           P.phase = 'jump'; P.t = 0.26;
@@ -2753,7 +2763,7 @@ function updatePlayer(dt) {
       p.move = lerp(p.move, 0, 0.3);
       P.t -= dt;
       if (P.t <= 0) { input.attack = true; p.atkCd = 0; P.t = 0.55; }
-      if (!input.pounceHold) p.pounce = null;
+      if (!input.pounceHold) { p.pounce = null; p.pounceCd = 2; }
     }
   } else if (p.bathing) {
     // ------ BATHING (F, while resting in mud): rolling, wriggling, kicking —
