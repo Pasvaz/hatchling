@@ -180,8 +180,11 @@
     margin-bottom: 4px;
   }
   #profiles .sub { font-size: 12px; letter-spacing: 4px; color: #a5936c; margin-bottom: 26px; text-transform: uppercase; }
+  #topbar {
+    position: absolute; right: 22px; top: 18px; z-index: 14;
+    display: flex; align-items: center; gap: 10px;
+  }
   #gr-balance {
-    position: absolute; right: 22px; top: 18px;
     font-size: 15px; letter-spacing: 1px; color: #ffd23e;
     background: rgba(35,26,14,0.9); border: 2px solid #57452a; border-radius: 8px;
     padding: 6px 14px;
@@ -246,33 +249,48 @@
     border-left: 2px dashed #3a2d18; transform: translateX(-1px);
   }
 
-  /* the jump-to dots: a bare column of camps on the screen's left edge */
+  /* the jump-to dots double as expedition stamps: a tint ring once the land
+     is discovered, feat pips riveted on the rim, a gold rim when all lit */
   #ecotabs {
-    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
-    display: flex; flex-direction: column; gap: 9px; z-index: 12;
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 24px; z-index: 12;
   }
   .ecotab {
     position: relative; cursor: pointer;
-    width: 36px; height: 36px; border-radius: 50%;
+    width: 44px; height: 44px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
+    font-size: 19px;
     background: radial-gradient(circle at 35% 30%, #3a2d18, #1d1409);
-    border: 2px solid #57452a;
+    border: 2px solid var(--tint, #57452a);
     transition: border-color 0.12s, transform 0.12s, box-shadow 0.12s;
   }
-  .ecotab:hover { transform: scale(1.12); border-color: #7a6034; }
+  .ecotab:hover { transform: scale(1.1); }
   .ecotab.sel { border-color: #d8a534; box-shadow: 0 0 10px rgba(216,165,52,0.45); }
+  .ecotab.gold { box-shadow: 0 0 0 2px #d8a534, 0 0 12px rgba(216,165,52,0.4); }
   .ecotab.locked { filter: grayscale(0.85) brightness(0.65); }
-  /* the camp's name floats out on hover — no panel, just a whisper of text */
-  .ecotab .tabname {
-    position: absolute; left: 120%; top: 50%; transform: translateY(-50%);
-    white-space: nowrap; pointer-events: none;
-    font-size: 10px; letter-spacing: 2px; color: #ffe9a0;
+  .tabpip {
+    position: absolute; left: 50%; top: 50%; width: 7px; height: 7px;
+    margin: -3.5px 0 0 -3.5px; border-radius: 50%; pointer-events: none;
+    transform: rotate(var(--a)) translateX(var(--pr, 31px));
+    background: #2c2113; border: 1px solid #57452a;
+  }
+  .tabpip.lit { background: #a3bf58; border-color: #5c8a3a; }
+  /* the stamp's story floats out on hover — no panel, just inked text */
+  .ecotab .tabfly {
+    position: absolute; left: 128%; top: 50%; transform: translateY(-50%);
+    white-space: nowrap; pointer-events: none; text-align: left;
+    padding: 10px 34px 10px 14px; border-radius: 14px;
+    background: linear-gradient(90deg, rgba(14,10,6,0.92) 55%, transparent);
     text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.9);
     opacity: 0; transition: opacity 0.12s;
   }
-  .ecotab:hover .tabname { opacity: 1; }
-  .ecotab.locked .tabname { color: #8d7c58; }
+  .ecotab:hover .tabfly { opacity: 1; }
+  .tabfly .tfname { font-size: 10px; letter-spacing: 2px; color: #ffe9a0; }
+  .ecotab.locked .tabfly .tfname { color: #8d7c58; }
+  .tabfly .tfstat { font-size: 8px; letter-spacing: 1px; color: #a3bf58; margin-top: 2px; }
+  .ecotab.locked .tabfly .tfstat { color: #7d6c4c; }
+  .tabfly .tffeat { font-size: 8px; letter-spacing: 0.5px; color: #6b5836; margin-top: 3px; }
+  .tabfly .tffeat.lit { color: #a3bf58; }
 
   /* the flash line floats over everything, a quiet banner up top */
   #title-msg {
@@ -405,6 +423,57 @@
   #trailend { text-align: center; padding: 18px 0 34px; }
   #trailend .tenode { font-size: 14px; letter-spacing: 6px; color: #57452a; }
   #trailend .tetext { font-size: 10px; letter-spacing: 2px; color: #7d6c4c; margin-top: 8px; }
+
+  /* ---------- the discovery ceremony: a chapter develops before your eyes ---------- */
+  .ecosect.develop::after { animation: devWash 2.4s ease-out; }
+  @keyframes devWash { from { opacity: 0; } }
+  .ecosect.develop::before { animation: devArt 2.8s ease-out; }
+  @keyframes devArt { from { opacity: 0; } }
+  .ecosect.develop .ecohead::before { animation: devSeam 1.3s ease-out; }
+  @keyframes devSeam { from { transform: translateX(-50%) scaleX(0); } }
+  .ecosect.develop .medal { animation: devStamp 0.75s cubic-bezier(0.2, 2.2, 0.4, 1); }
+  @keyframes devStamp { 0% { transform: scale(2.4); opacity: 0; } 55% { opacity: 1; } 100% { transform: scale(1); } }
+
+  /* ---------- the crest: a heater shield beside the pill; it wears your
+     worn title's mark (a bare ★ otherwise) and opens the wall of titles */
+  #btn-titles {
+    width: 34px; height: 40px; cursor: pointer; flex: none;
+    display: flex; align-items: center; justify-content: center;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 40"><path d="M17 1L31 5.5V17C31 27 25 34.5 17 39C9 34.5 3 27 3 17V5.5Z" fill="%2357452a"/><path d="M17 3.2L29 7.2V17C29 25.8 23.8 32.6 17 36.7C10.2 32.6 5 25.8 5 17V7.2Z" fill="%23241a0d"/><path d="M17 6L26.5 9.2V17C26.5 24.3 22.4 30 17 33.6C11.6 30 7.5 24.3 7.5 17V9.2Z" fill="none" stroke="%237a6034"/></svg>') center / contain no-repeat;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5));
+    transition: transform 0.12s;
+  }
+  #btn-titles:hover {
+    transform: scale(1.12);
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 40"><path d="M17 1L31 5.5V17C31 27 25 34.5 17 39C9 34.5 3 27 3 17V5.5Z" fill="%23d8a534"/><path d="M17 3.2L29 7.2V17C29 25.8 23.8 32.6 17 36.7C10.2 32.6 5 25.8 5 17V7.2Z" fill="%23241a0d"/><path d="M17 6L26.5 9.2V17C26.5 24.3 22.4 30 17 33.6C11.6 30 7.5 24.3 7.5 17V9.2Z" fill="none" stroke="%23d8a534"/></svg>');
+  }
+  #btn-titles span { font-size: 14px; color: #d8a534; padding-bottom: 7px; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+  /* the title wall: badges on a deep-dark ground so they read clearly */
+  #titlewall { z-index: 30; flex-direction: column; background: rgba(10,7,4,0.94); backdrop-filter: blur(4px); }
+  #twall { display: flex; flex-wrap: wrap; justify-content: center; gap: 18px 20px; max-width: 720px; }
+  .ltitle { width: 108px; cursor: default; }
+  .ltitle .lbadge {
+    width: 54px; height: 54px; border-radius: 50%; margin: 0 auto 6px;
+    display: flex; align-items: center; justify-content: center; font-size: 23px;
+    background: radial-gradient(circle at 35% 30%, #3a2d18, #1d1409);
+    border: 2px solid #3a2d18; color: #57452a;
+    transition: transform 0.12s, border-color 0.12s;
+  }
+  .ltitle .ltname {
+    font-size: 11px; letter-spacing: 0.5px; color: #6b5836; line-height: 1.35;
+    text-align: center; text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+  }
+  .ltitle.owned { cursor: pointer; }
+  .ltitle.owned .lbadge { border-color: #7a6034; color: inherit; }
+  .ltitle.owned .ltname { color: #cdbb92; }
+  .ltitle.owned:hover .lbadge { transform: scale(1.1); border-color: #d8a534; }
+  .ltitle.worn .lbadge { border-color: #d8a534; box-shadow: 0 0 12px rgba(216,165,52,0.45); }
+  .ltitle.worn .ltname { color: #ffd23e; }
+  #tcount {
+    margin-top: 18px; font-size: 11px; letter-spacing: 1.5px; color: #a5936c;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+  }
+  #gr-balance .worntitle { color: #d8a534; }
 
   /* ---------- gender segmented toggle (under the preview) ---------- */
   .gsel { display: flex; margin: 9px 0 2px; border: 1px solid #4a3a22; border-radius: 6px; overflow: hidden; }
@@ -567,7 +636,10 @@
      and the name carry the card. */
   body.touch #profiles h1 { font-size: 22px; letter-spacing: 5px; text-shadow: 2px 2px 0 #6a3a1a; margin-bottom: 2px; }
   body.touch #profiles .sub { font-size: 9px; letter-spacing: 2px; margin-bottom: 8px; }
-  body.touch #gr-balance { right: 8px; top: 8px; font-size: 12px; padding: 5px 10px; z-index: 14; }
+  body.touch #topbar { right: 8px; top: 8px; gap: 7px; }
+  body.touch #gr-balance { font-size: 12px; padding: 5px 10px; }
+  body.touch #btn-titles { width: 27px; height: 32px; }
+  body.touch #btn-titles span { font-size: 11px; padding-bottom: 6px; }
   body.touch #jhead { padding: calc(14px + env(safe-area-inset-top)) 0 2px; }
   body.touch #title h1 { font-size: 22px; letter-spacing: 5px; text-shadow: 2px 2px 0 #6a3a1a; }
   body.touch #title .sub { font-size: 8.5px; letter-spacing: 2px; margin-top: 2px; }
@@ -575,9 +647,10 @@
   body.touch #journey { touch-action: pan-y; }
   body.touch #cards-area { width: auto; margin: 0 6px 0 calc(44px + env(safe-area-inset-left)); }
   body.touch #cards-area::before { left: 14px; transform: none; }
-  body.touch #ecotabs { left: calc(2px + env(safe-area-inset-left)); gap: 6px; }
-  body.touch .ecotab { width: 30px; height: 30px; font-size: 13px; }
-  body.touch .ecotab .tabname { display: none; }
+  body.touch #ecotabs { left: calc(2px + env(safe-area-inset-left)); gap: 15px; }
+  body.touch .ecotab { width: 32px; height: 32px; font-size: 14px; --pr: 23px; }
+  body.touch .tabpip { width: 6px; height: 6px; margin: -3px 0 0 -3px; }
+  body.touch .ecotab .tabfly { display: none; }
   body.touch .ecosect { padding: 30px 0 8px; }
   body.touch .ecosect::after { background: radial-gradient(ellipse 70% 280px at 30% 194px, var(--ecoglow), transparent 78%); }
   body.touch .ecosect::before { background-size: 440px 385px; }
@@ -712,7 +785,10 @@
   </div>
 
   <div id="title" class="screen hidden">
-    <div id="gr-balance">❖ 0</div>
+    <div id="topbar">
+      <div id="btn-titles" title="Your titles"><span>★</span></div>
+      <div id="gr-balance">❖ 0</div>
+    </div>
     <!-- the lobby is ONE long expedition scroll: the trail spine runs from the
          wordmark to the bottom of the world, each biome is a waypoint ON the
          trail, and its dinos hang off the spine left and right like a
@@ -728,6 +804,12 @@
       </div>
       <div id="cards-area"></div>
     </div>
+  </div>
+
+  <!-- THE TITLE WALL — the names you've earned, worn like badges -->
+  <div id="titlewall" class="screen trans hidden">
+    <div id="twall"></div>
+    <div id="tcount"></div>
   </div>
 
   <div id="death" class="screen hidden">
@@ -781,7 +863,7 @@
         <tr><td>TAB</td><td>health menu</td></tr>
         <tr><td>ESC / U</td><td>pause / mute</td></tr>
         <tr><td>R</td><td>rest — a 3s settle; heal faster, drain slower (sit 1s, then move to rise)</td></tr>
-        <tr><td>P</td><td>hold + a direction to pounce — the leap strikes EVERYTHING it crosses, takeoff to landing (tail-fighters: hold to spin)</td></tr>
+        <tr><td>SPACE (hold)</td><td>+ a direction to pounce — the bite flows into a coil, and the leap strikes EVERYTHING it crosses, takeoff to landing (tail-fighters: hold to spin)</td></tr>
         <tr><td>1 / 2 / 3</td><td>calls — broadcast (claim a carcass) · friendly (invite the pack) · aggressive (threaten)</td></tr>
         <tr><td>H</td><td>hitbox X-ray (red = attack, cyan = body)</td></tr>
         <tr><td>Open jaws!</td><td>a predator pausing with open jaws is about to lunge — sidestep!</td></tr>

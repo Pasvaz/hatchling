@@ -405,6 +405,13 @@ function killNPC(e, attacker) {
   G.carcasses.push({ x: e.x, y: e.y, species: e.species, growth: e.growth, meat, maxMeat: meat, t: 0 });
   const i = G.npcs.indexOf(e);
   if (i >= 0) G.npcs.splice(i, 1);
+  // PACKBREAKER: the player felled the last member of a wild pack
+  if (attacker && attacker.isPlayer && e.packId &&
+      !G.npcs.some(o => o.species === e.species && o.packId === e.packId && o.hp > 0) &&
+      typeof Save !== 'undefined' && !Save.packBreaker) {
+    Save.packBreaker = true;
+    if (typeof syncTitles === 'function') syncTitles();
+  }
   // FEAR: watching one of your own die breaks the pack's nerve — survivors rout
   if (!(NPC_DEF[e.species] || { fearless: true }).fearless) {
     let fled = 0;
@@ -585,6 +592,31 @@ function stepToward(e, tx, ty, speed, dt) {
 function idleDrift(e, dt) {
   e.move = lerp(e.move, 0, 0.1);
 }
+// ---------- edge-aware escape ----------
+// steering dead-away from a threat pins an animal on the world border: the
+// heading points off the map, the clamp holds the body, and it runs in
+// place while the chaser closes. Instead, take the straightest escape whose
+// next stretch stays on the map — at a wall that becomes a slide along it,
+// and in a corner a break past the chaser's flank.
+const EDGE_MARGIN = 60;      // how close to the border still counts as escapable
+const ESCAPE_PROBE = 110;    // how far ahead an escape heading is tested
+function awayDir(e, t) {
+  const base = angTo(t.x, t.y, e.x, e.y);
+  // already inside the margin (a corner, say): any heading that gains real
+  // ground toward open map counts — otherwise demand the full margin
+  const bd0 = Math.min(e.x, e.y, WORLD_W - e.x, WORLD_H - e.y);
+  const need = Math.min(bd0 + 30, EDGE_MARGIN);
+  let best = null, bestScore = -1e9;
+  for (const off of [0, 0.55, -0.55, 1.1, -1.1, 1.7, -1.7, 2.3, -2.3, 2.9, -2.9]) {
+    const a = base + off;
+    const nx = e.x + Math.cos(a) * ESCAPE_PROBE, ny = e.y + Math.sin(a) * ESCAPE_PROBE;
+    if (Math.min(nx, ny, WORLD_W - nx, WORLD_H - ny) < need) continue;
+    const score = dist(nx, ny, t.x, t.y) - Math.abs(off) * 30;   // prefer straight away
+    if (score > bestScore) { bestScore = score; best = a; }
+  }
+  // boxed in completely: break for the open middle of the map
+  return best != null ? best : angTo(e.x, e.y, WORLD_W / 2, WORLD_H / 2);
+}
 
 // ---------- NPC thinking ----------
 function playerVisibleTo(e, detectR) {
@@ -594,6 +626,9 @@ function playerVisibleTo(e, detectR) {
   // sprinting is noisy, resting/small is stealthy
   if (G.keys && G.input && G.input.sprinting) r *= 1.3;
   if (p.move < 0.15) r *= 0.72;
+  // …but LINGERING is the opposite of stealth: pooled scent carries on the
+  // wind well past sight (scentRange grows the longer the player stands)
+  r = Math.max(r, scentRange(p));
   return dist(e.x, e.y, p.x, p.y) < r;
 }
 function packmates(e, radius) {
@@ -614,7 +649,6 @@ const DISENGAGE_MUL = 0.7;   // already committed: only break off if odds get TH
 const RETALIATE_MUL = 0.8;   // wounded pride: retaliation accepts worse odds than ambition
 const SKITTISH_FLEE_MUL = 2; // harmless prey only bothers fleeing a hunter at 2× its power
 const FEARLESS_ROUT_MUL = 2; // even the fearless walk away from a titan at 2× their power
-const GROUP_DECAY = 0.9;     // each extra packmate helps a little less than the last
 const ALLY_R = 300;          // how near an ally must be to count toward group power
 const RALLY_R = 700;         // how far a routed pack-courage fighter runs to find its kin
 const ENGAGED_STATES = new Set(['chase', 'windup', 'lunge', 'recover', 'fight', 'stalk', 'strike', 'gripping']);
@@ -637,11 +671,8 @@ function alliesOf(e, r) {
   return packmates(e, r).filter(o => !isFamily(o) && o.hp > 0);
 }
 function groupPower(e, r) {
-  const powers = [powerOf(e)];
-  for (const o of alliesOf(e, r || ALLY_R)) powers.push(powerOf(o));
-  powers.sort((a, b) => b - a);
-  let sum = 0, w = 1;
-  for (const pw of powers) { sum += pw * w; w *= GROUP_DECAY; }
+  let sum = powerOf(e);
+  for (const o of alliesOf(e, r || ALLY_R)) sum += powerOf(o);
   return sum;
 }
 // the one question: "can my side take theirs?" — caution is the species'
@@ -651,12 +682,47 @@ function confident(att, tgt, opts) {
   let bar = defOf(att).caution || 1;
   if (att.target === tgt && ENGAGED_STATES.has(att.state)) bar *= DISENGAGE_MUL;
   else if (opts && opts.retaliate) bar *= RETALIATE_MUL;
+  // easy prey emboldens — and the longer it stands, the surer the gamble:
+  // a fresh pool shaves SCENT_BOLD off the bar, a long camp up to SCENT_BOLD_MAX
+  const sp = scentPull(att, tgt);
+  if (sp > 0) bar *= 1 - sp * Math.min(SCENT_BOLD_MAX, SCENT_BOLD + Math.max(0, tgt.scentSec - SCENT_FILL) / SCENT_BOLD_RAMP);
   return groupPower(att) > groupPower(tgt) * bar;
+}
+// ---------- scent: stillness is not stealth for long ----------
+// A player who lingers pools their scent (p.scent 0..1, filled by
+// updatePlayer). Past SCENT_MIN the pool becomes a detection radius that
+// beats line of sight, and hunters standing inside it stop doing the
+// "not worth it" math — a chase costs energy, a free meal doesn't.
+// Hiding (bush/burrow) still works: the pool waits for you to come out.
+// tuning knobs — every number of the scent system in one place
+const SCENT_DELAY = 6.5;       // seconds of stillness before the pool opens
+const SCENT_BASE_R = 260;      // the pool's opening radius (a typical hunter's detect)
+const SCENT_GROW = 55;         // px of radius per further second of stillness
+const SCENT_RIPEN = 12;        // seconds from pool-open to full pull strength
+const SCENT_FILL = 18;         // seconds of stillness to max wisps/warning
+const SCENT_DRAIN_WALK = 10;   // drain speed while moving (x the fill rate)
+const SCENT_DRAIN_RUN = 16;    //   …and while running
+const SCENT_WARN_AT = 11;      // seconds of stillness before the banner
+const SCENT_BOLD = 0.3;        // caution shaved off a hunter in a fresh pool
+const SCENT_BOLD_MAX = 0.55;   //   …deepening to this for a long camp
+const SCENT_BOLD_RAMP = 100;   // seconds of camping to go from BOLD to BOLD_MAX
+function scentRange(p) {
+  if (!p.isPlayer || p.hidden || (p.scentSec || 0) < SCENT_DELAY) return 0;
+  // the pool opens at a typical hunter's own detect range, then widens every
+  // second you keep standing — camp long enough and the whole map has your scent
+  return Math.min(WORLD_W + WORLD_H, SCENT_BASE_R + SCENT_GROW * (p.scentSec - SCENT_DELAY));
+}
+// 0..1: how strongly this attacker smells the pooled target
+function scentPull(att, tgt) {
+  const r = scentRange(tgt);
+  if (!r || dist(att.x, att.y, tgt.x, tgt.y) > r) return 0;
+  return Math.min(1, (tgt.scentSec - SCENT_DELAY) / SCENT_RIPEN);
 }
 // hatchlings aren't worth a titan's energy — until hunger says otherwise.
 // Only shields the player and their family; curated hunts lists stay fair game
 function trivialPrey(att, tgt) {
   if (!(tgt.isPlayer || tgt.isMate || tgt.isBaby)) return false;
+  if (scentPull(att, tgt) > 0.15) return false;   // a sitting meal is always worth it
   return powerOf(tgt) < TRIVIAL_PREY * powerOf(att);
 }
 // the one retaliation rule, replacing every per-brain variant. Returns true
@@ -791,6 +857,13 @@ function aimYAt(e, t) {
   return t.y + weaponHeight(e) - zoneHeights(td).spine * ts;
 }
 // ---- pounce: coil, leap, bite at the landing ----
+// tuning knobs — the leap's whole economy in one place
+const POUNCE_HOLD_T = 0.32;     // seconds SPACE must stay down to turn bite into coil
+const POUNCE_CD = 1;            // seconds the spring needs to reload
+const POUNCE_ARM_STAM = 0.5;    // fraction of the bar needed to even coil
+const POUNCE_COST_MISS = 0.5;   // a whiffed leap burns this much of the bar
+const POUNCE_COST_HIT = 0.25;   //   …a connecting one only this
+const POUNCE_COST_SPIN = 0.25;  // the tail-fighter's spin, paid up front
 // One rule for every dino, player and NPC alike: the PREP time scales with
 // SIZE (a big body takes longer to load the spring), the LEAP length with
 // SPEED (fast dinos cover real ground). Tail-fighters trade the leap for the
@@ -1075,7 +1148,7 @@ function thinkPackHunter(e, d) {
   // kin truce (aardiraptor): your own kind never starts it — but blood
   // drawn is blood answered, handled by the aggro block below
   const kin = p && p.species === e.species;
-  if (!kin && p && p.alive && pd < d.detect && playerVisibleTo(e, d.detect) && (e.tiredT || 0) <= 0) {
+  if (!kin && p && p.alive && playerVisibleTo(e, d.detect) && (e.tiredT || 0) <= 0) {
     const small = powerOf(p) < powerOf(e) * MERCY_MUL;
     if (small) {
       // babies face lone hunters only — the pack never gangs up on a hatchling
@@ -1837,7 +1910,7 @@ function updateNPC(e, dt) {
       if (!t) { e.state = 'idle'; e.stateT = 1; break; }
       const dd = dist(e.x, e.y, t.x, t.y);
       if (dd < 150) {
-        const a = angTo(t.x, t.y, e.x, e.y);
+        const a = awayDir(e, t);
         stepToward(e, e.x + Math.cos(a) * 60, e.y + Math.sin(a) * 60, sp * 0.8, dt);
       } else {
         idleDrift(e, dt);
@@ -1852,7 +1925,10 @@ function updateNPC(e, dt) {
       const gone = !t || (t.isPlayer ? !t.alive : t.hp <= 0);
       if (gone || e.stateT <= 0) { e.state = 'return'; e.target = null; e.stateT = 6; break; }
       const dd = dist(e.x, e.y, t.x, t.y);
-      if (dd > d.detect * 2.2) { e.state = 'return'; e.target = null; e.stateT = 6; break; }
+      // the pursuit leash — stretched to the whole scent pool when the prey
+      // is a lingering player (move, and the pool collapses back to normal)
+      const leash = Math.max(d.detect * 2.2, t.isPlayer ? scentRange(t) : 0);
+      if (dd > leash) { e.state = 'return'; e.target = null; e.stateT = 6; break; }
       // a prey that keeps its legs going outlasts the hunter's patience
       if (d.patience && e.pursuitT > d.patience) {
         e.state = 'return'; e.target = null; e.stateT = 6; e.tiredT = 7; e.pursuitT = 0;
@@ -1935,7 +2011,7 @@ function updateNPC(e, dt) {
         e.atkCd = d.atkCd + rrange(0.4, 1.1);
         e.state = 'recover';
         e.stateT = rrange(0.7, 1.2);
-        e.recA = t ? angTo(t.x, t.y, e.x, e.y) + rrange(-0.7, 0.7) : e.heading + Math.PI;
+        e.recA = t ? awayDir(e, t) + rrange(-0.7, 0.7) : e.heading + Math.PI;
       }
       break;
     }
@@ -1988,7 +2064,7 @@ function updateNPC(e, dt) {
       e.headDown = 0;
       const t = e.target;
       if (!t || e.stateT <= 0) { e.state = 'idle'; e.stateT = 1; break; }
-      const a = angTo(t.x, t.y, e.x, e.y);
+      const a = awayDir(e, t);
       // a broken thigh can't even flee at speed — the cripple cap holds
       const fsp = (d.fleeSpeed || d.speed) * (sp / d.speed);
       stepToward(e, e.x + Math.cos(a) * 90, e.y + Math.sin(a) * 90, fsp, dt);
@@ -2003,24 +2079,15 @@ function updateNPC(e, dt) {
     case 'scavenge': {
       const c = e.carc;
       if (!c || c.meat <= 0 || G.carcasses.indexOf(c) < 0) { e.state = 'idle'; e.stateT = 1; e.carc = null; break; }
-      // a CLAIMED carcass is spoken for: most animals back off the moment
-      // they smell the mark — but every so often one decides the meat is
-      // worth killing for, and that feud ends only one way
-      const pcl = G.player;
-      if (c.claim && pcl && pcl.alive && !isFamily(e)) {
-        if (e.claimRoll !== c.claim) {
-          e.claimRoll = c.claim;   // one decision per claim, not per frame
-          if ((NPC_DEF[e.species].dmg || 0) > 0 && rnd() < 0.1) {
-            e.feud = true;
-            G.banner = { str: 'The ' + DINO[e.species].name + ' defies your claim — TO THE DEATH!', t: 3.5, color: '#d43a2a' };
-          } else {
-            floatText(e.x, e.y - 30, '…', '#cbb98a');
-          }
-        }
-        if (!e.feud) { e.state = 'return'; e.stateT = 6; e.carc = null; break; }
-        e.state = 'chase'; e.target = pcl; e.stateT = 2; break;
-      }
       const dd = dist(e.x, e.y, c.x, c.y);
+      // a CLAIMED carcass is spoken for — but an animal that never heard the
+      // bellow doesn't know that yet. It walks in like any scavenger, and
+      // only close enough to SMELL the mark does it make the claim decision
+      const pcl = G.player;
+      if (c.claim && pcl && pcl.alive && !isFamily(e) && dd < CLAIM_SMELL_R) {
+        answerClaim(e, c);
+        break;
+      }
       if (dd > 26) { e.headDown = lerp(e.headDown, 0, 0.1); stepToward(e, c.x, c.y, sp * 0.6, dt); }
       else {
         idleDrift(e, dt);
@@ -2219,7 +2286,7 @@ function updateNPC(e, dt) {
 // or a whole new world — is one line here.
 const ECO_SPAWNS = {
   valley: [
-    { sp: 'guanlong', pack: 3, min: 7 },
+    { sp: 'guanlong', pack: 3, sizes: [2, 3, 2], min: 5 },
     { sp: 'moros', n: 3, min: 3 },
     { sp: 'ornitho', n: 6, min: 5 },
     { sp: 'scelido', n: 4, min: 4, away: true },
@@ -2227,7 +2294,7 @@ const ECO_SPAWNS = {
     { sp: 'lophos', pack: 2, sizes: [2, 3, 1], min: 4 },   // small loose packs — sometimes a duo, a trio, or a lone hunter
   ],
   prairie: [
-    { sp: 'troodon', pack: 3, min: 7 },
+    { sp: 'troodon', pack: 3, sizes: [2, 3, 2], min: 5 },
     { sp: 'eotyrannus', n: 3, min: 3 },
     { sp: 'grunos', n: 2, min: 2, away: true },
     { sp: 'archeo', n: 5, min: 4 },
@@ -2240,7 +2307,7 @@ const ECO_SPAWNS = {
     // herds of 3-4, sometimes a loner or a pair — out on the open grass
     { sp: 'ugru', pack: 3, sizes: [3, 4, 3, 4, 2, 1], den: 'plains', min: 8 },
     { sp: 'archaomim', n: 5, min: 4 },
-    { sp: 'hesper', pack: 2, min: 5 },
+    { sp: 'hesper', pack: 2, sizes: [2, 3], min: 3 },
     { sp: 'concav', n: 3, min: 3, away: true },
     { sp: 'charono', n: 2, min: 2, away: true },
     { sp: 'lepisosteus', n: 8, min: 7 },
@@ -2250,7 +2317,7 @@ const ECO_SPAWNS = {
   ],
   ash: [
     { sp: 'tarbo', n: 2, min: 2, away: true },
-    { sp: 'linhe', pack: 2, sizes: [4, 4, 3], min: 6 },
+    { sp: 'linhe', pack: 2, sizes: [2, 3], min: 3 },
     { sp: 'nothro', n: 2, min: 2, away: true },
     { sp: 'ovi', n: 4, min: 3 },
     { sp: 'shuv', n: 5, min: 4 },
@@ -2267,9 +2334,9 @@ const ECO_SPAWNS = {
     { sp: 'panoplo', n: 5, min: 4, away: true },
     { sp: 'proto', pack: 3, sizes: [2, 3, 3], min: 7 },
     { sp: 'atlas', n: 2, min: 2, away: true },
-    { sp: 'dakota', pack: 4, sizes: [4, 3, 4, 3], min: 11 },
+    { sp: 'dakota', pack: 4, sizes: [2, 3, 2], min: 7 },
     // wild aardiraptor packs: kin to an aardiraptor player, recruits-in-waiting
-    { sp: 'aardi', pack: 3, sizes: [3, 4, 3], min: 8 },
+    { sp: 'aardi', pack: 3, sizes: [2, 3, 2], min: 5 },
     { sp: 'yuty', n: 3, min: 3, away: true },
     { sp: 'wuerho', n: 3, min: 3, away: true },
     { sp: 'fluvio', n: 4, min: 3, away: true },
@@ -2288,7 +2355,7 @@ const ECO_SPAWNS = {
   wall: [
     { sp: 'kerbero', pack: 3, sizes: [4, 3, 4, 2], den: 'plains', min: 9 },
     { sp: 'beipiao', n: 4, min: 3, away: true },
-    { sp: 'pectino', pack: 3, sizes: [3, 4, 3], min: 8 },
+    { sp: 'pectino', pack: 3, sizes: [2, 3, 2], min: 5 },
     { sp: 'korean', n: 8, min: 5 },
     { sp: 'nanuq', n: 2, min: 2, away: true },
     { sp: 'titanov', n: 1, min: 1, away: true },
@@ -2300,14 +2367,14 @@ const ECO_SPAWNS = {
     { sp: 'bonita', n: 2, min: 2, away: true },
     { sp: 'overo', n: 3, min: 3, away: true },
     { sp: 'skorpio', n: 3, min: 3, away: true },
-    { sp: 'masiak', pack: 3, sizes: [3, 4, 3], min: 8 },
+    { sp: 'masiak', pack: 3, sizes: [2, 3, 2], min: 5 },
     { sp: 'arari', n: 5, min: 4 },
     // the channels run thick with fish — a buitreraptor's whole living
     { sp: 'lepisosteus', n: 12, min: 10 },
     { sp: 'bassb', n: 7, min: 6 },
   ],
   moor: [
-    { sp: 'gracili', pack: 3, min: 7 },
+    { sp: 'gracili', pack: 3, sizes: [2, 3, 2], min: 5 },
     { sp: 'telmato', pack: 3, sizes: [3, 4, 2], den: 'plains', min: 7 },
     { sp: 'tanius', pack: 2, sizes: [2, 3], den: 'plains', min: 4 },
     { sp: 'secerno', pack: 2, sizes: [2, 3, 1], den: 'plains', min: 4 },
@@ -2369,10 +2436,89 @@ function spawnInitialNPCs() {
       G.npcs.push(makeNPC(spec.sp, pos.x, pos.y));
     }
   }
+  recordPackBases();   // the packs' ORIGINAL rosters anchor all pack scaling
+}
+// ---------- pack scaling: the packs grow with the player ----------
+// The power model lets a growing player drop off every pack's menu for good.
+// So each wild pack quietly recruits as the player's power rises — sized
+// against the pack's ORIGINAL roster, never its losses: a death freezes
+// recruitment for that pack (the cripple payoff), the existing regeneration
+// rule is the only road back, and recruits are shed again when the player's
+// power collapses (death, species swap). Recruits are flagged packBonus so
+// maintainPopulation never counts them.
+const PACK_SCALE_SPECIES = new Set(['guanlong', 'troodon', 'hesper', 'linhe', 'dakota', 'aardi', 'pectino', 'gracili', 'masiak']);
+const PACK_BONUS_MAX = 5;      // at most this many recruits beyond the original roster
+const PACK_TARGET_MUL = 1.1;   // recruit until the hunt is just worth it
+const PACK_RECRUIT_MIN_D = 620;   // a recruit never appears closer to the player than this
+const PACK_SHED_D = 800;          // surplus recruits slip away once this far from the player
+function recordPackBases() {
+  G.packScale = { base: {}, granted: {}, t: 0 };
+  for (const e of G.npcs) {
+    if (!PACK_SCALE_SPECIES.has(e.species) || !e.packId) continue;
+    const key = e.species + ':' + e.packId;
+    const b = G.packScale.base[key] || (G.packScale.base[key] = { n: 0, x: e.home.x, y: e.home.y });
+    b.n++;
+  }
+}
+// the player's power at full hp — packs size to what you ARE, not to a wound
+function playerFullPower() {
+  const p = G.player, def = PLAYER_DEF[p.species];
+  return powerFromStats(def.hp * genderMod(p).hp * hpFrac(p.growth), playerDmg());
+}
+// how many members this pack wants against that power (base..base+5).
+// Out of reach even at the cap: field everything and shadow the giant.
+function packTargetSize(sp, baseN, pp) {
+  const d = NPC_DEF[sp];
+  const P = powerFromStats(d.hp, d.dmg);
+  const need = Math.ceil(pp * PACK_TARGET_MUL / P);
+  return clamp(need, baseN, baseN + PACK_BONUS_MAX);
+}
+function updatePackScale() {
+  const ps = G.packScale, p = G.player;
+  if (!ps || !p || !p.alive) return;
+  const pp = playerFullPower();
+  for (const key in ps.base) {
+    const b = ps.base[key], sp = key.split(':')[0], packId = +key.split(':')[1];
+    const bonusTarget = packTargetSize(sp, b.n, pp) - b.n;
+    const granted = ps.granted[key] || 0;
+    const members = G.npcs.filter(e => e.species === sp && e.packId === packId && e.hp > 0);
+    if (granted < bonusTarget) {
+      // recruit ONE per tick — and only while the pack is intact: any loss
+      // (base or recruit) freezes growth until the player's power drops
+      if (members.length >= b.n + granted) {
+        // arrive from off in the direction away from the player, but LIVE at
+        // the den — home is the den, so the recruit walks in and the pack
+        // actually congregates (groupPower only sums allies within reach)
+        const away = Math.atan2(b.y - p.y, b.x - p.x);
+        for (let k = 0; k < 20; k++) {
+          const a = away + rrange(-0.9, 0.9), r = rrange(650, 950);
+          const gx = clamp(b.x + Math.cos(a) * r, 30, WORLD_W - 30);
+          const gy = clamp(b.y + Math.sin(a) * r, 30, WORLD_H - 30);
+          if (isWaterPx(gx, gy) || isLavaPx(gx, gy) || isCliffPx(gx, gy)) continue;
+          if (dist(gx, gy, p.x, p.y) < PACK_RECRUIT_MIN_D) continue;
+          const rec = makeNPC(sp, gx, gy, packId);
+          rec.packBonus = true;
+          rec.home = { x: b.x + rrange(-60, 60), y: b.y + rrange(-60, 60) };
+          G.npcs.push(rec);
+          ps.granted[key] = granted + 1;
+          break;
+        }
+      }
+    } else if (granted > bonusTarget) {
+      // the player shrank: surplus recruits slip away once out of sight
+      for (const e of members) {
+        if ((ps.granted[key] || 0) <= bonusTarget) break;
+        if (e.packBonus && dist(e.x, e.y, p.x, p.y) > PACK_SHED_D) {
+          G.npcs.splice(G.npcs.indexOf(e), 1);
+          ps.granted[key]--;
+        }
+      }
+    }
+  }
 }
 function maintainPopulation() {
   const counts = {};
-  for (const e of G.npcs) counts[e.species] = (counts[e.species] || 0) + 1;
+  for (const e of G.npcs) { if (!e.packBonus) counts[e.species] = (counts[e.species] || 0) + 1; }
   for (const spec of ECO_SPAWNS[World.eco]) {
     if ((counts[spec.sp] || 0) < spec.min) {
       for (let k = 0; k < 30; k++) {
@@ -2398,6 +2544,16 @@ function updatePlayer(dt) {
   p.clawCd = Math.max(0, (p.clawCd || 0) - dt);
   p.clawT = Math.max(0, (p.clawT || 0) - dt * 3.2);
   p.hurtT = Math.max(0, p.hurtT - dt);
+
+  // scent pools while you linger, disperses as you move (a long camp takes
+  // proportionally longer to walk off). No exemptions: still is still.
+  if (p.move < 0.15) p.scentSec = (p.scentSec || 0) + dt;
+  else p.scentSec = Math.max(0, (p.scentSec || 0) - dt * (p.move > 0.6 ? SCENT_DRAIN_RUN : SCENT_DRAIN_WALK));
+  p.scent = Math.min(1, p.scentSec / SCENT_FILL);   // the 0..1 face of it (wisps etc.)
+  if (p.scentSec > SCENT_WARN_AT && !p.scentWarned) {
+    p.scentWarned = true;
+    G.banner = { str: 'Your scent is pooling — the still get found. Move!', t: 5, color: '#ffd23e' };
+  }
 
   // bleed on player
   if (p.bleed) {
@@ -2595,10 +2751,17 @@ function updatePlayer(dt) {
   // coil and nothing happens. A tail-fighter plants instead of leaping: the
   // tail scythes continuously until release, but the feet never move.
   const tailPow = !!DINO[p.species].tailWeapon;
-  // the leap is an athletic burst: it costs real stamina, spent legs can't
-  // coil, and the spring needs a couple of seconds to reload between leaps
-  if (input.pounceHold && !p.pounce && !p.pounceLatch && !p.exhausted && p.pounceCd <= 0 &&
-      p.atkCd <= 0 && p.actionT <= 0 && !p.fishing && !G.wrestle) {
+  // SPACE is both weapons: the press bites (instant, as ever), and a hold
+  // past POUNCE_HOLD_T becomes the coil. The touch POUNCE button feeds
+  // pounceHold directly; both roads meet in pounceHeld.
+  input.spaceHeldT = input.atkHold ? (input.spaceHeldT || 0) + dt : 0;
+  input.pounceHeld = input.pounceHold || input.spaceHeldT > POUNCE_HOLD_T;
+  // the leap is an athletic burst: it costs real stamina, tired legs can't
+  // coil at all (half a bar minimum), and the spring reloads between leaps.
+  // The hold path is exempt from atkCd — the press's own bite set it.
+  if (input.pounceHeld && !p.pounce && !p.pounceLatch && !p.exhausted && p.pounceCd <= 0 &&
+      p.stamina >= def.stamMax * POUNCE_ARM_STAM &&
+      (p.atkCd <= 0 || input.spaceHeldT > POUNCE_HOLD_T) && p.actionT <= 0 && !p.fishing && !G.wrestle) {
     let pdx = (input.right ? 1 : 0) - (input.left ? 1 : 0);
     let pdy = (input.down ? 1 : 0) - (input.up ? 1 : 0);
     if (tailPow || pdx || pdy) {
@@ -2608,7 +2771,7 @@ function updatePlayer(dt) {
       p.resting = false;
     }
   }
-  if (!input.pounceHold) p.pounceLatch = false;
+  if (!input.pounceHeld) p.pounceLatch = false;
 
   // performance clocks & blends (consumed by drawDino): each act pushes its
   // own blend back up every frame it runs; everything else eases out here
@@ -2627,9 +2790,9 @@ function updatePlayer(dt) {
     p.pounceGrace.t -= dt;
     if (p.pounceGrace.t <= 0) {
       const landed = p.pounceGrace.hit && p.pounceGrace.hit.size > 0;
-      p.stamina = Math.max(0, p.stamina - def.stamMax * (landed ? 0.25 : 0.5));
+      p.stamina = Math.max(0, p.stamina - def.stamMax * (landed ? POUNCE_COST_HIT : POUNCE_COST_MISS));
       if (p.stamina <= 0) p.exhausted = true;
-      p.pounceCd = 2;
+      p.pounceCd = POUNCE_CD;
       p.pounceGrace = null;
     }
   }
@@ -2777,12 +2940,12 @@ function updatePlayer(dt) {
       p.attackT = Math.max(p.attackT, 0.38);
       p.headDown = lerp(p.headDown, tailPow ? 0 : 0.3, 0.15);
       P.t -= dt;
-      if (!input.pounceHold) {
+      if (!input.pounceHeld) {
         p.pounce = null;   // let go mid-coil: cancelled, no leap
       } else if (P.t <= 0) {
         if (tailPow) {
           // the spin plants and pays up front (a cancelled coil costs nothing)
-          p.stamina = Math.max(0, p.stamina - def.stamMax * 0.25);
+          p.stamina = Math.max(0, p.stamina - def.stamMax * POUNCE_COST_SPIN);
           if (p.stamina <= 0) p.exhausted = true;
           P.phase = 'swing'; P.t = 0.01;
         } else {
@@ -2826,7 +2989,7 @@ function updatePlayer(dt) {
       p.move = lerp(p.move, 0, 0.3);
       P.t -= dt;
       if (P.t <= 0) { input.attack = true; p.atkCd = 0; P.t = 0.55; }
-      if (!input.pounceHold) { p.pounce = null; p.pounceCd = 2; }
+      if (!input.pounceHeld) { p.pounce = null; p.pounceCd = POUNCE_CD; }
     }
   } else if (p.bathing) {
     // ------ BATHING (F, while resting in mud): rolling, wriggling, kicking —
@@ -2982,7 +3145,9 @@ function updatePlayer(dt) {
   }
 
   // ------ attack ------
-  if (input.attack && p.atkCd <= 0 && p.actionT <= 0) {
+  // (space auto-repeat must not bite through a coil or mid-leap; the
+  // tail-fighter's swing metronome still fires through this gate)
+  if (input.attack && p.atkCd <= 0 && p.actionT <= 0 && (!p.pounce || p.pounce.phase === 'swing')) {
     input.attack = false;
     p.resting = false;                    // up and biting
     p.hidden = false;                     // …and out of the burrow to do it
@@ -3664,6 +3829,27 @@ function failWrestle(p, t) {
 }
 
 // ---------- calls: what each call DOES (the voice lives in VOICE, util.js) ----------
+// claim knobs: how far the bellow carries, how close a latecomer must get
+// to smell the mark, and how often an animal decides the meat is worth dying for
+const CLAIM_CALL_R = 300;
+const CLAIM_SMELL_R = 90;
+const CLAIM_FEUD_CHANCE = 0.1;
+// the once-per-claim decision, made the moment an animal LEARNS of the claim
+// (hearing the bellow, or smelling the mark at the meat): back off — or defy
+// the claimant, and that feud ends only one way
+function answerClaim(e, c) {
+  if (e.claimRoll !== c.claim) {
+    e.claimRoll = c.claim;   // one decision per claim, not per frame
+    if ((NPC_DEF[e.species].dmg || 0) > 0 && rnd() < CLAIM_FEUD_CHANCE) {
+      e.feud = true;
+      G.banner = { str: 'The ' + DINO[e.species].name + ' defies your claim — TO THE DEATH!', t: 3.5, color: '#d43a2a' };
+    } else {
+      floatText(e.x, e.y - 30, '…', '#cbb98a');
+    }
+  }
+  if (e.feud) { e.state = 'chase'; e.target = G.player; e.stateT = 2; }
+  else { e.state = 'return'; e.stateT = 6; e.carc = null; }
+}
 function fireCall(p, k) {
   const def = PLAYER_DEF[p.species];
   if (k === 1) {
@@ -3672,13 +3858,21 @@ function fireCall(p, k) {
     if (def.diet !== 'carn') return;
     let n = 0;
     for (const c of G.carcasses) {
-      if (c.meat > 0 && dist(p.x, p.y, c.x, c.y) < 300) {
+      if (c.meat > 0 && dist(p.x, p.y, c.x, c.y) < CLAIM_CALL_R) {
         c.claim = { t: 150 };
         floatText(c.x, c.y - 26, '⚑ CLAIMED', '#ffd23e');
         n++;
       }
     }
-    if (n) G.banner = { str: 'Your call claims ' + (n > 1 ? n + ' carcasses' : 'the carcass') + '.', t: 3, color: '#ffd23e' };
+    if (n) {
+      G.banner = { str: 'Your call claims ' + (n > 1 ? n + ' carcasses' : 'the carcass') + '.', t: 3, color: '#ffd23e' };
+      // everyone in earshot of the bellow decides RIGHT NOW; animals beyond
+      // it never heard a thing — they learn at the meat (see 'scavenge')
+      for (const e of G.npcs) {
+        if (e.state === 'scavenge' && e.carc && e.carc.claim && !isFamily(e) &&
+            dist(p.x, p.y, e.x, e.y) < CLAIM_CALL_R) answerClaim(e, e.carc);
+      }
+    }
   } else if (k === 2) {
     // FRIENDLY: the invitation — kin who hear it fall in behind the alpha
     if (p.species !== 'aardi') return;

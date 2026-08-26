@@ -24,7 +24,7 @@ G.prompt = '';
 G.banner = null;
 G.paused = false;
 G.started = false;
-G.input = { up: false, down: false, left: false, right: false, sprint: false, attack: false, interact: false, sprinting: false, fish: false, nest: false, wrestle: false, pack: false, burrow: false, rest: false, grab: false, pounceHold: false };
+G.input = { up: false, down: false, left: false, right: false, sprint: false, attack: false, interact: false, sprinting: false, fish: false, nest: false, wrestle: false, pack: false, burrow: false, rest: false, grab: false, pounceHold: false, atkHold: false, spaceHeldT: 0 };
 G.zoom = 1;   // grow-zoom: eases toward 1 + growth·(size term) — see loop()
 G.mate = null;
 G.nesting = { stage: 'none', babies: [] };
@@ -41,7 +41,7 @@ const PROFILES_KEY = 'hatchling_profiles_v1';
 const LEGACY_SAVE_KEY = 'hatchling_save_v1';
 // earned = lifetime growths score (never spent down — it's the leaderboard)
 // ecoPaid = one flag per unlocked ecosystem, ready for however many we add
-function defaultSave() { return { growths: 0, earned: 0, ecoPaid: {}, mastery: {}, owned: {}, dino: {}, skinChoice: {}, genderChoice: {}, skinOwned: {} }; }
+function defaultSave() { return { growths: 0, earned: 0, ecoPaid: {}, mastery: {}, owned: {}, dino: {}, skinChoice: {}, genderChoice: {}, skinOwned: {}, discovered: {}, arrived: {}, hatched: {}, titles: {}, titleWorn: null, ecoSeen: {} }; }
 // paid skins are bought once per species (Classic and other free skins pass)
 function skinOwned(species, skinId) {
   return !SKINS[skinId].cost || !!(Save.skinOwned || {})[species + ':' + skinId];
@@ -140,6 +140,12 @@ function syncEcoUnlocks() {
     const i = ecoFirstRung(key);
     if (i >= 0 && spUnlocked(CHAIN[i][0])) {
       Save.ecoPaid[key] = true;
+      // stamp the ledger: which land this was, and whose mastery opened it
+      Save.discovered = Save.discovered || {};
+      if (!Save.discovered[key]) {
+        const gate = CHAIN[i - 1] ? CHAIN[i - 1].find(m => Save.mastery[m]) : null;
+        Save.discovered[key] = { n: Object.keys(Save.discovered).length + 1, by: gate || null };
+      }
       fresh.push(ECOS[key].name);
     }
   }
@@ -164,10 +170,11 @@ function onFullyGrown(species) {
   Save.earned += 100;
   const fresh = ALL_PLAYABLES.filter(sp => spUnlocked(sp) && !before.includes(sp));
   const lands = syncEcoUnlocks();
+  syncTitles();
   saveSave();
   setTimeout(() => {
     let str = '+100 growths mastery bonus!';
-    if (lands.length) str += '  🔓 NEW LAND: ' + lands.join(' & ').toUpperCase() + '!';
+    if (lands.length) str += '  🗺️ THE TRAIL OPENS: ' + lands.join(' & ').toUpperCase() + '!';
     if (fresh.length) str += '  🔓 ' + fresh.map(sp => DINO[sp].name.toUpperCase()).join(' & ') + ' unlocked — visit the lobby!';
     G.banner = { str, t: 9, color: '#ffd23e' };
   }, 6200);
@@ -197,6 +204,11 @@ function saveDinoSnapshot() {
     growth: p.growth, hp: p.hp, food: p.food, water: p.water,
     stamina: p.stamina, hygiene: p.hygiene, x: p.x, y: p.y,
     cold: p.cold || 0,
+    // the body's condition travels too — the lobby is not a hospital:
+    // an open wound keeps bleeding right where you left off
+    bleed: p.bleed ? { dps: p.bleed.dps, t: p.bleed.t } : null,
+    bones: p.bones || null,
+    exhausted: !!p.exhausted,
   };
   saveSave();
 }
@@ -214,7 +226,7 @@ window.addEventListener('keydown', (e) => {
   if (e.repeat) return;
   G.keys[e.code] = true;
   if (KEYMAP[e.code]) G.input[KEYMAP[e.code]] = true;
-  if (e.code === 'Space') G.input.attack = true;
+  if (e.code === 'Space') { G.input.attack = true; G.input.atkHold = true; }
   if (e.code === 'KeyE') G.input.interact = true;
   // F is the SECOND context key: fish · grab · wrestle · claw · bathe · dig ·
   // court · leave a den — whichever one the situation offers (resolveAction)
@@ -229,11 +241,11 @@ window.addEventListener('keydown', (e) => {
   if (e.code === 'Digit2') G.input.call2 = true;
   if (e.code === 'Digit3') G.input.call3 = true;
   if (e.code === 'KeyR') G.input.rest = true;
-  // hold P (+ a direction) to pounce — tail-fighters hold it to swing.
-  // (CTRL was tried first and abandoned: Ctrl+letter combos are browser
-  // shortcuts — bookmarks, close-tab — and can't be prevented.)
-  if (e.code === 'KeyP') G.input.pounceHold = true;
+  // pounce lives on SPACE now: the press bites, a continuous hold coils
+  // (P was retired; CTRL was tried before that and abandoned — Ctrl+letter
+  // combos are browser shortcuts and can't be prevented.)
   if (e.code === 'Escape') {
+    if (!document.getElementById('titlewall').classList.contains('hidden')) { toggleTitles(false); return; }
     if (Spec.open) { toggleSpecimenHall(); return; }
     if (G.started) { G.paused = !G.paused; document.getElementById('pause').classList.toggle('hidden', !G.paused); }
   }
@@ -256,13 +268,13 @@ window.addEventListener('keydown', (e) => {
 window.addEventListener('keyup', (e) => {
   G.keys[e.code] = false;
   if (KEYMAP[e.code]) G.input[KEYMAP[e.code]] = false;
-  if (e.code === 'KeyP') G.input.pounceHold = false;
+  if (e.code === 'Space') G.input.atkHold = false;
 });
 // losing focus (a browser shortcut fired, a tab switch) eats the keyups —
 // clear every held flag so nothing stays latched behind our back
 window.addEventListener('blur', () => {
   const i = G.input;
-  i.up = i.down = i.left = i.right = i.sprint = i.pounceHold = false;
+  i.up = i.down = i.left = i.right = i.sprint = i.pounceHold = i.atkHold = false;
   G.keys = {};
 });
 
@@ -570,6 +582,142 @@ function ecoBackdrop(key, tint) {
   return cv.toDataURL();
 }
 
+// ---------- the EXPEDITION LEDGER: stamps, pips and collectible titles ----------
+// every name here is a PLACEHOLDER — the kid renames them; a title is one
+// registry entry (id stays stable, name/icon/desc are his to change)
+function ecoRoster(key) {
+  return ALL_PLAYABLES.filter(sp => (PLAYER_DEF[sp].eco || 'valley') === key && !PLAYER_DEF[sp].secret);
+}
+const TITLE_ECO_NAMES = { valley: 'Valleyborn', prairie: 'Bonepicker', coast: 'Tidewalker', ash: 'Ashborn', delta: 'Delta Rat', wall: 'Wall Climber', moor: 'Mistwalker', jungle: 'Rainblood' };
+const TITLES = [];
+for (const key of Object.keys(ECOS)) {
+  TITLES.push({ id: 'disc-' + key, name: TITLE_ECO_NAMES[key] || ECOS[key].name, icon: ECOS[key].emoji,
+    desc: 'Discover ' + ECOS[key].name, test: () => !!Save.discovered[key] });
+}
+TITLES.push(
+  { id: 'first-mastery', name: 'First Blood', icon: '🥇', desc: 'Raise your first Full Adult', test: () => Object.keys(Save.mastery).length >= 1 },
+  { id: 'keeper-five', name: 'Keeper of Five', icon: '🏅', desc: 'Master five dinosaurs', test: () => Object.keys(Save.mastery).length >= 5 },
+  { id: 'lord-land', name: 'Lord of a Land', icon: '👑', desc: 'Master every dinosaur of one land', test: () => Object.keys(ECOS).some(k => ecoRoster(k).every(sp => Save.mastery[sp])) },
+  { id: 'eight-lands', name: 'Master of the Eight Lands', icon: '🌍', desc: 'Master every dinosaur in the world', test: () => ALL_PLAYABLES.filter(sp => !PLAYER_DEF[sp].secret).every(sp => Save.mastery[sp]) },
+  { id: 'giantfinder', name: 'Giantfinder', icon: '🧊', desc: 'Find what sleeps in the high maze', test: () => !!Save.owned.nivalo },
+  { id: 'parent', name: 'Parent', icon: '🥚', desc: 'Raise a clutch of young', test: () => !!Save.raisedClutch },
+  { id: 'stormrider', name: 'Stormrider', icon: '⛈️', desc: 'Live through a whole monsoon', test: () => !!Save.stormRider },
+  { id: 'packbreaker', name: 'Packbreaker', icon: '💥', desc: 'Wipe a pack out to the last', test: () => !!Save.packBreaker },
+);
+// award anything newly earned; silent for backfilling old saves
+function syncTitles(silent) {
+  const fresh = [];
+  for (const t of TITLES) {
+    if (!Save.titles[t.id] && t.test()) { Save.titles[t.id] = true; fresh.push(t); }
+  }
+  if (fresh.length) {
+    saveSave();
+    if (!silent) {
+      const names = fresh.map(t => t.icon + ' ' + t.name.toUpperCase()).join(' · ');
+      if (G.started) setTimeout(() => { G.banner = { str: '🏅 TITLE EARNED: ' + names, t: 6, color: '#ffd23e' }; }, 11000);
+      else flashTitleMsg('🏅 Title earned: ' + names + ' — tap the shield to wear it!');
+    }
+  }
+}
+// saves from before the ledger: backfill stamps/hatchlings, no ceremonies
+function migrateLedger() {
+  for (const key of Object.keys(ECOS)) {
+    if (ecoPaid(key) && !Save.discovered[key]) {
+      Save.discovered[key] = { n: Object.keys(Save.discovered).length + 1, by: null };
+      Save.ecoSeen[key] = true;   // history, not news — no reveal ceremony
+    }
+  }
+  for (const sp of ALL_PLAYABLES) {
+    if (Save.mastery[sp] || Save.dino[dinoKey(sp, 'f')] || Save.dino[dinoKey(sp, 'm')]) Save.hatched[sp] = true;
+  }
+  syncTitles(true);
+}
+const ORDINALS = ['', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th'];
+function stampPips(key) {
+  const roster = ecoRoster(key);
+  const pips = [
+    ['Arrived — set foot in this land', !!Save.arrived[key]],
+    ['Survived — raised a Full Adult here', roster.some(sp => Save.mastery[sp])],
+    ['All hatched — played every dinosaur here', roster.every(sp => Save.hatched[sp])],
+    ['All mastered — every dinosaur Full Adult', roster.every(sp => Save.mastery[sp])],
+  ];
+  if (key === 'wall') pips.push(['Secret found — the frozen giant', !!Save.owned.nivalo]);
+  return pips;
+}
+// the jump-dot IS the land's stamp now: tint ring once discovered, feat pips
+// riveted round the rim, gold rim when every pip lights; the hover flyout
+// tells the stamp's story (ordinal, who opened it, what each pip means)
+const TABPIP_STEP = 38;   // degrees between rim pips, fanned on the right arc
+function decorateEcoTab(key) {
+  const tab = document.getElementById('tab-' + key);
+  const d = Save.discovered[key];
+  tab.style.setProperty('--tint', d ? (ECOS[key].tint || '#7a6034') : '#57452a');
+  for (const old of tab.querySelectorAll('.tabpip')) old.remove();
+  const feats = tab.querySelector('.tffeats');
+  feats.innerHTML = '';
+  const pips = d ? stampPips(key) : [];
+  let all = !!d && pips.length > 0;
+  pips.forEach(([tip, lit], i) => {
+    const pip = document.createElement('span');
+    pip.className = 'tabpip' + (lit ? ' lit' : '');
+    pip.style.setProperty('--a', ((i - (pips.length - 1) / 2) * TABPIP_STEP) + 'deg');
+    tab.appendChild(pip);
+    const line = document.createElement('div');
+    line.className = 'tffeat' + (lit ? ' lit' : '');
+    line.textContent = (lit ? '●' : '○') + ' ' + tip;
+    feats.appendChild(line);
+    if (!lit) all = false;
+  });
+  tab.classList.toggle('gold', all);
+  tab.querySelector('.tfstat').textContent = d
+    ? (ORDINALS[d.n] || d.n + 'th') + ' land' + (d.by ? ' · by ' + DINO[d.by].name.toUpperCase() : '')
+    : 'undiscovered';
+}
+function renderTitleWall() {
+  const row = document.getElementById('twall');
+  row.innerHTML = '';
+  let ownedN = 0;
+  for (const t of TITLES) {
+    const owned = !!Save.titles[t.id];
+    if (owned) ownedN++;
+    const el = document.createElement('div');
+    el.className = 'ltitle' + (owned ? ' owned' : '') + (owned && Save.titleWorn === t.id ? ' worn' : '');
+    el.innerHTML = '<div class="lbadge"></div><div class="ltname"></div>';
+    el.querySelector('.lbadge').textContent = owned ? t.icon : '?';
+    el.querySelector('.ltname').textContent = owned ? t.name : '???';
+    el.title = t.desc + (owned ? (Save.titleWorn === t.id ? ' — worn (tap to take off)' : ' — tap to wear') : '');
+    if (owned) el.addEventListener('click', () => {
+      Save.titleWorn = Save.titleWorn === t.id ? null : t.id;
+      saveSave(); renderTitleWall(); refreshTitle();
+    });
+    row.appendChild(el);
+  }
+  document.getElementById('tcount').textContent = ownedN + ' / ' + TITLES.length + ' collected · tap a badge to wear it';
+}
+function toggleTitles(show) {
+  const wall = document.getElementById('titlewall');
+  const want = show != null ? show : wall.classList.contains('hidden');
+  if (want) renderTitleWall();
+  wall.classList.toggle('hidden', !want);
+}
+// the reveal ceremony: the first lobby visit after a land opens develops its
+// chapter live — color blooms, the seam draws itself, the stamp thuds down
+function playDiscovery() {
+  const key = Object.keys(ECOS).find(k => ecoPaid(k) && Save.discovered[k] && !Save.ecoSeen[k]);
+  if (!key) return false;
+  Save.ecoSeen[key] = true;
+  saveSave();
+  const sect = document.getElementById('sect-' + key);
+  sect.classList.remove('develop');
+  void sect.offsetWidth;   // restart the css animation
+  sect.scrollIntoView({ block: 'start', behavior: 'instant' });
+  sect.classList.add('develop');
+  setTimeout(() => sect.classList.remove('develop'), 3000);
+  try { SFX.buy(); } catch (err) { }
+  flashTitleMsg('🗺️ ' + ECOS[key].name.toUpperCase() + ' joins your trail!');
+  return true;
+}
+
 // build tabs and cards once from ECOS / PLAYER_DEF / DINO / CARD_INFO
 function buildTitleUI() {
   const tabs = document.getElementById('ecotabs');
@@ -587,10 +735,11 @@ function buildTitleUI() {
     tab.className = 'ecotab';
     tab.id = 'tab-' + key;
     tab.textContent = eco.emoji;
-    const tname = document.createElement('span');
-    tname.className = 'tabname';
-    tname.textContent = eco.name.toUpperCase();
-    tab.appendChild(tname);
+    const fly = document.createElement('span');
+    fly.className = 'tabfly';
+    fly.innerHTML = '<div class="tfname"></div><div class="tfstat"></div><div class="tffeats"></div>';
+    fly.querySelector('.tfname').textContent = eco.name.toUpperCase();
+    tab.appendChild(fly);
     tab.addEventListener('click', () => tryEcoTab(key));
     tabs.appendChild(tab);
 
@@ -711,16 +860,28 @@ function buildTitleUI() {
 function refreshTitle() {
   const bal = document.getElementById('gr-balance');
   bal.textContent = '';
+  // the crest shield beside the pill wears your worn title's mark (★ when
+  // bare); the pill itself swaps players when clicked
+  const wt = TITLES.find(t => t.id === Save.titleWorn && Save.titles[t.id]);
+  document.querySelector('#btn-titles span').textContent = wt ? wt.icon : '★';
   const nm = document.createElement('span');
   nm.className = 'pname';
+  nm.title = 'Switch player';
   nm.textContent = '🦖 ' + (Profiles.current || '—');
   bal.appendChild(nm);
+  if (wt) {
+    const ts = document.createElement('span');
+    ts.className = 'worntitle';
+    ts.textContent = ' · ' + wt.name;
+    bal.appendChild(ts);
+  }
   bal.appendChild(document.createTextNode('  ·  ❖ ' + Save.growths));
   // waypoint camps: lock state, subtitle, and how far each ladder is climbed
   for (const key of Object.keys(ECOS)) {
     const eco = ECOS[key];
     const paid = ecoPaid(key);
     document.getElementById('tab-' + key).classList.toggle('locked', !paid);
+    decorateEcoTab(key);
     const sect = document.getElementById('sect-' + key);
     sect.classList.toggle('locked', !paid);
     sect.querySelector('.ecosub').textContent = paid ? eco.sub : '🔒 ' + ecoUnlockHint(key);
@@ -939,9 +1100,12 @@ document.getElementById('btn-respawn').addEventListener('click', () => {
   document.getElementById('death').classList.add('hidden');
   respawn(G.player.species, G.player.gender, G.player.skin);
 });
-function exitToLobby() {
-  if (uiSwitchBlocked()) return;
+function exitToLobby(force) {
+  // force: the lobby countdown already debounced this exit — the wall-clock
+  // double-click guard must not eat a scheduled departure
+  if (!force && uiSwitchBlocked()) return;
   markUiSwitch();
+  G.lobbyCountdown = null;
   saveDinoSnapshot();
   G.paused = false;
   document.getElementById('pause').classList.add('hidden');
@@ -954,16 +1118,33 @@ function exitToLobby() {
   const sect = document.getElementById('sect-' + World.eco);
   if (sect) sect.scrollIntoView({ block: 'start', behavior: 'instant' });
   refreshTitle();
+  playDiscovery();   // a land opened this life? develop its chapter now
   animateAllPreviews();
 }
+document.getElementById('btn-titles').addEventListener('click', () => toggleTitles());
+// no close button on the wall — tap anywhere off the badges (or Esc) to leave
+document.getElementById('titlewall').addEventListener('click', (e) => {
+  if (!e.target.closest('#twall')) toggleTitles(false);
+});
 document.getElementById('btn-title').addEventListener('click', exitToLobby);
+// leaving a LIVE game is not instant: the lobby button starts a 5-second
+// countdown DURING which the world keeps running — no teleporting out of a
+// bad situation. (The death screen's buttons stay instant — you're dead.)
+const LOBBY_LEAVE_T = 5;
+function requestLobby() {
+  if (!G.started || G.lobbyCountdown != null) return;
+  // the countdown must be survivable, not skippable: unpause and stand there
+  G.paused = false;
+  document.getElementById('pause').classList.add('hidden');
+  G.lobbyCountdown = LOBBY_LEAVE_T;
+}
 document.getElementById('btn-lobby').addEventListener('click', (ev) => {
   if (ev.detail === 0) return;   // keyboard-activated "click" (SPACE/Enter) — never leave the game for that
-  if (G.started) exitToLobby();
+  requestLobby();
 });
 document.getElementById('pause-lobby').addEventListener('click', (ev) => {
   if (ev.detail === 0) return;
-  if (G.started) exitToLobby();
+  requestLobby();
 });
 // buttons must never hold keyboard focus, or SPACE (bite!) re-clicks them mid-game
 for (const id of ['btn-lobby', 'btn-respawn', 'btn-title', 'pause-lobby']) {
@@ -1058,11 +1239,19 @@ function respawn(species, gender, skin) {
     p.stamina = clamp(snap.stamina, 0, PLAYER_DEF[species].stamMax);
     p.hygiene = clamp(snap.hygiene, 0, 100);
     p.cold = clamp(snap.cold || 0, 0, 95);   // never resume mid-freeze
+    // wounds survive the lobby round-trip
+    if (snap.bleed && snap.bleed.t > 0 && snap.bleed.dps > 0) p.bleed = { dps: snap.bleed.dps, t: snap.bleed.t };
+    if (snap.bones) p.bones = Object.assign({}, snap.bones);
+    p.exhausted = !!snap.exhausted;
     const okPos = snap.x > 20 && snap.x < WORLD_W - 20 && snap.y > 20 && snap.y < WORLD_H - 20 &&
       (!isDeepPx(snap.x, snap.y) || PLAYER_DEF[species].swim);
     if (okPos) { p.x = snap.x; p.y = snap.y; }
   }
   G.player.bornAt = G.time;
+  // ledger ink: this dino has hatched, and this land has been walked
+  Save.hatched[species] = true;
+  Save.arrived[World.eco] = true;
+  saveSave();
   // snap the grow-zoom to this dino's size — no swooshing on spawn
   G.zoom = growZoom(species, G.player.growth);
   G.paused = false;
@@ -1162,12 +1351,14 @@ function selectProfile(name) {
     }
   }
   syncEcoUnlocks();   // lands reachable on the ladder open silently
+  migrateLedger();    // stamps/titles backfilled for pre-ledger saves
   saveSave();
   document.getElementById('profiles').classList.add('hidden');
   document.getElementById('title').classList.remove('hidden');
   titleEco = 'valley';
   refreshTitle();
   document.getElementById('journey').scrollTop = 0;
+  playDiscovery();
   animateAllPreviews();
 }
 function createProfile() {
@@ -1288,11 +1479,50 @@ function drawMinimap() {
   }
   // player
   const p = G.player;
+  // the scent pool: the true detectable range, live on the map — yellow as
+  // it builds, red once anything with teeth is standing inside it
+  const sr = scentRange(p);
+  if (sr > 0) {
+    const hot = G.npcs.some(o => o.hp > 0 && !isFamily(o) &&
+      (NPC_DEF[o.species].dmg || 0) > 0 && dist(o.x, o.y, p.x, p.y) < sr);
+    c2.strokeStyle = hot ? 'rgba(255,90,70,0.85)' : 'rgba(255,210,62,0.7)';
+    c2.fillStyle = hot ? 'rgba(255,90,70,0.10)' : 'rgba(255,210,62,0.07)';
+    c2.lineWidth = 1;
+    c2.beginPath();
+    c2.arc(p.x * sx, p.y * sy, sr * (sx + sy) / 2, 0, Math.PI * 2);
+    c2.fill(); c2.stroke();
+  }
   const blink = Math.floor(G.time * 3) % 2 === 0;
   c2.fillStyle = blink ? '#ffffff' : '#ffdd88';
   c2.fillRect(p.x * sx - 2, p.y * sy - 2, 4, 4);
   c2.strokeStyle = 'rgba(0,0,0,0.5)';
   c2.strokeRect(p.x * sx - 2.5, p.y * sy - 2.5, 5, 5);
+}
+
+// cartoon stink: wavering lines that rise off a lingering player, thicker
+// as the pool builds — the close-up half of the minimap ring's warning
+function drawScentWisps(ctx, p) {
+  const sc = p.scent || 0;
+  if (sc < 0.25 || p.hidden) return;
+  const a = (sc - 0.25) / 0.75;
+  const h = 18 + 30 * p.growth;
+  ctx.save();
+  ctx.strokeStyle = 'rgba(214, 226, 150, ' + (0.6 * a).toFixed(2) + ')';
+  ctx.lineWidth = 2.4;
+  ctx.lineCap = 'round';
+  for (let i = 0; i < 3; i++) {
+    const t = G.time * 1.1 + i * 2.3;
+    const rise = (G.time * 16 + i * 14) % 40;
+    const bx = p.x + (i - 1) * (7 + 8 * p.growth) + Math.sin(t) * 4;
+    const by = p.y - h - rise;
+    ctx.globalAlpha = 1 - rise / 40;
+    ctx.beginPath();
+    ctx.moveTo(bx, by);
+    ctx.quadraticCurveTo(bx + 6, by - 8, bx, by - 15);
+    ctx.quadraticCurveTo(bx - 6, by - 22, bx, by - 29);
+    ctx.stroke();
+  }
+  ctx.restore();
 }
 
 // ---------- nesting: courtship, eggs, and raising the young ----------
@@ -1514,6 +1744,7 @@ function updateNesting(dt) {
       b.hp = Math.min(b.maxhp, b.hp + dt * 2);
       if (b.growth >= 0.9) {
         awardGrowths(150, b.x, b.y - 40);
+        if (!Save.raisedClutch) { Save.raisedClutch = true; syncTitles(); }
         if (b.packAlpha && p.species === 'aardi') {
           // an aardiraptor's young doesn't set off — it takes its place in
           // the pack, a full hunter now (kinYoung: your own blood is a
@@ -1649,6 +1880,8 @@ function updateMonsoon(dt) {
     G.banner = { str: 'The rain thins. The water starts to fall back.', t: 4, color: '#cfe6d8' };
   } else if (M.phase === 'easing' && M.t <= 0) {
     M.phase = 'calm'; M.t = 70 + Math.random() * 50;
+    // the storm has passed and you are still breathing — that earns a name
+    if (G.started && G.player && G.player.alive && !Save.stormRider) { Save.stormRider = true; syncTitles(); }
   }
   const wantRain = M.phase === 'storm' ? 1 : M.phase === 'building' ? 0.35 : M.phase === 'easing' ? 0.4 : 0;
   const wantRise = M.phase === 'storm' ? 1 : M.phase === 'easing' ? 0.45 : 0;
@@ -2163,8 +2396,6 @@ function loop(now) {
     return;
   }
   updateAmbient(dt);
-  popT += dt;
-  if (popT > 10) { popT = 0; maintainPopulation(); }
   autosaveT += dt;
   if (autosaveT > 10) { autosaveT = 0; saveDinoSnapshot(); }
 
@@ -2203,6 +2434,20 @@ function simTick(dt) {
   updateBlizzard(dt);
   updateMonsoon(dt);
   updateNesting(dt);
+  // the lobby-leave countdown runs on WORLD time: dying cancels it, and the
+  // banner keeps the player honest about how long they must survive
+  if (G.lobbyCountdown != null) {
+    if (!G.player || !G.player.alive) { G.lobbyCountdown = null; }
+    else {
+      G.lobbyCountdown -= dt;
+      if (G.lobbyCountdown <= 0) exitToLobby(true);   // clears the countdown itself
+      else G.banner = { str: '⌂ Leaving for the lobby in ' + Math.ceil(G.lobbyCountdown) + '…', t: 0.4, color: '#ffe9a0' };
+    }
+  }
+  // population upkeep is simulation, not rendering — it must tick under
+  // window.step too, or headless runs never regenerate or scale the packs
+  popT += dt;
+  if (popT > 10) { popT = 0; maintainPopulation(); updatePackScale(); }
   G.input.action = false;   // F is read by the player, the den AND the courtship
   G.input.claw = false; G.input.dig = false;
   decayFx(dt);
@@ -2303,7 +2548,7 @@ function renderBurrow() {
     if (e.hp <= 0) continue;
     draws.push({ y: e.y, fn: () => { drawShadow(ctx, e.x, e.y, bodyRadius(e) * 1.4); drawDino(ctx, e.species, e); if (e.hp < e.maxhp) drawHpBar(e); } });
   }
-  draws.push({ y: p.y, fn: () => { drawShadow(ctx, p.x, p.y, (8 + 14 * p.growth) * genderMod(p).size); drawDino(ctx, p.species, p); } });
+  draws.push({ y: p.y, fn: () => { drawShadow(ctx, p.x, p.y, (8 + 14 * p.growth) * genderMod(p).size); drawDino(ctx, p.species, p); drawScentWisps(ctx, p); } });
   draws.sort((a, b) => a.y - b.y);
   for (const d of draws) d.fn();
 
