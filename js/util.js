@@ -230,5 +230,7 @@ const VOICE = {
   hypsi:     { style: 'chatter', f: 540 },                            // thin panic-peeps
   adratik:   { style: 'bellow',  f: 128, rasp: 0.25 },                // a low wall clearing its throat
   orkor:     { style: 'shriek',  f: 240, rasp: 0.45 },                // the hook-handed scream
-  neove:     { style: 'roar',    f: 165, rasp: 0.55 },                // the quiet apex, finally loud
+  neove:     { style: 'roar',    f: 165, rasp: 0.55 },                // the quiet hunter, finally loud
+  coahuila:  { style: 'honk',    f: 135, wave: 'square', rasp: 0.25 },// the great horns' war-trumpet
+  poekilo:   { style: 'roar',    f: 112, rasp: 0.75 },                // the apex: gravel and thunder
 };

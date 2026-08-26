@@ -581,7 +581,7 @@ const DINO = {
       top: '#585044', mid: '#847862', belly: '#dcd4b8', line: '#241e14',
       acc: '#d0c49a', eye: '#4a3218', pat: '#463e30', shade: '#6e6452',
     },
-    tailUp: 0.1, frill: true, headButt: true, pattern: 'dapple',
+    tailUp: 0.1, frill: true, headButt: true, longHorns: 1, pattern: 'dapple',
   },
   bravo: {
     // the vast frill: a huge poorly-known chasmosaurine — big everything
@@ -940,7 +940,8 @@ const DINO = {
       acc: '#c8863c', eye: '#e8c25a', pat: '#392f3c', shade: '#655a68',
     },
     tailUp: 0.3, fuzz: true, armScale: 1.35, armUp: 0.1, bigClaws: true, clawLen: 10,
-    clawWeapon: true, clawSecond: true, snoutW: 0.22, snoutMidW: 0.44, pattern: 'streak',
+    armBend: 1, armSwipe: true, armAndJaw: true, clawSecond: true, humpLow: true,
+    snoutW: 0.22, snoutMidW: 0.44, pattern: 'streak',
   },
   neove: {
     // the quiet apex: an allosauroid built long and lean rather than heavy —
@@ -952,7 +953,23 @@ const DINO = {
       acc: '#c05a34', eye: '#f0cc58', pat: '#2e3626', shade: '#5b664a',
     },
     tailUp: 0.28, browRidge: true, armScale: 1.15, armUp: 0.08, bigClaws: true,
-    clawLen: 9, clawWeapon: true, clawSecond: true, snoutW: 0.2, snoutMidW: 0.46, pattern: 'stripes',
+    clawLen: 9, armBend: 1, armSwipe: true, armAndJaw: true, clawSecond: true,
+    snoutW: 0.2, snoutMidW: 0.46, pattern: 'stripes',
+  },
+  poekilo: {
+    // the megalosaurid apex: a long keeled skull on a barrel of a body, and
+    // arms SHORT but massively thick — raw power over reach, head and hands
+    // striking together. The real fossil was destroyed in the war; only
+    // casts survive, which suits an animal this hard to kill.
+    name: 'Poekilopleuron', full: 'Poekilopleuron bucklandii', diet: 'carn', biped: true, scale: 1.5,
+    L: { body: [56, 26], tail: [58, 10], neckLen: 12, neckAng: 0.3, head: [28, 12], leg: [26, 8] },
+    col: {
+      top: '#4a3524', mid: '#7d5f42', belly: '#e0d2ae', line: '#1a1009',
+      acc: '#c05a2a', eye: '#e8c25a', pat: '#38281a', shade: '#654d38',
+    },
+    tailUp: 0.26, browRidge: true, skullArch: true, armScale: 0.75, armUp: 0.06,
+    bigClaws: true, clawLen: 5.5, armBend: 1, armThick: 1.7, armSwipe: true, armAndJaw: true,
+    snoutW: 0.26, snoutMidW: 0.48, pattern: 'stripes',
   },
   talenk: {
     // plate-ribbed browser: a light ornithopod carrying a row of thin bony
@@ -1103,7 +1120,8 @@ function skinPath(pts) {
     const l = Math.hypot(dx, dy) || 1;
     const nx = -dy / l, ny = dx / l;   // normal (up when heading right)
     const p = pts[i];
-    top.push({ x: p.x - nx * p.w, y: p.y - ny * p.w });
+    const tw = p.w + (p.hump || 0);   // hump: extra height on the TOP side only
+    top.push({ x: p.x - nx * tw, y: p.y - ny * tw });
     bot.push({ x: p.x + nx * p.w, y: p.y + ny * p.w });
   }
   const path = new Path2D();
@@ -1176,23 +1194,50 @@ function genderSkin(key, gender) {
 const SKINS = {
   default: { name: 'Classic' },
   ripcel: { name: 'Ripcel', cost: 100 },   // cost is per species, paid in ❖
-  // jungell: tyrannotitan's jungle coat — brown, green, and shining lime
-  // (`only` restricts a skin to a single species' picker)
-  jungell: { name: 'Jungell', cost: 100, only: 'tyranno' },
+  // (`only` restricts a skin to the listed species' pickers)
+  jungell: { name: 'Jungell', cost: 100, only: ['tyranno', 'nivarex'] },      // brown, green, shining lime
+  wylord: { name: 'Wylord', cost: 100, only: ['buitre', 'aardi', 'omni'] },   // teal, dark blue waves
+  klanderx: { name: 'Klanderx', cost: 100, only: ['nivarex', 'tyranno'] },    // black & magenta, white stars
+  litherim: { name: 'Litherim', cost: 100, only: ['orkor', 'neove'] },        // silver, light grey streaks
+  granulon: { name: 'Granulon', cost: 100, only: ['moro', 'nivalo', 'eotrach', 'campto'] },  // granite & earth
 };
+// a skin fits a species when it has no `only`, or the species is on the list
+function skinFits(sp, skinId) {
+  const o = SKINS[skinId] && SKINS[skinId].only;
+  return !o || o === sp || (Array.isArray(o) && o.includes(sp));
+}
 function skinColors(key, gender, skinId) {
   if (!skinId || skinId === 'default' || !SKINS[skinId]) return genderSkin(key, gender);
   const id = key + ':' + (gender || 'n') + ':' + skinId;
   if (!GENDER_SKINS[id]) {
     const c = DINO[key].col, out = {};
-    if (skinId === 'jungell') {
-      // jungell: mossy green over brown flanks, lime highlights — the coat is
-      // blended toward the jungle so a whisper of the species' color survives
-      const J = {
+    // every named coat blends toward its palette so a whisper of the species'
+    // own color survives — the same dino stays recognizable under the paint
+    const SKIN_PALETTES = {
+      jungell: {   // mossy green over brown flanks, lime highlights
         top: '#465c24', mid: '#7c6b38', belly: '#dde4a6', shade: '#575328',
         pat: '#2f461c', acc: '#9fe434', eye: '#d6ff6a', line: '#1c1a0a',
-      };
-      for (const k in c) out[k] = J[k] ? mixHex(c[k], J[k], 0.82) : c[k];
+      },
+      wylord: {    // teal waters, dark blue waves rolling through
+        top: '#155e66', mid: '#2f9394', belly: '#c6eede', shade: '#20807c',
+        pat: '#16386b', acc: '#3ad4c8', eye: '#b2f4e4', line: '#082024',
+      },
+      klanderx: {  // void black cut with magenta, white stars in places
+        top: '#120d16', mid: '#291d31', belly: '#5c3164', shade: '#1c1422',
+        pat: '#b0207e', acc: '#f43fae', eye: '#ff7ad2', line: '#050308',
+      },
+      litherim: {  // polished silver, light grey streaks in places
+        top: '#848d97', mid: '#b6bcc3', belly: '#f0f1f3', shade: '#98a0a8',
+        pat: '#dde2e7', acc: '#eef2f5', eye: '#3c4650', line: '#272b30',
+      },
+      granulon: {  // granite flecked with earthy ochres
+        top: '#57534a', mid: '#8a8274', belly: '#d9d1bd', shade: '#6c665a',
+        pat: '#453f36', acc: '#a5794a', eye: '#2e2820', line: '#26221c',
+      },
+    };
+    const P = SKIN_PALETTES[skinId];
+    if (P) {
+      for (const k in c) out[k] = P[k] ? mixHex(c[k], P[k], 0.82) : c[k];
     } else {
       // ripcel: the species' own colors sunk toward black — silhouette and
       // extras keep a ghost of their identity instead of going flat
@@ -1286,7 +1331,7 @@ function drawDino(ctx, key, o) {
   // shift, the crouch and the lean, not just the weapon itself
   const swingPh = tailAtk > 0 ? 1 - tailAtk : 0;                        // 0 → 1 across the tail slam
   const swingDrive = tailAtk > 0 ? Math.sin(swingPh * Math.PI) : 0;     // hips loading into the whip
-  const clawA = d.clawWeapon ? atk : d.clawSecond ? (o.clawT || 0) : 0;
+  const clawA = d.clawWeapon ? atk : d.clawSecond ? Math.max(o.clawT || 0, d.armAndJaw ? atk : 0) : 0;
   const clawDrive = clawA > 0 ? Math.sin((1 - clawA) * Math.PI) : 0;    // shoulders through the swipe
   const bth = o.bathe || 0;                                             // rolling in the mud bath
 
@@ -1538,9 +1583,10 @@ function drawDino(ctx, key, o) {
   // is at its thickest right under the high shoulders instead of tapering
   const arch = d.arch || 0;
   const chest = d.chest || 0;
-  pts.push({ x: -bodyL * 0.40, y: cy - bodyH * 0.02 + fl * 0.08, w: bodyH * 0.40 });
-  pts.push({ x: -bodyL * 0.16, y: cy - bodyH * 0.09 * arch - fl * 0.12, w: bodyH * (0.5 + 0.06 * arch + 0.04 * chest) });
-  pts.push({ x: bodyL * 0.14, y: cy - bodyH * 0.02 - fl * 0.36, w: bodyH * (0.47 - 0.04 * arch + 0.15 * chest) });
+  const humpL = d.humpLow ? bodyH : 0;   // megaraptorid: slight rise over the hips
+  pts.push({ x: -bodyL * 0.40, y: cy - bodyH * 0.02 + fl * 0.08, w: bodyH * 0.40, hump: humpL * 0.09 });
+  pts.push({ x: -bodyL * 0.16, y: cy - bodyH * 0.09 * arch - fl * 0.12, w: bodyH * (0.5 + 0.06 * arch + 0.04 * chest), hump: humpL * 0.15 });
+  pts.push({ x: bodyL * 0.14, y: cy - bodyH * 0.02 - fl * 0.36, w: bodyH * (0.47 - 0.04 * arch + 0.15 * chest), hump: humpL * 0.04 });
   pts.push({ x: bodyL * 0.34, y: cy - bodyH * 0.10 - fl * 0.58, w: bodyH * (0.38 - 0.05 * arch + 0.24 * chest) });
   // neck
   const nSeg = 3;
@@ -1735,7 +1781,7 @@ function drawDino(ctx, key, o) {
   // its arms up with it, and armUp raises the socket further per species
   // clawSecond species (riojasaurus) swing the tail on SPACE and the arm on M:
   // the arm swipe listens to its own clock (o.clawT), never the tail's attackT
-  else if (d.biped) drawArm(ctx, d, C, { x: bodyL * 0.26, y: cy + bodyH * (0.16 - (d.armUp || 0)) - fl * 0.6, s: s * (d.armScale || 1), lineW, key, ph, move, atk: d.clawSecond ? (o.clawT || 0) : atk });
+  else if (d.biped) drawArm(ctx, d, C, { x: bodyL * 0.26, y: cy + bodyH * (0.16 - (d.armUp || 0)) - fl * 0.6, s: s * (d.armScale || 1), lineW, key, ph, move, atk: d.clawSecond ? Math.max(o.clawT || 0, d.armAndJaw ? atk : 0) : atk });
 
   // ---------------- weapon trails: every attack paints its own signature ----
   // a crescent chasing the tail sweep, twin slashes for the claws, a radial
@@ -2122,6 +2168,94 @@ function drawPattern(ctx, key, d, C, a) {
       ctx.beginPath();
       ctx.ellipse(x, y, r * 1.25, r * 0.55, ang, 0, TAU);   // a little leaf
       ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    return;
+  }
+  if (a.coat === 'wylord') {
+    // wylord: the species' markings in deep blue, plus dark blue WAVES
+    // rolling along the flank — a sea worn as a hide
+    drawPattern(ctx, key, d, C, Object.assign({}, a, { coat: null }));
+    ctx.strokeStyle = C.pat;
+    ctx.lineCap = 'round';
+    for (let row = 0; row < 3; row++) {
+      const y0 = cy - bodyH * (0.26 - row * 0.2);
+      const x0 = -bodyL * 0.46 - tailLen * (0.42 - row * 0.14), x1 = bodyL * (0.42 - row * 0.06);
+      ctx.globalAlpha = 0.6 - row * 0.1;
+      ctx.lineWidth = (1.5 - row * 0.25) * s;
+      ctx.beginPath();
+      const nW = 7;
+      for (let i = 0; i <= nW; i++) {
+        const x = x0 + (x1 - x0) * i / nW;
+        const y = y0 + Math.sin(i * 2.1 + row * 1.7) * bodyH * 0.07;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    return;
+  }
+  if (a.coat === 'klanderx') {
+    // klanderx: magenta markings on the void, and WHITE STARS in some places —
+    // four-point glints scattered over the dark upper body
+    drawPattern(ctx, key, d, C, Object.assign({}, a, { coat: null }));
+    const rng = speckleRng(key.charCodeAt(0) * 6367 + 3);
+    for (let i = 0; i < 9; i++) {
+      const x = -bodyL * 0.44 - tailLen * 0.42 + rng() * (bodyL * 0.92 + tailLen * 0.42);
+      const y = cy - bodyH * 0.42 + rng() * bodyH * 0.5;
+      const r = (0.7 + rng() * 1.1) * s;
+      ctx.strokeStyle = '#f4f2ff';
+      ctx.globalAlpha = 0.9;
+      ctx.lineWidth = 0.55 * s;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(x - r, y); ctx.lineTo(x + r, y);
+      ctx.moveTo(x, y - r); ctx.lineTo(x, y + r);
+      ctx.stroke();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(x, y, r * 0.28, 0, TAU); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    return;
+  }
+  if (a.coat === 'litherim') {
+    // litherim: the markings in pale silver, plus LIGHT GREY STREAKS in
+    // places — long polished brush-marks raking back along the flank
+    drawPattern(ctx, key, d, C, Object.assign({}, a, { coat: null }));
+    const rng = speckleRng(key.charCodeAt(0) * 9151 + 13);
+    ctx.strokeStyle = C.pat;
+    ctx.lineCap = 'round';
+    for (let i = 0; i < 6; i++) {
+      const x = -bodyL * 0.42 - tailLen * 0.3 + rng() * (bodyL * 0.86 + tailLen * 0.3);
+      const y = cy - bodyH * 0.34 + rng() * bodyH * 0.5;
+      const len = (5 + rng() * 7) * s;
+      ctx.globalAlpha = 0.5 + rng() * 0.25;
+      ctx.lineWidth = (0.8 + rng() * 0.5) * s;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.quadraticCurveTo(x - len * 0.5, y - 0.6 * s, x - len, y + 0.4 * s);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    return;
+  }
+  if (a.coat === 'granulon') {
+    // granulon: the markings in dark stone, plus GRANITE GRAIN — angular
+    // flecks in dark grit and warm ochre peppered across the hide
+    drawPattern(ctx, key, d, C, Object.assign({}, a, { coat: null }));
+    const rng = speckleRng(key.charCodeAt(0) * 5233 + 29);
+    for (let i = 0; i < 18; i++) {
+      const x = -bodyL * 0.46 - tailLen * 0.4 + rng() * (bodyL * 0.94 + tailLen * 0.4);
+      const y = cy - bodyH * 0.42 + rng() * bodyH * 0.72;
+      const r = (0.5 + rng() * 0.9) * s;
+      ctx.globalAlpha = 0.45 + rng() * 0.25;
+      ctx.fillStyle = i % 3 === 0 ? C.acc : i % 3 === 1 ? C.pat : mixHex(C.belly, '#ffffff', 0.2);
+      ctx.beginPath();
+      ctx.moveTo(x - r, y + r * 0.4);
+      ctx.lineTo(x - r * 0.2, y - r);
+      ctx.lineTo(x + r, y - r * 0.2);
+      ctx.lineTo(x + r * 0.4, y + r);
+      ctx.closePath(); ctx.fill();
     }
     ctx.globalAlpha = 1;
     return;
@@ -2686,9 +2820,44 @@ function drawHead(ctx, key, d, C, a) {
     ctx.beginPath();
     ctx.ellipse(hPt(-0.26, -0.62).x, hPt(-0.26, -0.62).y, hl * 0.16, hh * 0.22, -0.5, 0, TAU);
     ctx.fill();
+    // longHorns (coahuilaceratops, the magnacuerna): the kosmo hornlets are
+    // replaced by a matched PAIR of brow horns longer than the skull itself,
+    // sweeping up and forward — the far horn drawn first and dimmer
+    if (d.longHorns) {
+      const L = d.longHorns;
+      for (const [ox, oy, sh] of [[-0.07, 0.08, 0.78], [0, 0, 1]]) {
+        const b = hPt(0.08 + ox, -0.24 + oy);
+        const mid = hPt(0.4 + ox, (-0.68 - 0.14 * L) + oy);
+        const tip = hPt((0.66 + 0.32 * L) + ox, (-0.98 - 0.42 * L) + oy);
+        ctx.fillStyle = shade(C.belly, 0.95 * sh);
+        ctx.strokeStyle = C.line;
+        ctx.beginPath();
+        ctx.moveTo(b.x - hl * 0.13, b.y);
+        ctx.quadraticCurveTo(mid.x - hl * 0.06, mid.y - hh * 0.1, tip.x, tip.y);
+        ctx.quadraticCurveTo(mid.x + hl * 0.1, mid.y + hh * 0.16, b.x + hl * 0.13, b.y);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        // ridged growth rings near the base
+        ctx.strokeStyle = shade(C.belly, 0.7 * sh);
+        ctx.lineWidth = lineW * 0.5;
+        for (let k = 1; k <= 2; k++) {
+          const t = k * 0.16;
+          const rx = lerp(b.x, mid.x, t), ry = lerp(b.y, mid.y, t);
+          ctx.beginPath(); ctx.moveTo(rx - hl * 0.06, ry); ctx.lineTo(rx + hl * 0.06, ry - hh * 0.03); ctx.stroke();
+        }
+        ctx.strokeStyle = C.line;
+        ctx.lineWidth = lineW * 0.9;
+      }
+      // the modest nose horn under all that headline hardware
+      const nh = hPt(0.46, -0.22);
+      ctx.fillStyle = shade(C.belly, 0.95);
+      ctx.beginPath();
+      ctx.moveTo(nh.x - hl * 0.045, nh.y);
+      ctx.quadraticCurveTo(nh.x + hl * 0.01, nh.y - hh * 0.34, nh.x + hl * 0.06, nh.y);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    }
     // the kosmoceratops extras — a 'plain' frill (proto, centro & co) skips
     // them and wears its own horns from the flags below instead
-    if (d.frill !== 'plain') {
+    if (d.frill !== 'plain' && !d.longHorns) {
       // hooked hornlets curling forward off the frill's crown
       ctx.fillStyle = shade(C.belly, 0.95);
       for (let k = 0; k < 3; k++) {
@@ -3122,15 +3291,30 @@ function drawArm(ctx, d, C, a) {
     ctx.translate(x, y);
     ctx.rotate(swipeA);       // rotate the whole arm about the shoulder
     ctx.translate(-x, -y);
-    const el = x + 4.5 * s, ely = y + 3.5 * s + swing * 5 * s;   // elbow
-    const wx = el + 4 * s, wy = ely + 4 * s;                     // wrist, reaching down-forward
-    ctx.strokeStyle = shade(C.mid, 0.92);
-    ctx.lineWidth = Math.max(1.6, 3.2 * s);
+    // armBend species (megaraptorids) hold the arm FLEXED: upper arm down
+    // from the shoulder, forearm forward off a visible elbow — the default
+    // near-straight reach is the therizinosaur hang
+    const bend = d.armBend || 0;
+    const el = x + (4.5 - 3.3 * bend) * s, ely = y + (3.5 + 1.8 * bend) * s + swing * 5 * s;   // elbow
+    const wx = el + (4 + 2.4 * bend) * s, wy = ely + (4 - 2.2 * bend) * s;   // wrist, reaching down-forward
     ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.quadraticCurveTo(el, ely, wx, wy);
-    ctx.stroke();
+    const armW = Math.max(1.6, 3.2 * s * (d.armThick || 1));   // armThick: beam-built forearms
+    const armPath = () => {
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      if (bend) { ctx.lineTo(el, ely); ctx.lineTo(wx, wy); }   // crisp kink at the joint
+      else ctx.quadraticCurveTo(el, ely, wx, wy);
+      ctx.stroke();
+    };
+    if (d.armThick) {
+      // a beam of an arm needs its own outline, or it melts into the chest
+      ctx.strokeStyle = C.line;
+      ctx.lineWidth = armW + lineW * 1.6;
+      armPath();
+    }
+    ctx.strokeStyle = shade(C.mid, d.armThick ? 0.85 : 0.92);
+    ctx.lineWidth = armW;
+    armPath();
     if (d.fuzz) {
       // shaggy filo-feather fringe on the upper arm (feathered species only —
       // a scaly spinosaur arm stays bare)

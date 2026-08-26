@@ -104,6 +104,12 @@ const PLAYER_DEF = {
   // the quiet apex: it does not chase the way the tyrants chase — it arrives.
   // Hands and jaws together, and everything it touches bleeds
   neove: { hp: 2500, dmg: 205, speed: 132, sprint: 1.7, reach: 38, atkCd: 0.8, diet: 'carn', bleedBite: true, bleedMul: 2.0, stamMax: 160, eco: 'jungle', cost: 900, req: 'orkor', growthRate: 0.7, clawSecond: true, wrestler: true },
+  // the great horns: possibly the longest brow horns anything ever grew, and
+  // every wound they open keeps working — the Reach's bleed on four legs
+  coahuila: { hp: 2600, dmg: 175, speed: 96, sprint: 1.5, reach: 40, atkCd: 1.1, diet: 'herb', bleedBite: true, bleedMul: 2.6, stamMax: 145, eco: 'jungle', cost: 1000, req: 'orkor', growthRate: 0.65 },
+  // the NEW apex: a megalosaurid of keel-skulled muscle. No ambush, no
+  // tricks — raw damage, thick short arms, and the M double bite
+  poekilo: { hp: 3000, dmg: 260, speed: 124, sprint: 1.65, reach: 40, atkCd: 0.85, diet: 'carn', bleedBite: true, bleedMul: 1.2, stamMax: 155, eco: 'jungle', cost: 1200, req: 'neove', growthRate: 0.6, doubleBite: true, wrestler: true },
 };
 
 const NPC_DEF = {
@@ -858,6 +864,10 @@ function aimYAt(e, t) {
 }
 // ---- pounce: coil, leap, bite at the landing ----
 // tuning knobs — the leap's whole economy in one place
+// tuning knobs — the double bite (poekilopleuron's M): two snaps, one commitment
+const DBL_BITE_CD = 2;       // seconds between double bites
+const DBL_BITE_GAP = 0.28;   // seconds between the two snaps
+const DBL_BITE_MUL = 1.35;   // each snap hits this much harder than a normal bite
 const POUNCE_HOLD_T = 0.32;     // seconds SPACE must stay down to turn bite into coil
 const POUNCE_CD = 1;            // seconds the spring needs to reload
 const POUNCE_ARM_STAM = 0.5;    // fraction of the bar needed to even coil
@@ -2542,6 +2552,7 @@ function updatePlayer(dt) {
   p.attackT = Math.max(0, p.attackT - dt * 3.2);
   p.pounceCd = Math.max(0, (p.pounceCd || 0) - dt);
   p.clawCd = Math.max(0, (p.clawCd || 0) - dt);
+  p.dblCd = Math.max(0, (p.dblCd || 0) - dt);
   p.clawT = Math.max(0, (p.clawT || 0) - dt * 3.2);
   p.hurtT = Math.max(0, p.hurtT - dt);
 
@@ -3325,14 +3336,14 @@ function updatePlayer(dt) {
   if (p.bathing) G.prompt = 'scrubbing into the mud…';
   if (p.fishing) G.prompt = 'fishing… hold still — SPACE to strike';
 
-  // ------ claw slash (M) — riojasaurus' second weapon ------
+  // ------ claw slash (M) — the clawSecond species' second weapon ------
   // The tail is the main argument; the thumb-claws are the closing one: a
   // forward slash that opens a bleeding wound. Same F key the wrestlers use —
   // a species has one F-move or the other, never both.
   if (def.clawSecond && !p.carry && !p.fishing && p.actionT <= 0 && !p.pounce) {
     for (const e of G.npcs) {
       if (DINO[e.species].fish || e.packAlpha || e.isBaby || e === G.mate) continue;
-      if (dist(p.x, p.y, e.x, e.y) < 150) { G.prompt = (G.prompt ? G.prompt + '    ' : '') + 'C — Claw slash'; break; }
+      if (dist(p.x, p.y, e.x, e.y) < 150) { G.prompt = (G.prompt ? G.prompt + '    ' : '') + 'M — Claw slash'; break; }
     }
     if (input.claw && p.clawCd <= 0) {
       p.clawCd = 1.15;
@@ -3356,6 +3367,56 @@ function updatePlayer(dt) {
         if ((NPC_DEF[best.species] || {}).bleedable && p.growth > 0.25)
           opts.bleed = { dps: 6 + 8 * p.growth, dur: 9 };
         dealDamage(best, playerDmg() * 0.85 * rrange(0.9, 1.1), p, opts);
+      }
+    }
+  }
+
+  // ------ double bite (M) — the megalosaurid's second weapon ------
+  // Two snaps in one committed motion: press M and the second bite follows
+  // the first on its own, each hitting harder than a normal bite. Raw
+  // damage is poekilopleuron's whole kit — this is the exclamation mark.
+  if (def.doubleBite && !p.carry && !p.fishing && p.actionT <= 0 && !p.pounce) {
+    for (const e of G.npcs) {
+      if (DINO[e.species].fish || e.packAlpha || e.isBaby || e === G.mate) continue;
+      if (dist(p.x, p.y, e.x, e.y) < 150) { G.prompt = (G.prompt ? G.prompt + '    ' : '') + 'M — Double bite'; break; }
+    }
+    if (input.claw && p.dblCd <= 0) {
+      p.dblCd = DBL_BITE_CD;
+      p.dblSnaps = 2;           // snaps left to fire
+      p.dblT = 0;               // the first fires this very frame
+      p.resting = false;
+    }
+  }
+  if ((p.dblSnaps || 0) > 0) {
+    p.dblT -= dt;
+    if (p.dblT <= 0) {
+      p.dblSnaps--;
+      p.dblT = DBL_BITE_GAP;
+      p.attackT = 1;            // the head snaps out (and the arms swipe with it)
+      p.hidden = false;
+      p.vx += p.facing * 85;    // each snap drives forward
+      SFX.bite();
+      // same hitbox truth as the main bite: the full strike arc, front side only
+      const zones = biteZones(p);
+      if (DINO[p.species].armAndJaw) zones.push(clawArcCircle(p));
+      let best = null, bestPt = null, bd = 1e9;
+      for (const e of G.npcs) {
+        if (e.packAlpha || e.isBaby || e === G.mate) continue;
+        for (const z of zones) {
+          const pt = bodyHitPoint(e, z.x, z.y, z.r);
+          if (!pt) continue;
+          if ((pt.x - p.x) * p.facing < -2) continue;
+          const dd = dist(z.x, z.y, pt.x, pt.y);
+          if (dd < bd) { bd = dd; best = e; bestPt = pt; }
+        }
+      }
+      if (best) {
+        const opts = { hitX: bestPt.x, hitY: bestPt.y, kb: 110 };
+        if (def.bleedBite && (NPC_DEF[best.species] || {}).bleedable && p.growth > 0.25) {
+          const bm = def.bleedMul || 1;
+          opts.bleed = { dps: (6 + 8 * p.growth) * bm, dur: 10 * Math.min(1.4, bm) };
+        }
+        dealDamage(best, playerDmg() * DBL_BITE_MUL * rrange(0.9, 1.1), p, opts);
       }
     }
   }

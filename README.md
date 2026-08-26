@@ -65,7 +65,7 @@ No build step, no dependencies — plain HTML5 canvas + JavaScript.
 | | *E and F are **context** keys: they do **only** what the on-screen prompt says, and nothing at all when there is no prompt. Moves you can make anywhere — a weapon, a species power — always get their own key instead.* |
 | **E** | **Interact** — the primary CONTEXT key: eat ferns/horsetails · browse the canopy · feed on a carcass · drink · swallow what you carry · hide in your own burrow · enter or invade a den · nest underground |
 | **F** | **Action** — the secondary CONTEXT key: go fishing · grab a carcass (hold: tear off a chunk) or drop it · wrestle · bathe · court and take a mate · leave a den |
-| C | Claw slash — riojasaurus' second weapon |
+| M | Second weapon — claw slash (riojasaurus, orkoraptor, neovenator) · double bite (poekilopleuron) |
 | B | Dig your burrow, anywhere (simosuchus) — press it beside the burrow to collapse it |
 | SPACE (hold) + direction | **Pounce** — the press bites, and keeping SPACE down flows into the coil: the dino loads (bigger = longer), leaps (faster = farther) and strikes EVERYTHING the leap crosses — the hit zones are live from the first inch of the jump to a beat after the landing, one strike per victim. Tail-fighters instead hold SPACE to **tail-swing**: continuous hits on a metronome, but the feet are planted until you let go. |
 | R | Rest — a deliberate **3-second** settle onto folded legs (you stop moving first). Heal faster, needs drain slower. You're committed: sit at least **1 second**, then a step (or R) starts the equally slow **3-second** rise — no popping up. |

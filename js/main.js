@@ -52,7 +52,7 @@ function skinOwned(species, skinId) {
 function cardGender(species) { return (Save.genderChoice || {})[species] === 'f' ? 'f' : 'm'; }
 function cardSkin(species) {
   const s = (Save.skinChoice || {})[species];
-  return SKINS[s] && (!SKINS[s].only || SKINS[s].only === species) && skinOwned(species, s) ? s : 'default';
+  return SKINS[s] && skinFits(species, s) && skinOwned(species, s) ? s : 'default';
 }
 const Profiles = (() => {
   try {
@@ -93,7 +93,9 @@ const CHAIN = [
   ['tyranno', 'spino'],                                        // 🐟 Delta finale: choose your apex
   ['jianchang'], ['eshano'], ['nanuq'], ['nivarex'],           // 🏔️ The Wall
   ['simo'], ['korea'], ['sarco'], ['drypto'], ['gastonia'],    // 🌫️ The Great Moors of Martulisth
-  ['buitre'], ['hypsi'], ['adratik'], ['orkor'], ['neove'],    // 🌴 The Sodden Reach
+  ['buitre'], ['hypsi'], ['adratik'], ['orkor'],               // 🌴 The Sodden Reach
+  ['neove', 'coahuila'],   // the fork: quiet hands or great horns — either one
+  ['poekilo'],             // …opens the road to the Reach's true apex
 ];
 function chainRung(sp) { return CHAIN.findIndex(r => r.includes(sp)); }
 // a species is playable if: it's the chain's first rung, the rung before it
@@ -233,7 +235,7 @@ window.addEventListener('keydown', (e) => {
   if (e.code === 'KeyF') G.input.action = true;
   // ALWAYS-AVAILABLE moves keep their own keys — they have no situational cue
   // to hang a prompt on, so they must never share the context keys
-  if (e.code === 'KeyC') G.input.claw = true;   // second weapon (riojasaurus)
+  if (e.code === 'KeyM') G.input.claw = true;   // claw slash — the clawSecond species' second weapon
   if (e.code === 'KeyB') G.input.dig = true;    // the digger's burrow, anywhere
   if (G.wrestle && WRESTLE_KEYS.includes(e.code)) G.wrestle.pressed = e.code;
   // the CALLS: 1 broadcast (claim), 2 friendly (invite), 3 aggressive (threat)
@@ -370,7 +372,9 @@ const CARD_INFO = {
   hypsi: { desc: 'A tiny feathered thicket-mouse. Fast, fragile, and hunted by everything — but it can throw itself into the earth, and for ten seconds nothing on the Reach will touch it.', tag: '◆ HERBIVORE — HARD', tagClass: 'hard' },
   adratik: { desc: 'The oldest stegosaur of them all: a low spiked wall that opens wounds. Every plate edge and tail spike leaves the attacker leaking. Slow, patient, and very hard to finish.', tag: '◆ HERBIVORE — BLEED TANK', tagClass: 'mod' },
   orkor: { desc: 'The last of the megaraptorids — long hooked arms, blade teeth, and real speed. It opens prey with its hands as much as its jaws, and the bleeding does the rest.', tag: '◆ CARNIVORE — BLEEDER', tagClass: 'mod' },
-  neove: { desc: 'The quiet apex of the Reach. It does not chase the way the tyrants chase — it arrives. Hands and jaws together, and everything it touches bleeds.', tag: '◆ CARNIVORE — APEX', tagClass: 'hard' },
+  neove: { desc: 'The quiet hunter of the Reach. It does not chase the way the tyrants chase — it arrives. Hands and jaws together, and everything it touches bleeds.', tag: '◆ CARNIVORE — HUNTER', tagClass: 'hard' },
+  coahuila: { desc: 'Possibly the longest brow horns anything ever grew, and a committed charge on the far end of them. Every wound those horns open keeps working — crazy bleed on four legs.', tag: '◆ HERBIVORE — BLEEDER', tagClass: 'mod' },
+  poekilo: { desc: 'The new apex of the Reach: a megalosaurid of keel-skulled muscle. No tricks, no ambush — raw damage, arms like beams, and a double bite (M) that ends arguments.', tag: '◆ CARNIVORE — APEX', tagClass: 'hard' },
   raja: { desc: 'A predator hatched in the fern forest. Scavenge carcasses, hunt to eat, and one day even the mighty Huayangosaurus may fear your bite.', tag: '◆ CARNIVORE — MODERATE', tagClass: 'mod' },
   campto: { desc: 'Born on the open plains where Moros intrepidus hunts. Run for the fern forest fast — the shade is your only refuge until you grow. Earns extra growths.', tag: '◆ HERBIVORE — HARD', tagClass: 'hard' },
   rioja: { desc: 'An ancient sauropodomorph and the valley\'s best brawler: swing the tail, then slash with the thumb-claws (M) to open bleeding wounds. Grows very slowly and eats enormously.', tag: '◆ HERBIVORE — BRAWLER', tagClass: 'mod' },
@@ -644,10 +648,11 @@ function stampPips(key) {
   if (key === 'wall') pips.push(['Secret found — the frozen giant', !!Save.owned.nivalo]);
   return pips;
 }
-// the jump-dot IS the land's stamp now: tint ring once discovered, feat pips
-// riveted round the rim, gold rim when every pip lights; the hover flyout
-// tells the stamp's story (ordinal, who opened it, what each pip means)
-const TABPIP_STEP = 38;   // degrees between rim pips, fanned on the right arc
+// the jump-dot IS the land's stamp now: tint ring once discovered, one rim
+// pip PER DINOSAUR of the land (lit when mastered — the same count as the
+// chapter's "N / M mastered"), gold rim when every feat is complete; the
+// hover flyout tells the stamp's story (ordinal, who opened it, the feats)
+const TABPIP_STEP = 38;   // max degrees between rim pips, fanned on the right arc
 function decorateEcoTab(key) {
   const tab = document.getElementById('tab-' + key);
   const d = Save.discovered[key];
@@ -655,22 +660,32 @@ function decorateEcoTab(key) {
   for (const old of tab.querySelectorAll('.tabpip')) old.remove();
   const feats = tab.querySelector('.tffeats');
   feats.innerHTML = '';
-  const pips = d ? stampPips(key) : [];
-  let all = !!d && pips.length > 0;
-  pips.forEach(([tip, lit], i) => {
+  // the rim: one pip per dinosaur, lit once that dinosaur is mastered
+  const roster = d ? ecoRoster(key) : [];
+  const step = Math.min(TABPIP_STEP, roster.length > 1 ? 160 / (roster.length - 1) : TABPIP_STEP);
+  let done = 0;
+  roster.forEach((sp, i) => {
+    const lit = !!Save.mastery[sp];
+    if (lit) done++;
     const pip = document.createElement('span');
     pip.className = 'tabpip' + (lit ? ' lit' : '');
-    pip.style.setProperty('--a', ((i - (pips.length - 1) / 2) * TABPIP_STEP) + 'deg');
+    pip.style.setProperty('--a', ((i - (roster.length - 1) / 2) * step) + 'deg');
     tab.appendChild(pip);
+  });
+  // the flyout: the land's feats, each a lit or dark line
+  const pips = d ? stampPips(key) : [];
+  let all = !!d && pips.length > 0;
+  for (const [tip, lit] of pips) {
     const line = document.createElement('div');
     line.className = 'tffeat' + (lit ? ' lit' : '');
     line.textContent = (lit ? '●' : '○') + ' ' + tip;
     feats.appendChild(line);
     if (!lit) all = false;
-  });
+  }
   tab.classList.toggle('gold', all);
   tab.querySelector('.tfstat').textContent = d
     ? (ORDINALS[d.n] || d.n + 'th') + ' land' + (d.by ? ' · by ' + DINO[d.by].name.toUpperCase() : '')
+      + ' · ' + done + '/' + roster.length + ' mastered'
     : 'undiscovered';
 }
 function renderTitleWall() {
@@ -947,7 +962,7 @@ function buildCardSkins(sp, container) {
   const cur = cardSkin(sp);
   for (const id of Object.keys(SKINS)) {
     const def = SKINS[id];
-    if (def.only && def.only !== sp) continue;      // species-exclusive coat
+    if (!skinFits(sp, id)) continue;                // species-exclusive coat
     const owned = skinOwned(sp, id);
     const selected = id === cur;
     const sq = document.createElement('div');
@@ -1093,6 +1108,36 @@ function drawSkinSwatch(cv, species, skinId) {
       x.fillStyle = mixHex(C.acc, '#ffffff', 0.55);
       x.beginPath(); x.arc(W * dx - W * r * 0.25, H * dy - W * r * 0.3, W * r * 0.42, 0, Math.PI * 2); x.fill();
     }
+  } else if (skinId === 'wylord') {
+    x.strokeStyle = C.pat; x.lineWidth = 2.5; x.lineCap = 'round';
+    for (const [fy, ph] of [[0.45, 0], [0.66, 1.8]]) {
+      x.beginPath();
+      for (let i = 0; i <= 8; i++) x[i ? 'lineTo' : 'moveTo'](W * i / 8, H * fy + Math.sin(i * 1.6 + ph) * H * 0.06);
+      x.stroke();
+    }
+  } else if (skinId === 'klanderx') {
+    x.strokeStyle = '#f4f2ff'; x.lineWidth = 1.6; x.lineCap = 'round';
+    for (const [dx, dy, r] of [[0.26, 0.4, 0.09], [0.6, 0.62, 0.06], [0.8, 0.32, 0.075]]) {
+      x.beginPath();
+      x.moveTo(W * (dx - r), H * dy); x.lineTo(W * (dx + r), H * dy);
+      x.moveTo(W * dx, H * dy - W * r); x.lineTo(W * dx, H * dy + W * r);
+      x.stroke();
+    }
+  } else if (skinId === 'litherim') {
+    x.strokeStyle = C.pat; x.lineWidth = 2.2; x.lineCap = 'round';
+    for (const [fx, fy, ln] of [[0.7, 0.42, 0.3], [0.55, 0.62, 0.24], [0.9, 0.68, 0.28]]) {
+      x.beginPath(); x.moveTo(W * fx, H * fy); x.lineTo(W * (fx - ln), H * (fy + 0.04)); x.stroke();
+    }
+  } else if (skinId === 'granulon') {
+    for (const [dx, dy, r, ci] of [[0.2, 0.46, 0.05, 0], [0.44, 0.6, 0.04, 1], [0.66, 0.4, 0.055, 2], [0.85, 0.64, 0.045, 0], [0.32, 0.7, 0.035, 2]]) {
+      x.fillStyle = ci === 0 ? C.acc : ci === 1 ? C.pat : mixHex(C.belly, '#ffffff', 0.2);
+      x.beginPath();
+      x.moveTo(W * (dx - r), H * dy + W * r * 0.4);
+      x.lineTo(W * dx, H * dy - W * r);
+      x.lineTo(W * (dx + r), H * dy);
+      x.lineTo(W * dx, H * dy + W * r);
+      x.closePath(); x.fill();
+    }
   }
   x.strokeStyle = C.line; x.lineWidth = 3; x.strokeRect(0, 0, W, H);
 }
@@ -1159,6 +1204,8 @@ const START_BANNERS = {
   adratik: 'You hatch spiked and slow. Let them come — everything you touch bleeds.',
   orkor: 'You hatch with hooks for hands. Nothing here outruns you.',
   neove: 'You hatch in the green dark. Learn to arrive without being seen.',
+  coahuila: 'You hatch horn-budded. One day nothing will dare stand in front of you.',
+  poekilo: 'You hatch heavy-boned. Grow — the Reach will learn your name.',
   raja: 'You hatch in the fern forest. Grow. Hunt. Survive.',
   campto: 'You hatch on the open plains. Reach the ferns before Moros finds you!',
   rioja: 'You hatch heavy-boned and hungry. Eat everything — greatness takes time.',
@@ -2047,17 +2094,30 @@ function drawMonsoon() {
   const M = G.monsoon;
   if (!M || (M.rain < 0.01 && M.rise < 0.01)) return;
   const vw = VIEW_W * G.zoom, vh = VIEW_H * G.zoom;
-  // the risen water, in world space (drawn under the rain, over the ground)
+  // the risen water, in world space (drawn under the rain, over the ground).
+  // All the channel blobs go into ONE path filled ONCE — filling each blob
+  // separately stacks translucency wherever they overlap (which is
+  // everywhere) and the river turns into blotchy fog instead of water.
   if (M.rise > 0.02) {
+    const flood = (shrink) => {
+      ctx.beginPath();
+      for (const c of (World.channels || [])) {
+        const r = c.r + 160 * M.rise - shrink;
+        if (r <= 0) continue;
+        if (c.x < G.camX - r - 40 || c.x > G.camX + vw + r + 40 ||
+            c.y < G.camY - r - 40 || c.y > G.camY + vh + r + 40) continue;
+        ctx.moveTo(c.x - G.camX + r, c.y - G.camY);
+        ctx.arc(c.x - G.camX, c.y - G.camY, r, 0, TAU);
+      }
+      ctx.fill();
+    };
     ctx.save();
     ctx.globalAlpha = 0.42 * M.rise;
     ctx.fillStyle = '#3f6570';
-    for (const c of (World.channels || [])) {
-      if (c.x < G.camX - 200 || c.x > G.camX + vw + 200 || c.y < G.camY - 200 || c.y > G.camY + vh + 200) continue;
-      ctx.beginPath();
-      ctx.arc(c.x - G.camX, c.y - G.camY, (c.r + 160 * M.rise) / 1, 0, TAU);
-      ctx.fill();
-    }
+    flood(0);                       // the water sheet, one even body
+    ctx.globalAlpha = 0.3 * M.rise;
+    ctx.fillStyle = '#35545e';
+    flood(70);                      // the deeper heart of the torrent
     ctx.restore();
   }
   ctx.save();
