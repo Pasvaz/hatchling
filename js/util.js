@@ -207,6 +207,10 @@ const VOICE = {
   giganto:   { style: 'bellow',  f: 110, vib: 0.02, vibR: 3.5 },      // a foghorn on legs
   crista:    { style: 'hiss',    f: 140, rasp: 0.3 },                 // the shoreline croc-rumble
   linhe:     { style: 'shriek',  f: 380 },                            // the ridge's knife-scream
+  preno:     { style: 'honk',    f: 230, rasp: 0.2 },                 // short blunt head-down huffs
+  vulcano:   { style: 'boom',    f: 62, rasp: 0.2 },                  // the mountain clears its throat
+  shanag:    { style: 'chatter', f: 560 },                            // ash-sparrow scatter-peeps
+  achillo:   { style: 'shriek',  f: 300, rasp: 0.5 },                 // the cinder bear's saw-scream
   nothro:    { style: 'bellow',  f: 160, rasp: 0.5 },                 // a huffing pot-bellied blast
   aardi:     { style: 'chatter', f: 360 },                            // the pack's yipping tongue
   centro:    { style: 'honk',    f: 190, wave: 'square' },            // a nose-horn blast

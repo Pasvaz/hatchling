@@ -88,7 +88,8 @@ const CHAIN = [
   // late-bloomer sauropodomorph — master either one to reach qianzhousaurus
   ['ichthyo', 'rioja'], ['qianzho'], ['scutello'],             // 🦴 Skull Prairie (+ rioja back home)
   ['metria'], ['giganto'], ['crista'],                         // 🌊 Coastal Scrubs
-  ['linhe'], ['nothro'],                                       // 🌋 Ashfall Ridge
+  ['linhe'], ['preno'],                                        // 🌋 Ashfall Ridge
+  ['nothro', 'vulcano'],   // the ridge's fork: scythe claws or the young mountain
   ['aardi'], ['centro'], ['omni'], ['eotrach'], ['loki'], ['moro'],
   ['tyranno', 'spino'],                                        // 🐟 Delta finale: choose your apex
   ['jianchang'], ['eshano'], ['nanuq'], ['nivarex'],           // 🏔️ The Wall
@@ -385,6 +386,8 @@ const CARD_INFO = {
   giganto: { desc: 'A living fortress with giant shoulder spines. It cannot bite at all — turn your back and swing the thagomizer. Slow, but almost unkillable.', tag: '◆ HERBIVORE — TAIL FIGHTER', tagClass: 'hard' },
   crista: { desc: 'The shoreline king: a croc-snouted heavyweight that swims deep water and hits like a slammed door. Slow — but far too strong for Megorontosuchus to hold.', tag: '◆ CARNIVORE — TANK', tagClass: 'mod' },
   linhe: { desc: 'Nothing on the ridge outruns you — and nothing forgives a mistake. Dodge the falling fire, dodge Tarbosaurus, and remember: the wild packs hunt here too.', tag: '◆ CARNIVORE — SPEED', tagClass: 'hard' },
+  preno: { desc: 'A dome of solid bone on a sprinter\'s frame. Nothing else on the ridge RAMS: build speed, hit like a falling rock, and knock things clean off their feet.', tag: '◆ HERBIVORE — RAMMER', tagClass: 'mod' },
+  vulcano: { desc: 'A real dinosaur named after a volcano — Vulcanodon, VOLCANO TOOTH, dug from between two lava flows. A young mountain in cracked basalt hide, with a tail like a falling tree. Grows slowly; fears little.', tag: '◆ HERBIVORE — SAUROPOD', tagClass: 'mod' },
   nothro: { desc: 'A pot-bellied giant that stands tall and swings great scythe claws. Eats only plants; slashes anything that forgets that. Claw wounds bleed.', tag: '◆ HERBIVORE — CLAWS', tagClass: 'mod' },
   aardi: { desc: 'Small, weak, and it looks like a dumb pick — until you meet your kin. Press 2 to call the pack together: raid Protoceratops burrows, claim them, and rule the undergrowth.', tag: '◆ CARNIVORE — PACK ALPHA', tagClass: 'hard' },
   centro: { desc: 'One great nose horn and no sense of retreat. Grows slowly, but a grown Centrosaurus is a wall — cheap to hatch, hard to move.', tag: '◆ HERBIVORE — TANK', tagClass: 'mod' },
@@ -648,11 +651,12 @@ function stampPips(key) {
   if (key === 'wall') pips.push(['Secret found — the frozen giant', !!Save.owned.nivalo]);
   return pips;
 }
-// the jump-dot IS the land's stamp now: tint ring once discovered, one rim
-// pip PER DINOSAUR of the land (lit when mastered — the same count as the
-// chapter's "N / M mastered"), gold rim when every feat is complete; the
-// hover flyout tells the stamp's story (ordinal, who opened it, the feats)
-const TABPIP_STEP = 38;   // max degrees between rim pips, fanned on the right arc
+// the jump-dot IS the land's stamp now: tint ring once discovered, and on
+// the rim — three feat pips (Arrived · All hatched · All mastered) plus one
+// GOLD pip for every dinosaur currently walking the land as an Adult; gold
+// rim when every feat is complete. The hover flyout tells the whole story.
+const TABPIP_STEP = 38;      // max degrees between rim pips, fanned on the right arc
+const TAB_ADULT_G = 0.9;     // growth from which a saved dino counts as Adult
 function decorateEcoTab(key) {
   const tab = document.getElementById('tab-' + key);
   const d = Save.discovered[key];
@@ -660,19 +664,27 @@ function decorateEcoTab(key) {
   for (const old of tab.querySelectorAll('.tabpip')) old.remove();
   const feats = tab.querySelector('.tffeats');
   feats.innerHTML = '';
-  // the rim: one pip per dinosaur, lit once that dinosaur is mastered
   const roster = d ? ecoRoster(key) : [];
-  const step = Math.min(TABPIP_STEP, roster.length > 1 ? 160 / (roster.length - 1) : TABPIP_STEP);
-  let done = 0;
-  roster.forEach((sp, i) => {
-    const lit = !!Save.mastery[sp];
-    if (lit) done++;
+  const isAdult = (sp) => ['f', 'm'].some(gd => {
+    const sd = Save.dino[dinoKey(sp, gd)];
+    return sd && sd.growth >= TAB_ADULT_G;
+  });
+  const adults = roster.filter(isAdult);
+  // the rim: the three feats, then one gold pip per currently-adult dino
+  const rim = d ? [
+    ['', !!Save.arrived[key]],
+    ['', roster.every(sp => Save.hatched[sp])],
+    ['', roster.every(sp => Save.mastery[sp])],
+    ...adults.map(() => ['adult', true]),
+  ] : [];
+  const step = Math.min(TABPIP_STEP, rim.length > 1 ? 160 / (rim.length - 1) : TABPIP_STEP);
+  rim.forEach(([kind, lit], i) => {
     const pip = document.createElement('span');
-    pip.className = 'tabpip' + (lit ? ' lit' : '');
-    pip.style.setProperty('--a', ((i - (roster.length - 1) / 2) * step) + 'deg');
+    pip.className = 'tabpip' + (kind === 'adult' ? ' adult' : lit ? ' lit' : '');
+    pip.style.setProperty('--a', ((i - (rim.length - 1) / 2) * step) + 'deg');
     tab.appendChild(pip);
   });
-  // the flyout: the land's feats, each a lit or dark line
+  // the flyout: the land's feats, each a lit or dark line, then the adults
   const pips = d ? stampPips(key) : [];
   let all = !!d && pips.length > 0;
   for (const [tip, lit] of pips) {
@@ -682,7 +694,14 @@ function decorateEcoTab(key) {
     feats.appendChild(line);
     if (!lit) all = false;
   }
+  if (d) {
+    const ad = document.createElement('div');
+    ad.className = 'tffeat' + (adults.length ? ' adult' : '');
+    ad.textContent = (adults.length ? '●' : '○') + ' ' + adults.length + ' walking this land full-grown';
+    feats.appendChild(ad);
+  }
   tab.classList.toggle('gold', all);
+  const done = roster.filter(sp => Save.mastery[sp]).length;
   tab.querySelector('.tfstat').textContent = d
     ? (ORDINALS[d.n] || d.n + 'th') + ' land' + (d.by ? ' · by ' + DINO[d.by].name.toUpperCase() : '')
       + ' · ' + done + '/' + roster.length + ' mastered'
@@ -1216,6 +1235,8 @@ const START_BANNERS = {
   giganto: 'You hatch spined. Turn your back to fight, and let the tail talk.',
   crista: 'You hatch by the shore. One day the surf itself will fear you.',
   linhe: 'You hatch on the ash. Nothing here forgives — be faster than all of it.',
+  preno: 'You hatch hard-headed. The ridge will test that. Meet it head-on.',
+  vulcano: 'You hatch between old lava flows. The mountain made you — now grow into one.',
   nothro: 'You hatch beneath the ash clouds. Grow tall; the claws will answer.',
   aardi: 'You hatch scruffy and small. Find your kin — alone you are nothing.',
   centro: 'You hatch on the floodplain. Grow the horn — then stop retreating.',

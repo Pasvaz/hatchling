@@ -29,6 +29,10 @@ const PLAYER_DEF = {
   // --- Ashfall Ridge playables ---
   // glass cannon: nothing on the ridge outruns you, and nothing forgives you
   linhe: { hp: 800, dmg: 95, speed: 142, sprint: 1.95, reach: 26, atkCd: 0.45, diet: 'carn', bleedBite: false, stamMax: 150, eco: 'ash', cost: 250, req: 'metria' },
+  // the battering ram: the ridge's only rammer — speed into solid bone
+  preno: { hp: 1100, dmg: 130, speed: 132, sprint: 1.8, reach: 26, atkCd: 0.7, diet: 'herb', bleedBite: false, stamMax: 160, eco: 'ash', cost: 350, req: 'linhe', growthRate: 0.95 },
+  // VOLCANO TOOTH: the young mountain — slow, patient, tail like a falling tree
+  vulcano: { hp: 2400, dmg: 165, speed: 76, sprint: 1.4, reach: 48, atkCd: 1.5, diet: 'herb', bleedBite: false, stamMax: 160, eco: 'ash', cost: 450, req: 'preno', growthRate: 0.55 },
   // the herbivore that hunts back: scythe-claw swipes that leave bleeding wounds
   nothro: { hp: 1600, dmg: 140, speed: 88, sprint: 1.5, reach: 40, atkCd: 1.1, diet: 'herb', bleedBite: true, stamMax: 130, eco: 'ash', cost: 300, req: 'giganto' },
   // --- Lertentous Delta playables ---
@@ -238,6 +242,16 @@ const NPC_DEF = {
   mercuri: { hp: 1100, dmg: 115, atkCd: 1.8, speed: 80, detect: 175, homeR: 280, reach: 34, biome: 'plains', turn: 1.9, tank: true, bleedable: true, melee: { kb: 220 } },
   // the longest brow horns on the moor — and a TELEGRAPHED charge behind them
   coahuila: { hp: 1700, dmg: 165, atkCd: 2.0, speed: 70, detect: 180, homeR: 260, reach: 40, biome: 'plains', turn: 1.7, fearless: true, tank: true, bleedable: true, melee: { kb: 300 }, chargeR: 160, lungeT: 0.65, lungeMul: 3.2 },
+  // --- Ashfall Ridge's new cast ---
+  // the young mountain: too big to argue with, ember seams down its flanks
+  vulcano: { hp: 2400, dmg: 200, atkCd: 1.9, speed: 70, detect: 170, homeR: 320, reach: 50, biome: 'plains', turn: 1.4, fearless: true, tank: true, bleedable: true, melee: { kb: 320 } },
+  // the ash sparrows: crow-sized, everywhere, gone the moment you look
+  shanag: { hp: 70, dmg: 10, atkCd: 0.8, speed: 190, detect: 250, homeR: 380, reach: 14, biome: 'plains', turn: 4.5 },
+  // the cinder bear: a raptor built like a brawler — the pack fills the gap
+  // between linheraptor's needling and tarbosaurus' verdict
+  achillo: { hp: 520, dmg: 95, atkCd: 1.0, speed: 165, detect: 280, homeR: 380, reach: 28, biome: 'forest', turn: 3.6, patience: 7, packCourage: true, fears: [['tarbo', 180]] },
+  // the rammer: mild until it isn't — then it arrives dome-first
+  preno: { hp: 1000, dmg: 120, atkCd: 1.2, speed: 130, fleeSpeed: 150, detect: 240, homeR: 340, reach: 26, biome: 'plains', turn: 2.6, bleedable: true, melee: { kb: 300 }, caution: 1.1 },
   // the vast frill looming out of the grey: big body, bigger temper
   bravo: { hp: 2000, dmg: 175, atkCd: 2.1, speed: 66, detect: 170, homeR: 250, reach: 42, biome: 'plains', turn: 1.6, fearless: true, tank: true, bleedable: true, melee: { kb: 280 } },
   // the Dorset hunter: the moor's fearless terror — it hunts through the
@@ -1606,6 +1620,10 @@ NPC_THINK.secerno = thinkHerdFighter;
 NPC_THINK.spiclypeus = thinkTank;       // the horned silhouettes hold their ground
 NPC_THINK.mercuri = thinkTank;
 NPC_THINK.coahuila = thinkTank;
+NPC_THINK.vulcano = thinkTank;
+NPC_THINK.shanag = thinkSkittish;
+NPC_THINK.achillo = thinkPackHunter;
+NPC_THINK.preno = thinkHerdFighter;
 NPC_THINK.bravo = thinkTank;
 NPC_THINK.duria = thinkHunter;          // the Dorset hunter wants a real meal
 NPC_THINK.drypto = thinkRunner;         // the long tyrant runs its prey down
@@ -2328,7 +2346,11 @@ const ECO_SPAWNS = {
   ash: [
     { sp: 'tarbo', n: 2, min: 2, away: true },
     { sp: 'linhe', pack: 2, sizes: [2, 3], min: 3 },
+    { sp: 'achillo', pack: 1, sizes: [2], min: 2 },
     { sp: 'nothro', n: 2, min: 2, away: true },
+    { sp: 'vulcano', n: 2, min: 2, away: true },
+    { sp: 'preno', n: 2, min: 2 },
+    { sp: 'shanag', n: 6, min: 4 },
     { sp: 'ovi', n: 4, min: 3 },
     { sp: 'shuv', n: 5, min: 4 },
     { sp: 'pinaco', n: 3, min: 3, away: true },
@@ -2456,7 +2478,7 @@ function spawnInitialNPCs() {
 // rule is the only road back, and recruits are shed again when the player's
 // power collapses (death, species swap). Recruits are flagged packBonus so
 // maintainPopulation never counts them.
-const PACK_SCALE_SPECIES = new Set(['guanlong', 'troodon', 'hesper', 'linhe', 'dakota', 'aardi', 'pectino', 'gracili', 'masiak']);
+const PACK_SCALE_SPECIES = new Set(['guanlong', 'troodon', 'hesper', 'linhe', 'dakota', 'aardi', 'pectino', 'gracili', 'masiak', 'achillo']);
 const PACK_BONUS_MAX = 5;      // at most this many recruits beyond the original roster
 const PACK_TARGET_MUL = 1.1;   // recruit until the hunt is just worth it
 const PACK_RECRUIT_MIN_D = 620;   // a recruit never appears closer to the player than this

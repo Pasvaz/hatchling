@@ -250,8 +250,8 @@
   }
 
   /* the jump-to dots double as expedition stamps: a tint ring once the land
-     is discovered, one rim pip per dinosaur (lit when mastered), a gold rim
-     when every feat of the land is complete */
+     is discovered, three feat pips plus a gold pip per currently-adult dino
+     on the rim, a gold rim when every feat of the land is complete */
   #ecotabs {
     position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
     display: flex; flex-direction: column; gap: 24px; z-index: 12;
@@ -276,6 +276,8 @@
     background: #2c2113; border: 1px solid #57452a;
   }
   .tabpip.lit { background: #a3bf58; border-color: #5c8a3a; }
+  .tabpip.adult { background: #d8a534; border-color: #8a6a20; }
+  .tabfly .tffeat.adult { color: #d8a534; }
   /* the stamp's story floats out on hover — no panel, just inked text */
   .ecotab .tabfly {
     position: absolute; left: 128%; top: 50%; transform: translateY(-50%);

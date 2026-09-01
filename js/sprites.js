@@ -329,6 +329,56 @@ const DINO = {
     },
     tailUp: 0.3, fuzz: true, armScale: 1.4, bigClaws: true, clawWeapon: true, pattern: 'dapple',
   },
+  vulcano: {
+    // VOLCANO TOOTH — a real dinosaur, dug from between two lava flows in
+    // Zimbabwe. A basal sauropod: stockier and lower than the later giants,
+    // deeper head (the real skull was never found — the ridge shaped ours),
+    // hide like cooled basalt crust with ember seams still glowing in it
+    name: 'Vulcanodon', full: 'Vulcanodon karibaensis', diet: 'herb', biped: false, scale: 1.45,
+    L: { body: [56, 27], tail: [52, 10], neckLen: 23, neckAng: 0.64, head: [12.5, 8], leg: [24, 8.5] },
+    col: {
+      top: '#3c3a3c', mid: '#6b625c', belly: '#d9cfc0', line: '#171314',
+      acc: '#d2622e', eye: '#e0b64e', pat: '#2a2628', shade: '#57504c',
+    },
+    tailUp: 0.24, tailWeapon: true, neckW: 0.62, neckArc: 0.05, sauroHead: true, beak: false,
+    snoutW: 0.46, snoutMidW: 0.6, highBrowse: true, pattern: 'crackle',
+  },
+  shanag: {
+    // the ash sparrow: a crow-sized basal dromaeosaur whose species name is
+    // literally ASHILE. Soot-dark with the black cap its Buddhist-dancer
+    // name promises, and one ember-orange flick in the plume
+    name: 'Shanag', full: 'Shanag ashile', diet: 'carn', biped: true, scale: 0.4,
+    L: { body: [16, 7], tail: [22, 3], neckLen: 6, neckAng: 0.5, head: [8.5, 5], leg: [12, 2.8] },
+    col: {
+      top: '#26222b', mid: '#5c5560', belly: '#cfc6bb', line: '#100e13',
+      acc: '#d2622e', eye: '#f0b448', pat: '#171420', shade: '#48424e',
+    },
+    tailUp: 0.4, fuzz: true, plume: true, bigEye: 1.3, pattern: 'mask',
+  },
+  preno: {
+    // the battering ram: a pachycephalosaur — high dome of solid bone on a
+    // sprinter's frame, a ring of knobs behind it, tail held stiff for the
+    // charge. Dusty scrub-tan under a bone-bright crown
+    name: 'Prenocephale', full: 'Prenocephale prenes', diet: 'herb', biped: true, scale: 0.85,
+    L: { body: [30, 15], tail: [30, 6], neckLen: 8, neckAng: 0.35, head: [13, 9], leg: [20, 5] },
+    col: {
+      top: '#5f5138', mid: '#8d7a55', belly: '#e6dcc0', line: '#2b1e0e',
+      acc: '#e6dabc', eye: '#3f3116', pat: '#463a22', shade: '#786849',
+    },
+    tailUp: 0.3, headButt: true, dome: true, snoutW: 0.3, snoutMidW: 0.5, pattern: 'dapple',
+  },
+  achillo: {
+    // the cinder bear: Mongolia's heavyweight dromaeosaur — a raptor built
+    // like a brawler, deep skull, deep chest, stocky legs. Burnt-maroon
+    // with ember striping: a coal that learned to run
+    name: 'Achillobator', full: 'Achillobator giganteus', diet: 'carn', biped: true, scale: 0.95,
+    L: { body: [34, 17], tail: [38, 6.5], neckLen: 10, neckAng: 0.42, head: [16, 9.5], leg: [20, 5.5] },
+    col: {
+      top: '#4a2a22', mid: '#7c4a34', belly: '#e2cba6', line: '#1c0f0a',
+      acc: '#e07a2e', eye: '#eed24e', pat: '#2e1812', shade: '#663c2c',
+    },
+    tailUp: 0.32, fuzz: true, plume: true, browRidge: true, pattern: 'stripes',
+  },
   eshano: {
     // the Wall's shaggy climber: a VERY unique therizinosaur — held nearly
     // UPRIGHT on short stumpy legs, chest high, tail low, with short arms
@@ -2308,6 +2358,45 @@ function drawPattern(ctx, key, d, C, a) {
     ctx.ellipse(bodyL * 0.05, cy - bodyH * 0.1, bodyL * 0.34, bodyH * 0.16, 0.12, 0, TAU);
     ctx.fill();
     ctx.globalAlpha = 1;
+  } else if (d.pattern === 'crackle') {
+    // cooled-lava crust: dark branching seams run down the flank, and a
+    // faint ember still glows in the heart of every third one
+    const rng = speckleRng(key.charCodeAt(0) * 8779 + 41);
+    ctx.lineCap = 'round';
+    for (let i = 0; i < 7; i++) {
+      let x = -bodyL * 0.44 + rng() * bodyL * 0.88;
+      let y = cy - bodyH * 0.18 + rng() * bodyH * 0.3;
+      const seam = [[x, y]];
+      const segs = 3 + (rng() * 2 | 0);
+      for (let k = 0; k < segs; k++) {
+        x += (rng() - 0.38) * 4.2 * s;
+        y += (1.3 + rng() * 2.1) * s;
+        seam.push([x, y]);
+      }
+      ctx.strokeStyle = C.pat;
+      ctx.globalAlpha = 0.85;
+      ctx.lineWidth = Math.max(0.9, 1.3 * s) * 0.95;
+      ctx.beginPath();
+      ctx.moveTo(seam[0][0], seam[0][1]);
+      for (const [sx, sy] of seam.slice(1)) ctx.lineTo(sx, sy);
+      // one fork off the seam, like crust does
+      const [fx, fy] = seam[1 + (rng() * (seam.length - 2) | 0)];
+      ctx.moveTo(fx, fy);
+      ctx.lineTo(fx + (rng() > 0.5 ? 1 : -1) * (2 + rng() * 3) * s, fy + (1 + rng() * 2) * s);
+      ctx.stroke();
+      if (i % 3 === 0) {
+        // the ember: the middle stretch of the seam, barely alight
+        ctx.strokeStyle = C.acc;
+        ctx.globalAlpha = 0.6;
+        ctx.lineWidth = Math.max(0.7, 1.3 * s) * 0.6;
+        ctx.beginPath();
+        ctx.moveTo(seam[1][0], seam[1][1]);
+        ctx.lineTo(seam[2][0], seam[2][1]);
+        ctx.stroke();
+      }
+    }
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = C.pat;
   } else if (d.pattern === 'band') {
     // lighter keeled flank band between armour rows
     ctx.fillStyle = C.pat;
@@ -3194,6 +3283,31 @@ function drawHead(ctx, key, d, C, a) {
     ctx.beginPath();
     ctx.ellipse(hPt(0.08, -0.72).x, hPt(0.08, -0.72).y, hl * 0.09, hh * 0.14, -0.3, 0, TAU);
     ctx.fill();
+  }
+  if (d.dome) {
+    // prenocephale: the high bone dome, polished from use, with a ring of
+    // knobs trailing behind it where the dome meets the neck
+    ctx.fillStyle = C.acc;
+    ctx.strokeStyle = C.line;
+    ctx.lineWidth = lineW * 0.8;
+    const b0 = hPt(-0.14, -0.26), b1 = hPt(0.42, -0.3);
+    ctx.beginPath();
+    ctx.moveTo(b0.x, b0.y);
+    ctx.quadraticCurveTo(hPt(-0.08, -1.3).x, hPt(-0.08, -1.3).y, hPt(0.16, -1.18).x, hPt(0.16, -1.18).y);
+    ctx.quadraticCurveTo(hPt(0.42, -0.9).x, hPt(0.42, -0.9).y, b1.x, b1.y);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    // the polish: one hard highlight where the dome takes the hits
+    ctx.fillStyle = 'rgba(255,248,230,0.4)';
+    ctx.beginPath();
+    ctx.ellipse(hPt(0.12, -0.94).x, hPt(0.12, -0.94).y, hl * 0.1, hh * 0.15, -0.3, 0, TAU);
+    ctx.fill();
+    // knob ring trailing off the dome's back rim
+    ctx.fillStyle = shade(C.acc, 0.78);
+    ctx.lineWidth = lineW * 0.55;
+    for (let k = 0; k < 3; k++) {
+      const q = hPt(-0.17 - k * 0.1, -0.3 - k * 0.03);
+      ctx.beginPath(); ctx.arc(q.x, q.y, hl * 0.045, 0, TAU); ctx.fill(); ctx.stroke();
+    }
   }
   if (d.duckbill) {
     // hadrosaur spoonbill: a wide flat keratin beak capping the snout.
