@@ -207,6 +207,10 @@ const VOICE = {
   giganto:   { style: 'bellow',  f: 110, vib: 0.02, vibR: 3.5 },      // a foghorn on legs
   crista:    { style: 'hiss',    f: 140, rasp: 0.3 },                 // the shoreline croc-rumble
   linhe:     { style: 'shriek',  f: 380 },                            // the ridge's knife-scream
+  preno:     { style: 'honk',    f: 230, rasp: 0.2 },                 // short blunt head-down huffs
+  vulcano:   { style: 'boom',    f: 62, rasp: 0.2 },                  // the mountain clears its throat
+  shanag:    { style: 'chatter', f: 560 },                            // ash-sparrow scatter-peeps
+  achillo:   { style: 'shriek',  f: 300, rasp: 0.5 },                 // the cinder bear's saw-scream
   nothro:    { style: 'bellow',  f: 160, rasp: 0.5 },                 // a huffing pot-bellied blast
   aardi:     { style: 'chatter', f: 360 },                            // the pack's yipping tongue
   centro:    { style: 'honk',    f: 190, wave: 'square' },            // a nose-horn blast
@@ -226,4 +230,11 @@ const VOICE = {
   sarco:     { style: 'shriek',  f: 340, rasp: 0.3 },                 // the bone-breaker's cry
   drypto:    { style: 'roar',    f: 125, rasp: 0.6 },                 // the long tyrant, low and dry
   gastonia:  { style: 'bellow',  f: 120, rasp: 0.3 },                 // armor with lungs
+  buitre:    { style: 'chatter', f: 470, rasp: 0.15 },                // a wader's clattering rattle
+  hypsi:     { style: 'chatter', f: 540 },                            // thin panic-peeps
+  adratik:   { style: 'bellow',  f: 128, rasp: 0.25 },                // a low wall clearing its throat
+  orkor:     { style: 'shriek',  f: 240, rasp: 0.45 },                // the hook-handed scream
+  neove:     { style: 'roar',    f: 165, rasp: 0.55 },                // the quiet hunter, finally loud
+  coahuila:  { style: 'honk',    f: 135, wave: 'square', rasp: 0.25 },// the great horns' war-trumpet
+  poekilo:   { style: 'roar',    f: 112, rasp: 0.75 },                // the apex: gravel and thunder
 };

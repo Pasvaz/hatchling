@@ -23,7 +23,7 @@ land itself is trying to kill you (Linheraptor → Nothronychus), the
 **Lertentous Delta** — a map FOUR TIMES the size of any other, where one great
 river braids into four channels on its way to a drowned southern sea
 (Aardiraptor → Centrosaurus → Omniraptor → Eotrachodon → Lokiceratops →
-Morosaurus, then a **choice of apex**: master Tyrannotitan OR Spinosaurus —
+Morosaurus, then a **choice of apex**: master Tyrannotitan OR Sigilmassasaurus —
 both unlock together, either one opens the endgame), and finally
 **The Nivalotitan Wall** — a misty mountain built as a CLIMBING MAZE of rock
 walls, where a **COLD bar** ticks toward freezing solid, **blizzards** force
@@ -34,7 +34,7 @@ lands harder, Kerberosaurus herds are warm to huddle beside, and Nanuqsaurus
 rules the whiteout (Jianchangosaurus → Eshanosaurus → Nanuqsaurus →
 Nivarex) — and beyond the Wall, **The Great Moors of Martulisth**: a grey,
 sunless heath where mist rings the screen and everything beyond arm's length
-is a silhouette lying about its size (Simosuchus → Koreaceratops →
+is a dark silhouette (Simosuchus → Koreaceratops →
 Sarcosaurus → Dryptosaurus → Gastonia). Somewhere
 in the high maze one hidden cave holds the **frozen giant** the mountain is
 named for — find it, and the biggest animal in the game joins your lobby
@@ -62,15 +62,14 @@ No build step, no dependencies — plain HTML5 canvas + JavaScript.
 | WASD / Arrows | Move |
 | SHIFT | Sprint (drains stamina) |
 | SPACE | Bite / attack |
-| P (hold) + direction | **Pounce** — the dino coils (bigger = longer), leaps (faster = farther) and bites where it lands. Tail-fighters instead hold P to **tail-swing**: continuous hits on a metronome, but the feet are planted until you let go. (P still creates an aardiraptor pack on a quick tap — hold + direction is the pounce.) |
-| E | Eat ferns · drink · feed on carcass · swallow what you carry |
+| | *E and F are **context** keys: they do **only** what the on-screen prompt says, and nothing at all when there is no prompt. Moves you can make anywhere — a weapon, a species power — always get their own key instead.* |
+| **E** | **Interact** — the primary CONTEXT key: eat ferns/horsetails · browse the canopy · feed on a carcass · drink · swallow what you carry · hide in your own burrow · enter or invade a den · nest underground |
+| **F** | **Action** — the secondary CONTEXT key: go fishing · grab a carcass (hold: tear off a chunk) or drop it · wrestle · bathe · court and take a mate · leave a den |
+| M | Second weapon — claw slash (riojasaurus, orkoraptor, neovenator) · double bite (poekilopleuron) |
+| B | Dig your burrow, anywhere (simosuchus) — press it beside the burrow to collapse it |
+| SPACE (hold) + direction | **Pounce** — the press bites, and keeping SPACE down flows into the coil: the dino loads (bigger = longer), leaps (faster = farther) and strikes EVERYTHING the leap crosses — the hit zones are live from the first inch of the jump to a beat after the landing, one strike per victim. Tail-fighters instead hold SPACE to **tail-swing**: continuous hits on a metronome, but the feet are planted until you let go. |
 | R | Rest — a deliberate **3-second** settle onto folded legs (you stop moving first). Heal faster, needs drain slower. You're committed: sit at least **1 second**, then a step (or R) starts the equally slow **3-second** rise — no popping up. |
-| B | **Bathe** (while resting in a mud pool) — roll, wriggle and kick the mud clean in a real scrub animation: the fast way to restore hygiene. Just standing in mud still works, but VERY slowly. |
-| G | Grab a carcass to carry (hold: tear off a chunk) · press again to drop |
-| M | Wrestle a dino your own size (apex carnivores) |
-| P / I | Aardiraptor: pounce-hold / invade a protoceratops burrow |
 | 1 / 2 / 3 | **Calls** — every playable has its OWN voice, matched to its playstyle (the `VOICE` registry, js/util.js): carnivores rasp and roar, duckbills and horned dinos trumpet, sauropods answer with sub-bass booms, raptors scream, the pack species yips, croc-snouts gurgle, and the Wall's dinos cry over the wind — all pitched up while young, and each call type is that same voice in a different mood. **1 Broadcast:** head craned to the sky, a long droning call — a carnivore claims every carcass in earshot (⚑): NPCs outside your pack must kill you before they may eat it. Most back off… rarely one defies the claim and hunts you TO THE DEATH. **2 Friendly:** short and smooth, a soft bow — this is how an aardiraptor invites its kin to the pack now. **3 Aggressive:** long, jagged, full of sharp sudden movements — smaller dinosaurs scatter, bolder ones may be provoked into attacking, and aimed at a close packmate it casts them out of the pack. |
-| F / N | Go fishing (spinosaurids) / nest |
 | TAB | Health menu |
 | ESC / U / F1 | Pause / mute / help |
 | H | Hitbox X-ray — red = attack zone, cyan = hittable body, orange = nip jaws |
@@ -87,7 +86,7 @@ ease well back toward the center). On the right, an **icon button cluster**:
 💤 rest, and two buttons that only exist when the world offers them — ✊ grab
 appears beside a carcass (tap to carry, hold to tear a chunk) and a fourth
 slot appears as 💧/🌿/🍖 to drink or eat whatever you're standing at. Rarer
-prompts — nest, wrestle, fish, burrows — stay as labelled pills above the
+prompts — nest, wrestle, fish, dig — stay as labelled pills above the
 cluster. During a wrestle the right half of the
 screen becomes a **swipe pad** (the QTE shows which way). Landscape is the
 intended orientation: portrait shows a "turn your phone" screen, and the first
@@ -235,7 +234,7 @@ them: every fish in the game lives here, plus two of its own — and to
 sun-glades where orchid drifts bloom; reeds line every bank and ferns carpet
 the understory.
 
-**Fishing (F).** Spinosaurids (Spinosaurus, Cristatusaurus) at the water's
+**Fishing (F).** Spinosaurids (Sigilmassasaurus, Cristatusaurus) at the water's
 edge get a second prompt: *F — go fishing*. You crouch dead-still at the
 waterside and the fish, seeing no danger, drift slowly closer — they take
 their time deciding. When one is close, SPACE one-shots it: an easy meal.
@@ -268,7 +267,7 @@ on purpose). G again drops it (still edible, and its rot pauses while
 carried); **E swallows** what you hold — head thrown back, jaws snapping as
 it goes down.
 
-**Wrestling (M).** Apex carnivores (Spinosaurus maroccanus, Tyrannotitan) can
+**Wrestling (M).** Apex carnivores (Sigilmassasaurus, Tyrannotitan) can
 wrestle any land dinosaur near their own bulk: the prey is clamped neck-and-
 body in your jaws while five keys flash up — press each in time and the fifth
 is the **SLAM** (heavy damage, long stun). The bigger the opponent, the less
@@ -308,8 +307,8 @@ and the hatchlings stay safely below until they emerge as sub-adults.
 - **Eotrachodon** (master Omniraptor) — the oldest duckbill: tough and hardy, resists bleeding, swings a real hadrosaur tail. Earns extra.
 - **Lokiceratops** (master Eotrachodon) — Centrosaurus but cooler: midnight coat, golden blade horns, more of everything.
 - **Morosaurus** (master Lokiceratops) — **the sauropod.** Grows agonizingly slowly; a full adult swings a whip tail, shrugs off nearly everything, and fears exactly one animal in the delta (see below).
-- **Spinosaurus maroccanus** (master Morosaurus — then Tyrannotitan and Spinosaurus unlock TOGETHER: choose your apex, and mastering either opens the Wall) — the end of the spinosaurid road (Ichthyovenator → Cristatusaurus → this), built to its Prior Extinction likeness: an **M-shaped sail**, a throat **dewlap**, an upward-arcing neck, and a skull all its own (nasal crest, rosette snout, interlocking croc teeth, slit nostrils set far back). It attacks with **jaws AND clawed arms together** — point-blank prey inside the long snout still catches the swipe — and its **Wet Wrath** makes it hit 1.2× harder standing in water (and 15% softer on dry land). The fastest swimmer in the game; at adult, the undisputed apex of the water. Getting there is the whole game.
-- **Tyrannotitan** (the other half of the apex choice) — Spinosaurus' opposite number: the LAND apex. A lesser-sung carcharodontosaurid with the deep shark-toothed skull and heavy brow bosses of its famous cousin, and a **bleed-based** kit — its wounds bleed nearly twice as hard and longer. Hit, fall back, and let the blood do the rest.
+- **Sigilmassasaurus** (master Morosaurus — then Tyrannotitan and Sigilmassasaurus unlock TOGETHER: choose your apex, and mastering either opens the Wall) — the end of the spinosaurid road (Ichthyovenator → Cristatusaurus → this), built to its Prior Extinction likeness: an **M-shaped sail**, a throat **dewlap**, an upward-arcing neck, and a skull all its own (nasal crest, rosette snout, interlocking croc teeth, slit nostrils set far back). It attacks with **jaws AND clawed arms together** — point-blank prey inside the long snout still catches the swipe — and its **Wet Wrath** makes it hit 1.2× harder standing in water (and 15% softer on dry land). The fastest swimmer in the game; at adult, the undisputed apex of the water. Getting there is the whole game.
+- **Tyrannotitan** (the other half of the apex choice) — Sigilmassasaurus' opposite number: the LAND apex. A lesser-sung carcharodontosaurid with the deep shark-toothed skull and heavy brow bosses of its famous cousin, and a **bleed-based** kit — its wounds bleed nearly twice as hard and longer. Hit, fall back, and let the blood do the rest.
 
 **NPCs — Lertentous Delta**
 - **Magnapaulia** — a giant hadrosaur that defends its herd *vigorously*: strike one and the whole river bank swings back.
@@ -328,7 +327,7 @@ and the hatchlings stay safely below until they emerge as sub-adults.
 - **Mawsonia** *(fish)* — the greatest coelacanth that ever lived: immensely tanky, strong, and it never, ever flees.
 - …plus **Lepisosteus**, **Black-back Bass**, **Herrietopus** and **Scutelocephalichthyus** — every fish in the game swims the delta.
 
-**Playable — The Nivalotitan Wall** (opens when Tyrannotitan OR Spinosaurus is mastered)
+**Playable — The Nivalotitan Wall** (opens when Tyrannotitan OR Sigilmassasaurus is mastered)
 - **Jianchangosaurus** (unlocked with the land) — the cheap way onto the mountain: a small rusty therizinosaur, quick and thin-coated. Its **hatchlings can climb** the maze walls to escape anything with teeth — a grown one is too heavy for the rock. Use the gift while you have it.
 - **Eshanosaurus** (master Jianchangosaurus) — the oldest therizinosaur, held nearly upright on stumpy legs, short high arms ending in great scythes. Thick-coated (55% cold resistance), claw wounds bleed, and it is the ONLY grown dino that climbs the Wall — the whole maze is its road, and every wall-top a pounce perch.
 - **Nivalotitan** *(imagined — THE SECRET)* — the frozen giant the mountain is named for. It cannot be bought at any price: somewhere in the high north maze, one hidden cave holds it, **visibly asleep inside a slab of old blue ice**, and standing before it once unlocks it forever. The largest animal in the game — a brachiosaur silhouette with towering shoulders and a near-vertical neck, a sweeping tail, near-total cold immunity, the slowest growth there is — and it **TRAMPLES**: anything clearly smaller caught under a walking giant's footprint is simply crushed.
@@ -339,10 +338,9 @@ and the hatchlings stay safely below until they emerge as sub-adults.
 **Playable — The Great Moors of Martulisth** (opens when Nivarex is mastered — or when a Nivalotitan reaches ADULT; the giant needn't finish growing)
 
 The moors are grey, gloomy and NEVER sunny: mist lingers in a heavy ring at
-the edge of the screen, and anything past arm's length is a dark **silhouette
-that lies about its size** — each animal looms through the mist a fixed,
-personal amount bigger or smaller than it really is. Guess wrong at your
-peril.
+the edge of the screen, and anything past arm's length is a dark
+**silhouette** — a shape in the grey with no name, no health bar and no
+shadow. Guess what it is at your peril.
 
 - **Simosuchus** (unlocked with the land) — weird and wonderful: a tiny, quadrupedal, square-faced armored digger (Protoceratops-sized). Press **B** anywhere (not while resting) and it digs its OWN burrow — press **E** at it to hide head-first, backside out: attackers deal next to nothing to the armored butt and give up. One burrow at a time — B beside it collapses it so you can dig a wiser one.
 - **Koreaceratops** (master Simosuchus) — a small horned swimmer with a deep paddle tail: the only moor-dweller at home in the black meres' deep water.

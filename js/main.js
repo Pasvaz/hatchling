@@ -24,7 +24,7 @@ G.prompt = '';
 G.banner = null;
 G.paused = false;
 G.started = false;
-G.input = { up: false, down: false, left: false, right: false, sprint: false, attack: false, interact: false, sprinting: false, fish: false, nest: false, wrestle: false, pack: false, burrow: false, rest: false, grab: false, pounceHold: false };
+G.input = { up: false, down: false, left: false, right: false, sprint: false, attack: false, interact: false, sprinting: false, fish: false, nest: false, wrestle: false, pack: false, burrow: false, rest: false, grab: false, pounceHold: false, atkHold: false, spaceHeldT: 0 };
 G.zoom = 1;   // grow-zoom: eases toward 1 + growth·(size term) — see loop()
 G.mate = null;
 G.nesting = { stage: 'none', babies: [] };
@@ -41,7 +41,7 @@ const PROFILES_KEY = 'hatchling_profiles_v1';
 const LEGACY_SAVE_KEY = 'hatchling_save_v1';
 // earned = lifetime growths score (never spent down — it's the leaderboard)
 // ecoPaid = one flag per unlocked ecosystem, ready for however many we add
-function defaultSave() { return { growths: 0, earned: 0, ecoPaid: {}, mastery: {}, owned: {}, dino: {}, skinChoice: {}, genderChoice: {}, skinOwned: {} }; }
+function defaultSave() { return { growths: 0, earned: 0, ecoPaid: {}, mastery: {}, owned: {}, dino: {}, skinChoice: {}, genderChoice: {}, skinOwned: {}, discovered: {}, arrived: {}, hatched: {}, titles: {}, titleWorn: null, ecoSeen: {} }; }
 // paid skins are bought once per species (Classic and other free skins pass)
 function skinOwned(species, skinId) {
   return !SKINS[skinId].cost || !!(Save.skinOwned || {})[species + ':' + skinId];
@@ -52,7 +52,7 @@ function skinOwned(species, skinId) {
 function cardGender(species) { return (Save.genderChoice || {})[species] === 'f' ? 'f' : 'm'; }
 function cardSkin(species) {
   const s = (Save.skinChoice || {})[species];
-  return SKINS[s] && (!SKINS[s].only || SKINS[s].only === species) && skinOwned(species, s) ? s : 'default';
+  return SKINS[s] && skinFits(species, s) && skinOwned(species, s) ? s : 'default';
 }
 const Profiles = (() => {
   try {
@@ -88,11 +88,15 @@ const CHAIN = [
   // late-bloomer sauropodomorph — master either one to reach qianzhousaurus
   ['ichthyo', 'rioja'], ['qianzho'], ['scutello'],             // 🦴 Skull Prairie (+ rioja back home)
   ['metria'], ['giganto'], ['crista'],                         // 🌊 Coastal Scrubs
-  ['linhe'], ['nothro'],                                       // 🌋 Ashfall Ridge
+  ['linhe'], ['preno'],                                        // 🌋 Ashfall Ridge
+  ['nothro', 'vulcano'],   // the ridge's fork: scythe claws or the young mountain
   ['aardi'], ['centro'], ['omni'], ['eotrach'], ['loki'], ['moro'],
   ['tyranno', 'spino'],                                        // 🐟 Delta finale: choose your apex
   ['jianchang'], ['eshano'], ['nanuq'], ['nivarex'],           // 🏔️ The Wall
   ['simo'], ['korea'], ['sarco'], ['drypto'], ['gastonia'],    // 🌫️ The Great Moors of Martulisth
+  ['buitre'], ['hypsi'], ['adratik'], ['orkor'],               // 🌴 The Sodden Reach
+  ['neove', 'coahuila'],   // the fork: quiet hands or great horns — either one
+  ['poekilo'],             // …opens the road to the Reach's true apex
 ];
 function chainRung(sp) { return CHAIN.findIndex(r => r.includes(sp)); }
 // a species is playable if: it's the chain's first rung, the rung before it
@@ -139,6 +143,12 @@ function syncEcoUnlocks() {
     const i = ecoFirstRung(key);
     if (i >= 0 && spUnlocked(CHAIN[i][0])) {
       Save.ecoPaid[key] = true;
+      // stamp the ledger: which land this was, and whose mastery opened it
+      Save.discovered = Save.discovered || {};
+      if (!Save.discovered[key]) {
+        const gate = CHAIN[i - 1] ? CHAIN[i - 1].find(m => Save.mastery[m]) : null;
+        Save.discovered[key] = { n: Object.keys(Save.discovered).length + 1, by: gate || null };
+      }
       fresh.push(ECOS[key].name);
     }
   }
@@ -163,10 +173,11 @@ function onFullyGrown(species) {
   Save.earned += 100;
   const fresh = ALL_PLAYABLES.filter(sp => spUnlocked(sp) && !before.includes(sp));
   const lands = syncEcoUnlocks();
+  syncTitles();
   saveSave();
   setTimeout(() => {
     let str = '+100 growths mastery bonus!';
-    if (lands.length) str += '  🔓 NEW LAND: ' + lands.join(' & ').toUpperCase() + '!';
+    if (lands.length) str += '  🗺️ THE TRAIL OPENS: ' + lands.join(' & ').toUpperCase() + '!';
     if (fresh.length) str += '  🔓 ' + fresh.map(sp => DINO[sp].name.toUpperCase()).join(' & ') + ' unlocked — visit the lobby!';
     G.banner = { str, t: 9, color: '#ffd23e' };
   }, 6200);
@@ -196,6 +207,11 @@ function saveDinoSnapshot() {
     growth: p.growth, hp: p.hp, food: p.food, water: p.water,
     stamina: p.stamina, hygiene: p.hygiene, x: p.x, y: p.y,
     cold: p.cold || 0,
+    // the body's condition travels too — the lobby is not a hospital:
+    // an open wound keeps bleeding right where you left off
+    bleed: p.bleed ? { dps: p.bleed.dps, t: p.bleed.t } : null,
+    bones: p.bones || null,
+    exhausted: !!p.exhausted,
   };
   saveSave();
 }
@@ -213,27 +229,27 @@ window.addEventListener('keydown', (e) => {
   if (e.repeat) return;
   G.keys[e.code] = true;
   if (KEYMAP[e.code]) G.input[KEYMAP[e.code]] = true;
-  if (e.code === 'Space') G.input.attack = true;
+  if (e.code === 'Space') { G.input.attack = true; G.input.atkHold = true; }
   if (e.code === 'KeyE') G.input.interact = true;
-  if (e.code === 'KeyF') G.input.fish = true;
-  if (e.code === 'KeyN') G.input.nest = true;
-  if (e.code === 'KeyM') G.input.wrestle = true;
+  // F is the SECOND context key: fish · grab · wrestle · claw · bathe · dig ·
+  // court · leave a den — whichever one the situation offers (resolveAction)
+  if (e.code === 'KeyF') G.input.action = true;
+  // ALWAYS-AVAILABLE moves keep their own keys — they have no situational cue
+  // to hang a prompt on, so they must never share the context keys
+  if (e.code === 'KeyM') G.input.claw = true;   // claw slash — the clawSecond species' second weapon
+  if (e.code === 'KeyB') G.input.dig = true;    // the digger's burrow, anywhere
   if (G.wrestle && WRESTLE_KEYS.includes(e.code)) G.wrestle.pressed = e.code;
-  if (e.code === 'KeyP') G.input.pack = true;
-  if (e.code === 'KeyI') G.input.burrow = true;
   // the CALLS: 1 broadcast (claim), 2 friendly (invite), 3 aggressive (threat)
   if (e.code === 'Digit1') G.input.call1 = true;
   if (e.code === 'Digit2') G.input.call2 = true;
   if (e.code === 'Digit3') G.input.call3 = true;
   if (e.code === 'KeyR') G.input.rest = true;
-  if (e.code === 'KeyB') G.input.bathe = true;
-  if (e.code === 'KeyG') G.input.grab = true;
-  // hold P (+ a direction) to pounce — tail-fighters hold it to swing.
-  // (CTRL was tried first and abandoned: Ctrl+letter combos are browser
-  // shortcuts — bookmarks, close-tab — and can't be prevented. P doubles as
-  // the aardiraptor's pack key; tap = pack, hold-with-direction = pounce.)
-  if (e.code === 'KeyP') G.input.pounceHold = true;
+  // pounce lives on SPACE now: the press bites, a continuous hold coils
+  // (P was retired; CTRL was tried before that and abandoned — Ctrl+letter
+  // combos are browser shortcuts and can't be prevented.)
   if (e.code === 'Escape') {
+    if (!document.getElementById('titlewall').classList.contains('hidden')) { toggleTitles(false); return; }
+    if (Spec.open) { toggleSpecimenHall(); return; }
     if (G.started) { G.paused = !G.paused; document.getElementById('pause').classList.toggle('hidden', !G.paused); }
   }
   if (e.code === 'KeyU') {
@@ -241,6 +257,9 @@ window.addEventListener('keydown', (e) => {
     G.banner = { str: m ? 'Sound muted' : 'Sound on', t: 1.5, color: '#cbb' };
   }
   if (e.code === 'KeyH') G.debugHit = !G.debugHit; // hitbox X-ray
+  // the secret door: type the word "bones" and the Specimen Hall opens
+  G._secret = ((G._secret || '') + (e.key.length === 1 ? e.key.toLowerCase() : '')).slice(-5);
+  if (G._secret === 'bones') { G._secret = ''; toggleSpecimenHall(); }
   if (e.code === 'F1') { e.preventDefault(); document.getElementById('help').classList.toggle('hidden'); }
   if (e.code === 'Tab') document.getElementById('statspanel').classList.toggle('hidden');
   if (e.code === 'KeyY' && G.player && G.player.alive) { // growth cheat for testing
@@ -252,13 +271,13 @@ window.addEventListener('keydown', (e) => {
 window.addEventListener('keyup', (e) => {
   G.keys[e.code] = false;
   if (KEYMAP[e.code]) G.input[KEYMAP[e.code]] = false;
-  if (e.code === 'KeyP') G.input.pounceHold = false;
+  if (e.code === 'Space') G.input.atkHold = false;
 });
 // losing focus (a browser shortcut fired, a tab switch) eats the keyups —
 // clear every held flag so nothing stays latched behind our back
 window.addEventListener('blur', () => {
   const i = G.input;
-  i.up = i.down = i.left = i.right = i.sprint = i.pounceHold = false;
+  i.up = i.down = i.left = i.right = i.sprint = i.pounceHold = i.atkHold = false;
   G.keys = {};
 });
 
@@ -313,13 +332,21 @@ function animatePreview(canvasId, species, gender, growth, skinId) {
 // every key in PLAYER_DEF is a playable — add an entry there (+ DINO art +
 // CARD_INFO copy below) and its card, previews and purchase flow just appear
 const ALL_PLAYABLES = Object.keys(PLAYER_DEF);
+// the whole world scrolls as one journey now, so "which previews animate" is
+// decided by the viewport: an observer keeps this set to the on-screen cards
+// (plus a little margin) — 30 dinos still won't burn CPU
+const previewVisible = new Set();
+const previewObserver = new IntersectionObserver((entries) => {
+  for (const en of entries) {
+    const sp = en.target.id.slice(5);      // 'prev-<sp>'
+    if (en.isIntersecting) previewVisible.add(sp); else previewVisible.delete(sp);
+  }
+  animateAllPreviews();
+}, { rootMargin: '160px 0px' });
 function animateAllPreviews() {
   previewGen++;
-  // only the visible ecosystem's previews animate — 30 dinos won't burn CPU.
-  // Each hatchling wears the loadout currently selected on its card.
-  for (const sp of ALL_PLAYABLES) {
-    if ((PLAYER_DEF[sp].eco || 'valley') === titleEco) animatePreview('prev-' + sp, sp, cardGender(sp), undefined, cardSkin(sp));
-  }
+  // each hatchling wears the loadout currently selected on its card
+  for (const sp of previewVisible) animatePreview('prev-' + sp, sp, cardGender(sp), undefined, cardSkin(sp));
 }
 
 const needMsg = (cost) => ' — you need ' + (cost - Save.growths) + ' more.';
@@ -342,6 +369,13 @@ let titleEco = 'valley';
 
 // lobby copy per playable — the only thing a new dino needs besides its defs
 const CARD_INFO = {
+  buitre: { desc: 'A long-legged river ghost on black pin legs. Its slender snout is built for fish — and fish feed it DOUBLE. It wades deep water where others must swim, slowly, and its bite will not stop bleeding.', tag: '◆ CARNIVORE — FISHER', tagClass: 'swim' },
+  hypsi: { desc: 'A tiny feathered thicket-mouse. Fast, fragile, and hunted by everything — but it can throw itself into the earth, and for ten seconds nothing on the Reach will touch it.', tag: '◆ HERBIVORE — HARD', tagClass: 'hard' },
+  adratik: { desc: 'The oldest stegosaur of them all: a low spiked wall that opens wounds. Every plate edge and tail spike leaves the attacker leaking. Slow, patient, and very hard to finish.', tag: '◆ HERBIVORE — BLEED TANK', tagClass: 'mod' },
+  orkor: { desc: 'The last of the megaraptorids — long hooked arms, blade teeth, and real speed. It opens prey with its hands as much as its jaws, and the bleeding does the rest.', tag: '◆ CARNIVORE — BLEEDER', tagClass: 'mod' },
+  neove: { desc: 'The quiet hunter of the Reach. It does not chase the way the tyrants chase — it arrives. Hands and jaws together, and everything it touches bleeds.', tag: '◆ CARNIVORE — HUNTER', tagClass: 'hard' },
+  coahuila: { desc: 'Possibly the longest brow horns anything ever grew, and a committed charge on the far end of them. Every wound those horns open keeps working — crazy bleed on four legs.', tag: '◆ HERBIVORE — BLEEDER', tagClass: 'mod' },
+  poekilo: { desc: 'The new apex of the Reach: a megalosaurid of keel-skulled muscle. No tricks, no ambush — raw damage, arms like beams, and a double bite (M) that ends arguments.', tag: '◆ CARNIVORE — APEX', tagClass: 'hard' },
   raja: { desc: 'A predator hatched in the fern forest. Scavenge carcasses, hunt to eat, and one day even the mighty Huayangosaurus may fear your bite.', tag: '◆ CARNIVORE — MODERATE', tagClass: 'mod' },
   campto: { desc: 'Born on the open plains where Moros intrepidus hunts. Run for the fern forest fast — the shade is your only refuge until you grow. Earns extra growths.', tag: '◆ HERBIVORE — HARD', tagClass: 'hard' },
   rioja: { desc: 'An ancient sauropodomorph and the valley\'s best brawler: swing the tail, then slash with the thumb-claws (M) to open bleeding wounds. Grows very slowly and eats enormously.', tag: '◆ HERBIVORE — BRAWLER', tagClass: 'mod' },
@@ -352,8 +386,10 @@ const CARD_INFO = {
   giganto: { desc: 'A living fortress with giant shoulder spines. It cannot bite at all — turn your back and swing the thagomizer. Slow, but almost unkillable.', tag: '◆ HERBIVORE — TAIL FIGHTER', tagClass: 'hard' },
   crista: { desc: 'The shoreline king: a croc-snouted heavyweight that swims deep water and hits like a slammed door. Slow — but far too strong for Megorontosuchus to hold.', tag: '◆ CARNIVORE — TANK', tagClass: 'mod' },
   linhe: { desc: 'Nothing on the ridge outruns you — and nothing forgives a mistake. Dodge the falling fire, dodge Tarbosaurus, and remember: the wild packs hunt here too.', tag: '◆ CARNIVORE — SPEED', tagClass: 'hard' },
+  preno: { desc: 'A dome of solid bone on a sprinter\'s frame. Nothing else on the ridge RAMS: build speed, hit like a falling rock, and knock things clean off their feet.', tag: '◆ HERBIVORE — RAMMER', tagClass: 'mod' },
+  vulcano: { desc: 'A real dinosaur named after a volcano — Vulcanodon, VOLCANO TOOTH, dug from between two lava flows. A young mountain in cracked basalt hide, with a tail like a falling tree. Grows slowly; fears little.', tag: '◆ HERBIVORE — SAUROPOD', tagClass: 'mod' },
   nothro: { desc: 'A pot-bellied giant that stands tall and swings great scythe claws. Eats only plants; slashes anything that forgets that. Claw wounds bleed.', tag: '◆ HERBIVORE — CLAWS', tagClass: 'mod' },
-  aardi: { desc: 'Small, weak, and it looks like a dumb pick — until you meet your kin. Press P and lead the pack: raid Protoceratops burrows, claim them, and rule the undergrowth.', tag: '◆ CARNIVORE — PACK ALPHA', tagClass: 'hard' },
+  aardi: { desc: 'Small, weak, and it looks like a dumb pick — until you meet your kin. Press 2 to call the pack together: raid Protoceratops burrows, claim them, and rule the undergrowth.', tag: '◆ CARNIVORE — PACK ALPHA', tagClass: 'hard' },
   centro: { desc: 'One great nose horn and no sense of retreat. Grows slowly, but a grown Centrosaurus is a wall — cheap to hatch, hard to move.', tag: '◆ HERBIVORE — TANK', tagClass: 'mod' },
   omni: { desc: 'Fast, strong, and cheap: the working raptor of the delta islands. Bleed your prey, cross at the sandbars, and never swim where the saw hunts.', tag: '◆ CARNIVORE — RAIDER', tagClass: 'mod' },
   eotrach: { desc: 'The oldest duckbill — tough, hardy, and built to outlast the delta. Its scarred hide resists bleeding and its tail swings like a river gate.', tag: '◆ HERBIVORE — HARDY', tagClass: 'hard' },
@@ -366,12 +402,355 @@ const CARD_INFO = {
   nivalo: { desc: 'THE FROZEN GIANT. The mountain bears its name, and it cannot be bought — somewhere in the high maze, a hidden cave remembers it. The largest animal that has ever walked this game.', tag: '◆ HERBIVORE — THE LEGEND', tagClass: 'swim' },
   nanuq: { desc: 'Play the KING. The polar tyrant hunts the whiteout in a fur coat — bleed bites, wrestling strength, and every herd on the mountain knows your silhouette. Only the Titanovenator outranks you.', tag: '◆ CARNIVORE — THE KING', tagClass: 'mod' },
   nivarex: { desc: 'The Wall\'s final apex. A shark-toothed giant in a deep feather blanket — the largest carnivore on the mountain, near-immune to the cold, and heavy enough to bring down a Kerberosaurus alone. Every wound it opens keeps working.', tag: '◆ CARNIVORE — THE SUMMIT', tagClass: 'mod' },
-  simo: { desc: 'Weird and wonderful: a pug-faced, square-headed little digger. Press B and it builds its OWN burrow — dive in and attackers gnaw an armored backside until they give up. One burrow at a time: choose the spot wisely.', tag: '◆ HERBIVORE — THE DIGGER', tagClass: 'hard' },
+  simo: { desc: 'Weird and wonderful: a pug-faced, square-headed little digger. Press B and it digs its OWN burrow — dive in and attackers gnaw an armored backside until they give up. One burrow at a time: choose the spot wisely.', tag: '◆ HERBIVORE — THE DIGGER', tagClass: 'hard' },
   korea: { desc: 'The horned swimmer: a small ceratopsian with a deep paddle tail. The black meres hide it, feed it, and drown whatever follows it in — the only moor-dweller at home in the deep water.', tag: '◆ HERBIVORE — SWIMMER', tagClass: 'swim' },
   sarco: { desc: 'Fast, deadly, and never bleeding — BREAKING. Its bites can crack the very bone they land on: a thigh ends the chase, a tail sends prey veering wrong, a skull takes the force out of everything.', tag: '◆ CARNIVORE — BONE BREAKER', tagClass: 'mod' },
   drypto: { desc: 'The long tyrant: stretched skull, stretched frame, and the same bone-cracking jaws turned up to full. Big, fast, agile — the mist\'s worst silhouette to guess wrong about.', tag: '◆ CARNIVORE — BONE BREAKER', tagClass: 'mod' },
   gastonia: { desc: 'A flat oval of living armor: ankylosaur head, shoulder spikes that grow as it does, and a long spiked tail swinging behind. Nothing on the moor opens it — most stop trying.', tag: '◆ HERBIVORE — THE FORTRESS', tagClass: 'hard' },
 };
+
+// ---------- chapter backdrops: each land's wallpaper ----------
+// every biome gets a repeating pattern tile — a few quiet motifs in its own
+// tint, scattered like a botanical print — that papers that land's entire
+// stretch of the journey. Motifs draw around their origin ("ground" at y=0,
+// growing upward) and bdAt() places them in the tile at any scale/rotation.
+function bdAt(x, tx, ty, sc, rot, fn) {
+  x.save(); x.translate(tx, ty); x.rotate(rot); x.scale(sc, sc); fn(x); x.restore();
+}
+function bdFern(x) {
+  const p1 = [95, -270], p2 = [215, -410];
+  const q = (t, i) => 2 * (1 - t) * t * p1[i] + t * t * p2[i];
+  const dq = (t, i) => 2 * (1 - t) * p1[i] + 2 * t * (p2[i] - p1[i]);
+  x.lineWidth = 7;
+  x.beginPath(); x.moveTo(0, 0); x.quadraticCurveTo(p1[0], p1[1], p2[0], p2[1]); x.stroke();
+  x.lineWidth = 9;
+  for (let t = 0.12; t < 0.95; t += 0.09) {
+    const px = q(t, 0), py = q(t, 1), a = Math.atan2(dq(t, 1), dq(t, 0)), len = 74 * (1 - t) + 14;
+    for (const side of [-1, 1]) {
+      x.beginPath(); x.moveTo(px, py);
+      x.lineTo(px + Math.cos(a + side * 1.15) * len, py + Math.sin(a + side * 1.15) * len);
+      x.stroke();
+    }
+  }
+}
+function bdBone(x) {
+  x.fillRect(-105, -13, 210, 26);
+  for (const [dx, dy] of [[-105, -15], [-105, 15], [105, -15], [105, 15]])
+    { x.beginPath(); x.arc(dx, dy, 23, 0, Math.PI * 2); x.fill(); }
+}
+function bdSkull(x) {
+  x.beginPath(); x.arc(0, 0, 66, 0, Math.PI * 2); x.fill();
+  x.fillRect(-36, 44, 74, 36);
+  x.save(); x.globalCompositeOperation = 'destination-out';
+  for (const ex of [-28, 24]) { x.beginPath(); x.arc(ex, -7, 13, 0, Math.PI * 2); x.fill(); }
+  x.restore();
+}
+function bdRibs(x) {
+  x.lineWidth = 9;
+  for (let i = 0; i < 4; i++)
+    { x.beginPath(); x.arc(i * 34, 0, 46, Math.PI * 1.15, Math.PI * 1.85); x.stroke(); }
+}
+function bdVolcano(x) {
+  x.beginPath(); x.moveTo(-290, 0); x.lineTo(-46, -360); x.lineTo(46, -360); x.lineTo(290, 0);
+  x.closePath(); x.fill();
+  x.save(); x.globalCompositeOperation = 'destination-out';
+  x.beginPath(); x.moveTo(-46, -360); x.lineTo(46, -360); x.lineTo(0, -302); x.closePath(); x.fill();
+  x.restore();
+}
+function bdFish(x) {
+  x.beginPath(); x.ellipse(0, 0, 70, 27, 0, 0, Math.PI * 2); x.fill();
+  x.beginPath(); x.moveTo(-62, 0); x.lineTo(-105, -26); x.lineTo(-105, 26); x.closePath(); x.fill();
+  x.beginPath(); x.moveTo(-8, -22); x.lineTo(18, -46); x.lineTo(30, -20); x.closePath(); x.fill();
+  x.save(); x.globalCompositeOperation = 'destination-out';
+  x.beginPath(); x.arc(42, -7, 5, 0, Math.PI * 2); x.fill();
+  x.restore();
+}
+function bdReeds(x) {
+  x.lineWidth = 7;
+  for (let i = 0; i < 4; i++) {
+    const bx = i * 26;
+    x.beginPath(); x.moveTo(bx, 0); x.quadraticCurveTo(bx + 12, -90, bx + 4, -138 + i * 12); x.stroke();
+    x.beginPath(); x.ellipse(bx + 4, -148 + i * 12, 7, 17, 0.1, 0, Math.PI * 2); x.fill();
+  }
+}
+function bdPeaks(x) {
+  x.beginPath(); x.moveTo(-330, 0); x.lineTo(-110, -345); x.lineTo(30, -145);
+  x.lineTo(205, -405); x.lineTo(370, -125); x.lineTo(490, 0);
+  x.closePath(); x.fill();
+}
+function bdPine(x) {
+  for (const [w, y0, y1] of [[30, 95, 40], [40, 60, 0]]) {
+    x.beginPath(); x.moveTo(0, -y0);
+    x.lineTo(-w, -y1); x.lineTo(w, -y1);
+    x.closePath(); x.fill();
+  }
+}
+function bdMist(x, w) {
+  x.beginPath();
+  if (x.roundRect) x.roundRect(0, 0, w, 24, 12); else x.rect(0, 0, w, 24);
+  x.fill();
+}
+function bdTree(x) {
+  x.lineWidth = 10;
+  x.beginPath(); x.moveTo(0, 0); x.quadraticCurveTo(2, -120, 12, -230); x.stroke();
+  x.lineWidth = 7;
+  x.beginPath(); x.moveTo(8, -168); x.lineTo(-44, -242); x.stroke();
+  x.beginPath(); x.moveTo(10, -198); x.lineTo(62, -272); x.stroke();
+  x.beginPath(); x.moveTo(5, -108); x.lineTo(-52, -158); x.stroke();
+}
+function bdPalm(x) {
+  x.lineWidth = 16;
+  x.beginPath(); x.moveTo(53, 0); x.quadraticCurveTo(20, -130, 0, -248); x.stroke();
+  x.lineWidth = 9;
+  for (const [ex, ey, cx2, cy2] of [[-120, -308, -70, -318], [-94, -216, -60, -258], [90, -318, 40, -328],
+    [124, -226, 60, -268], [-50, -336, -28, -326], [54, -346, 24, -328]])
+    { x.beginPath(); x.moveTo(0, -252); x.quadraticCurveTo(cx2, cy2, ex, ey); x.stroke(); }
+  for (const [nx, ny] of [[-14, -236], [11, -230]])
+    { x.beginPath(); x.arc(nx, ny, 11, 0, Math.PI * 2); x.fill(); }
+}
+function bdLeaf(x) {
+  x.lineWidth = 6;
+  x.beginPath(); x.ellipse(0, 0, 105, 34, 0, 0, Math.PI * 2); x.fill();
+  x.beginPath(); x.moveTo(-105, 0); x.lineTo(-160, 26); x.stroke();
+}
+function bdGull(x) {
+  x.lineWidth = 5;
+  x.beginPath(); x.moveTo(-26, 0);
+  x.quadraticCurveTo(-13, -16, 0, 0); x.quadraticCurveTo(13, -16, 26, 0);
+  x.stroke();
+}
+// one tile per land (640×560, repeated): motifs alternate corner to corner
+// and flip up/down like a wallpaper print so the repeat reads as texture
+const ECO_ART = {
+  valley(x) {
+    bdAt(x, 100, 520, 0.72, -0.08, bdFern);
+    bdAt(x, 520, 60, 0.5, Math.PI - 0.15, bdFern);   // hanging frond
+    bdAt(x, 420, 545, 0.36, 0.25, bdFern);
+  },
+  prairie(x) {
+    bdAt(x, 165, 130, 0.8, -0.45, bdBone);
+    bdAt(x, 470, 420, 0.55, 0.35, bdBone);
+    bdAt(x, 460, 130, 0.62, 0.1, bdSkull);
+    bdAt(x, 130, 430, 0.8, 0, bdRibs);
+  },
+  coast(x) {
+    x.lineWidth = 7; x.lineCap = 'butt';
+    for (const y of [110, 290, 470]) {
+      x.beginPath(); x.moveTo(0, y);
+      for (let wx = 0; wx < 640; wx += 80) x.quadraticCurveTo(wx + 40, y - 34, wx + 80, y);
+      x.stroke();
+    }
+    x.lineCap = 'round';
+    bdAt(x, 180, 205, 1, 0.1, bdGull);
+    bdAt(x, 450, 385, 0.8, -0.1, bdGull);
+  },
+  ash(x) {
+    bdAt(x, 170, 320, 0.55, 0, bdVolcano);
+    bdAt(x, 480, 552, 0.38, 0, bdVolcano);
+    for (const [fx, fy, r] of [[300, 90, 8], [420, 50, 11], [520, 130, 6], [80, 60, 7], [600, 340, 6], [60, 480, 8]])
+      { x.beginPath(); x.arc(fx, fy, r, 0, Math.PI * 2); x.fill(); }
+  },
+  delta(x) {
+    bdAt(x, 190, 120, 0.7, 0.06, bdFish);
+    bdAt(x, 460, 330, 0.5, -0.06, (c) => { c.scale(-1, 1); bdFish(c); });
+    bdAt(x, 110, 545, 0.9, 0, bdReeds);
+    bdAt(x, 500, 545, 0.6, 0, bdReeds);
+    for (const [bx, by, r] of [[320, 230, 7], [340, 200, 5], [330, 260, 4]])
+      { x.beginPath(); x.arc(bx, by, r, 0, Math.PI * 2); x.fill(); }
+  },
+  wall(x) {
+    bdAt(x, 200, 240, 0.5, 0, bdPeaks);
+    bdAt(x, 480, 330, 0.85, 0, bdPine);
+    bdAt(x, 545, 345, 0.6, 0, bdPine);
+    bdAt(x, 130, 545, 0.75, 0, bdPine);
+    bdAt(x, 520, 545, 0.45, 0, bdPine);
+  },
+  moor(x) {
+    for (const [mx, my, w] of [[40, 70, 300], [300, 180, 280], [70, 300, 260], [360, 420, 240], [130, 500, 300]])
+      bdAt(x, mx, my, 1, 0, (c) => bdMist(c, w));
+    bdAt(x, 520, 300, 0.6, 0.05, bdTree);
+  },
+  jungle(x) {
+    bdAt(x, 150, 400, 0.62, 0.04, bdPalm);
+    bdAt(x, 480, 120, 0.55, -0.35, bdLeaf);
+    bdAt(x, 430, 500, 0.45, 0.5, bdLeaf);
+    bdAt(x, 560, 555, 0.34, -0.06, (c) => { c.scale(-1, 1); bdPalm(c); });
+  },
+};
+function ecoBackdrop(key, tint) {
+  const painter = ECO_ART[key];
+  if (!painter) return '';
+  const cv = document.createElement('canvas');
+  cv.width = 640; cv.height = 560;
+  const x = cv.getContext('2d');
+  x.strokeStyle = x.fillStyle = tint;
+  x.lineCap = x.lineJoin = 'round';
+  painter(x);
+  return cv.toDataURL();
+}
+
+// ---------- the EXPEDITION LEDGER: stamps, pips and collectible titles ----------
+// every name here is a PLACEHOLDER — the kid renames them; a title is one
+// registry entry (id stays stable, name/icon/desc are his to change)
+function ecoRoster(key) {
+  return ALL_PLAYABLES.filter(sp => (PLAYER_DEF[sp].eco || 'valley') === key && !PLAYER_DEF[sp].secret);
+}
+const TITLE_ECO_NAMES = { valley: 'Valleyborn', prairie: 'Bonepicker', coast: 'Tidewalker', ash: 'Ashborn', delta: 'Delta Rat', wall: 'Wall Climber', moor: 'Mistwalker', jungle: 'Rainblood' };
+const TITLES = [];
+for (const key of Object.keys(ECOS)) {
+  TITLES.push({ id: 'disc-' + key, name: TITLE_ECO_NAMES[key] || ECOS[key].name, icon: ECOS[key].emoji,
+    desc: 'Discover ' + ECOS[key].name, test: () => !!Save.discovered[key] });
+}
+TITLES.push(
+  { id: 'first-mastery', name: 'First Blood', icon: '🥇', desc: 'Raise your first Full Adult', test: () => Object.keys(Save.mastery).length >= 1 },
+  { id: 'keeper-five', name: 'Keeper of Five', icon: '🏅', desc: 'Master five dinosaurs', test: () => Object.keys(Save.mastery).length >= 5 },
+  { id: 'lord-land', name: 'Lord of a Land', icon: '👑', desc: 'Master every dinosaur of one land', test: () => Object.keys(ECOS).some(k => ecoRoster(k).every(sp => Save.mastery[sp])) },
+  { id: 'eight-lands', name: 'Master of the Eight Lands', icon: '🌍', desc: 'Master every dinosaur in the world', test: () => ALL_PLAYABLES.filter(sp => !PLAYER_DEF[sp].secret).every(sp => Save.mastery[sp]) },
+  { id: 'giantfinder', name: 'Giantfinder', icon: '🧊', desc: 'Find what sleeps in the high maze', test: () => !!Save.owned.nivalo },
+  { id: 'parent', name: 'Parent', icon: '🥚', desc: 'Raise a clutch of young', test: () => !!Save.raisedClutch },
+  { id: 'stormrider', name: 'Stormrider', icon: '⛈️', desc: 'Live through a whole monsoon', test: () => !!Save.stormRider },
+  { id: 'packbreaker', name: 'Packbreaker', icon: '💥', desc: 'Wipe a pack out to the last', test: () => !!Save.packBreaker },
+);
+// award anything newly earned; silent for backfilling old saves
+function syncTitles(silent) {
+  const fresh = [];
+  for (const t of TITLES) {
+    if (!Save.titles[t.id] && t.test()) { Save.titles[t.id] = true; fresh.push(t); }
+  }
+  if (fresh.length) {
+    saveSave();
+    if (!silent) {
+      const names = fresh.map(t => t.icon + ' ' + t.name.toUpperCase()).join(' · ');
+      if (G.started) setTimeout(() => { G.banner = { str: '🏅 TITLE EARNED: ' + names, t: 6, color: '#ffd23e' }; }, 11000);
+      else flashTitleMsg('🏅 Title earned: ' + names + ' — tap the shield to wear it!');
+    }
+  }
+}
+// saves from before the ledger: backfill stamps/hatchlings, no ceremonies
+function migrateLedger() {
+  for (const key of Object.keys(ECOS)) {
+    if (ecoPaid(key) && !Save.discovered[key]) {
+      Save.discovered[key] = { n: Object.keys(Save.discovered).length + 1, by: null };
+      Save.ecoSeen[key] = true;   // history, not news — no reveal ceremony
+    }
+  }
+  for (const sp of ALL_PLAYABLES) {
+    if (Save.mastery[sp] || Save.dino[dinoKey(sp, 'f')] || Save.dino[dinoKey(sp, 'm')]) Save.hatched[sp] = true;
+  }
+  syncTitles(true);
+}
+const ORDINALS = ['', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th'];
+function stampPips(key) {
+  const roster = ecoRoster(key);
+  const pips = [
+    ['Arrived — set foot in this land', !!Save.arrived[key]],
+    ['Survived — raised a Full Adult here', roster.some(sp => Save.mastery[sp])],
+    ['All hatched — played every dinosaur here', roster.every(sp => Save.hatched[sp])],
+    ['All mastered — every dinosaur Full Adult', roster.every(sp => Save.mastery[sp])],
+  ];
+  if (key === 'wall') pips.push(['Secret found — the frozen giant', !!Save.owned.nivalo]);
+  return pips;
+}
+// the jump-dot IS the land's stamp now: tint ring once discovered, and on
+// the rim — three feat pips (Arrived · All hatched · All mastered) plus one
+// GOLD pip for every dinosaur currently walking the land as an Adult; gold
+// rim when every feat is complete. The hover flyout tells the whole story.
+const TABPIP_STEP = 38;      // max degrees between rim pips, fanned on the right arc
+const TAB_ADULT_G = 0.9;     // growth from which a saved dino counts as Adult
+function decorateEcoTab(key) {
+  const tab = document.getElementById('tab-' + key);
+  const d = Save.discovered[key];
+  tab.style.setProperty('--tint', d ? (ECOS[key].tint || '#7a6034') : '#57452a');
+  for (const old of tab.querySelectorAll('.tabpip')) old.remove();
+  const feats = tab.querySelector('.tffeats');
+  feats.innerHTML = '';
+  const roster = d ? ecoRoster(key) : [];
+  const isAdult = (sp) => ['f', 'm'].some(gd => {
+    const sd = Save.dino[dinoKey(sp, gd)];
+    return sd && sd.growth >= TAB_ADULT_G;
+  });
+  const adults = roster.filter(isAdult);
+  // the rim: the three feats, then one gold pip per currently-adult dino
+  const rim = d ? [
+    ['', !!Save.arrived[key]],
+    ['', roster.every(sp => Save.hatched[sp])],
+    ['', roster.every(sp => Save.mastery[sp])],
+    ...adults.map(() => ['adult', true]),
+  ] : [];
+  const step = Math.min(TABPIP_STEP, rim.length > 1 ? 160 / (rim.length - 1) : TABPIP_STEP);
+  rim.forEach(([kind, lit], i) => {
+    const pip = document.createElement('span');
+    pip.className = 'tabpip' + (kind === 'adult' ? ' adult' : lit ? ' lit' : '');
+    pip.style.setProperty('--a', ((i - (rim.length - 1) / 2) * step) + 'deg');
+    tab.appendChild(pip);
+  });
+  // the flyout: the land's feats, each a lit or dark line, then the adults
+  const pips = d ? stampPips(key) : [];
+  let all = !!d && pips.length > 0;
+  for (const [tip, lit] of pips) {
+    const line = document.createElement('div');
+    line.className = 'tffeat' + (lit ? ' lit' : '');
+    line.textContent = (lit ? '●' : '○') + ' ' + tip;
+    feats.appendChild(line);
+    if (!lit) all = false;
+  }
+  if (d) {
+    const ad = document.createElement('div');
+    ad.className = 'tffeat' + (adults.length ? ' adult' : '');
+    ad.textContent = (adults.length ? '●' : '○') + ' ' + adults.length + ' walking this land full-grown';
+    feats.appendChild(ad);
+  }
+  tab.classList.toggle('gold', all);
+  const done = roster.filter(sp => Save.mastery[sp]).length;
+  tab.querySelector('.tfstat').textContent = d
+    ? (ORDINALS[d.n] || d.n + 'th') + ' land' + (d.by ? ' · by ' + DINO[d.by].name.toUpperCase() : '')
+      + ' · ' + done + '/' + roster.length + ' mastered'
+    : 'undiscovered';
+}
+function renderTitleWall() {
+  const row = document.getElementById('twall');
+  row.innerHTML = '';
+  let ownedN = 0;
+  for (const t of TITLES) {
+    const owned = !!Save.titles[t.id];
+    if (owned) ownedN++;
+    const el = document.createElement('div');
+    el.className = 'ltitle' + (owned ? ' owned' : '') + (owned && Save.titleWorn === t.id ? ' worn' : '');
+    el.innerHTML = '<div class="lbadge"></div><div class="ltname"></div>';
+    el.querySelector('.lbadge').textContent = owned ? t.icon : '?';
+    el.querySelector('.ltname').textContent = owned ? t.name : '???';
+    el.title = t.desc + (owned ? (Save.titleWorn === t.id ? ' — worn (tap to take off)' : ' — tap to wear') : '');
+    if (owned) el.addEventListener('click', () => {
+      Save.titleWorn = Save.titleWorn === t.id ? null : t.id;
+      saveSave(); renderTitleWall(); refreshTitle();
+    });
+    row.appendChild(el);
+  }
+  document.getElementById('tcount').textContent = ownedN + ' / ' + TITLES.length + ' collected · tap a badge to wear it';
+}
+function toggleTitles(show) {
+  const wall = document.getElementById('titlewall');
+  const want = show != null ? show : wall.classList.contains('hidden');
+  if (want) renderTitleWall();
+  wall.classList.toggle('hidden', !want);
+}
+// the reveal ceremony: the first lobby visit after a land opens develops its
+// chapter live — color blooms, the seam draws itself, the stamp thuds down
+function playDiscovery() {
+  const key = Object.keys(ECOS).find(k => ecoPaid(k) && Save.discovered[k] && !Save.ecoSeen[k]);
+  if (!key) return false;
+  Save.ecoSeen[key] = true;
+  saveSave();
+  const sect = document.getElementById('sect-' + key);
+  sect.classList.remove('develop');
+  void sect.offsetWidth;   // restart the css animation
+  sect.scrollIntoView({ block: 'start', behavior: 'instant' });
+  sect.classList.add('develop');
+  setTimeout(() => sect.classList.remove('develop'), 3000);
+  try { SFX.buy(); } catch (err) { }
+  flashTitleMsg('🗺️ ' + ECOS[key].name.toUpperCase() + ' joins your trail!');
+  return true;
+}
 
 // build tabs and cards once from ECOS / PLAYER_DEF / DINO / CARD_INFO
 function buildTitleUI() {
@@ -379,23 +758,84 @@ function buildTitleUI() {
   tabs.innerHTML = '';
   const area = document.getElementById('cards-area');
   area.innerHTML = '';
+  // the branch side alternates all the way down the trail, across biome
+  // borders, so the journey sways left-right like real switchbacks
+  let flip = 0;
+  const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
   for (const key of Object.keys(ECOS)) {
     const eco = ECOS[key];
+    // the jump-to dot on the screen's left edge — its name floats on hover
     const tab = document.createElement('div');
     tab.className = 'ecotab';
     tab.id = 'tab-' + key;
-    tab.innerHTML = '<h3></h3><div class="tabsub"></div>';
-    tab.querySelector('h3').textContent = eco.emoji + ' ' + eco.name.toUpperCase();
+    tab.textContent = eco.emoji;
+    const fly = document.createElement('span');
+    fly.className = 'tabfly';
+    fly.innerHTML = '<div class="tfname"></div><div class="tfstat"></div><div class="tffeats"></div>';
+    fly.querySelector('.tfname').textContent = eco.name.toUpperCase();
+    tab.appendChild(fly);
     tab.addEventListener('click', () => tryEcoTab(key));
     tabs.appendChild(tab);
 
-    const wrap = document.createElement('div');
-    wrap.className = 'cards hidden';
-    wrap.id = 'cards-' + key;
-    // cards read left-to-right in ladder order (secrets and forks keep their spot)
+    // the waypoint camp on the trail, then its dinos as rungs beneath it:
+    // one rung per chain step, forks flanking the trail on a shared rung,
+    // secrets on a ★ rung of their own (hidden until the world gives them)
+    const sect = document.createElement('div');
+    sect.className = 'ecosect';
+    sect.id = 'sect-' + key;
+    sect.innerHTML = '<div class="ecohead"><div class="medal"></div>' +
+      '<div class="ecotxt"><h2></h2><div class="ecosub"></div><div class="ecomast"></div></div></div>';
+    sect.querySelector('.medal').textContent = eco.emoji;
+    sect.querySelector('h2').textContent = eco.name.toUpperCase();
+    // the land's signature color washes its whole chapter of the trail
+    const tint = eco.tint || '#7a6034';
+    sect.style.setProperty('--ecoline', tint);
+    const tr = parseInt(tint.slice(1, 3), 16), tg = parseInt(tint.slice(3, 5), 16), tb = parseInt(tint.slice(5, 7), 16);
+    sect.style.setProperty('--ecoglow', 'rgba(' + tr + ',' + tg + ',' + tb + ',0.15)');
+    const art = ecoBackdrop(key, tint);
+    if (art) sect.style.setProperty('--ecoart', 'url(' + art + ')');
     const roster = ALL_PLAYABLES.filter(sp => (PLAYER_DEF[sp].eco || 'valley') === key)
       .sort((a, b) => (chainRung(a) + 1 || 99) - (chainRung(b) + 1 || 99));
+    const rungs = [];
     for (const sp of roster) {
+      const rk = PLAYER_DEF[sp].secret ? 'secret-' + sp : chainRung(sp);
+      const last = rungs[rungs.length - 1];
+      if (last && last.rk === rk) last.sps.push(sp);
+      else rungs.push({ rk, sps: [sp] });
+    }
+    let step = 0;
+    for (const rung of rungs) {
+      const secret = String(rung.rk).startsWith('secret');
+      if (!secret) step++;
+      const duo = rung.sps.length > 1;
+      const row = document.createElement('div');
+      row.className = 'rung ' + (duo ? 'duo' : (flip++ % 2 ? 'right' : 'left'));
+      row.dataset.sps = rung.sps.join(',');
+      const node = document.createElement('div');
+      node.className = 'rungnode';
+      node.textContent = secret ? '★' : (ROMAN[step - 1] || step);
+      row.appendChild(node);
+      const holder = document.createElement('div');
+      holder.className = 'rungcards';
+      row.appendChild(holder);
+      for (const sp of rung.sps) buildCard(sp, holder);
+      sect.appendChild(row);
+    }
+    area.appendChild(sect);
+  }
+  // the trail doesn't end — it just hasn't been walked yet
+  const te = document.createElement('div');
+  te.id = 'trailend';
+  te.innerHTML = '<div class="tenode">· · ·</div><div class="tetext">the trail goes on…</div>';
+  area.appendChild(te);
+  // hand every preview canvas to the viewport observer
+  previewObserver.disconnect();
+  previewVisible.clear();
+  for (const cv of area.querySelectorAll('.card canvas')) previewObserver.observe(cv);
+  // the trail-spy: whichever camp owns the middle of the screen lights its dot
+  document.getElementById('journey').addEventListener('scroll', updateTrailSpot, { passive: true });
+
+  function buildCard(sp, holder) {
       const info = CARD_INFO[sp] || { desc: '', tag: '', tagClass: 'mod' };
       const card = document.createElement('div');
       card.className = 'card';
@@ -405,15 +845,15 @@ function buildTitleUI() {
       // chosen loadout's growth sits under the difficulty tag; skins are their
       // own swatch row lower down. Clicking the dino/body launches — the gender
       // bar and skin row swallow their own clicks.
-      card.innerHTML = '<div class="prevwrap"><canvas width="200" height="120"></canvas><span class="ownbadge"></span></div>' +
+      card.innerHTML = '<div class="side"><div class="prevwrap"><canvas width="200" height="120"></canvas><span class="ownbadge"></span></div>' +
         '<div class="gsel">' +
         '<span class="gseg" data-g="f">♀ Female<span class="tip"></span></span>' +
         '<span class="gseg" data-g="m">♂ Male<span class="tip"></span></span>' +
-        '</div>' +
-        '<h2></h2><div class="latin"></div><p></p>' +
-        '<div class="diff"></div><div class="prog"></div>' +
+        '</div></div>' +
+        '<div class="info"><h2></h2><div class="latin"></div><p></p>' +
+        '<div class="meta"><div class="diff"></div><div class="prog"></div></div>' +
         '<div class="price"></div>' +
-        '<div class="skinsel"></div>';
+        '<div class="skinsel"></div></div>';
       card.querySelector('canvas').id = 'prev-' + sp;
       card.querySelector('h2').textContent = DINO[sp].name.toUpperCase();
       card.querySelector('.latin').textContent = DINO[sp].full;
@@ -447,30 +887,52 @@ function buildTitleUI() {
       card.querySelector('.skinsel').addEventListener('click', (ev) => ev.stopPropagation());
       buildCardSkins(sp, card.querySelector('.skinsel'));
       card.addEventListener('click', () => tryPlay(sp));
-      wrap.appendChild(card);
-    }
-    area.appendChild(wrap);
+      holder.appendChild(card);
   }
 }
 
 function refreshTitle() {
   const bal = document.getElementById('gr-balance');
   bal.textContent = '';
+  // the crest shield beside the pill wears your worn title's mark (★ when
+  // bare); the pill itself swaps players when clicked
+  const wt = TITLES.find(t => t.id === Save.titleWorn && Save.titles[t.id]);
+  document.querySelector('#btn-titles span').textContent = wt ? wt.icon : '★';
   const nm = document.createElement('span');
   nm.className = 'pname';
+  nm.title = 'Switch player';
   nm.textContent = '🦖 ' + (Profiles.current || '—');
   bal.appendChild(nm);
+  if (wt) {
+    const ts = document.createElement('span');
+    ts.className = 'worntitle';
+    ts.textContent = ' · ' + wt.name;
+    bal.appendChild(ts);
+  }
   bal.appendChild(document.createTextNode('  ·  ❖ ' + Save.growths));
-  // ecosystem tabs + their card sets
+  // waypoint camps: lock state, subtitle, and how far each ladder is climbed
   for (const key of Object.keys(ECOS)) {
     const eco = ECOS[key];
-    const tab = document.getElementById('tab-' + key);
     const paid = ecoPaid(key);
-    tab.classList.toggle('locked', !paid);
-    tab.querySelector('.tabsub').textContent =
-      paid ? eco.sub : '🔒 ' + ecoUnlockHint(key);
-    tab.classList.toggle('sel', titleEco === key);
-    document.getElementById('cards-' + key).classList.toggle('hidden', titleEco !== key);
+    document.getElementById('tab-' + key).classList.toggle('locked', !paid);
+    decorateEcoTab(key);
+    const sect = document.getElementById('sect-' + key);
+    sect.classList.toggle('locked', !paid);
+    sect.querySelector('.ecosub').textContent = paid ? eco.sub : '🔒 ' + ecoUnlockHint(key);
+    const roster = ALL_PLAYABLES.filter(sp => (PLAYER_DEF[sp].eco || 'valley') === key
+      && (!PLAYER_DEF[sp].secret || Save.owned[sp]));
+    const done = roster.filter(sp => Save.mastery[sp]).length;
+    sect.querySelector('.ecomast').textContent = done + ' / ' + roster.length + ' mastered';
+  }
+  // rung nodes: green once a member is mastered, gold while playable, dim before
+  for (const row of document.querySelectorAll('#cards-area .rung')) {
+    const sps = row.dataset.sps.split(',');
+    const done = sps.some(sp => Save.mastery[sp]);
+    row.classList.toggle('done', done);
+    row.classList.toggle('open', !done && sps.some(spUnlocked));
+    // a secret's whole rung stays off the ladder until the world gives it
+    if (sps.every(sp => PLAYER_DEF[sp].secret))
+      row.style.display = sps.some(sp => Save.owned[sp]) ? '' : 'none';
   }
   // per-card ownership badge / price / progress state
   for (const sp of ALL_PLAYABLES) {
@@ -483,6 +945,7 @@ function refreshTitle() {
       if (!Save.owned[sp]) continue;
     }
     const owned = spUnlocked(sp);
+    card.classList.toggle('locked', !owned);
     // ownership is a corner badge on the preview now — ✓ unlocked, 🔒 not yet
     const badge = card.querySelector('.ownbadge');
     badge.textContent = owned ? '✓' : '🔒';
@@ -498,6 +961,7 @@ function refreshTitle() {
     // balance (they're first built at boot, before a profile is even chosen)
     buildCardSkins(sp, card.querySelector('.skinsel'));
   }
+  updateTrailSpot();
 }
 // the selected gender's saved growth, e.g. "♂ 100% Full Adult" (blank if new)
 function cardProgText(sp) {
@@ -517,7 +981,7 @@ function buildCardSkins(sp, container) {
   const cur = cardSkin(sp);
   for (const id of Object.keys(SKINS)) {
     const def = SKINS[id];
-    if (def.only && def.only !== sp) continue;      // species-exclusive coat
+    if (!skinFits(sp, id)) continue;                // species-exclusive coat
     const owned = skinOwned(sp, id);
     const selected = id === cur;
     const sq = document.createElement('div');
@@ -589,15 +1053,27 @@ function refreshCardOpts(sp) {
   animateAllPreviews();
 }
 
+// which camp owns the middle of the screen right now — its dot gets the glow
+function updateTrailSpot() {
+  const jr = document.getElementById('journey');
+  const probe = jr.getBoundingClientRect().top + jr.clientHeight * 0.38;
+  let cur = Object.keys(ECOS)[0];
+  for (const key of Object.keys(ECOS)) {
+    const sect = document.getElementById('sect-' + key);
+    if (sect && sect.getBoundingClientRect().top <= probe) cur = key;
+  }
+  titleEco = cur;
+  for (const key of Object.keys(ECOS))
+    document.getElementById('tab-' + key).classList.toggle('sel', key === cur);
+}
+
 function tryEcoTab(key) {
   const eco = ECOS[key];
-  if (!ecoPaid(key)) {
-    flashTitleMsg('To discover ' + eco.name + ': ' + ecoUnlockHint(key) + '!');
-    return;
-  }
+  // locked camps still scroll into view — seeing the padlocked waypoint IS
+  // the answer — but the dot also says out loud what opens the land
+  if (!ecoPaid(key)) flashTitleMsg('To discover ' + eco.name + ': ' + ecoUnlockHint(key) + '!');
   titleEco = key;
-  refreshTitle();
-  animateAllPreviews();
+  document.getElementById('sect-' + key).scrollIntoView({ block: 'start' });
 }
 // UI transition guard: SPACE-mashing must never re-click a focused button, and
 // the second click of a double-click must never land on the screen that just
@@ -651,6 +1127,36 @@ function drawSkinSwatch(cv, species, skinId) {
       x.fillStyle = mixHex(C.acc, '#ffffff', 0.55);
       x.beginPath(); x.arc(W * dx - W * r * 0.25, H * dy - W * r * 0.3, W * r * 0.42, 0, Math.PI * 2); x.fill();
     }
+  } else if (skinId === 'wylord') {
+    x.strokeStyle = C.pat; x.lineWidth = 2.5; x.lineCap = 'round';
+    for (const [fy, ph] of [[0.45, 0], [0.66, 1.8]]) {
+      x.beginPath();
+      for (let i = 0; i <= 8; i++) x[i ? 'lineTo' : 'moveTo'](W * i / 8, H * fy + Math.sin(i * 1.6 + ph) * H * 0.06);
+      x.stroke();
+    }
+  } else if (skinId === 'klanderx') {
+    x.strokeStyle = '#f4f2ff'; x.lineWidth = 1.6; x.lineCap = 'round';
+    for (const [dx, dy, r] of [[0.26, 0.4, 0.09], [0.6, 0.62, 0.06], [0.8, 0.32, 0.075]]) {
+      x.beginPath();
+      x.moveTo(W * (dx - r), H * dy); x.lineTo(W * (dx + r), H * dy);
+      x.moveTo(W * dx, H * dy - W * r); x.lineTo(W * dx, H * dy + W * r);
+      x.stroke();
+    }
+  } else if (skinId === 'litherim') {
+    x.strokeStyle = C.pat; x.lineWidth = 2.2; x.lineCap = 'round';
+    for (const [fx, fy, ln] of [[0.7, 0.42, 0.3], [0.55, 0.62, 0.24], [0.9, 0.68, 0.28]]) {
+      x.beginPath(); x.moveTo(W * fx, H * fy); x.lineTo(W * (fx - ln), H * (fy + 0.04)); x.stroke();
+    }
+  } else if (skinId === 'granulon') {
+    for (const [dx, dy, r, ci] of [[0.2, 0.46, 0.05, 0], [0.44, 0.6, 0.04, 1], [0.66, 0.4, 0.055, 2], [0.85, 0.64, 0.045, 0], [0.32, 0.7, 0.035, 2]]) {
+      x.fillStyle = ci === 0 ? C.acc : ci === 1 ? C.pat : mixHex(C.belly, '#ffffff', 0.2);
+      x.beginPath();
+      x.moveTo(W * (dx - r), H * dy + W * r * 0.4);
+      x.lineTo(W * dx, H * dy - W * r);
+      x.lineTo(W * (dx + r), H * dy);
+      x.lineTo(W * dx, H * dy + W * r);
+      x.closePath(); x.fill();
+    }
   }
   x.strokeStyle = C.line; x.lineWidth = 3; x.strokeRect(0, 0, W, H);
 }
@@ -658,9 +1164,12 @@ document.getElementById('btn-respawn').addEventListener('click', () => {
   document.getElementById('death').classList.add('hidden');
   respawn(G.player.species, G.player.gender, G.player.skin);
 });
-function exitToLobby() {
-  if (uiSwitchBlocked()) return;
+function exitToLobby(force) {
+  // force: the lobby countdown already debounced this exit — the wall-clock
+  // double-click guard must not eat a scheduled departure
+  if (!force && uiSwitchBlocked()) return;
   markUiSwitch();
+  G.lobbyCountdown = null;
   saveDinoSnapshot();
   G.paused = false;
   document.getElementById('pause').classList.add('hidden');
@@ -668,18 +1177,38 @@ function exitToLobby() {
   document.getElementById('title').classList.remove('hidden');
   document.getElementById('hud').classList.add('hidden');
   G.started = false;
-  titleEco = World.eco;
+  // reopen the journey at the land you were just walking (refreshTitle's
+  // trail-spy reads the scroll position, so scroll first, then refresh)
+  const sect = document.getElementById('sect-' + World.eco);
+  if (sect) sect.scrollIntoView({ block: 'start', behavior: 'instant' });
   refreshTitle();
+  playDiscovery();   // a land opened this life? develop its chapter now
   animateAllPreviews();
 }
+document.getElementById('btn-titles').addEventListener('click', () => toggleTitles());
+// no close button on the wall — tap anywhere off the badges (or Esc) to leave
+document.getElementById('titlewall').addEventListener('click', (e) => {
+  if (!e.target.closest('#twall')) toggleTitles(false);
+});
 document.getElementById('btn-title').addEventListener('click', exitToLobby);
+// leaving a LIVE game is not instant: the lobby button starts a 5-second
+// countdown DURING which the world keeps running — no teleporting out of a
+// bad situation. (The death screen's buttons stay instant — you're dead.)
+const LOBBY_LEAVE_T = 5;
+function requestLobby() {
+  if (!G.started || G.lobbyCountdown != null) return;
+  // the countdown must be survivable, not skippable: unpause and stand there
+  G.paused = false;
+  document.getElementById('pause').classList.add('hidden');
+  G.lobbyCountdown = LOBBY_LEAVE_T;
+}
 document.getElementById('btn-lobby').addEventListener('click', (ev) => {
   if (ev.detail === 0) return;   // keyboard-activated "click" (SPACE/Enter) — never leave the game for that
-  if (G.started) exitToLobby();
+  requestLobby();
 });
 document.getElementById('pause-lobby').addEventListener('click', (ev) => {
   if (ev.detail === 0) return;
-  if (G.started) exitToLobby();
+  requestLobby();
 });
 // buttons must never hold keyboard focus, or SPACE (bite!) re-clicks them mid-game
 for (const id of ['btn-lobby', 'btn-respawn', 'btn-title', 'pause-lobby']) {
@@ -689,6 +1218,13 @@ for (const id of ['btn-lobby', 'btn-respawn', 'btn-title', 'pause-lobby']) {
 }
 
 const START_BANNERS = {
+  buitre: 'You hatch on the riverbank. The fish are yours — the flood is not.',
+  hypsi: 'You hatch in the thicket. When the world comes for you, go underground.',
+  adratik: 'You hatch spiked and slow. Let them come — everything you touch bleeds.',
+  orkor: 'You hatch with hooks for hands. Nothing here outruns you.',
+  neove: 'You hatch in the green dark. Learn to arrive without being seen.',
+  coahuila: 'You hatch horn-budded. One day nothing will dare stand in front of you.',
+  poekilo: 'You hatch heavy-boned. Grow — the Reach will learn your name.',
   raja: 'You hatch in the fern forest. Grow. Hunt. Survive.',
   campto: 'You hatch on the open plains. Reach the ferns before Moros finds you!',
   rioja: 'You hatch heavy-boned and hungry. Eat everything — greatness takes time.',
@@ -699,6 +1235,8 @@ const START_BANNERS = {
   giganto: 'You hatch spined. Turn your back to fight, and let the tail talk.',
   crista: 'You hatch by the shore. One day the surf itself will fear you.',
   linhe: 'You hatch on the ash. Nothing here forgives — be faster than all of it.',
+  preno: 'You hatch hard-headed. The ridge will test that. Meet it head-on.',
+  vulcano: 'You hatch between old lava flows. The mountain made you — now grow into one.',
   nothro: 'You hatch beneath the ash clouds. Grow tall; the claws will answer.',
   aardi: 'You hatch scruffy and small. Find your kin — alone you are nothing.',
   centro: 'You hatch on the floodplain. Grow the horn — then stop retreating.',
@@ -769,11 +1307,19 @@ function respawn(species, gender, skin) {
     p.stamina = clamp(snap.stamina, 0, PLAYER_DEF[species].stamMax);
     p.hygiene = clamp(snap.hygiene, 0, 100);
     p.cold = clamp(snap.cold || 0, 0, 95);   // never resume mid-freeze
+    // wounds survive the lobby round-trip
+    if (snap.bleed && snap.bleed.t > 0 && snap.bleed.dps > 0) p.bleed = { dps: snap.bleed.dps, t: snap.bleed.t };
+    if (snap.bones) p.bones = Object.assign({}, snap.bones);
+    p.exhausted = !!snap.exhausted;
     const okPos = snap.x > 20 && snap.x < WORLD_W - 20 && snap.y > 20 && snap.y < WORLD_H - 20 &&
       (!isDeepPx(snap.x, snap.y) || PLAYER_DEF[species].swim);
     if (okPos) { p.x = snap.x; p.y = snap.y; }
   }
   G.player.bornAt = G.time;
+  // ledger ink: this dino has hatched, and this land has been walked
+  Save.hatched[species] = true;
+  Save.arrived[World.eco] = true;
+  saveSave();
   // snap the grow-zoom to this dino's size — no swooshing on spawn
   G.zoom = growZoom(species, G.player.growth);
   G.paused = false;
@@ -873,11 +1419,14 @@ function selectProfile(name) {
     }
   }
   syncEcoUnlocks();   // lands reachable on the ladder open silently
+  migrateLedger();    // stamps/titles backfilled for pre-ledger saves
   saveSave();
   document.getElementById('profiles').classList.add('hidden');
   document.getElementById('title').classList.remove('hidden');
   titleEco = 'valley';
   refreshTitle();
+  document.getElementById('journey').scrollTop = 0;
+  playDiscovery();
   animateAllPreviews();
 }
 function createProfile() {
@@ -998,11 +1547,50 @@ function drawMinimap() {
   }
   // player
   const p = G.player;
+  // the scent pool: the true detectable range, live on the map — yellow as
+  // it builds, red once anything with teeth is standing inside it
+  const sr = scentRange(p);
+  if (sr > 0) {
+    const hot = G.npcs.some(o => o.hp > 0 && !isFamily(o) &&
+      (NPC_DEF[o.species].dmg || 0) > 0 && dist(o.x, o.y, p.x, p.y) < sr);
+    c2.strokeStyle = hot ? 'rgba(255,90,70,0.85)' : 'rgba(255,210,62,0.7)';
+    c2.fillStyle = hot ? 'rgba(255,90,70,0.10)' : 'rgba(255,210,62,0.07)';
+    c2.lineWidth = 1;
+    c2.beginPath();
+    c2.arc(p.x * sx, p.y * sy, sr * (sx + sy) / 2, 0, Math.PI * 2);
+    c2.fill(); c2.stroke();
+  }
   const blink = Math.floor(G.time * 3) % 2 === 0;
   c2.fillStyle = blink ? '#ffffff' : '#ffdd88';
   c2.fillRect(p.x * sx - 2, p.y * sy - 2, 4, 4);
   c2.strokeStyle = 'rgba(0,0,0,0.5)';
   c2.strokeRect(p.x * sx - 2.5, p.y * sy - 2.5, 5, 5);
+}
+
+// cartoon stink: wavering lines that rise off a lingering player, thicker
+// as the pool builds — the close-up half of the minimap ring's warning
+function drawScentWisps(ctx, p) {
+  const sc = p.scent || 0;
+  if (sc < 0.25 || p.hidden) return;
+  const a = (sc - 0.25) / 0.75;
+  const h = 18 + 30 * p.growth;
+  ctx.save();
+  ctx.strokeStyle = 'rgba(214, 226, 150, ' + (0.6 * a).toFixed(2) + ')';
+  ctx.lineWidth = 2.4;
+  ctx.lineCap = 'round';
+  for (let i = 0; i < 3; i++) {
+    const t = G.time * 1.1 + i * 2.3;
+    const rise = (G.time * 16 + i * 14) % 40;
+    const bx = p.x + (i - 1) * (7 + 8 * p.growth) + Math.sin(t) * 4;
+    const by = p.y - h - rise;
+    ctx.globalAlpha = 1 - rise / 40;
+    ctx.beginPath();
+    ctx.moveTo(bx, by);
+    ctx.quadraticCurveTo(bx + 6, by - 8, bx, by - 15);
+    ctx.quadraticCurveTo(bx - 6, by - 22, bx, by - 29);
+    ctx.stroke();
+  }
+  ctx.restore();
 }
 
 // ---------- nesting: courtship, eggs, and raising the young ----------
@@ -1013,10 +1601,10 @@ function drawMinimap() {
 // female until they're grown — and every one raised pays out ❖ 150.
 function updateNesting(dt) {
   const p = G.player, ns = G.nesting;
-  if (!G.started || !p || !p.alive || !ns) { if (G.input) G.input.nest = false; return; }
+  if (!G.started || !p || !p.alive || !ns) return;
   const nest = World.nests[p.species];
-  const nPressed = G.input.nest;
-  G.input.nest = false;
+  // courtship is an F verb like any other (the loop clears the flag)
+  const nPressed = G.input.action;
 
   // mate housekeeping: a fallen mate ends the courtship — but eggs already
   // laid and babies already hatched carry on under the survivor's guard
@@ -1042,7 +1630,7 @@ function updateNesting(dt) {
       if (dd < cd) { cd = dd; cand = e; }
     }
     if (cand) {
-      G.prompt = (G.prompt ? G.prompt + '    ' : '') + 'N — Take ' + (cand.gender === 'm' ? 'him' : 'her') + ' as your mate';
+      G.prompt = (G.prompt ? G.prompt + '    ' : '') + 'F — Take ' + (cand.gender === 'm' ? 'him' : 'her') + ' as your mate';
       if (nPressed) {
         const def = PLAYER_DEF[p.species];
         G.mate = cand;
@@ -1091,7 +1679,7 @@ function updateNesting(dt) {
     if (p.gender === 'f') {
       // he displays — the female judges, and N beside him is a yes
       if (G.mate.state === 'display' && mateDist < 140) {
-        if (!G.prompt) G.prompt = 'N — accept his display';
+        if (!G.prompt) G.prompt = 'F — accept his display';
         if (nPressed) {
           ns.stage = 'accepted';
           SFX.stage();
@@ -1124,7 +1712,7 @@ function updateNesting(dt) {
   } else if (ns.stage === 'accepted') {
     ns.reNestT = Math.max(0, (ns.reNestT || 0) - dt);
     if (dist(p.x, p.y, nest.x, nest.y) < 100 && ns.reNestT <= 0) {
-      if (!G.prompt) G.prompt = 'N — nest here';
+      if (!G.prompt) G.prompt = 'F — nest here';
       if (nPressed) {
         ns.stage = 'eggs'; ns.eggs = 3; ns.hatchT = 120;
         ns.raidT = rrange(18, 30); ns.eatT = 0;
@@ -1224,6 +1812,7 @@ function updateNesting(dt) {
       b.hp = Math.min(b.maxhp, b.hp + dt * 2);
       if (b.growth >= 0.9) {
         awardGrowths(150, b.x, b.y - 40);
+        if (!Save.raisedClutch) { Save.raisedClutch = true; syncTitles(); }
         if (b.packAlpha && p.species === 'aardi') {
           // an aardiraptor's young doesn't set off — it takes its place in
           // the pack, a full hunter now (kinYoung: your own blood is a
@@ -1318,6 +1907,85 @@ function spawnAmbient() {
 // cold bar from running away. And rarely, the storm shakes an AVALANCHE
 // loose from the summit: a wall of snow that sweeps DOWN the mountain and
 // buries everything that isn't behind stone, on a rock wall, or fast.
+// ---------------------------------------------------------------------------
+// THE MONSOON — the Sodden Reach's whole personality. Long green calm, then
+// the sky closes, the rain arrives, and the channels climb their banks until
+// the low ground IS the river. Anything caught in the flood gets dragged and
+// battered; the high mud wallows stay put, and so does anything resting in
+// one. Survival here is knowing where the nearest wallow is.
+// ---------------------------------------------------------------------------
+function floodReach(x, y) {
+  // how deep the flood is at a point: 0 clear, 1 the middle of the torrent.
+  // The water grows outward from the permanent channels as `rise` climbs.
+  const M = G.monsoon;
+  if (!M || M.rise <= 0) return 0;
+  const grow = 160 * M.rise;                    // px the banks push outward
+  let best = 0;
+  for (const c of (World.channels || [])) {
+    const d = dist(x, y, c.x, c.y) - c.r;
+    if (d < grow) best = Math.max(best, clamp(1 - d / Math.max(1, grow), 0, 1));
+  }
+  return best * M.rise;
+}
+function inWallow(x, y) {
+  for (const m of World.mudPools) if (dist(x, y, m.x, m.y) < m.r * 1.05) return true;
+  return false;
+}
+function updateMonsoon(dt) {
+  if (!World.monsoonWorld) { G.monsoon = null; return; }
+  if (!G.monsoon) G.monsoon = { phase: 'calm', t: 50 + Math.random() * 40, rise: 0, rain: 0, shove: 0 };
+  const M = G.monsoon;
+  M.t -= dt;
+  // the cycle: calm -> the sky darkens -> the storm -> the water drains away
+  if (M.phase === 'calm' && M.t <= 0) {
+    M.phase = 'building'; M.t = 9;
+    G.banner = { str: 'The light goes green. The rain is coming — find a wallow.', t: 5, color: '#9fd6b0' };
+  } else if (M.phase === 'building' && M.t <= 0) {
+    M.phase = 'storm'; M.t = 26 + Math.random() * 14;
+    G.banner = { str: 'MONSOON! The rivers are climbing — get to the mud!', t: 5, color: '#bfe6ff' };
+  } else if (M.phase === 'storm' && M.t <= 0) {
+    M.phase = 'easing'; M.t = 14;
+    G.banner = { str: 'The rain thins. The water starts to fall back.', t: 4, color: '#cfe6d8' };
+  } else if (M.phase === 'easing' && M.t <= 0) {
+    M.phase = 'calm'; M.t = 70 + Math.random() * 50;
+    // the storm has passed and you are still breathing — that earns a name
+    if (G.started && G.player && G.player.alive && !Save.stormRider) { Save.stormRider = true; syncTitles(); }
+  }
+  const wantRain = M.phase === 'storm' ? 1 : M.phase === 'building' ? 0.35 : M.phase === 'easing' ? 0.4 : 0;
+  const wantRise = M.phase === 'storm' ? 1 : M.phase === 'easing' ? 0.45 : 0;
+  M.rain = lerp(M.rain, wantRain, Math.min(1, dt * 0.5));
+  M.rise = lerp(M.rise, wantRise, Math.min(1, dt * 0.25));   // water is slow to come AND to go
+  if (M.rise < 0.02) return;
+
+  // --- the flood itself: it drags, it batters, and the wallows are spared ---
+  const hit = (e, isPlayer) => {
+    if (inWallow(e.x, e.y)) return;                 // the mud holds you
+    const f = floodReach(e.x, e.y);
+    if (f < 0.25) return;
+    const heavy = f > 0.6;
+    // shoved downstream — the current always runs with the channel's slope
+    const push = (isPlayer ? 26 : 40) * f * dt * 60;
+    e.x = clamp(e.x + push * 0.9, 20, WORLD_W - 20);
+    e.y = clamp(e.y + Math.sin(e.x * 0.004 + G.time * 0.3) * push * 0.4, 20, WORLD_H - 20);
+    if (heavy && Math.random() < dt * (isPlayer ? 0.5 : 0.35)) {
+      // rare, and violent: caught by the current proper
+      if (isPlayer) {
+        dealDamage(e, playerMaxHp() * 0.06, null, { kb: 0 });
+        G.shake = Math.min(7, G.shake + 3);
+        floatText(e.x, e.y - 40, 'SWEPT!', '#bfe6ff');
+      } else {
+        dealDamage(e, e.maxhp * 0.14, null, { kb: 0 });
+        e.pinT = Math.max(e.pinT || 0, 0.5);        // tumbled, briefly helpless
+        e.thrash = 1;
+        if (Math.random() < 0.5) floatText(e.x, e.y - 34, 'SWEPT!', '#bfe6ff');
+      }
+    }
+  };
+  const p = G.player;
+  if (p && p.alive && !G.burrow) hit(p, true);
+  for (const e of G.npcs) { if (e.hp > 0 && !DINO[e.species].fish) hit(e, false); }
+}
+
 function updateBlizzard(dt) {
   // the Moors have no storms — just a mist that never, ever lifts
   if (World.misty) { G.blizzard = null; G.mist = lerp(G.mist || 0, 0.85, Math.min(1, dt * 0.5)); return; }
@@ -1441,6 +2109,64 @@ function drawAvalanche(camX, camY) {
 }
 // the mist, drawn in screen space: drifting banks under a flat veil.
 // Some days you see the whole ridge; some days shapes loom out of nothing.
+// the storm on screen: a green-dark gloom, slanting rain, and the swollen
+// water drawn as a translucent skin creeping out from every channel
+function drawMonsoon() {
+  const M = G.monsoon;
+  if (!M || (M.rain < 0.01 && M.rise < 0.01)) return;
+  const vw = VIEW_W * G.zoom, vh = VIEW_H * G.zoom;
+  // the risen water, in world space (drawn under the rain, over the ground).
+  // All the channel blobs go into ONE path filled ONCE — filling each blob
+  // separately stacks translucency wherever they overlap (which is
+  // everywhere) and the river turns into blotchy fog instead of water.
+  if (M.rise > 0.02) {
+    const flood = (shrink) => {
+      ctx.beginPath();
+      for (const c of (World.channels || [])) {
+        const r = c.r + 160 * M.rise - shrink;
+        if (r <= 0) continue;
+        if (c.x < G.camX - r - 40 || c.x > G.camX + vw + r + 40 ||
+            c.y < G.camY - r - 40 || c.y > G.camY + vh + r + 40) continue;
+        ctx.moveTo(c.x - G.camX + r, c.y - G.camY);
+        ctx.arc(c.x - G.camX, c.y - G.camY, r, 0, TAU);
+      }
+      ctx.fill();
+    };
+    ctx.save();
+    ctx.globalAlpha = 0.42 * M.rise;
+    ctx.fillStyle = '#3f6570';
+    flood(0);                       // the water sheet, one even body
+    ctx.globalAlpha = 0.3 * M.rise;
+    ctx.fillStyle = '#35545e';
+    flood(70);                      // the deeper heart of the torrent
+    ctx.restore();
+  }
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  const W = canvas.width, H = canvas.height;
+  // the light goes out — a heavy green-grey lid over everything
+  if (M.rain > 0.01) {
+    ctx.fillStyle = 'rgba(28,44,38,' + (0.34 * M.rain).toFixed(3) + ')';
+    ctx.fillRect(0, 0, W, H);
+  }
+  // rain: fast slanted streaks, seeded off world time so it never repeats
+  if (M.rain > 0.05) {
+    const n = Math.floor(340 * M.rain);
+    ctx.strokeStyle = 'rgba(200,226,236,' + (0.4 * M.rain).toFixed(3) + ')';
+    ctx.lineWidth = 1.1;
+    ctx.beginPath();
+    for (let i = 0; i < n; i++) {
+      const sx = (hash2(i, 3) * W + G.time * 240 * (0.6 + hash2(i, 9) * 0.7)) % (W + 60) - 30;
+      const sy = (hash2(i, 5) * H + G.time * 900 * (0.7 + hash2(i, 11) * 0.6)) % (H + 80) - 40;
+      const len = 14 + hash2(i, 13) * 16;
+      ctx.moveTo(sx, sy);
+      ctx.lineTo(sx - len * 0.28, sy + len);
+    }
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
 function drawMist() {
   if (!(World.snowy || World.misty) || !G.mist) return;
   const m = G.mist;
@@ -1743,41 +2469,16 @@ function loop(now) {
   if (!G.started) return;
   if (G.paused) { render(); return; }
 
-  G.time += dt;
-  // underground, the burrow owns the whole frame — the world above waits
-  if (G.burrow) {
-    updateBurrow(dt);
-    updateWorldStuff(dt);
-    if (G.banner) { G.banner.t -= dt; if (G.banner.t <= 0) G.banner = null; }
-    G.shake = Math.max(0, G.shake - dt * 14);
+  if (simTick(dt)) {
+    // the burrow owned this step — render the den (or the world, if the
+    // burrow was exited mid-step) and skip the surface-only frame work
     if (G.burrow) renderBurrow(); else render();
     updateHUD();
     return;
   }
-  updatePlayer(dt);
-  // just slipped underground THIS frame: the world halts right here — no NPC
-  // update may touch the pack at its burrow-local coordinates, and no world
-  // render may flash the map corner
-  if (G.burrow) {
-    updateWorldStuff(dt);
-    if (G.banner) { G.banner.t -= dt; if (G.banner.t <= 0) G.banner = null; }
-    G.shake = Math.max(0, G.shake - dt * 14);
-    renderBurrow();
-    updateHUD();
-    return;
-  }
-  for (const e of G.npcs) updateNPC(e, dt);
-  updateWorldStuff(dt);
-  updateEruption(dt);
-  updateBlizzard(dt);
-  updateNesting(dt);
   updateAmbient(dt);
-  popT += dt;
-  if (popT > 10) { popT = 0; maintainPopulation(); }
   autosaveT += dt;
   if (autosaveT > 10) { autosaveT = 0; saveDinoSnapshot(); }
-  if (G.banner) { G.banner.t -= dt; if (G.banner.t <= 0) G.banner = null; }
-  G.shake = Math.max(0, G.shake - dt * 14);
 
   // camera — with the GROW-ZOOM: the view very slowly pulls back as your
   // dino grows (bigger species pull back further), so a hatchling lives in
@@ -1796,6 +2497,59 @@ function loop(now) {
   updateHUD();
 }
 requestAnimationFrame(loop);
+
+// one fixed step of the simulation — shared by loop() and the dev stepper so
+// the two can never drift apart. Returns true when the burrow owned the step
+// (the caller then skips the surface-only frame work and renders the den).
+function simTick(dt) {
+  G.time += dt;
+  // underground, the burrow owns the whole frame — the world above waits
+  if (G.burrow) { updateBurrow(dt); updateWorldStuff(dt); decayFx(dt); return true; }
+  updatePlayer(dt);
+  // just slipped underground THIS frame: the world halts right here — no NPC
+  // update may touch the pack at its burrow-local coordinates
+  if (G.burrow) { updateWorldStuff(dt); decayFx(dt); return true; }
+  for (const e of G.npcs) updateNPC(e, dt);
+  updateWorldStuff(dt);
+  updateEruption(dt);
+  updateBlizzard(dt);
+  updateMonsoon(dt);
+  updateNesting(dt);
+  // the lobby-leave countdown runs on WORLD time: dying cancels it, and the
+  // banner keeps the player honest about how long they must survive
+  if (G.lobbyCountdown != null) {
+    if (!G.player || !G.player.alive) { G.lobbyCountdown = null; }
+    else {
+      G.lobbyCountdown -= dt;
+      if (G.lobbyCountdown <= 0) exitToLobby(true);   // clears the countdown itself
+      else G.banner = { str: '⌂ Leaving for the lobby in ' + Math.ceil(G.lobbyCountdown) + '…', t: 0.4, color: '#ffe9a0' };
+    }
+  }
+  // population upkeep is simulation, not rendering — it must tick under
+  // window.step too, or headless runs never regenerate or scale the packs
+  popT += dt;
+  if (popT > 10) { popT = 0; maintainPopulation(); updatePackScale(); }
+  G.input.action = false;   // F is read by the player, the den AND the courtship
+  G.input.claw = false; G.input.dig = false;
+  decayFx(dt);
+  return false;
+}
+function decayFx(dt) {
+  if (G.banner) { G.banner.t -= dt; if (G.banner.t <= 0) G.banner = null; }
+  G.shake = Math.max(0, G.shake - dt * 14);
+}
+
+// ---------- deterministic dev stepper (console: step(120)) ----------
+// rAF suspends whenever the pane loses the thread, so scripted tests can't
+// rely on wall-clock frames — step(n) advances the simulation n fixed 1/60s
+// frames synchronously instead. hold=true skips the final render for speed.
+window.step = function (n, hold) {
+  for (let i = 0; i < (n || 1); i++) {
+    if (!G.started || !G.player) break;
+    simTick(1 / 60);
+  }
+  if (!hold) { if (G.burrow) renderBurrow(); else render(); updateHUD(); }
+};
 
 // ---------- burrow render: the little world under the delta ----------
 function renderBurrow() {
@@ -1875,7 +2629,7 @@ function renderBurrow() {
     if (e.hp <= 0) continue;
     draws.push({ y: e.y, fn: () => { drawShadow(ctx, e.x, e.y, bodyRadius(e) * 1.4); drawDino(ctx, e.species, e); if (e.hp < e.maxhp) drawHpBar(e); } });
   }
-  draws.push({ y: p.y, fn: () => { drawShadow(ctx, p.x, p.y, (8 + 14 * p.growth) * genderMod(p).size); drawDino(ctx, p.species, p); } });
+  draws.push({ y: p.y, fn: () => { drawShadow(ctx, p.x, p.y, (8 + 14 * p.growth) * genderMod(p).size); drawDino(ctx, p.species, p); drawScentWisps(ctx, p); } });
   draws.sort((a, b) => a.y - b.y);
   for (const d of draws) d.fn();
 
@@ -1924,6 +2678,82 @@ function dbgCircle(g, x, y, r, col) {
   g.fill();
   g.globalAlpha = 1;
 }
+// ---------- THE SPECIMEN HALL (secret: type "bones") ----------
+// Every species in the registry on one scrollable field, drawn by the real
+// drawDino and overlaid by the REAL hit geometry (drawEntityHitboxes — the
+// same objects combat tests). The pose controls exist to torture the
+// geometry: pitch sway proves the circles lean with the art.
+const Spec = { open: false, t: 0, raf: 0 };
+function toggleSpecimenHall() {
+  Spec.open = !Spec.open;
+  document.getElementById('specimen').classList.toggle('hidden', !Spec.open);
+  if (Spec.open && !Spec.wired) {
+    Spec.wired = true;
+    document.getElementById('spec-close').addEventListener('click', toggleSpecimenHall);
+  }
+  if (Spec.open) specimenFrame(); else cancelAnimationFrame(Spec.raf);
+}
+function specimenFrame() {
+  Spec.raf = requestAnimationFrame(specimenFrame);
+  Spec.t += 1 / 60;
+  if (!G.started) G.time += 1 / 60;   // the lobby clock is frozen; breathe anyway
+  const cv = document.getElementById('spec-canvas');
+  const wrap = document.getElementById('spec-scroll');
+  const keys = Object.keys(DINO);
+  const COLS = Math.max(3, Math.floor((wrap.clientWidth || 1200) / 190));
+  const CW = Math.floor((wrap.clientWidth || 1200) / COLS), CH = 170;
+  const rows = Math.ceil(keys.length / COLS);
+  if (cv.width !== CW * COLS || cv.height !== rows * CH) { cv.width = CW * COLS; cv.height = rows * CH; }
+  const g = cv.getContext('2d');
+  g.fillStyle = '#141a16';
+  g.fillRect(0, 0, cv.width, cv.height);
+  const growth = parseFloat(document.getElementById('spec-growth').value);
+  const pose = document.getElementById('spec-pose').value;
+  const flip = document.getElementById('spec-flip').checked;
+  keys.forEach((sp, i) => {
+    const d = DINO[sp];
+    const col = i % COLS, row = (i / COLS) | 0;
+    const cx = col * CW + CW / 2, cy = row * CH + CH - 42;
+    // one fake specimen, posed by the controls — same fields the game uses
+    const ent = {
+      species: sp, x: 0, y: 0, growth,
+      facing: flip && Math.sin(Spec.t * 0.35 + i * 1.7) < 0 ? -1 : 1,
+      move: pose === 'walk' ? 1 : pose === 'run' ? 1 : 0,
+      run: pose === 'run' ? 1 : 0,
+      phase: (pose === 'walk' || pose === 'run') ? Spec.t * (pose === 'run' ? 11 : 6) : 0,
+      pitch: pose === 'pitch' ? Math.sin(Spec.t * 0.9 + i) * 0.45 : 0,
+      hurtT: 0, attackT: 0, headDown: 0,
+    };
+    // fit the cell: shrink giants, never inflate the tiny
+    const span = (d.L.body[0] + d.L.tail[0] + d.L.neckLen + d.L.head[0]) * d.scale * sizeScale(growth);
+    const k = Math.min(1, (CW - 26) / (span * 1.35), (CH - 50) / ((d.L.leg[0] + d.L.body[1] + d.L.neckLen * Math.abs(Math.sin(d.L.neckAng)) + 24) * d.scale * sizeScale(growth) * 1.5));
+    g.save();
+    g.translate(cx, cy);
+    g.scale(k, k);
+    // the ground line the anchor stands on
+    g.strokeStyle = 'rgba(160,170,150,0.25)';
+    g.beginPath(); g.moveTo(-CW / 2 / k, 0); g.lineTo(CW / 2 / k, 0); g.stroke();
+    drawDino(g, sp, ent);
+    drawEntityHitboxes(g, ent);
+    g.restore();
+    g.fillStyle = '#cdbb92';
+    g.font = '10px monospace';
+    g.textAlign = 'center';
+    g.fillText(d.name + (d.fish ? ' (fish)' : ''), cx, row * CH + CH - 19);
+    // the power readout: the food chain at a glance, at this slider growth —
+    // same powerFromStats the AI runs on, so the number here can never lie
+    // (decorative species carry no def and get no number)
+    const pdef = NPC_DEF[sp] || PLAYER_DEF[sp];
+    if (pdef && pdef.hp) {
+      const pw = powerFromStats(pdef.hp * hpFrac(growth), (pdef.dmg || 0) * dmgFrac(growth));
+      g.fillStyle = '#8fae8a';
+      g.font = '9px monospace';
+      g.fillText('pwr ' + Math.round(pw), cx, row * CH + CH - 8);
+    }
+    g.textAlign = 'left';
+  });
+}
+
 function drawEntityHitboxes(g, e) {
   const d = DINO[e.species];
   if (!d) return;
@@ -1965,9 +2795,9 @@ function drawEntityHitboxes(g, e) {
     const nc = nipCircle(e);
     dbgCircle(g, nc.x, nc.y, nc.r, '#ffb03e');
   }
-  // mid-pounce, the landing pin rides along under the body — the same object
-  // the landing bite will test the moment the leap ends
-  if (e.isPlayer && e.pounce && e.pounce.phase === 'jump') {
+  // mid-pounce (and through the landing grace) the flying-body pin rides
+  // along under the dino — the same object pounceStrike tests every step
+  if (e.isPlayer && ((e.pounce && e.pounce.phase === 'jump') || e.pounceGrace)) {
     const pz = pounceLandZone(e);
     dbgCircle(g, pz.x, pz.y, pz.r, '#ff5040');
   }
@@ -2043,17 +2873,11 @@ function render() {
           // a submerged croc is only a shadow under the surface — no hp bar,
           // no outline, just a dark shape and two eyes
           if (e.submerged && isWaterPx(e.x, e.y)) { drawCrocShadow(ctx, e); return; }
-          // THE MOORS: anything past arm's length is a SILHOUETTE — darkened
-          // to a shape, and lying about its size (each animal drifts through
-          // the mist a fixed, personal amount bigger or smaller than it is)
+          // THE MOORS: anything past arm's length is a SILHOUETTE —
+          // darkened to a shape in the grey, drawn at its true size
           const far = World.misty ? clamp((dist(e.x, e.y, p.x, p.y) - 150) / 130, 0, 1) : 0;
           if (far > 0.01) {
-            if (!e.mistS) e.mistS = 0.72 + hash2(e.id * 7 + 3, 13) * 0.7;
             ctx.save();
-            ctx.translate(e.x, e.y);
-            const sc = lerp(1, e.mistS, far);
-            ctx.scale(sc, sc);
-            ctx.translate(-e.x, -e.y);
             ctx.filter = 'brightness(' + (1 - 0.72 * far).toFixed(2) + ') saturate(' + (1 - 0.85 * far).toFixed(2) + ')';
             drawDino(ctx, e.species, e);
             ctx.filter = 'none';
@@ -2191,6 +3015,7 @@ function render() {
   ctx.globalAlpha = 1;
   ctx.drawImage(vignette, 0, 0, VIEW_W, VIEW_H);
   drawMist();
+  drawMonsoon();
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, Math.floor(Math.random() * -30), Math.floor(Math.random() * -30));
   ctx.fillStyle = grainPattern;
@@ -2251,7 +3076,31 @@ function updateHUD() {
   const elGr = document.getElementById('growthscount');
   const grLabel = '❖ ' + Save.growths + (Profiles.current ? ' · ' + Profiles.current : '');
   if (elGr && elGr._v !== grLabel) { elGr._v = grLabel; elGr.textContent = grLabel; }
-  elPrompt.textContent = G.prompt;
+  // the prompt bar is the ONLY place a player learns what E and F do here, so
+  // each offer becomes its own chip with the key drawn as a keycap. (Plain
+  // text collapsed the wide-space separator and ran the offers together:
+  // "E — Drink F — Go fishing" read as one unparseable line.)
+  if (elPrompt._v !== G.prompt) {
+    elPrompt._v = G.prompt;
+    elPrompt.innerHTML = '';
+    for (const seg of (G.prompt || '').split(/\s{3,}/)) {
+      if (!seg) continue;
+      const mk = seg.match(/^([A-Z0-9])\s*—\s*(.+)$/);
+      const chip = document.createElement('span');
+      chip.className = 'pchip';
+      if (mk) {
+        const cap = document.createElement('b');
+        cap.className = 'pkey';
+        cap.textContent = mk[1];
+        chip.appendChild(cap);
+        chip.appendChild(document.createTextNode(mk[2]));
+      } else {
+        chip.className = 'pchip note';
+        chip.textContent = seg;
+      }
+      elPrompt.appendChild(chip);
+    }
+  }
   elPrompt.style.opacity = G.prompt ? 1 : 0;
   if (G.banner) {
     elBanner.textContent = G.banner.str;

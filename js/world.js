@@ -39,39 +39,44 @@ const FORD_TYS = [30, 62, 100];
 // ============================================================================
 const ECOS = {
   valley: {
-    name: 'Fern Valley', emoji: '🌿', sub: 'forest · river · plains',
+    name: 'Fern Valley', tint: '#7ba03f', emoji: '🌿', sub: 'forest · river · plains',
     seed: 20260704, cost: 0,
     gen: () => genValley(),
   },
   prairie: {
-    name: 'Skull Prairie', emoji: '🦴', sub: 'bones · ponds · swamp',
+    name: 'Skull Prairie', tint: '#c9b98a', emoji: '🦴', sub: 'bones · ponds · swamp',
     seed: 20260705, cost: 100,          // unlocked by any Full Adult, then paid once
     gen: () => genPrairie(),
   },
   coast: {
-    name: 'Coastal Scrubs', emoji: '🌊', sub: 'scrubland · lake · the beach',
+    name: 'Coastal Scrubs', tint: '#5da3bd', emoji: '🌊', sub: 'scrubland · lake · the beach',
     seed: 20260706, cost: 250,
     gen: () => genCoast(),
   },
   ash: {
-    name: 'Ashfall Ridge', emoji: '🌋', sub: 'lava · hot springs · eruptions',
+    name: 'Ashfall Ridge', tint: '#d06a3a', emoji: '🌋', sub: 'lava · hot springs · eruptions',
     seed: 20260707, cost: 500,
     gen: () => genAsh(),
   },
   delta: {
-    name: 'Lertentous Delta', emoji: '🐟', sub: 'rainforest · a hundred islands · the drowned south',
+    name: 'Lertentous Delta', tint: '#4fae8f', emoji: '🐟', sub: 'rainforest · a hundred islands · the drowned south',
     seed: 20260711, cost: 1000, size: 256,   // the engine's maximum — tile packing caps at 256
     gen: () => genDelta(),
   },
   wall: {
-    name: 'The Nivalotitan Wall', emoji: '🏔️', sub: 'the climbing maze · giant pines · the frozen dark',
+    name: 'The Nivalotitan Wall', tint: '#a8c8dc', emoji: '🏔️', sub: 'the climbing maze · giant pines · the frozen dark',
     seed: 20260718, cost: 2000, size: 256,
     gen: () => genWall(),
   },
   moor: {
-    name: 'The Great Moors of Martulisth', emoji: '🌫️', sub: 'mist · silhouettes · the grey waste',
+    name: 'The Great Moors of Martulisth', tint: '#9a93ad', emoji: '🌫️', sub: 'mist · silhouettes · the grey waste',
     seed: 20260824, cost: 2500, size: 200,
     gen: () => genMoor(),
+  },
+  jungle: {
+    name: 'The Sodden Reach', tint: '#3fae57', emoji: '🌴', sub: 'deep jungle · swollen rivers · the monsoon',
+    seed: 20260825, cost: 3000, size: 240,
+    gen: () => genJungle(),
   },
 };
 // the river only ever occupies this x window (px) — used to cull river passes
@@ -791,6 +796,121 @@ function genWall() {
 // gnarled snags claw at a sunless sky, and everything beyond a stone's throw
 // is a silhouette that may be lying about its size. Gloom is the whole point.
 // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// THE SODDEN REACH — deep jungle, fat slow rivers, and the monsoon that
+// turns all of it into one brown sea. Land-heavy where the delta was water-
+// heavy: you can walk almost everywhere here, until the rain says otherwise.
+// The mud wallows are the one safe ground when the flood comes.
+// ---------------------------------------------------------------------------
+function genJungle() {
+  const W = World;
+  W.monsoonWorld = true;              // main.js runs the storm cycle on this map
+  W.lush = true;                      // rainforest: every green goes deeper
+  W.nests = {
+    buitre:  { x: 46 * TILE,  y: 176 * TILE },   // river-bend roost in the south-west
+    hypsi:   { x: 196 * TILE, y: 188 * TILE },   // thicket burrow, deep south-east
+    adratik: { x: 118 * TILE, y: 40 * TILE },    // the northern glade
+    orkor:   { x: 210 * TILE, y: 62 * TILE },    // high north-east ridge
+    neove:   { x: 60 * TILE,  y: 70 * TILE },    // the shrouded north-west heart
+  };
+
+  // the great rivers: broad channels the monsoon swells over their banks.
+  // Each is a chain of overlapping blobs, so a flood only has to widen them.
+  const CH = [
+    [[8, 150], [40, 152], [74, 146], [104, 152], [136, 158], [170, 154], [206, 160], [236, 156]],
+    [[96, 8], [100, 40], [112, 70], [108, 100], [118, 130], [124, 158], [120, 190], [128, 232]],
+    [[236, 74], [200, 82], [168, 76], [140, 84], [116, 92]],
+  ];
+  W.channels = [];
+  for (const path of CH) {
+    for (let k = 0; k < path.length - 1; k++) {
+      const [x0, y0] = path[k], [x1, y1] = path[k + 1];
+      const steps = Math.ceil(Math.hypot(x1 - x0, y1 - y0) / 3);
+      for (let t = 0; t <= steps; t++) {
+        const x = x0 + (x1 - x0) * (t / steps), y = y0 + (y1 - y0) * (t / steps);
+        const r = 3.4 + vnoise(x * 0.11, y * 0.11) * 2.2;
+        addWaterBlob(x, y, r, r > 4.6);        // the fat stretches run deep
+        W.channels.push({ x: x * TILE, y: y * TILE, r: r * TILE });
+      }
+    }
+  }
+  // ox-bows and forest pools left behind by older courses
+  const pools = [
+    { x: 30, y: 96, r: 4.6, deep: true }, { x: 178, y: 118, r: 4.2, deep: true },
+    { x: 64, y: 214, r: 3.8, deep: false }, { x: 198, y: 30, r: 3.6, deep: false },
+    { x: 152, y: 206, r: 4.0, deep: true }, { x: 84, y: 118, r: 3.2, deep: false },
+  ];
+  for (const p of pools) addWaterBlob(p.x, p.y, p.r, p.deep);
+
+  // THE WALLOWS: high sheltered mud, the only ground that stays put in a
+  // monsoon. Deliberately spread wide so nobody is ever too far from one.
+  const muds = [
+    { x: 62, y: 128, r: 4.2 }, { x: 150, y: 118, r: 4.0 }, { x: 96, y: 62, r: 3.8 },
+    { x: 190, y: 160, r: 4.0 }, { x: 36, y: 58, r: 3.4 }, { x: 216, y: 104, r: 3.6 },
+    { x: 128, y: 196, r: 3.8 }, { x: 74, y: 176, r: 3.4 },
+  ];
+
+  // --- base terrain: jungle is the default; clearings are the exception ---
+  for (let ty = 0; ty < HT; ty++) {
+    for (let tx = 0; tx < WT; tx++) {
+      const i = tIdx(tx, ty);
+      if (W.ter[i] === T_WATER || W.ter[i] === T_DEEP || W.ter[i] === T_SAND) continue;
+      // dense almost everywhere, thinning into occasional glades
+      const glade = clamp((fbm(tx * 0.045 + 311, ty * 0.045 + 97) - 0.52) * 3.4, 0, 1);
+      let ff = clamp(0.92 - glade, 0, 1);
+      for (const m of muds) {
+        const dd = Math.hypot(tx - m.x, ty - m.y);
+        if (dd < m.r + 5) ff = Math.min(ff, 0.28);      // wallows sit in the open
+      }
+      W.forest[i] = ff;
+      W.ter[i] = ff > 0.45 ? T_FOREST : T_GRASS;
+    }
+  }
+  for (const m of muds) addMudPool(m);
+
+  // --- vegetation: a crowded, layered rainforest floor ---
+  for (let ty = 1; ty < HT - 1; ty++) {
+    for (let tx = 1; tx < WT - 1; tx++) {
+      const i = tIdx(tx, ty), t = W.ter[i];
+      if (t === T_WATER || t === T_DEEP || t === T_MUD) continue;
+      const px = tx * TILE + rrange(2, TILE - 2), py = ty * TILE + rrange(2, TILE - 2);
+      if (nearAnyNest(px, py, 70)) continue;
+      const ff = W.forest[i], r = rnd();
+      if (ff > 0.5 && r < 0.10 + 0.16 * clamp((ff - 0.5) * 2.4, 0, 1)) {
+        // the canopy proper — broadleaf, blossoming, packed tight
+        const kind = rnd() < 0.78 ? 1 : 0;
+        W.trees.push({ x: px, y: py, s: rrange(0.9, 1.8), kind, v: rnd() < 0.5 ? 4 : 3 });
+      } else if (r > 0.90) {
+        W.ferns.push({ x: px, y: py, food: 1, regrow: 0, s: rrange(0.9, 1.5) });
+      } else if (t === T_SAND && r > 0.86) {
+        W.horsetails.push({ x: px, y: py, food: 1, regrow: 0, s: rrange(0.8, 1.3) });
+      } else if (r > 0.9965) {
+        W.rocks.push({ x: px, y: py, s: rrange(0.7, 1.6) });
+      } else {
+        const r2 = rnd();
+        if (ff < 0.4 && r2 < 0.09) W.props.push({ kind: 'tallgrass', x: px, y: py, s: rrange(0.9, 1.6) });
+        else if (ff > 0.45 && r2 < 0.03) W.props.push({ kind: 'log', x: px, y: py, s: rrange(0.8, 1.3), flip: rnd() < 0.5 ? 1 : -1 });
+        else if (ff > 0.5 && r2 < 0.05) W.props.push({ kind: 'mushroom', x: px, y: py, s: rrange(0.9, 1.5) });
+      }
+    }
+  }
+
+  // extra browse for the herds, and fish runs along the channels
+  for (let k = 0; k < 70; k++) {
+    const px = rrange(6, WT - 6) * TILE, py = rrange(6, HT - 6) * TILE;
+    if (!isWaterPx(px, py) && !isMudPx(px, py)) W.ferns.push({ x: px, y: py, food: 1, regrow: 0, s: rrange(0.9, 1.4) });
+  }
+
+  // game trails: everything walks between water and wallow
+  addTrail(W.nests.buitre.x, W.nests.buitre.y, muds[7].x * TILE, muds[7].y * TILE);
+  addTrail(muds[0].x * TILE, muds[0].y * TILE, 74 * TILE, 146 * TILE);
+  addTrail(W.nests.adratik.x, W.nests.adratik.y, muds[2].x * TILE, muds[2].y * TILE);
+  addTrail(muds[1].x * TILE, muds[1].y * TILE, 118 * TILE, 130 * TILE);
+  addTrail(W.nests.hypsi.x, W.nests.hypsi.y, muds[6].x * TILE, muds[6].y * TILE);
+  addTrail(W.nests.neove.x, W.nests.neove.y, muds[4].x * TILE, muds[4].y * TILE);
+  addTrail(muds[3].x * TILE, muds[3].y * TILE, 170 * TILE, 154 * TILE);
+}
+
 function genMoor() {
   const W = World;
   W.misty = true;
@@ -2401,6 +2521,7 @@ const PLAINS_RANGE = {
   coast: { xa: 0.05, xb: 0.80, yb: 0.95 },
   ash: { xa: 0.04, xb: 0.94, yb: 0.95 },
   delta: { xa: 0.03, xb: 0.97, yb: 0.92 },   // stop before the drowned south
+  jungle: { xa: 0.04, xb: 0.96, yb: 0.95 },  // land everywhere — the glades are the openings
 };
 function randPlainsPos() {
   const R = PLAINS_RANGE[World.eco] || PLAINS_RANGE.prairie;
