@@ -702,12 +702,30 @@ function genWall() {
       // stay open, punched with gaps so nothing is ever fully sealed in.
       // Denser up high (the summit is the true maze); the border is solid rock.
       const contour = ((el * 7) % 1 + 1) % 1;
-      const gap = fbm(tx * 0.33 + 40, ty * 0.33 + 20);
-      const bandW = 0.09 + 0.05 * clamp((el - 0.4) * 2, 0, 1);   // walls thicken up high
+      // the gap noise is coarse on purpose: long unbroken ramparts with
+      // proper passes between them, not a peppering of loose blocks
+      const gap = fbm(tx * 0.16 + 40, ty * 0.16 + 20);
+      const bandW = 0.12 + 0.08 * clamp((el - 0.4) * 2, 0, 1);   // walls thicken up high
       const edge = tx < 2 || ty < 2 || tx >= WT - 2 || ty >= HT - 2;
-      if (edge || (el > 0.22 && contour < bandW && gap > 0.42)) W.ter[i] = T_CLIFF;
+      if (edge || (el > 0.22 && contour < bandW && gap > 0.36)) W.ter[i] = T_CLIFF;
       else W.ter[i] = ff > 0.4 ? T_FOREST : T_GRASS;   // snow (a grass tile the snowy palette whitens)
     }
+  }
+  // scrub the stragglers: a rock tile with no rock beside it is a boulder,
+  // not a wall — twice over, so the stubs the first pass exposes go too
+  for (let pass = 0; pass < 2; pass++) {
+    const drop = [];
+    for (let ty = 2; ty < HT - 2; ty++) for (let tx = 2; tx < WT - 2; tx++) {
+      const i = tIdx(tx, ty);
+      if (W.ter[i] !== T_CLIFF) continue;
+      let n = 0;
+      if (W.ter[tIdx(tx - 1, ty)] === T_CLIFF) n++;
+      if (W.ter[tIdx(tx + 1, ty)] === T_CLIFF) n++;
+      if (W.ter[tIdx(tx, ty - 1)] === T_CLIFF) n++;
+      if (W.ter[tIdx(tx, ty + 1)] === T_CLIFF) n++;
+      if (n < 1) drop.push(i);
+    }
+    for (const i of drop) W.ter[i] = W.forest[i] > 0.4 ? T_FOREST : T_GRASS;
   }
 
   // a clear spawn bowl at the southern foot — never hatch inside a wall
@@ -1353,9 +1371,17 @@ function renderGroundRegion(ctx, rx, ry, rw, rh) {
       else if (World.misty) ground = mixHex(ground, '#787c70', 0.58 - ff * 0.18);
       // the Wall: deep snow, a hair bluer up high (north), a hair warmer under pines
       else if (World.snowy) {
+        // the snowfield: wind-sculpted, bluer in the hollows and up high,
+        // warmer under the pines, glazed to ice on the exposed summit
         const alt = 1 - ty / HT;
-        ground = mixHex(mixHex('#dfe8f2', '#c8d6e6', alt), '#c2cbd0', ff * 0.35);
-        if (t === T_CLIFF) ground = mixHex('#43454f', '#565863', fbm(tx * 0.4 + 2, ty * 0.4));   // bare rock wall
+        const drift = fbm(tx * 0.09 + 60, ty * 0.09 + 12);            // the big soft dunes
+        let snow = mixHex(mixHex('#e6edf5', '#cdd9e8', alt), '#c4ccd3', ff * 0.35);
+        snow = mixHex(snow, drift > 0.5 ? '#f3f7fb' : '#bccbdc', Math.abs(drift - 0.5) * 0.9);
+        if (alt > 0.45 && big > 0.66) snow = mixHex(snow, '#b9d0e6', (big - 0.66) * 2.2);   // ice glaze
+        ground = snow;
+        // rock walls are plateaus: their top wears the same snow, a shade
+        // greyer with the stone showing through (the faces come in pass 3)
+        if (t === T_CLIFF) ground = mixHex(snow, '#8b95a4', 0.5 + 0.18 * n);
       }
       ctx.fillStyle = ground;
       // +1px overdraw: at fractional render scales adjacent rects would
@@ -1454,27 +1480,75 @@ function renderGroundRegion(ctx, rx, ry, rw, rh) {
   // swamp pools merge into one waterline, then shallows, then deep hearts)
   if (World.waterBlobs.length) {
     const bs = World.waterBlobs.filter(b => inR(b.x, b.y, b.r * 1.5 + 14));
-    // frozen ponds on the Wall read as pale cracked ice, not open water
-    const WC = World.snowy
-      ? { sand: '#b8c4cf', foam: '#d6e2ec', shallow: '#c2d2df', open: '#a6bccb', deep: '#8ea9bc' }
-      : WATER_COLS;
-    for (const b of bs) poolBlob(b, 1.3, 5, WC.sand);
-    for (const b of bs) poolBlob(b, 1.08, 1.5, WC.foam);
-    for (const b of bs) poolBlob(b, 1.0, 0, WC.shallow);
-    for (const b of bs) poolBlob(b, 0.8, 0, WC.open);
-    for (const b of bs) if (b.deep) poolBlob(b, 0.52, 0, WC.deep);
-    // a few dark crack lines etched across each ice sheet
     if (World.snowy) {
-      ctx.strokeStyle = 'rgba(90,120,145,0.4)'; ctx.lineWidth = 0.8;
-      for (const b of bs) {
-        for (let k = 0; k < 3; k++) {
-          const a = hash2(Math.round(b.x) + k, Math.round(b.y)) * TAU;
-          ctx.beginPath();
-          ctx.moveTo(b.x + Math.cos(a) * b.r * 0.7, b.y + Math.sin(a) * b.r * 0.5);
-          ctx.lineTo(b.x - Math.cos(a + 0.6) * b.r * 0.6, b.y - Math.sin(a + 0.6) * b.r * 0.5);
-          ctx.stroke();
+      // FROZEN PONDS: a snow-buried rim, a sheet of glassy blue ice with the
+      // dark water showing through its heart, a fan of pressure cracks, a
+      // cold sheen across it and snow blown onto the edges
+      const poolPath = (p, mul, grow) => {
+        const pts = [];
+        for (let i = 0; i < 14; i++) {
+          const a = (i / 14) * TAU;
+          const rr2 = p.r * mul * (1 + (hash2(Math.round(p.x) + i, Math.round(p.y)) - 0.5) * 0.34) + grow;
+          pts.push({ x: p.x + Math.cos(a) * rr2, y: p.y + Math.sin(a) * rr2 * 0.94 });
         }
+        smoothClosed(pts);
+      };
+      for (const b of bs) poolBlob(b, 1.32, 6, '#d9e3ec');      // snow shelf
+      for (const b of bs) poolBlob(b, 1.12, 2, '#eef4fa');      // the bright drifted rim
+      for (const b of bs) {
+        poolPath(b, 1.0, 0);
+        ctx.save(); ctx.clip();
+        const g = ctx.createRadialGradient(b.x - b.r * 0.2, b.y - b.r * 0.2, b.r * 0.1, b.x, b.y, b.r * 1.05);
+        g.addColorStop(0, '#7d9db8'); g.addColorStop(0.55, '#a9c3d6'); g.addColorStop(1, '#c9dae7');
+        ctx.fillStyle = g; ctx.fillRect(b.x - b.r * 1.2, b.y - b.r * 1.2, b.r * 2.4, b.r * 2.4);
+        // the dark water under the thin middle
+        ctx.fillStyle = 'rgba(50,80,112,0.35)';
+        ctx.beginPath(); ctx.ellipse(b.x + b.r * 0.05, b.y + b.r * 0.08, b.r * 0.42, b.r * 0.3, 0.3, 0, TAU); ctx.fill();
+        // pressure cracks: fans of white-and-dark lines from two seeds
+        ctx.lineCap = 'round';
+        for (let sd = 0; sd < 2; sd++) {
+          const cx0 = b.x + (hash2(Math.round(b.x) + sd * 7, 3) - 0.5) * b.r * 0.9;
+          const cy0 = b.y + (hash2(5, Math.round(b.y) + sd * 11) - 0.5) * b.r * 0.6;
+          for (let k = 0; k < 3; k++) {
+            const a = hash2(Math.round(b.x) + k + sd * 3, Math.round(b.y) + k) * TAU;
+            const len = b.r * (0.5 + hash2(k, sd + 9) * 0.6);
+            const mx = cx0 + Math.cos(a) * len * 0.5 + (hash2(k * 3, sd) - 0.5) * 6;
+            const my = cy0 + Math.sin(a) * len * 0.5 * 0.94 + (hash2(sd, k * 5) - 0.5) * 6;
+            const ex = cx0 + Math.cos(a) * len, ey = cy0 + Math.sin(a) * len * 0.94;
+            ctx.strokeStyle = 'rgba(40,66,96,0.5)'; ctx.lineWidth = 0.9;
+            ctx.beginPath(); ctx.moveTo(cx0, cy0); ctx.quadraticCurveTo(mx, my, ex, ey); ctx.stroke();
+            ctx.strokeStyle = 'rgba(255,255,255,0.75)'; ctx.lineWidth = 0.8;
+            ctx.beginPath(); ctx.moveTo(cx0 + 0.8, cy0 - 0.8); ctx.quadraticCurveTo(mx + 0.8, my - 0.8, ex + 0.8, ey - 0.8); ctx.stroke();
+            // a short branch off the crack
+            ctx.strokeStyle = 'rgba(40,66,96,0.4)'; ctx.lineWidth = 0.7;
+            ctx.beginPath(); ctx.moveTo(mx, my); ctx.lineTo(mx + Math.cos(a + 1.1) * len * 0.3, my + Math.sin(a + 1.1) * len * 0.3); ctx.stroke();
+          }
+        }
+        // the sheen: a soft diagonal band of cold light
+        ctx.save();
+        ctx.translate(b.x, b.y); ctx.rotate(-0.55);
+        const sg = ctx.createLinearGradient(0, -b.r * 0.3, 0, b.r * 0.3);
+        sg.addColorStop(0, 'rgba(255,255,255,0)'); sg.addColorStop(0.5, 'rgba(255,255,255,0.32)'); sg.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = sg; ctx.fillRect(-b.r * 1.3, -b.r * 0.3, b.r * 2.6, b.r * 0.6);
+        ctx.restore();
+        // snow blown onto the ice at the rim
+        ctx.fillStyle = 'rgba(240,245,250,0.9)';
+        for (let k = 0; k < 4; k++) {
+          const a = hash2(Math.round(b.x) * 3 + k, Math.round(b.y) + k * 7) * TAU;
+          const rr2 = b.r * (0.72 + hash2(k, Math.round(b.y)) * 0.25);
+          ctx.beginPath();
+          ctx.ellipse(b.x + Math.cos(a) * rr2, b.y + Math.sin(a) * rr2 * 0.94, 4 + hash2(k * 5, 1) * 6, 2 + hash2(2, k * 3) * 2, a, 0, TAU);
+          ctx.fill();
+        }
+        ctx.restore();
       }
+    } else {
+      const WC = WATER_COLS;
+      for (const b of bs) poolBlob(b, 1.3, 5, WC.sand);
+      for (const b of bs) poolBlob(b, 1.08, 1.5, WC.foam);
+      for (const b of bs) poolBlob(b, 1.0, 0, WC.shallow);
+      for (const b of bs) poolBlob(b, 0.8, 0, WC.open);
+      for (const b of bs) if (b.deep) poolBlob(b, 0.52, 0, WC.deep);
     }
   }
   for (const p of World.mudPools) {
@@ -1530,38 +1604,141 @@ function renderGroundRegion(ctx, rx, ry, rw, rh) {
 
       // --- the Wall: rock walls and glittering snow instead of grass ---
       if (World.snowy) {
+        const alt = 1 - ty / HT;
         if (t === T_CLIFF) {
-          // cracked-rock strata + a snow cap where the wall meets open sky above
-          ctx.strokeStyle = 'rgba(20,22,30,0.5)'; ctx.lineWidth = 1;
-          for (let k = 0; k < 2; k++) {
-            const cy = y0 + 4 + hash2(tx * 9 + k, ty * 5 + k * 3) * (TILE - 6);
+          // a wall tile is a RAISED SHELF of rock: its snow-topped plateau,
+          // rounded wherever it meets open ground, a dark rock face dropping
+          // down its southern side (drawn INTO the tile below, like a cliff
+          // seen from above), lit on the west, shaded on the east, and a
+          // cold shadow thrown on the snow at its foot
+          const cl = (dx, dy) => {
+            const nx = tx + dx, ny = ty + dy;
+            return nx < 0 || ny < 0 || nx >= WT || ny >= HT ? true : World.ter[tIdx(nx, ny)] === T_CLIFF;
+          };
+          const N = !cl(0, -1), S = !cl(0, 1), E = !cl(1, 0), Wx = !cl(-1, 0);
+          const FACE = 15;
+          const jit = (a, b) => (hash2(tx * 17 + a, ty * 23 + b) - 0.5) * 3;
+          // plateau top: rounded on exposed corners, a ragged snow edge
+          const rr = [N && Wx ? 9 : 0, N && E ? 9 : 0, S && E ? 7 : 0, S && Wx ? 7 : 0];
+          // the top: stone, whitened wherever the wind lets snow lie — both
+          // fields are continuous noise, so the tint flows along the rampart
+          const tone = fbm(tx * 0.35 + 7, ty * 0.35 + 3);
+          const snowCatch = clamp((fbm(tx * 0.42 + 21, ty * 0.42 + 9) - 0.42) * 2.2, 0, 1);
+          ctx.fillStyle = mixHex(mixHex('#aeb7c3', '#8a94a3', tone), '#e9eff6', snowCatch * 0.85);
+          ctx.beginPath();
+          ctx.roundRect(x0 - 0.5, y0 - 0.5, TILE + 1, TILE + 1, rr);
+          ctx.fill();
+          if (snowCatch > 0.5 && h > 0.5) {
+            // a small drift banked in the lee
+            ctx.fillStyle = 'rgba(240,245,250,0.7)';
             ctx.beginPath();
-            ctx.moveTo(x0 + 2, cy);
-            ctx.lineTo(x0 + TILE - 2, cy + (h - 0.5) * 6);
+            ctx.ellipse(x0 + 12 + jit(3, 3) * 2, y0 + 13 + jit(6, 6), 5 + h * 4, 2.2 + h * 1.5, 0.3, 0, TAU);
+            ctx.fill();
+          }
+          // stone grain: a couple of scree flecks and a crack
+          ctx.fillStyle = 'rgba(66,72,86,0.5)';
+          for (let k = 0; k < 2; k++) {
+            const px = x0 + 4 + hash2(tx * 5 + k * 3, ty * 9 + k) * (TILE - 8);
+            const py = y0 + 4 + hash2(tx * 11 + k, ty * 7 + k * 5) * (TILE - 8);
+            ctx.beginPath(); ctx.ellipse(px, py, 1.2 + h * 0.8, 0.8 + h * 0.5, h * 3, 0, TAU); ctx.fill();
+          }
+          // the rampart's silhouette: a dark line along every exposed edge
+          ctx.strokeStyle = 'rgba(30,34,44,0.55)'; ctx.lineWidth = 1.2; ctx.lineCap = 'round';
+          ctx.beginPath();
+          if (N) { ctx.moveTo(x0 + (Wx ? 8 : -0.5), y0 + 0.6); ctx.lineTo(x0 + TILE - (E ? 8 : -0.5), y0 + 0.6); }
+          if (Wx) { ctx.moveTo(x0 + 0.6, y0 + (N ? 8 : -0.5)); ctx.lineTo(x0 + 0.6, y0 + TILE - (S ? 6 : -0.5)); }
+          if (E) { ctx.moveTo(x0 + TILE - 0.6, y0 + (N ? 8 : -0.5)); ctx.lineTo(x0 + TILE - 0.6, y0 + TILE - (S ? 6 : -0.5)); }
+          ctx.stroke();
+          if (N && Wx) { ctx.beginPath(); ctx.arc(x0 + 8.5, y0 + 8.5, 8, Math.PI, Math.PI * 1.5); ctx.stroke(); }
+          if (N && E) { ctx.beginPath(); ctx.arc(x0 + TILE - 8.5, y0 + 8.5, 8, Math.PI * 1.5, TAU); ctx.stroke(); }
+          if (h > 0.6) {
+            ctx.strokeStyle = 'rgba(70,76,90,0.45)'; ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.moveTo(x0 + 5 + jit(1, 2), y0 + 6 + jit(3, 4));
+            ctx.lineTo(x0 + 12 + jit(5, 6), y0 + 13 + jit(7, 8));
+            ctx.lineTo(x0 + 15 + jit(9, 1), y0 + 19 + jit(2, 5));
             ctx.stroke();
           }
-          ctx.fillStyle = 'rgba(90,96,110,0.5)';
-          ctx.beginPath(); ctx.arc(x0 + h * TILE, y0 + hash2(tx, ty * 3) * TILE, 1.6, 0, TAU); ctx.fill();
-          // snow settles on the top lip of the wall
-          if (ty > 0 && World.ter[tIdx(tx, ty - 1)] !== T_CLIFF) {
-            ctx.fillStyle = '#eef4fb';
+          // the north lip catches the light; the sides slope away
+          if (N) {
+            ctx.strokeStyle = 'rgba(255,255,255,0.75)'; ctx.lineWidth = 1.6;
+            ctx.beginPath(); ctx.moveTo(x0 + (Wx ? 7 : 0), y0 + 1.2); ctx.lineTo(x0 + TILE - (E ? 7 : 0), y0 + 1.2); ctx.stroke();
+          }
+          if (Wx) {
+            // the lit flank: a pale slope falling away west
+            const g = ctx.createLinearGradient(x0, 0, x0 + 7, 0);
+            g.addColorStop(0, 'rgba(255,255,255,0.45)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.fillStyle = g; ctx.fillRect(x0 + 1, y0 + (N ? 8 : 0), 7, TILE - (N ? 8 : 0) - (S ? 4 : 0));
+          }
+          if (E) {
+            // the shaded flank: a strip of rock in shadow with its own edge
+            const g = ctx.createLinearGradient(x0 + TILE - 9, 0, x0 + TILE, 0);
+            g.addColorStop(0, 'rgba(36,40,54,0)'); g.addColorStop(1, 'rgba(36,40,54,0.5)');
+            ctx.fillStyle = g; ctx.fillRect(x0 + TILE - 9, y0 + (N ? 8 : 0), 9, TILE - (N ? 8 : 0) - (S ? 4 : 0));
+          }
+          if (S) {
+            // the rock face: strata in cold grey-brown, darker toward the foot
+            const fy = y0 + TILE - 3;
+            const g = ctx.createLinearGradient(0, fy, 0, fy + FACE);
+            g.addColorStop(0, '#5a5e6c'); g.addColorStop(0.55, '#454955'); g.addColorStop(1, '#2f323b');
+            ctx.fillStyle = g;
             ctx.beginPath();
-            ctx.moveTo(x0, y0 + 5);
-            ctx.quadraticCurveTo(x0 + TILE * 0.5, y0 - 2, x0 + TILE + 1, y0 + 4);
-            ctx.lineTo(x0 + TILE + 1, y0);
-            ctx.lineTo(x0, y0); ctx.closePath(); ctx.fill();
+            ctx.roundRect(x0 - 0.5, fy, TILE + 1, FACE, [0, 0, E ? 5 : 0, Wx ? 5 : 0]);
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(26,28,36,0.55)'; ctx.lineWidth = 0.9;
+            for (let k = 0; k < 2; k++) {
+              const ly = fy + 3.5 + k * 4.5 + hash2(tx * 9 + k, ty * 5 + k * 3) * 2;
+              ctx.beginPath();
+              ctx.moveTo(x0 + 1, ly);
+              ctx.quadraticCurveTo(x0 + TILE * 0.5, ly + (h - 0.5) * 3, x0 + TILE, ly + (hash2(tx, ty + k) - 0.5) * 2);
+              ctx.stroke();
+            }
+            ctx.fillStyle = 'rgba(120,96,70,0.18)';                   // a warm mineral stain
+            ctx.fillRect(x0 + hash2(tx * 2, ty) * 12, fy + 4, 6 + h * 8, 4);
+            // the snow overhanging the brink, and a few clumps stuck to the face
+            ctx.fillStyle = '#eef3f9';
+            ctx.beginPath();
+            ctx.moveTo(x0 - 0.5, fy - 1);
+            ctx.quadraticCurveTo(x0 + 6, fy + 3 + jit(2, 9), x0 + 12, fy + 1.5);
+            ctx.quadraticCurveTo(x0 + 18, fy + 3.5 + jit(4, 7), x0 + TILE + 0.5, fy + 0.5);
+            ctx.lineTo(x0 + TILE + 0.5, fy - 2); ctx.lineTo(x0 - 0.5, fy - 2);
+            ctx.closePath(); ctx.fill();
+            if (h > 0.45) {
+              ctx.fillStyle = 'rgba(238,243,249,0.85)';
+              ctx.beginPath(); ctx.ellipse(x0 + 4 + h * 14, fy + 7 + hash2(tx, ty * 2) * 4, 2.4, 1.3, 0, 0, TAU); ctx.fill();
+            }
+            // the cold shadow at the foot of the wall
+            const sh = ctx.createLinearGradient(0, fy + FACE, 0, fy + FACE + 9);
+            sh.addColorStop(0, 'rgba(54,72,104,0.34)'); sh.addColorStop(1, 'rgba(54,72,104,0)');
+            ctx.fillStyle = sh; ctx.fillRect(x0 - 0.5, fy + FACE, TILE + 1, 9);
+          } else if (!S && cl(0, 1) && (Wx || E)) {
+            // where a side stays exposed but the wall continues south, the
+            // side shading needs no cap — nothing to do; kept for clarity
           }
         } else if (t === T_GRASS || t === T_FOREST) {
-          // snow glitter — a couple of tiny cold sparkles, an occasional rock nub
+          // the snowfield's skin: cold sparkle, sastrugi (wind-carved ridges
+          // streaking from the north-west), and bare stone worn through up top
           ctx.fillStyle = 'rgba(255,255,255,0.9)';
           for (let k = 0; k < 2; k++) {
             const sxp = x0 + hash2(tx * 13 + k * 7, ty * 5 + k) * TILE;
             const syp = y0 + hash2(tx * 3 + k, ty * 17 + k * 5) * TILE;
             ctx.fillRect(sxp, syp, 1.3, 1.3);
           }
-          if (h > 0.95) {
-            ctx.fillStyle = 'rgba(120,128,140,0.55)';
-            ctx.beginPath(); ctx.ellipse(x0 + h * 20, y0 + 14, 2.4, 1.4, 0, 0, TAU); ctx.fill();
+          const wind = fbm(tx * 0.22 + 90, ty * 0.22 + 33);
+          if (ff < 0.3 && wind > 0.55 && h > 0.35) {
+            const sx0 = x0 + hash2(tx * 5, ty * 3) * 10, sy0 = y0 + 4 + hash2(tx * 7, ty * 11) * 14;
+            const len = 14 + h * 12;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = 'rgba(120,145,180,0.16)'; ctx.lineWidth = 1.8;
+            ctx.beginPath(); ctx.moveTo(sx0, sy0 + 1.2); ctx.lineTo(sx0 + len, sy0 + 1.2 + len * 0.28); ctx.stroke();
+            ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 1.2;
+            ctx.beginPath(); ctx.moveTo(sx0, sy0); ctx.lineTo(sx0 + len, sy0 + len * 0.28); ctx.stroke();
+          }
+          if (h > 0.95 || (alt > 0.55 && h > 0.86)) {
+            ctx.fillStyle = 'rgba(112,120,134,0.6)';
+            ctx.beginPath(); ctx.ellipse(x0 + h * 20, y0 + 14, 2.4 + alt * 2, 1.4 + alt, h * 2, 0, TAU); ctx.fill();
+            ctx.fillStyle = 'rgba(255,255,255,0.5)';
+            ctx.beginPath(); ctx.ellipse(x0 + h * 20 - 0.8, y0 + 13, 1.2 + alt, 0.6, h * 2, 0, TAU); ctx.fill();
           }
         }
         continue;
@@ -1793,7 +1970,7 @@ const SpriteCache = {};
 function cachedSprite(key, w, h, ox, oy, drawFn) {
   // bake at the current render scale so sprites stay sharp in crisp mode
   const RS = G.RS || 1;
-  key = key + '@' + RS;
+  key = key + (World.snowy ? '_sn' : '') + '@' + RS;   // the Wall dresses its trees and stones in snow
   let sp = SpriteCache[key];
   if (!sp) {
     const cv = document.createElement('canvas');
@@ -1825,6 +2002,25 @@ function coniferLayer(ctx, x, y, w, h, fill, line) {
   ctx.quadraticCurveTo(x, y + h * 0.08, x - w, y);
   ctx.closePath();
   ctx.fill(); ctx.stroke();
+}
+
+// snow lying along the upper edges of a conifer layer: a thick white
+// stroke tracing the lit (left) side of the scallop up to the apex, and
+// loose clumps settled on the right where the boughs sag
+function snowOnLayer(ctx, x, y, w, h, s) {
+  ctx.strokeStyle = '#f2f6fb';
+  ctx.lineWidth = Math.max(1.4, 2.6 * s);
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(x - w * 0.92, y - h * 0.03);
+  ctx.quadraticCurveTo(x - w * 0.74, y - h * 0.2, x - w * 0.5, y - h * 0.36);
+  ctx.moveTo(x - w * 0.4, y - h * 0.55);
+  ctx.quadraticCurveTo(x - w * 0.18, y - h * 0.93, x + w * 0.02, y - h * 1.0);
+  ctx.quadraticCurveTo(x + w * 0.2, y - h * 0.92, x + w * 0.36, y - h * 0.62);
+  ctx.stroke();
+  ctx.fillStyle = 'rgba(242,246,251,0.92)';
+  ctx.beginPath(); ctx.ellipse(x + w * 0.6, y - h * 0.3, w * 0.22, h * 0.07, -0.3, 0, TAU); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(x - w * 0.15, y - h * 0.08, w * 0.24, h * 0.06, 0.2, 0, TAU); ctx.fill();
 }
 
 function drawTree(ctx, t) {
@@ -1863,9 +2059,14 @@ function drawTreeRaw(ctx, t) {
     ctx.closePath(); ctx.fill(); ctx.stroke();
     ctx.strokeStyle = '#6d5232';
     ctx.beginPath(); ctx.moveTo(x - 0.8 * s, y - 2 * s); ctx.lineTo(x - 0.4 * s, y - 10 * s); ctx.stroke();
-    coniferLayer(ctx, x, y - 10 * s, 13 * s, 15 * s, pal.con[0], '#1e3018');
-    coniferLayer(ctx, x, y - 19 * s, 10 * s, 13 * s, pal.con[1], '#1e3018');
-    coniferLayer(ctx, x, y - 27 * s, 7 * s, 11 * s, pal.con[2], '#1e3018');
+    const snowy = World.snowy;
+    const conCol = (c) => snowy ? mixHex(c, '#2e4a44', 0.35) : c;   // colder, bluer needles on the Wall
+    coniferLayer(ctx, x, y - 10 * s, 13 * s, 15 * s, conCol(pal.con[0]), '#1e3018');
+    if (snowy) snowOnLayer(ctx, x, y - 10 * s, 13 * s, 15 * s, s);
+    coniferLayer(ctx, x, y - 19 * s, 10 * s, 13 * s, conCol(pal.con[1]), '#1e3018');
+    if (snowy) snowOnLayer(ctx, x, y - 19 * s, 10 * s, 13 * s, s);
+    coniferLayer(ctx, x, y - 27 * s, 7 * s, 11 * s, conCol(pal.con[2]), '#1e3018');
+    if (snowy) snowOnLayer(ctx, x, y - 27 * s, 7 * s, 11 * s, s);
     // sun-lit tips
     ctx.fillStyle = 'rgba(168,192,110,0.5)';
     ctx.beginPath(); ctx.ellipse(x - 3 * s, y - 34 * s, 2.6 * s, 1.2 * s, -0.4, 0, TAU); ctx.fill();
@@ -2003,10 +2204,11 @@ function drawRockRaw(ctx, r) {
   ctx.lineTo(x + 7 * s, y - 2 * s);
   ctx.lineTo(x + 6.4 * s, y);
   ctx.closePath();
-  ctx.fillStyle = '#8b8577'; ctx.fill();
-  ctx.strokeStyle = '#43403a'; ctx.lineWidth = 1; ctx.lineJoin = 'round'; ctx.stroke();
+  const sn = World.snowy;
+  ctx.fillStyle = sn ? '#7c828f' : '#8b8577'; ctx.fill();
+  ctx.strokeStyle = sn ? '#3a3e48' : '#43403a'; ctx.lineWidth = 1; ctx.lineJoin = 'round'; ctx.stroke();
   // lit top facet
-  ctx.fillStyle = '#a7a291';
+  ctx.fillStyle = sn ? '#9ba2ae' : '#a7a291';
   ctx.beginPath();
   ctx.moveTo(x - 5.6 * s, y - 4.6 * s);
   ctx.lineTo(x - 1.2 * s, y - 7 * s);
@@ -2014,7 +2216,7 @@ function drawRockRaw(ctx, r) {
   ctx.lineTo(x - 0.6 * s, y - 3.6 * s);
   ctx.closePath(); ctx.fill();
   // shadowed right facet
-  ctx.fillStyle = '#6f6a5e';
+  ctx.fillStyle = sn ? '#5d626e' : '#6f6a5e';
   ctx.beginPath();
   ctx.moveTo(x + 3.6 * s, y - 5.6 * s);
   ctx.lineTo(x + 7 * s, y - 2 * s);
@@ -2029,6 +2231,19 @@ function drawRockRaw(ctx, r) {
   ctx.lineTo(x - 1.6 * s, y - 1.4 * s);
   ctx.lineTo(x - 0.8 * s, y);
   ctx.stroke();
+  if (sn) {
+    // a cap of snow on the boulder, and a drift banked against its foot
+    ctx.fillStyle = '#eef3f9';
+    ctx.beginPath();
+    ctx.moveTo(x - 5.2 * s, y - 4.4 * s);
+    ctx.quadraticCurveTo(x - 1.5 * s, y - 8.2 * s, x + 3.4 * s, y - 5.8 * s);
+    ctx.quadraticCurveTo(x + 1.4 * s, y - 4.6 * s, x - 0.6 * s, y - 4.9 * s);
+    ctx.quadraticCurveTo(x - 3 * s, y - 4.2 * s, x - 5.2 * s, y - 4.4 * s);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = 'rgba(238,243,249,0.85)';
+    ctx.beginPath(); ctx.ellipse(x + 4.5 * s, y - 0.4 * s, 4.5 * s, 1.5 * s, 0, 0, TAU); ctx.fill();
+    return;
+  }
   // grass at the base
   ctx.strokeStyle = '#7d7a40';
   ctx.beginPath(); ctx.moveTo(x - 6 * s, y); ctx.lineTo(x - 7 * s, y - 2.4 * s); ctx.stroke();

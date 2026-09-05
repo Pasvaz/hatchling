@@ -391,15 +391,15 @@
   /* ---------- the species card: a field-journal entry ---------- */
   .card {
     flex: 1; min-width: 0; cursor: pointer;
-    display: flex; gap: 12px; text-align: left;
+    display: flex; gap: 14px; text-align: left;
     background: rgba(35,26,14,0.9);
     border: 2px solid #57452a;
-    padding: 11px;
+    padding: 12px;
     transition: transform 0.12s, border-color 0.12s, box-shadow 0.12s;
   }
   .card:hover { transform: scale(1.02); border-color: #d8a534; box-shadow: 0 4px 18px rgba(0,0,0,0.45); }
-  .card .side { flex: none; width: 148px; }
-  .card .info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .card .side { flex: none; width: 170px; }
+  .card .info { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; padding: 2px 2px 2px 0; }
   .card .prevwrap { position: relative; line-height: 0; }
   .card canvas { width: 100%; height: 90px; background: #1d1912; border: 1px solid #3a2d18; }
   .card.locked canvas { filter: grayscale(0.55) brightness(0.8); }
@@ -407,19 +407,39 @@
   .ownbadge {
     position: absolute; top: 5px; right: 5px; pointer-events: none;
     width: 20px; height: 20px; line-height: 19px; text-align: center;
-    font-size: 11px; border-radius: 50%;
+    font-size: 11px;
     background: rgba(10,7,3,0.82); border: 1px solid #57452a;
   }
   .ownbadge.owned { color: #8fdc6a; border-color: #5c8a3a; }
   .ownbadge.locked { color: #d6c088; }
-  .card h2 { font-size: 13.5px; letter-spacing: 1.5px; color: #ffe9a0; }
-  .card .latin { font-size: 9.5px; font-style: italic; color: #a5936c; margin: 2px 0 6px; }
+  /* the field card: a ruled header, the blurb, three stat bars, trait
+     chips, and the growth / unlock footer — one column, one left edge */
+  .card .chead { padding-bottom: 6px; margin-bottom: 7px; border-bottom: 1px solid #3f3119; }
+  .card h2 { font-size: 14px; letter-spacing: 2px; color: #ffe9a0; }
+  .card .latin { font-size: 9.5px; font-style: italic; color: #a5936c; margin-top: 2px; }
   .card p { font-size: 10px; line-height: 1.5; color: #cdbb92; }
-  .card .meta { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; margin-top: auto; padding-top: 7px; }
+  .card .fstats { margin-top: 8px; display: grid; grid-template-columns: 44px 1fr; column-gap: 8px; row-gap: 4px; align-items: center; }
+  .card .frow.grow .flab { color: #7d6c4c; white-space: nowrap; }
+  .card .frow.grow.sel .flab { color: #ffd23e; }
+  .card .fstats.growth { margin-top: 9px; }
+  .card .f-grow { background: linear-gradient(90deg, #7da34a, #e2b23a); }
+  .card .f-grow.adult { background: linear-gradient(90deg, #e2b23a, #ffd23e); }
+  .card .frow { display: contents; }
+  .card .flab { font-size: 8px; letter-spacing: 1.5px; color: #8d7c58; }
+  .card .fbar { height: 6px; background: #1d1912; border: 1px solid #3a2d18; overflow: hidden; }
+  .card .ffill { height: 100%; }
+  .card .f-pow { background: linear-gradient(180deg, #e4685a, #a52f24); }
+  .card .f-hp { background: linear-gradient(180deg, #a3bf58, #718c34); }
+  .card .f-spd { background: linear-gradient(180deg, #eec25e, #b8862a); }
   .card .diff { font-size: 9.5px; letter-spacing: 1.5px; }
   .diff.mod { color: #d8a534; } .diff.hard { color: #e05a4a; } .diff.swim { color: #6cadc4; }
-  .card .prog { font-size: 9.5px; letter-spacing: 1px; color: #a3bf58; }
-  .card .price { margin-top: 5px; font-size: 9.5px; letter-spacing: 1px; color: #ffd23e; }
+  /* the class line (◆ HERBIVORE — HARD) sits centred under the preview,
+     between picture and gender bar; the stat bars are cut off from the
+     growth bars by a rule */
+  .card .meta { display: flex; justify-content: center; margin-top: 7px; }
+  .card .fstats + .fstats { margin-top: 8px; padding-top: 8px; border-top: 1px solid #3f3119; }
+  .card .meta:empty { display: none; }
+  .card .price { font-size: 9px; letter-spacing: 1px; color: #ffd23e; margin-top: 8px; text-align: center; line-height: 1.4; }
   .card .price.poor { color: #8d7c58; }
 
   /* the end of the known world — for now */
@@ -479,7 +499,7 @@
   #gr-balance .worntitle { color: #d8a534; }
 
   /* ---------- gender segmented toggle (under the preview) ---------- */
-  .gsel { display: flex; margin: 9px 0 2px; border: 1px solid #4a3a22; border-radius: 6px; overflow: hidden; }
+  .gsel { display: flex; margin: 7px 0 0; border: 1px solid #4a3a22; overflow: hidden; }
   .gseg {
     position: relative; flex: 1; cursor: pointer;
     padding: 5px 0; font-size: 11px; letter-spacing: 1px; text-align: center;
@@ -501,25 +521,28 @@
   }
   .gseg:hover .tip { display: block; }
   /* ---------- skin swatches (their own row lower down) ---------- */
-  .skinsel { display: flex; gap: 7px; justify-content: flex-start; margin-top: 8px; }
+  /* the swatch row sits centred under the gender bar — one column, one width,
+     every row aligned to the preview's edges */
+  .skinsel { display: flex; gap: 6px; margin-top: 8px; }
   .cskin {
     position: relative; cursor: pointer;
-    border: 2px solid #4a3a22; border-radius: 6px; padding: 2px;
+    flex: 1 1 0; min-width: 0;
+    border: 2px solid #4a3a22; padding: 2px;
     transition: transform 0.12s, border-color 0.12s, background 0.12s;
   }
   .cskin:hover { transform: translateY(-2px); border-color: #7a6034; }
   .cskin.sel { border-color: #d8a534; background: rgba(58,44,22,0.95); }
-  .cskin canvas { width: 34px; height: 34px; display: block; border-radius: 3px; }
+  .cskin canvas { width: 100%; height: 30px; display: block; }
   .cskin.forsale canvas { opacity: 0.5; }
   /* the selection check badge — sits on whichever skin is chosen */
   .cskchk {
     position: absolute; top: -6px; right: -6px;
     width: 16px; height: 16px; line-height: 15px; text-align: center;
-    font-size: 10px; border-radius: 50%;
+    font-size: 10px;
     background: #5c8a3a; color: #eafce0; border: 1px solid #1d1912;
   }
   /* every swatch keeps a label of the same height so the row never jumps */
-  .csklabel { font-size: 8px; letter-spacing: 0.5px; color: #ffd23e; text-align: center; margin-top: 2px; min-height: 10px; }
+  .csklabel { font-size: 8px; letter-spacing: 0.5px; color: #ffd23e; text-align: center; margin-top: 3px; min-height: 10px; }
   .csklabel.base { color: #8d7c58; }
   .csklabel.owned { color: #8fdc6a; }
   .csklabel.poor { color: #8d7c58; }
@@ -587,6 +610,10 @@
     position: absolute; right: calc(32px + env(safe-area-inset-right)); bottom: calc(198px + env(safe-area-inset-bottom));
     width: 60px; height: 60px; font-size: 25px;
   }
+  #btn-call {
+    position: absolute; right: calc(104px + env(safe-area-inset-right)); bottom: calc(190px + env(safe-area-inset-bottom));
+    width: 50px; height: 50px; font-size: 20px;
+  }
   .tbtn.ctxb { display: none; }
   .tbtn.ctxb.on { display: flex; }
   #btn-pause {
@@ -628,6 +655,8 @@
   body.touch .bar { width: 78px; height: 7px; }
   body.touch #minimap { right: calc(62px + env(safe-area-inset-right)); top: max(8px, env(safe-area-inset-top)); bottom: auto; width: 78px; height: 78px; }
   body.touch #keys { display: none; }
+  body.touch #stats { pointer-events: auto; cursor: pointer; }
+  body.touch #statspanel { pointer-events: auto; }
   body.touch #prompt { display: none; }
   body.touch #banner { font-size: 14px; top: 12%; }
   body.touch #btn-lobby { font-size: 11px; padding: 9px 18px; }
@@ -639,7 +668,7 @@
      and the name carry the card. */
   body.touch #profiles h1 { font-size: 22px; letter-spacing: 5px; text-shadow: 2px 2px 0 #6a3a1a; margin-bottom: 2px; }
   body.touch #profiles .sub { font-size: 9px; letter-spacing: 2px; margin-bottom: 8px; }
-  body.touch #topbar { right: 8px; top: 8px; gap: 7px; }
+  body.touch #topbar { right: 8px; top: 8px; gap: 7px; padding: 4px 6px; border-radius: 10px; background: rgba(22,17,10,0.86); }
   body.touch #gr-balance { font-size: 12px; padding: 5px 10px; }
   body.touch #btn-titles { width: 27px; height: 32px; }
   body.touch #btn-titles span { font-size: 11px; padding-bottom: 6px; }
@@ -650,7 +679,11 @@
   body.touch #journey { touch-action: pan-y; }
   body.touch #cards-area { width: auto; margin: 0 6px 0 calc(44px + env(safe-area-inset-left)); }
   body.touch #cards-area::before { left: 14px; transform: none; }
-  body.touch #ecotabs { left: calc(2px + env(safe-area-inset-left)); gap: 15px; }
+  body.touch #ecotabs { left: calc(2px + env(safe-area-inset-left)); gap: 12px; max-height: calc(100% - 20px); }
+  @media (max-height: 430px) {
+    body.touch #ecotabs { gap: 8px; }
+    body.touch .ecotab { width: 28px; height: 28px; font-size: 12px; --pr: 20px; }
+  }
   body.touch .ecotab { width: 32px; height: 32px; font-size: 14px; --pr: 23px; }
   body.touch .tabpip { width: 6px; height: 6px; margin: -3px 0 0 -3px; }
   body.touch .ecotab .tabfly { display: none; }
@@ -672,22 +705,22 @@
   body.touch .rung.duo::after { left: 26px; right: auto; width: 14px; }
   body.touch .rung.duo .rungcards { flex-direction: column; gap: 8px; }
   body.touch .rung.duo .card { width: 100%; }
-  body.touch .card { gap: 9px; padding: 8px; }
-  body.touch .card .side { width: 128px; }
+  body.touch .card { gap: 10px; padding: 10px; }
+  body.touch .card .side { width: 146px; }
   body.touch .card canvas { height: 76px; }
   body.touch .card h2 { font-size: 11.5px; letter-spacing: 1px; }
   body.touch .card .latin { font-size: 8px; margin: 1px 0 3px; }
   body.touch .card p { display: none; }
-  body.touch .card .diff { font-size: 8.5px; letter-spacing: 1px; }
-  body.touch .card .prog { font-size: 8.5px; }
+  body.touch .card .fstats { margin-top: 6px; }
+  body.touch .card .chead { padding-bottom: 4px; margin-bottom: 5px; }
   body.touch .card .price { margin-top: 2px; font-size: 8.5px; }
-  body.touch .card .meta { padding-top: 3px; gap: 8px; }
-  body.touch .gsel { margin: 5px 0 0; }
+  body.touch .card .meta { margin-top: 6px; }
+  body.touch .gsel { margin: 8px 0 0; }
   /* finger-sized targets (~44px) — same look, just more room to hit */
   body.touch .gseg { padding: 12px 0; font-size: 10px; }
-  body.touch .skinsel { gap: 9px; margin-top: 5px; }
-  body.touch .cskin { padding: 4px; }
-  body.touch .cskin canvas { width: 34px; height: 34px; }
+  body.touch .skinsel { gap: 6px; margin-top: 8px; }
+  body.touch .cskin { padding: 3px; }
+  body.touch .cskin canvas { width: 100%; height: 34px; }
   body.touch .profcard { padding: 9px 14px; }
   /* no hover on touch — delete is always visible, and big enough to hit */
   body.touch .profcard .pdel { opacity: 1; font-size: 14px; padding: 13px 15px; }
@@ -695,11 +728,27 @@
      stick, and the lobby screens scroll from the top instead of clipping */
   body.touch .card:hover, body.touch .ecotab:hover, body.touch .profcard:hover,
   body.touch #gr-balance:hover, body.touch .cskin:hover, body.touch .gseg:hover { transform: none; }
+  body.touch .screen { position: fixed; inset: 0; }
   body.touch #profiles {
     justify-content: flex-start;
     overflow-y: auto; touch-action: pan-y;
     padding: calc(8px + env(safe-area-inset-top)) env(safe-area-inset-right)
              calc(10px + env(safe-area-inset-bottom)) env(safe-area-inset-left);
+  }
+
+  /* portrait lobby: one narrow column — the pill above the wordmark, every
+     card stacked preview-over-info, skins wrapping onto a second row */
+  @media (orientation: portrait) {
+    body.touch #jhead { padding-top: calc(52px + env(safe-area-inset-top)); }
+    body.touch #cards-area { margin-left: calc(40px + env(safe-area-inset-left)); margin-right: 8px; }
+    body.touch .card { flex-direction: column; gap: 6px; }
+    body.touch .card .side { width: 100%; }
+    body.touch .card .prevwrap canvas { height: 108px; }
+    body.touch .card .info { padding-top: 2px; }
+    body.touch .ecosect::after { background: radial-gradient(ellipse 90% 260px at 40% 160px, var(--ecoglow), transparent 78%); }
+    body.touch #profile-list { min-width: 0; width: 100%; max-height: 52vh; }
+    body.touch #profile-create { flex-wrap: wrap; justify-content: center; }
+    body.touch #twall { gap: 14px 12px; }
   }
 
   /* portrait on a touch device: the game wants your phone sideways —
@@ -723,7 +772,7 @@
   }
   #rotate h2 { font-size: 21px; letter-spacing: 5px; color: #ffd23e; margin-bottom: 14px; }
   #rotate p { font-size: 12px; letter-spacing: 1px; line-height: 1.9; color: #a5936c; }
-  @media (orientation: portrait) { body.touch #rotate { display: flex; } }
+  @media (orientation: portrait) { body.touch.playing #rotate { display: flex; } }
 
   #death h2 { font-size: 34px; letter-spacing: 8px; color: #e05a4a; text-shadow: 3px 3px 0 #2a0d08; margin-bottom: 12px; }
   #death p { font-size: 13px; color: #cdbb92; margin-bottom: 24px; }
@@ -889,6 +938,7 @@
     <div class="tbtn ctxb" id="btn-grab">✊</div>
     <div class="tbtn ctxb" id="btn-eat">💧</div>
     <div class="tbtn" id="btn-rest">💤</div>
+    <div class="tbtn" id="btn-call" title="Aggressive call — threaten">📣</div>
     <div class="tbtn" id="btn-pause">❚❚</div>
     <div id="swipezone"></div>
   </div>
@@ -896,7 +946,7 @@
     <div class="rotbox">
       <div id="rot-phone"><div class="rot-scr"></div></div>
       <h2>TURN YOUR PHONE</h2>
-      <p>HATCHLING plays sideways —<br>the delta is wider than it is tall</p>
+      <p>HATCHLING plays sideways —<br>the delta is wider than it is tall<br><span style="color:#7d6c4c">(the lobby works either way)</span></p>
     </div>
   </div>
 

@@ -120,6 +120,14 @@
   const eatBtn = document.getElementById('btn-eat');
   press(eatBtn, () => { G.input.interact = true; });
   press(document.getElementById('btn-rest'), () => { G.input.rest = true; });
+  // the threat display has no prompt (it works anywhere), so it gets a
+  // button of its own; the broadcast and friendly calls arrive as prompts
+  press(document.getElementById('btn-call'), () => { G.input.call3 = true; });
+  // the health menu: TAB on a keyboard, a tap on the stat bars here — and a
+  // tap on the open menu closes it again
+  const statsPanel = document.getElementById('statspanel');
+  document.getElementById('stats').addEventListener('pointerdown', (ev) => { ev.preventDefault(); statsPanel.classList.toggle('hidden'); });
+  statsPanel.addEventListener('pointerdown', (ev) => { ev.preventDefault(); statsPanel.classList.add('hidden'); });
   press(document.getElementById('btn-pause'), () => {
     if (!G.started) return;
     G.paused = !G.paused;
@@ -130,7 +138,7 @@
   // G.prompt strings look like 'E — Drink' (several joined by wide spaces);
   // the leading letter tells us which input flag the action wants. Only E, F
   // and the three call digits exist now — the rest folded into those.
-  const KEYACT = { E: 'interact', F: 'action', R: 'rest', B: 'dig', C: 'claw', 1: 'call1', 2: 'call2', 3: 'call3' };
+  const KEYACT = { E: 'interact', F: 'action', R: 'rest', B: 'dig', C: 'claw', M: 'claw', 1: 'call1', 2: 'call2', 3: 'call3' };
   let lastPrompt = null;
   function buildCtx(prompt) {
     ctxBox.innerHTML = '';
@@ -177,6 +185,9 @@
   function syncTouch() {
     const on = G.started && G.player && G.player.alive;
     layer.classList.toggle('ingame', !!on);
+    // body.playing gates the TURN YOUR PHONE overlay: only a running game
+    // needs landscape — the profile and lobby screens work held upright
+    document.body.classList.toggle('playing', !!(G.started && G.player));
     if (on) ensureJoy();   // the zone is measurable now — safe to anchor the stick
     // the third button is the dino's power: leap for biters, spin for tails
     if (on && G.player.species !== pncSp) {

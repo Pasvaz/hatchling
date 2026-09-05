@@ -315,14 +315,16 @@ function animatePreview(canvasId, species, gender, growth, skinId) {
     const wEst = (d.L.body[0] + d.L.tail[0] * 0.7 + d.L.neckLen + d.L.head[0] * 0.6) * ss;
     const hEst = (d.L.leg[0] + d.L.body[1] * 1.25 + Math.sin(d.L.neckAng) * d.L.neckLen + d.L.head[1]) * ss;
     zoom = Math.min(zoom, 178 / wEst, 90 / hEst);
-    const hop = Math.abs(Math.sin(t * 3)) * 2;
+    // cadence matches an in-game walk (phase advances ~4 rad/s at walking
+    // speed); the hop rides the stride, one bounce per footfall
+    const hop = Math.abs(Math.sin(t * 2.1)) * 1.5;
     c2.save();
     c2.translate(W / 2 - 6, H - 18);
     c2.scale(zoom, zoom);
     drawShadow(c2, 0, 0, 14);
     drawDino(c2, species, {
       x: 0, y: -hop, facing: 1, gender, skin: skinId,
-      growth: g, move: 0.6, phase: t * 6, attackT: 0, headDown: 0, hurtT: 0,
+      growth: g, move: 0.6, phase: t * 4.2, attackT: 0, headDown: 0, hurtT: 0,
     });
     c2.restore();
     requestAnimationFrame(frame);
@@ -332,6 +334,13 @@ function animatePreview(canvasId, species, gender, growth, skinId) {
 // every key in PLAYER_DEF is a playable — add an entry there (+ DINO art +
 // CARD_INFO copy below) and its card, previews and purchase flow just appear
 const ALL_PLAYABLES = Object.keys(PLAYER_DEF);
+// the ceiling each card's stat bar is measured against
+const CARD_MAX = { dmg: 0, hp: 0, speed: 0 };
+for (const k of ALL_PLAYABLES) {
+  CARD_MAX.dmg = Math.max(CARD_MAX.dmg, PLAYER_DEF[k].dmg || 0);
+  CARD_MAX.hp = Math.max(CARD_MAX.hp, PLAYER_DEF[k].hp || 0);
+  CARD_MAX.speed = Math.max(CARD_MAX.speed, PLAYER_DEF[k].speed || 0);
+}
 // the whole world scrolls as one journey now, so "which previews animate" is
 // decided by the viewport: an observer keeps this set to the on-screen cards
 // (plus a little margin) — 30 dinos still won't burn CPU
@@ -842,18 +851,29 @@ function buildTitleUI() {
       card.id = 'card-' + sp;
       // gender is a segmented toggle sat right under the preview (it changes the
       // dino you see); ownership is a corner badge on the preview (✓ / 🔒); the
-      // chosen loadout's growth sits under the difficulty tag; skins are their
-      // own swatch row lower down. Clicking the dino/body launches — the gender
+      // chosen loadout's growth sits under the difficulty tag; skins are a
+      // centred swatch row under the gender bar, so the whole left column
+      // stacks preview / gender / skins at one width. Clicking the dino/body launches — the gender
       // bar and skin row swallow their own clicks.
       card.innerHTML = '<div class="side"><div class="prevwrap"><canvas width="200" height="120"></canvas><span class="ownbadge"></span></div>' +
+        '<div class="meta"><div class="diff"></div></div>' +
         '<div class="gsel">' +
         '<span class="gseg" data-g="f">♀ Female<span class="tip"></span></span>' +
         '<span class="gseg" data-g="m">♂ Male<span class="tip"></span></span>' +
-        '</div></div>' +
-        '<div class="info"><h2></h2><div class="latin"></div><p></p>' +
-        '<div class="meta"><div class="diff"></div><div class="prog"></div></div>' +
-        '<div class="price"></div>' +
-        '<div class="skinsel"></div></div>';
+        '</div><div class="skinsel"></div><div class="price"></div></div>' +
+        '<div class="info">' +
+        '<div class="chead"><h2></h2><div class="latin"></div></div>' +
+        '<p></p>' +
+        '<div class="fstats growth">' +
+        '<div class="frow grow" data-g="f"><span class="flab">♀ EGG</span><div class="fbar"><div class="ffill f-grow"></div></div></div>' +
+        '<div class="frow grow" data-g="m"><span class="flab">♂ EGG</span><div class="fbar"><div class="ffill f-grow"></div></div></div>' +
+        '</div>' +
+        '<div class="fstats">' +
+        '<div class="frow"><span class="flab">POWER</span><div class="fbar"><div class="ffill f-pow"></div></div></div>' +
+        '<div class="frow"><span class="flab">TOUGH</span><div class="fbar"><div class="ffill f-hp"></div></div></div>' +
+        '<div class="frow"><span class="flab">SPEED</span><div class="fbar"><div class="ffill f-spd"></div></div></div>' +
+        '</div>' +
+        '</div>';
       card.querySelector('canvas').id = 'prev-' + sp;
       card.querySelector('h2').textContent = DINO[sp].name.toUpperCase();
       card.querySelector('.latin').textContent = DINO[sp].full;
@@ -861,6 +881,13 @@ function buildTitleUI() {
       const diff = card.querySelector('.diff');
       diff.textContent = info.tag;
       diff.classList.add(info.tagClass);
+      // the field card: three bars against the strongest playable in the
+      // game (square-rooted so a giant doesn't flatten everyone else)
+      const def = PLAYER_DEF[sp];
+      const bar = (cls, v, max) => { card.querySelector(cls).style.width = Math.round(100 * Math.sqrt(clamp(v / max, 0, 1))) + '%'; };
+      bar('.f-pow', def.dmg, CARD_MAX.dmg);
+      bar('.f-hp', def.hp, CARD_MAX.hp);
+      bar('.f-spd', def.speed, CARD_MAX.speed);
       // gender segments: hover one for the trait tooltip; clicking only changes
       // the selection (the bar swallows its clicks so it never launches the game)
       const verb = DINO[sp].tailWeapon ? 'swings' : DINO[sp].clawWeapon ? 'slashes' : DINO[sp].headButt ? 'rams' : 'bites';
@@ -956,7 +983,7 @@ function refreshTitle() {
     priceEl.textContent = owned ? '' : spUnlockHint(sp);
     priceEl.style.display = owned ? 'none' : '';
     // the chosen loadout's growth sits right under the difficulty tag
-    card.querySelector('.prog').textContent = cardProgText(sp);
+    fillCardGrowth(sp, card);
     // rebuild the swatches so OWNED / affordability labels track the live
     // balance (they're first built at boot, before a profile is even chosen)
     buildCardSkins(sp, card.querySelector('.skinsel'));
@@ -964,10 +991,21 @@ function refreshTitle() {
   updateTrailSpot();
 }
 // the selected gender's saved growth, e.g. "♂ 100% Full Adult" (blank if new)
-function cardProgText(sp) {
-  const g = cardGender(sp);
-  const s = Save.dino[dinoKey(sp, g)];
-  return s && s.growth > 0.005 ? (g === 'm' ? '♂' : '♀') + ' ' + Math.floor(s.growth * 100) + '% ' + stageOf(s.growth) : '';
+// the growth rows (the first two bars): one per gender, filled from that
+// loadout's saved dino, its reading AS the label (♀ 42%, ♂ ADULT, ♀ EGG if
+// never hatched); the gender the card is set to is the lit row
+function fillCardGrowth(sp, card) {
+  const cur = cardGender(sp);
+  for (const row of card.querySelectorAll('.frow.grow')) {
+    const g = row.dataset.g;
+    const s = Save.dino[dinoKey(sp, g)];
+    const gr = s && s.growth > 0.005 ? s.growth : 0;
+    row.querySelector('.f-grow').style.width = Math.round(gr * 100) + '%';
+    row.querySelector('.f-grow').classList.toggle('adult', gr >= 0.999);
+    // the label IS the reading: ♀ 42% · ♂ ADULT · ♀ — (never hatched)
+    row.querySelector('.flab').textContent = (g === 'm' ? '♂ ' : '♀ ') + (gr ? (gr >= 0.999 ? 'ADULT' : Math.floor(gr * 100) + '%') : 'EGG');
+    row.classList.toggle('sel', g === cur);
+  }
 }
 
 // the skin swatches on a species card — the inline heir to the old picker's
@@ -976,20 +1014,41 @@ function cardProgText(sp) {
 // flips to BUY?), the second within 2.5s spends the growths — a stray tap
 // on the way through the lobby must never buy a coat.
 let armSkin = null, armSkinT = 0;
+// swatches repaint at their REAL rendered size whenever the cell changes
+// width (desktop column, phone landscape, phone portrait): the coat's
+// pattern always continues at one scale, never stretched or zoomed
+const skinRO = typeof ResizeObserver !== 'undefined' ? new ResizeObserver((entries) => {
+  for (const en of entries) {
+    const cv = en.target;
+    const w = Math.round(cv.clientWidth), hgt = Math.round(cv.clientHeight);
+    if (!w || !hgt) continue;
+    const nw = w * 2, nh = hgt * 2;
+    if (cv.width !== nw || cv.height !== nh) {
+      cv.width = nw; cv.height = nh;
+      drawSkinSwatch(cv, cv.dataset.sp, cv.dataset.skin);
+    }
+  }
+}) : null;
 function buildCardSkins(sp, container) {
   container.innerHTML = '';
   const cur = cardSkin(sp);
-  for (const id of Object.keys(SKINS)) {
+  // the row is a strip of EQUAL cells filling the preview's width, so each
+  // swatch is painted at (roughly) the width it will show at — a 2-coat
+  // row gets wide swatches, a 4-coat row narrow ones, nothing stretches
+  const ids = Object.keys(SKINS).filter(id => skinFits(sp, id));   // species-exclusive coats filtered
+  const cellW = Math.max(28, Math.round((156 - 5 * (ids.length - 1)) / ids.length - 8));
+  for (const id of ids) {
     const def = SKINS[id];
-    if (!skinFits(sp, id)) continue;                // species-exclusive coat
     const owned = skinOwned(sp, id);
     const selected = id === cur;
     const sq = document.createElement('div');
     sq.className = 'cskin' + (selected ? ' sel' : '') + (owned ? '' : ' forsale');
     sq.title = def.name + (def.cost && !owned ? ' — ❖ ' + def.cost : '');
     const cv = document.createElement('canvas');
-    cv.width = 40; cv.height = 40;
+    cv.width = cellW * 2; cv.height = 60;   // 2× for crisp edges on hi-dpi
+    cv.dataset.sp = sp; cv.dataset.skin = id;
     sq.appendChild(cv);
+    if (skinRO) skinRO.observe(cv);
     drawSkinSwatch(cv, sp, id);
     // EVERY swatch carries a label so the row never changes height: BASE for
     // the free default, OWNED once a paid coat is bought, its ❖ price while
@@ -1047,7 +1106,7 @@ function refreshCardOpts(sp) {
   if (!card) return;
   const g = cardGender(sp);
   for (const seg of card.querySelectorAll('.gseg')) seg.classList.toggle('sel', seg.dataset.g === g);
-  card.querySelector('.prog').textContent = cardProgText(sp);   // growth follows the chosen loadout
+  fillCardGrowth(sp, card);   // the chosen loadout's row lights up
   const skinsel = card.querySelector('.skinsel');
   if (skinsel) buildCardSkins(sp, skinsel);
   animateAllPreviews();
@@ -1103,62 +1162,78 @@ function tryPlay(species) {
 // ---------- skin swatches (painted onto each species card) ----------
 // one square per skin — a little painted swatch of that skin's markings
 function drawSkinSwatch(cv, species, skinId) {
+  // the cell can stretch, the coat cannot: every stripe, dot and fleck is
+  // sized from the swatch's HEIGHT and repeated along its width at a fixed
+  // pitch, so a wide swatch simply shows more hide at the same scale
   const x = cv.getContext('2d');
   const W = cv.width, H = cv.height;
   const C = skinColors(species, null, skinId);
   x.fillStyle = C.mid; x.fillRect(0, 0, W, H);
   x.fillStyle = C.top; x.fillRect(0, 0, W, H * 0.34);
   x.fillStyle = C.belly; x.fillRect(0, H * 0.82, W, H * 0.18);
+  // flank stripes at a fixed pitch
+  const pitch = H * 0.62, sw = H * 0.13;
   x.fillStyle = C.pat;
   x.globalAlpha = 0.85;
-  for (const fx of [0.3, 0.62]) {
+  for (let sx = pitch * 0.45; sx < W + sw; sx += pitch) {
     x.beginPath();
-    x.moveTo(W * fx - W * 0.05, 0); x.lineTo(W * fx + W * 0.08, 0);
-    x.quadraticCurveTo(W * fx + W * 0.02, H * 0.5, W * fx - W * 0.02, H * 0.86);
-    x.lineTo(W * fx - W * 0.12, H * 0.86);
-    x.quadraticCurveTo(W * fx - W * 0.08, H * 0.5, W * fx - W * 0.05, 0);
+    x.moveTo(sx - sw * 0.4, 0); x.lineTo(sx + sw * 0.6, 0);
+    x.quadraticCurveTo(sx + sw * 0.15, H * 0.5, sx - sw * 0.15, H * 0.86);
+    x.lineTo(sx - sw * 0.9, H * 0.86);
+    x.quadraticCurveTo(sx - sw * 0.6, H * 0.5, sx - sw * 0.4, 0);
     x.closePath(); x.fill();
   }
   x.globalAlpha = 1;
+  // a little deterministic scatter for the dotted / flecked coats
+  const rng = speckleRng(species.charCodeAt(0) * 131 + skinId.length * 17);
+  const n = Math.max(2, Math.round(W / (H * 0.55)));
   if (skinId === 'ripcel') {
-    for (const [dx, dy, r] of [[0.18, 0.42, 0.1], [0.48, 0.62, 0.085], [0.82, 0.35, 0.11], [0.72, 0.74, 0.07]]) {
+    for (let k = 0; k < n; k++) {
+      const dx = (k + 0.5) / n * W + (rng() - 0.5) * H * 0.2, dy = H * (0.36 + rng() * 0.38), r = H * (0.07 + rng() * 0.04);
       x.fillStyle = C.acc;
-      x.beginPath(); x.arc(W * dx, H * dy, W * r, 0, Math.PI * 2); x.fill();
+      x.beginPath(); x.arc(dx, dy, r, 0, Math.PI * 2); x.fill();
       x.fillStyle = mixHex(C.acc, '#ffffff', 0.55);
-      x.beginPath(); x.arc(W * dx - W * r * 0.25, H * dy - W * r * 0.3, W * r * 0.42, 0, Math.PI * 2); x.fill();
+      x.beginPath(); x.arc(dx - r * 0.25, dy - r * 0.3, r * 0.42, 0, Math.PI * 2); x.fill();
     }
   } else if (skinId === 'wylord') {
-    x.strokeStyle = C.pat; x.lineWidth = 2.5; x.lineCap = 'round';
+    x.strokeStyle = C.pat; x.lineWidth = H * 0.06; x.lineCap = 'round';
     for (const [fy, ph] of [[0.45, 0], [0.66, 1.8]]) {
       x.beginPath();
-      for (let i = 0; i <= 8; i++) x[i ? 'lineTo' : 'moveTo'](W * i / 8, H * fy + Math.sin(i * 1.6 + ph) * H * 0.06);
+      const steps = Math.ceil(W / (H * 0.12));
+      for (let i = 0; i <= steps; i++) x[i ? 'lineTo' : 'moveTo'](i * H * 0.12, H * fy + Math.sin(i * 0.9 + ph) * H * 0.06);
       x.stroke();
     }
   } else if (skinId === 'klanderx') {
-    x.strokeStyle = '#f4f2ff'; x.lineWidth = 1.6; x.lineCap = 'round';
-    for (const [dx, dy, r] of [[0.26, 0.4, 0.09], [0.6, 0.62, 0.06], [0.8, 0.32, 0.075]]) {
+    x.strokeStyle = '#f4f2ff'; x.lineWidth = Math.max(1, H * 0.04); x.lineCap = 'round';
+    for (let k = 0; k < n; k++) {
+      const dx = (k + 0.5) / n * W + (rng() - 0.5) * H * 0.2, dy = H * (0.3 + rng() * 0.4), r = H * (0.06 + rng() * 0.04);
       x.beginPath();
-      x.moveTo(W * (dx - r), H * dy); x.lineTo(W * (dx + r), H * dy);
-      x.moveTo(W * dx, H * dy - W * r); x.lineTo(W * dx, H * dy + W * r);
+      x.moveTo(dx - r, dy); x.lineTo(dx + r, dy);
+      x.moveTo(dx, dy - r); x.lineTo(dx, dy + r);
       x.stroke();
     }
   } else if (skinId === 'litherim') {
-    x.strokeStyle = C.pat; x.lineWidth = 2.2; x.lineCap = 'round';
-    for (const [fx, fy, ln] of [[0.7, 0.42, 0.3], [0.55, 0.62, 0.24], [0.9, 0.68, 0.28]]) {
-      x.beginPath(); x.moveTo(W * fx, H * fy); x.lineTo(W * (fx - ln), H * (fy + 0.04)); x.stroke();
+    x.strokeStyle = C.pat; x.lineWidth = H * 0.055; x.lineCap = 'round';
+    for (let k = 0; k < n; k++) {
+      const fx = (k + 0.8) / n * W, fy = H * (0.4 + rng() * 0.3), ln = H * (0.22 + rng() * 0.12);
+      x.beginPath(); x.moveTo(fx, fy); x.lineTo(fx - ln, fy + H * 0.04); x.stroke();
     }
   } else if (skinId === 'granulon') {
-    for (const [dx, dy, r, ci] of [[0.2, 0.46, 0.05, 0], [0.44, 0.6, 0.04, 1], [0.66, 0.4, 0.055, 2], [0.85, 0.64, 0.045, 0], [0.32, 0.7, 0.035, 2]]) {
-      x.fillStyle = ci === 0 ? C.acc : ci === 1 ? C.pat : mixHex(C.belly, '#ffffff', 0.2);
+    for (let k = 0; k < n * 2; k++) {
+      const dx = (k + 0.5) / (n * 2) * W + (rng() - 0.5) * H * 0.15, dy = H * (0.38 + rng() * 0.36), r = H * (0.035 + rng() * 0.025);
+      x.fillStyle = k % 3 === 0 ? C.acc : k % 3 === 1 ? C.pat : mixHex(C.belly, '#ffffff', 0.2);
       x.beginPath();
-      x.moveTo(W * (dx - r), H * dy + W * r * 0.4);
-      x.lineTo(W * dx, H * dy - W * r);
-      x.lineTo(W * (dx + r), H * dy);
-      x.lineTo(W * dx, H * dy + W * r);
+      x.moveTo(dx - r, dy + r * 0.4); x.lineTo(dx, dy - r); x.lineTo(dx + r, dy); x.lineTo(dx, dy + r);
       x.closePath(); x.fill();
     }
+  } else if (skinId === 'jungell') {
+    for (let k = 0; k < n; k++) {
+      const dx = (k + 0.5) / n * W + (rng() - 0.5) * H * 0.2, dy = H * (0.3 + rng() * 0.4), r = H * (0.05 + rng() * 0.03);
+      x.fillStyle = k % 3 ? C.acc : mixHex(C.acc, '#f4ffd0', 0.5);
+      x.beginPath(); x.ellipse(dx, dy, r * 1.3, r * 0.6, rng() * 3, 0, Math.PI * 2); x.fill();
+    }
   }
-  x.strokeStyle = C.line; x.lineWidth = 3; x.strokeRect(0, 0, W, H);
+  x.strokeStyle = C.line; x.lineWidth = Math.max(2, H * 0.05); x.strokeRect(0, 0, W, H);
 }
 document.getElementById('btn-respawn').addEventListener('click', () => {
   document.getElementById('death').classList.add('hidden');
@@ -1518,6 +1593,8 @@ function buildMinimap() {
       else if (t === T_SAND) col = [186, 170, 128];
       else if (t === T_MUD) col = [100, 74, 52];
       else if (t === T_LAVA) col = [216, 74, 30];
+      else if (t === T_CLIFF) col = [78, 84, 98];                                  // the Wall's ramparts
+      else if (World.snowy) col = ff > 0.42 ? [176, 192, 200] : [222, 230, 240];   // snow, pines a shade colder
       else if (World.misty) col = ff > 0.42 ? [78, 84, 74] : [112, 116, 106];
       else if (ff > 0.42) col = World.lush ? [46, 88, 44] : [92, 104, 58];
       else if (World.ashy) col = [128, 122, 108];
@@ -2167,33 +2244,123 @@ function drawMonsoon() {
   ctx.restore();
 }
 
+// ---------- fog ----------
+// Real fog has STRUCTURE: banks and tendrils that drift past at different
+// speeds, thick here and torn open there. So the mist is painted from a
+// pair of pre-baked wisp tiles (soft elongated cloudlets, seamlessly
+// wrapped) laid down as three parallax layers, then tinted; the Moors' edge
+// ring is eroded by the same wisps so it closes in as ragged tendrils, not
+// a smooth vignette. Density breathes slowly on top of the weather's own.
+const FOG = { tiles: null, cv: null, ring: null, w: 0, h: 0 };
+function fogTiles() {
+  if (FOG.tiles) return FOG.tiles;
+  const rng = speckleRng(90210);
+  const mk = (seedMul, n, rxA, rxB, ryA, ryB) => {
+    const S = 384;
+    const cv = document.createElement('canvas'); cv.width = S; cv.height = S;
+    const c = cv.getContext('2d');
+    for (let k = 0; k < n; k++) {
+      const x = rng() * S, y = rng() * S;
+      const rx = rxA + rng() * (rxB - rxA), ry = ryA + rng() * (ryB - ryA);
+      const rot = (rng() - 0.5) * 0.5, al = (0.07 + rng() * 0.16) * seedMul;
+      // every wisp is stamped at the four wrap offsets so the tile repeats
+      for (const [ox, oy] of [[0, 0], [S, 0], [-S, 0], [0, S], [0, -S], [S, S], [-S, -S], [S, -S], [-S, S]]) {
+        const cx = x + ox, cy = y + oy;
+        if (cx < -rx * 2 || cx > S + rx * 2 || cy < -ry * 2 || cy > S + ry * 2) continue;
+        c.save();
+        c.translate(cx, cy); c.rotate(rot); c.scale(1, ry / rx);
+        const g = c.createRadialGradient(0, 0, 0, 0, 0, rx);
+        g.addColorStop(0, 'rgba(255,255,255,' + al.toFixed(3) + ')');
+        g.addColorStop(0.55, 'rgba(255,255,255,' + (al * 0.45).toFixed(3) + ')');
+        g.addColorStop(1, 'rgba(255,255,255,0)');
+        c.fillStyle = g;
+        c.beginPath(); c.arc(0, 0, rx, 0, TAU); c.fill();
+        c.restore();
+      }
+    }
+    return cv;
+  };
+  FOG.tiles = [
+    mk(1.0, 34, 80, 190, 22, 54),    // banks: long low cloudlets, few and fat
+    mk(1.2, 70, 26, 80, 8, 26),      // wisps: small torn shreds
+  ];
+  return FOG.tiles;
+}
 function drawMist() {
   if (!(World.snowy || World.misty) || !G.mist) return;
-  const m = G.mist;
-  // moor mist is grey-green and heavier; Wall mist is blue-white snowlight
-  const MC = World.misty ? '196,200,190' : '232,240,248';
-  for (let i = 0; i < 3; i++) {
-    const t = G.time * (5 + i * 2.4);
-    const fx = ((t + i * 340) % (VIEW_W + 360)) - 180;
-    const fy = VIEW_H * (0.2 + 0.28 * i) + Math.sin(G.time * 0.11 + i * 2) * 26;
-    const g = ctx.createRadialGradient(fx, fy, 20, fx, fy, 230);
-    g.addColorStop(0, 'rgba(' + MC + ',' + (0.16 * m).toFixed(3) + ')');
-    g.addColorStop(1, 'rgba(' + MC + ',0)');
-    ctx.fillStyle = g;
-    ctx.fillRect(fx - 240, fy - 240, 480, 480);
+  const breathe = 1 + 0.12 * Math.sin(G.time * 0.09) + 0.05 * Math.sin(G.time * 0.31 + 1.3);
+  const m = clamp(G.mist * breathe, 0, 1);
+  // moor mist is grey-lavender and heavy; Wall mist is blue-white snowlight
+  const col = World.misty ? [204, 204, 214] : [232, 240, 248];
+  const tiles = fogTiles();
+  if (!FOG.cv || FOG.w !== VIEW_W || FOG.h !== VIEW_H) {
+    FOG.cv = document.createElement('canvas'); FOG.ring = document.createElement('canvas');
+    FOG.cv.width = FOG.ring.width = VIEW_W; FOG.cv.height = FOG.ring.height = VIEW_H;
+    FOG.w = VIEW_W; FOG.h = VIEW_H;
   }
-  ctx.fillStyle = 'rgba(' + MC + ',' + ((World.misty ? 0.16 : 0.3) * m).toFixed(3) + ')';
-  ctx.fillRect(0, 0, VIEW_W, VIEW_H);
-  // the Moors' signature: mist LINGERS AT THE EDGE of the screen — a heavy
-  // ring closing in, so the world you can trust is only the middle of it
+  const fc = FOG.cv.getContext('2d');
+  fc.globalCompositeOperation = 'source-over';
+  fc.clearRect(0, 0, VIEW_W, VIEW_H);
+  // three layers: far banks crawl, the middle drifts, the near shreds race.
+  // Each slides with the camera at its own parallax so the fog sits IN the
+  // moor rather than on the glass
+  const camX = G.camX || 0, camY = G.camY || 0;
+  const layers = [
+    { t: 0, s: 2.4, vx: 7, vy: 1.5, par: 0.35, a: 1.0 },
+    { t: 0, s: 1.4, vx: 15, vy: -2.5, par: 0.6, a: 0.85 },
+    { t: 1, s: 1.0, vx: 27, vy: 4, par: 0.9, a: 0.7 },
+  ];
+  for (const L of layers) {
+    const tile = tiles[L.t], S = tile.width * L.s;
+    const ox = (((-(camX * L.par) - G.time * L.vx) % S) + S) % S;
+    const oy = (((-(camY * L.par) - G.time * L.vy + Math.sin(G.time * 0.13 + L.s) * 12) % S) + S) % S;
+    const pat = fc.createPattern(tile, 'repeat');
+    pat.setTransform(new DOMMatrix().translate(ox, oy).scale(L.s, L.s));
+    fc.globalAlpha = L.a * m;
+    fc.fillStyle = pat;
+    fc.fillRect(0, 0, VIEW_W, VIEW_H);
+  }
+  fc.globalAlpha = 1;
+  // a thin even veil under the wisps, then tint the whole sheet
+  fc.fillStyle = 'rgba(255,255,255,' + ((World.misty ? 0.04 : 0.18) * m).toFixed(3) + ')';
+  fc.fillRect(0, 0, VIEW_W, VIEW_H);
+  fc.globalCompositeOperation = 'source-in';
+  fc.fillStyle = 'rgb(' + col.join(',') + ')';
+  fc.fillRect(0, 0, VIEW_W, VIEW_H);
+  fc.globalCompositeOperation = 'source-over';
+  ctx.drawImage(FOG.cv, 0, 0);
+  // the Moors' signature: mist LINGERS AT THE EDGE — a ring closing in on
+  // the one clear pool around you, its inner edge torn by the wisps
   if (World.misty) {
-    const g2 = ctx.createRadialGradient(VIEW_W / 2, VIEW_H / 2, Math.min(VIEW_W, VIEW_H) * 0.3,
-      VIEW_W / 2, VIEW_H / 2, Math.max(VIEW_W, VIEW_H) * 0.62);
-    g2.addColorStop(0, 'rgba(' + MC + ',0)');
-    g2.addColorStop(0.7, 'rgba(' + MC + ',' + (0.42 * m).toFixed(3) + ')');
-    g2.addColorStop(1, 'rgba(' + MC + ',' + (0.85 * m).toFixed(3) + ')');
-    ctx.fillStyle = g2;
+    const rc = FOG.ring.getContext('2d');
+    rc.globalCompositeOperation = 'source-over';
+    rc.clearRect(0, 0, VIEW_W, VIEW_H);
+    const g2 = rc.createRadialGradient(VIEW_W / 2, VIEW_H / 2, Math.min(VIEW_W, VIEW_H) * 0.26,
+      VIEW_W / 2, VIEW_H / 2, Math.max(VIEW_W, VIEW_H) * 0.64);
+    g2.addColorStop(0, 'rgba(' + col.join(',') + ',0)');
+    g2.addColorStop(0.55, 'rgba(' + col.join(',') + ',' + (0.5 * m).toFixed(3) + ')');
+    g2.addColorStop(1, 'rgba(' + col.join(',') + ',' + (0.92 * m).toFixed(3) + ')');
+    rc.fillStyle = g2;
+    rc.fillRect(0, 0, VIEW_W, VIEW_H);
+    // erode: punch the wisp pattern OUT of the ring so its edge is tendrils
+    const tile = tiles[0], S = tile.width * 1.6;
+    const ox = (((-(camX * 0.5) - G.time * 11) % S) + S) % S;
+    const oy = (((-(camY * 0.5) + G.time * 3) % S) + S) % S;
+    const pat = rc.createPattern(tile, 'repeat');
+    pat.setTransform(new DOMMatrix().translate(ox, oy).scale(1.6, 1.6));
+    rc.globalCompositeOperation = 'destination-out';
+    rc.globalAlpha = 0.9;
+    rc.fillStyle = pat;
+    rc.fillRect(0, 0, VIEW_W, VIEW_H);
+    rc.fillRect(0, 0, VIEW_W, VIEW_H);   // twice: deeper bites
+    rc.globalAlpha = 1;
+    rc.globalCompositeOperation = 'source-over';
+    ctx.drawImage(FOG.ring, 0, 0);
+    // and a faint luminous lift — fog catches what light there is
+    ctx.globalCompositeOperation = 'screen';
+    ctx.fillStyle = 'rgba(120,118,132,' + (0.12 * m).toFixed(3) + ')';
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+    ctx.globalCompositeOperation = 'source-over';
   }
 }
 
