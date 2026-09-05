@@ -83,13 +83,19 @@ joystick** on the left — it appears wherever your thumb lands, with a dashed
 stick and ring flare gold while the run is latched, and it lets go when you
 ease well back toward the center). On the right, an **icon button cluster**:
 🦷 attack, 🐾 pounce (🌀 tail-swing on tail-fighters — hold it like the P key),
-💤 rest, and two buttons that only exist when the world offers them — ✊ grab
+💤 rest, 📣 the aggressive call (the broadcast and friendly calls arrive as
+prompt pills when they apply), and two buttons that only exist when the world offers them — ✊ grab
 appears beside a carcass (tap to carry, hold to tear a chunk) and a fourth
 slot appears as 💧/🌿/🍖 to drink or eat whatever you're standing at. Rarer
-prompts — nest, wrestle, fish, dig — stay as labelled pills above the
-cluster. During a wrestle the right half of the
+prompts — nest, wrestle, fish, dig, the claw slash / double bite of the
+second-weapon species — stay as labelled pills above the cluster. A tap on
+the stat bars opens the **health menu** (TAB on a keyboard); a tap on the
+menu closes it. During a wrestle the right half of the
 screen becomes a **swipe pad** (the QTE shows which way). Landscape is the
-intended orientation: portrait shows a "turn your phone" screen, and the first
+intended orientation **for play**: the profile and lobby screens work held
+upright too (in portrait every card stacks its preview over its name, gender
+and skins, one column down the phone), and only once a game is running does
+portrait show the "turn your phone" screen. The first
 tap in-game requests fullscreen + landscape lock where the browser allows it
 (Android; iPhones can't lock, but **Share → Add to Home Screen** installs the
 game as a fullscreen app — no URL bar — via the web app manifest). The view
