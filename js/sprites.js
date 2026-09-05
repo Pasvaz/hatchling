@@ -357,8 +357,8 @@ const DINO = {
     name: 'Shanag', full: 'Shanag ashile', diet: 'carn', biped: true, scale: 0.4,
     L: { body: [16, 7], tail: [22, 3], neckLen: 6, neckAng: 0.5, head: [8.5, 5], leg: [12, 2.8] },
     col: {
-      top: '#26222b', mid: '#5c5560', belly: '#cfc6bb', line: '#100e13',
-      acc: '#d2622e', eye: '#f0b448', pat: '#171420', shade: '#48424e',
+      top: '#34303c', mid: '#6b6472', belly: '#d3cbc0', line: '#141218',
+      acc: '#d2622e', eye: '#f0b448', pat: '#211d29', shade: '#544d5c',
     },
     tailUp: 0.4, fuzz: true, plume: true, bigEye: 1.3, pattern: 'mask',
   },
@@ -1920,15 +1920,15 @@ function drawDino(ctx, key, o) {
     }
     // skin folds: loose hide creases at the throat, the shoulder, the hip
     // and the tail root — short soft curves in the shadow tone
-    ctx.strokeStyle = 'rgba(20,12,4,0.2)';
-    ctx.lineWidth = Math.max(0.5, lineW * 0.6);
+    ctx.strokeStyle = 'rgba(20,12,4,' + (s > 0.8 ? 0.14 : 0.08) + ')';
+    ctx.lineWidth = Math.max(0.5, lineW * 0.55);
     ctx.lineCap = 'round';
     const fold = (x0, y0, x1, y1, bx, by) => { ctx.beginPath(); ctx.moveTo(x0, y0); ctx.quadraticCurveTo(bx, by, x1, y1); ctx.stroke(); };
-    for (let k = 0; k < 3; k++) {   // tail root
-      const fx0 = -bodyL * 0.42 - k * 2.6 * s;
-      fold(fx0, cy - bodyH * (0.24 - k * 0.03), fx0 - 1.2 * s, cy + bodyH * (0.2 - k * 0.04), fx0 - 1.6 * s, cy - bodyH * 0.02);
+    for (let k = 0; k < 2; k++) {   // tail root: two soft rings
+      const fx0 = -bodyL * 0.42 - k * 3 * s;
+      fold(fx0 + 0.6 * s, cy - bodyH * (0.2 - k * 0.03), fx0 - 0.4 * s, cy + bodyH * (0.18 - k * 0.04), fx0 - 1.8 * s, cy - bodyH * 0.02);
     }
-    for (let k = 0; k < 2; k++) {   // hip crease over the thigh root
+    for (let k = 0; k < 1; k++) {   // hip crease over the thigh root
       fold(hipX + bodyL * (0.02 + k * 0.05), cy + bodyH * 0.02, hipX + bodyL * (0.1 + k * 0.05), cy + bodyH * 0.34, hipX + bodyL * (0.02 + k * 0.05), cy + bodyH * 0.22);
     }
     for (let k = 0; k < 2; k++) {   // shoulder
@@ -2741,17 +2741,17 @@ function drawBodyExtras(ctx, key, d, C, a) {
       const t = 0.2 + k * 0.11;
       const px = -bodyL * 0.36 + bodyL * t * 0.92;
       const py = cy - bodyH * 0.06 + Math.sin(t * Math.PI) * bodyH * 0.05;
-      ctx.fillStyle = shade(C.belly, 0.9);
-      ctx.strokeStyle = shade(C.line, 1.1);
-      ctx.globalAlpha = 0.85;
+      ctx.fillStyle = mixHex(C.mid, C.belly, 0.45);
+      ctx.strokeStyle = shade(C.line, 1.3);
+      ctx.globalAlpha = 0.7;
       ctx.beginPath();
-      ctx.ellipse(px, py, bodyH * 0.13, bodyH * 0.2, -0.12, 0, TAU);
+      ctx.ellipse(px, py, bodyH * 0.075, bodyH * 0.2, -0.3, 0, TAU);
       ctx.fill(); ctx.stroke();
       // lit upper edge so the plates read as raised, not painted on
-      ctx.globalAlpha = 0.4;
+      ctx.globalAlpha = 0.35;
       ctx.strokeStyle = 'rgba(255,250,232,0.7)';
       ctx.beginPath();
-      ctx.ellipse(px, py, bodyH * 0.13, bodyH * 0.2, -0.12, Math.PI * 1.1, Math.PI * 1.85);
+      ctx.ellipse(px, py, bodyH * 0.075, bodyH * 0.2, -0.3, Math.PI * 1.1, Math.PI * 1.85);
       ctx.stroke();
       ctx.globalAlpha = 1;
     }
@@ -2973,17 +2973,31 @@ function drawBodyExtras(ctx, key, d, C, a) {
   }
   if (d.plume) {
     // ornithomimid tail fan
+    // a fan of five vanes rooted at the tail's end, spread up and back,
+    // outlined once as a whole so it reads as one plume
     const tip = skin.top[2];
     if (tip) {
+      const rx = tip.x + 1.5 * s, ry = tip.y + 0.6 * s + Math.sin(ph) * 0.4;
+      const vanes = [[-0.95, 7.5], [-0.62, 8.5], [-0.3, 8.8], [0.0, 8.2], [0.28, 7.0]];   // [angle, length]
+      const pts = [];
+      for (const [a, len] of vanes) pts.push({ x: rx - Math.cos(a) * len * s, y: ry + Math.sin(a) * len * s });
       ctx.fillStyle = shade(C.mid, 1.12);
       ctx.strokeStyle = C.line;
       ctx.lineWidth = lineW * 0.7;
-      for (let k = -1; k <= 1; k++) {
-        ctx.beginPath();
-        ctx.ellipse(tip.x - 3 * s, tip.y + k * 1.6 * s + Math.sin(ph) * 0.6,
-          6.5 * s, 1.7 * s, k * 0.24 - 0.28, 0, TAU);
-        ctx.fill(); ctx.stroke();
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(rx, ry);
+      for (let k = 0; k < pts.length; k++) {
+        const p = pts[k], n = pts[k + 1] || null;
+        // each vane: a rounded tip, then a notch back toward the root
+        ctx.quadraticCurveTo(p.x + 1.2 * s, p.y - 1.4 * s, p.x, p.y);
+        if (n) ctx.quadraticCurveTo(lerp(p.x, n.x, 0.5) + 2.2 * s, lerp(p.y, n.y, 0.5) + 0.3 * s, n.x, n.y);
       }
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      // the shafts
+      ctx.strokeStyle = shade(C.top, 0.85);
+      ctx.lineWidth = Math.max(0.5, lineW * 0.5);
+      for (const p of pts) { ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(lerp(rx, p.x, 0.85), lerp(ry, p.y, 0.85)); ctx.stroke(); }
     }
   }
 }
@@ -3293,16 +3307,24 @@ function drawHead(ctx, key, d, C, a) {
     // the kosmoceratops extras — a 'plain' frill (proto, centro & co) skips
     // them and wears its own horns from the flags below instead
     if (d.frill !== 'plain' && !d.longHorns) {
-      // hooked hornlets curling forward off the frill's crown
+      // hooked hornlets curling forward off the frill's crown — placed on
+      // the shield's own top margin, so they ride it at every size
       ctx.fillStyle = shade(C.belly, 0.95);
-      for (let k = 0; k < 3; k++) {
-        const b = hPt(-0.44 + k * 0.16, -0.92 - k * 0.03);
+      ctx.strokeStyle = C.line;
+      ctx.lineWidth = lineW * 0.7;
+      // the hornlets ride the shield, so they take its counter-rotation
+      ctx.save();
+      { const r0 = hPt(-0.06, -0.3); ctx.translate(r0.x, r0.y); ctx.rotate(-headAng * 0.65); ctx.translate(-r0.x, -r0.y); }
+      for (const [fx, fy] of [[-0.3, -1.42], [-0.62, -1.5], [-0.92, -1.32]]) {
+        const b = fP(fx, fy);
+        const w = hl * 0.045 * fm, h = hh * 0.22 * fm;
         ctx.beginPath();
-        ctx.moveTo(b.x - hl * 0.03, b.y);
-        ctx.quadraticCurveTo(b.x + hl * 0.02, b.y - hh * 0.22, b.x + hl * 0.1, b.y - hh * 0.16);
-        ctx.quadraticCurveTo(b.x + hl * 0.04, b.y - hh * 0.06, b.x + hl * 0.03, b.y);
+        ctx.moveTo(b.x - w, b.y + h * 0.15);
+        ctx.quadraticCurveTo(b.x + w * 0.3, b.y - h, b.x + w * 2.4, b.y - h * 0.7);   // the hook, curling forward
+        ctx.quadraticCurveTo(b.x + w * 0.9, b.y - h * 0.3, b.x + w, b.y + h * 0.15);
         ctx.closePath(); ctx.fill(); ctx.stroke();
       }
+      ctx.restore();
       // long brow horns sweeping forward-down over the eyes
       const bh0 = hPt(0.12, -0.3);
       ctx.fillStyle = shade(C.belly, 0.95);
@@ -3342,17 +3364,24 @@ function drawHead(ctx, key, d, C, a) {
   if (d.lokiHorns) {
     // lokiceratops: two great blade horns sweeping out-and-back off the frill
     // crown (far one dim), plus a pair of brow blades — no nose horn at all
-    for (const [dx, dim] of [[-0.1, true], [0, false]]) {
-      const b0 = hPt(-0.22 + dx, -0.78);
-      ctx.fillStyle = dim ? shade(C.acc, 0.68) : C.acc;
+    // the blades root on the shield's top corner and sweep up and back —
+    // bone, like every horn, so they read against the frill's colour
+    const fmL = (d.frillMul || 1) * (0.4 + 0.6 * g);
+    const fPL = (fx, fy) => hPt(-0.06 + (fx + 0.06) * fmL, -0.3 + (fy + 0.3) * fmL);
+    ctx.save();   // the blades ride the shield: same counter-rotation
+    { const r0 = hPt(-0.06, -0.3); ctx.translate(r0.x, r0.y); ctx.rotate(-headAng * 0.65); ctx.translate(-r0.x, -r0.y); }
+    for (const [dx, dim] of [[-0.12, true], [0, false]]) {
+      const b0 = fPL(-0.5 + dx, -1.35);
+      ctx.fillStyle = dim ? shade(C.belly, 0.7) : shade(C.belly, 0.95);
       ctx.strokeStyle = C.line;
       ctx.lineWidth = lineW * 0.85;
       ctx.beginPath();
-      ctx.moveTo(b0.x - hl * 0.06, b0.y);
-      ctx.quadraticCurveTo(hPt(-0.62 + dx, -1.3).x, hPt(-0.62 + dx, -1.3).y, hPt(-0.86 + dx, -1.22).x, hPt(-0.86 + dx, -1.22).y);
-      ctx.quadraticCurveTo(hPt(-0.5 + dx, -0.98).x, hPt(-0.5 + dx, -0.98).y, b0.x + hl * 0.08, b0.y);
+      ctx.moveTo(b0.x - hl * 0.08 * fmL, b0.y);
+      ctx.quadraticCurveTo(fPL(-0.85 + dx, -1.95).x, fPL(-0.85 + dx, -1.95).y, fPL(-1.15 + dx, -2.05).x, fPL(-1.15 + dx, -2.05).y);
+      ctx.quadraticCurveTo(fPL(-0.75 + dx, -1.6).x, fPL(-0.75 + dx, -1.6).y, b0.x + hl * 0.08 * fmL, b0.y);
       ctx.closePath(); ctx.fill(); ctx.stroke();
     }
+    ctx.restore();
     // brow blades over the eyes
     const bb = hPt(0.14, -0.32);
     ctx.fillStyle = shade(C.belly, 0.92);

@@ -843,13 +843,15 @@ function hitZonesOf(d) {
         : { dx: -(L.body[0] * 0.42 + L.tail[0] * 0.7), dy: 0, dz: tUp(0.7), r: Math.max(2, L.tail[1] * 0.6), part: 'tail' },      // tail tip
     ];
     if (!d.hitZones && L.neckLen >= 16) {
-      // long necks (sauropods) get a mid-neck circle — the chest→head gap is
-      // hittable body too
-      d._zones.splice(1, 0, {
-        dx: L.body[0] * 0.36 + Math.cos(L.neckAng) * L.neckLen * 0.55,
+      // long necks (sauropods) get mid-neck circles — the chest→head gap is
+      // hittable body too; a tower neck (the frozen giant) gets three
+      const fr = L.neckLen >= 40 ? [0.8, 0.55, 0.3] : [0.55];
+      for (const t of fr) d._zones.splice(1, 0, {
+        dx: L.body[0] * 0.36 + Math.cos(L.neckAng) * L.neckLen * t,
         dy: 0,
-        dz: spine + L.body[1] * 0.14 + Math.sin(L.neckAng) * L.neckLen * 0.55 + (d.foreLift || 0) * L.body[1] * 0.6,
+        dz: spine + L.body[1] * 0.14 + Math.sin(L.neckAng) * L.neckLen * t + (d.foreLift || 0) * L.body[1] * 0.6,
         r: Math.max(3.5, L.body[1] * 0.3 * (d.neckW || 1)),
+        part: 'body',
       });
     }
     for (const z of d._zones) {
