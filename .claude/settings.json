@@ -1,0 +1,18 @@
+{
+  "env": {
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "35"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "PowerShell(\\(Get-Command node -ErrorAction SilentlyContinue\\); \\(Get-Command python -ErrorAction SilentlyContinue\\) | Select-Object Source)",
+      "PowerShell(cd C:\\\\Users\\\\pasqu\\\\DEV\\\\evax\\\\evax; foreach \\($n in 'isInVillage','rebuildForBiome','setupLighting','updateGrassTufts','updateOceanWaves','createRaftModel','isNearIsland','damageTree'\\) { $hits = Select-String -Path js\\\\environment.js -Pattern \\(\"\\\\b\" + $n + \":\"\\) | Measure-Object; \"{0}: {1}\" -f $n, $hits.Count }; foreach \\($n in 'updatePlayer','createPeccary','createBackSword','createSkinSparkles','createBackBasket','updateSkinSparkles','updateBackBasket','updateBackSword','startSwordSpin','endSwordSpin','rebuildPeccary','buildPeccaryModel'\\) { $hits = Select-String -Path js\\\\player.js -Pattern \\(\"\\\\b\" + $n + \":\"\\) | Measure-Object; \"P {0}: {1}\" -f $n, $hits.Count })",
+      "PowerShell(node --check js/pigon-game.js; node --check js/card-game.js; node --check js/tavern.js; node --check js/data/tavern-dialogs.js; echo \"EXIT:$LASTEXITCODE\")",
+      "PowerShell(node --check \"C:\\\\Users\\\\pasqu\\\\DEV\\\\evax\\\\evax\\\\js\\\\game.js\")",
+      "PowerShell(foreach \\($f in 'js/items.js','js/save.js','js/ui.js','js/player.js','js/environment.js','js/inventory.js'\\) { node --check $f; if \\($?\\) { Write-Output \"OK $f\" } })",
+      "PowerShell($node = \"C:\\\\Program Files\\\\Unity\\\\Hub\\\\Editor\\\\2021.3.23f1\\\\Editor\\\\Data\\\\Tools\\\\nodejs\\\\node.exe\"; & $node --version; foreach \\($f in 'js/items.js','js/save.js','js/ui.js','js/player.js','js/environment.js','js/inventory.js'\\) { & $node --check $f; if \\($LASTEXITCODE -eq 0\\) { Write-Output \"OK $f\" } else { Write-Output \"FAIL $f\" } })",
+      "mcp__Claude_Preview__preview_start"
+    ]
+  },
+  "compactAtPercent": 35
+}

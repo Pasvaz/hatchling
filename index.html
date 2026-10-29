@@ -60,6 +60,10 @@
   .ic-hyg   { background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><path d='M6 1.2 7.1 4.3 10.2 5.4 7.1 6.5 6 9.6 4.9 6.5 1.8 5.4 4.9 4.3Z' fill='%23c1a2e0'/><circle cx='9.6' cy='9.4' r='1' fill='%23c1a2e0'/></svg>"); }
   .ic-cold  { background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><path d='M6 0.8v10.4M1.5 3.4l9 5.2M10.5 3.4l-9 5.2M6 0.8 4.6 2.2M6 0.8 7.4 2.2M6 11.2 4.6 9.8M6 11.2 7.4 9.8' stroke='%23a8dcf0' stroke-width='1.1' fill='none' stroke-linecap='round'/></svg>"); }
   #row-cold { display: none; }
+  .ic-heat  { background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><circle cx='6' cy='6' r='2.6' fill='%23ffb84a'/><path d='M6 0.8v1.8M6 9.4v1.8M0.8 6h1.8M9.4 6h1.8M2.3 2.3l1.3 1.3M8.4 8.4l1.3 1.3M9.7 2.3 8.4 3.6M3.6 8.4 2.3 9.7' stroke='%23ffb84a' stroke-width='1.1' stroke-linecap='round'/></svg>"); }
+  #row-heat { display: none; }
+  #fill-heat { background: linear-gradient(90deg, #e08a3a, #ffd27a); }
+  #fill-heat.low { background: linear-gradient(90deg, #ffd27a, #ffffff); }
   #fill-cold { background: linear-gradient(90deg, #7ec8e0, #cfeefc); }
   #fill-cold.low { background: linear-gradient(90deg, #cfeefc, #ffffff); }
   .bar {
@@ -278,6 +282,8 @@
   .tabpip.lit { background: #a3bf58; border-color: #5c8a3a; }
   .tabpip.adult { background: #d8a534; border-color: #8a6a20; }
   .tabfly .tffeat.adult { color: #d8a534; }
+  .tabpip.settled { background: #ffd23e; border-color: #c08a1a; box-shadow: 0 0 4px #ffd23e; }
+  .tabfly .tffeat.settled { color: #ffd23e; }
   /* the stamp's story floats out on hover — no panel, just inked text */
   .ecotab .tabfly {
     position: absolute; left: 128%; top: 50%; transform: translateY(-50%);
@@ -439,6 +445,9 @@
   .card .meta { display: flex; justify-content: center; margin-top: 7px; }
   .card .fstats + .fstats { margin-top: 8px; padding-top: 8px; border-top: 1px solid #3f3119; }
   .card .meta:empty { display: none; }
+  .card .crest { font-size: 9px; letter-spacing: 1px; color: #ffd23e; text-align: center; margin-top: 6px; line-height: 1.4; }
+  .card .crest:empty { display: none; }
+  .card.settled { border-color: #8a6a20; }
   .card .price { font-size: 9px; letter-spacing: 1px; color: #ffd23e; margin-top: 8px; text-align: center; line-height: 1.4; }
   .card .price.poor { color: #8d7c58; }
 
@@ -551,6 +560,7 @@
   #touch { position: absolute; inset: 0; display: none; z-index: 8; pointer-events: none; }
   body.touch #touch.ingame { display: block; }
   #touch.paused > :not(#btn-pause) { visibility: hidden; }
+  body.cine #hud, body.cine #touch { visibility: hidden; }
   #joyzone {
     position: absolute; left: 0; bottom: 0;
     width: 44%; height: 72%;
@@ -814,6 +824,7 @@
       <div class="statrow"><span class="sicon ic-water" title="Water"></span><div class="bar"><div class="fill" id="fill-water"></div></div></div>
       <div class="statrow"><span class="sicon ic-hyg" title="Hygiene"></span><div class="bar"><div class="fill" id="fill-hyg"></div></div></div>
       <div class="statrow" id="row-cold"><span class="sicon ic-cold" title="Cold — full means frozen"></span><div class="bar"><div class="fill" id="fill-cold"></div></div></div>
+      <div class="statrow" id="row-heat"><span class="sicon ic-heat" title="Heat — full means heatstroke"></span><div class="bar"><div class="fill" id="fill-heat"></div></div></div>
     </div>
     <canvas id="minimap" width="120" height="120"></canvas>
     <div id="prompt" style="opacity:0"></div>
@@ -907,8 +918,8 @@
         <tr><td>WASD / Arrows</td><td>move</td></tr>
         <tr><td>SHIFT</td><td>sprint (drains stamina)</td></tr>
         <tr><td>SPACE</td><td>bite / attack</td></tr>
-        <tr><td>E</td><td>interact — eat · drink · feed on a carcass · swallow · hide · enter a burrow · nest</td></tr>
-        <tr><td>F</td><td>action — fish · grab a carcass (hold: tear a chunk) · wrestle · bathe · court a mate · leave a den</td></tr>
+        <tr><td>E</td><td>interact — eat · drink · feed on a carcass · swallow · hide · enter a burrow</td></tr>
+        <tr><td>F</td><td>action — fish · grab a carcass (hold: tear a chunk) · wrestle · bathe · court a mate · lay your eggs · leave a den (on a phone: tap the prompt's button)</td></tr>
         <tr><td colspan="2" style="color:#a5936c;padding-top:6px">E and F are CONTEXT keys: they only ever do what the prompt at the bottom of the screen says. Moves you can make anywhere have their own key:</td></tr>
         <tr><td>M</td><td>second weapon — claw slash (riojasaurus, the megaraptorids) · double bite (poekilopleuron)</td></tr>
         <tr><td>B</td><td>dig your burrow, anywhere (simosuchus) — B beside it collapses it</td></tr>
@@ -923,6 +934,7 @@
         <tr><td>Water edge</td><td>drink to restore water</td></tr>
         <tr><td>Grow</td><td>eat &amp; drink well and time will do the rest</td></tr>
         <tr><td>❖ Growths</td><td>earned every minute alive (+ kill bonus) — spend on skins in the lobby</td></tr>
+        <tr><td>⚜ Great Walk</td><td>when your clutch is grown enough, the season turns: lead the young to the land's landmark (follow the gold arrow) with enough of them alive, and your line SETTLES there for good</td></tr>
         <tr><td>⌂ Lobby</td><td>swap dinosaur any time; your dino keeps its progress</td></tr>
       </table>
     </div>
@@ -955,6 +967,7 @@
 <script src="js/world.js"></script>
 <script src="js/entities.js"></script>
 <script src="js/main.js"></script>
+<script src="js/walk.js"></script>
 <script src="js/lib/nipplejs.min.js"></script>
 <script src="js/touch.js"></script>
 </body>

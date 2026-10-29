@@ -50,6 +50,201 @@ const DINO = {
     armSwipe: true, clawSecond: true, sauroHead: true, beak: false, tailWeapon: true,
     neckArc: 0.08, pattern: 'band',
   },
+  coelo: {
+    // THE DESERT'S PLAYABLE: a Triassic coelophysoid — Lophostropheus' build
+    // on shorter legs, with a deeper S-curve to the neck: fast, dangerous,
+    // sand-coloured with rust bars, and it hunts the little ribbon-tailed
+    // Epidexipteryx through the river belt
+    name: 'Coelophysis', full: 'Coelophysis bauri', diet: 'carn', biped: true, scale: 0.85,
+    L: { body: [34, 13], tail: [46, 5.5], neckLen: 16, neckAng: 0.8, head: [14, 7.5], leg: [22, 4.6] },
+    col: {
+      top: '#9a6a3c', mid: '#c89a62', belly: '#efe2c0', line: '#3a2410',
+      acc: '#c8502c', eye: '#e8c25a', pat: '#7a3e22', shade: '#a67c4c',
+    },
+    tailUp: 0.3, fuzz: true, snoutW: 0.2, neckArc: 0.14, pattern: 'stripes',
+  },
+  procomp: {
+    // THE DESERT'S FIRST PLAYABLE: a miniature coelophysoid — the same lean
+    // frame at half the size, with a slimmer, longer head for its body, and
+    // feathered from hatching. Runs with its own kind, and never tires
+    name: 'Procompsognathus', full: 'Procompsognathus triassicus', diet: 'carn', biped: true, scale: 0.5,
+    L: { body: [26, 10], tail: [36, 4], neckLen: 12, neckAng: 0.75, head: [13, 5.4], leg: [17, 3.6] },
+    col: {
+      top: '#7a6a44', mid: '#b8a06a', belly: '#f0e6c8', line: '#302410',
+      acc: '#d0662e', eye: '#e8c25a', pat: '#5a4a2a', shade: '#9a8454',
+    },
+    tailUp: 0.32, fuzz: true, featherCoat: true, snoutW: 0.17, neckArc: 0.12, pattern: 'stripes',
+  },
+  homalo: {
+    // the desert's second rung: a pachycephalosaur with a FLAT dome — a thick
+    // table of bone on the skull instead of Prenocephale's high crown. Between
+    // the two coelophysoids in size, a pack animal, and its pounce lands
+    // skull-first hard enough to break bones
+    name: 'Homalocephale', full: 'Homalocephale calathocercos', diet: 'herb', biped: true, scale: 0.68,
+    L: { body: [30, 15], tail: [30, 6], neckLen: 8, neckAng: 0.35, head: [13, 8.5], leg: [20, 5] },
+    col: {
+      top: '#8a5a3a', mid: '#c08a5a', belly: '#f0e2c4', line: '#3a2210',
+      acc: '#e8dcc0', eye: '#3f3116', pat: '#6a4028', shade: '#a67448',
+    },
+    tailUp: 0.3, headButt: true, flatDome: true, snoutW: 0.3, snoutMidW: 0.5, pattern: 'dapple',
+  },
+  // ---- the hadrosaurs of the desert: seven, no two alike ----
+  willina: {
+    // the biggest: a barge of a saurolophine, long low skull, deep tail
+    name: 'Willinakaqe', full: 'Willinakaqe salitralensis', diet: 'herb', biped: false, scale: 1.45,
+    L: { body: [52, 28], tail: [52, 12], neckLen: 14, neckAng: 0.5, head: [21, 9], leg: [26, 8] },
+    col: { top: '#5a4c36', mid: '#8c7a5a', belly: '#e6dcc4', line: '#241c10', acc: '#b89060', eye: '#3a2e1c', pat: '#43382a', shade: '#726048' },
+    tailUp: 0.2, armScale: 1.3, arch: 1, forageQuad: true, tailWeapon: true, duckbill: true, pattern: 'band',
+  },
+  bonaparte: {
+    // robust and short-tailed, a rise over the hips — the survivor
+    name: 'Bonapartesaurus', full: 'Bonapartesaurus rionegrensis', diet: 'herb', biped: false, scale: 1.3,
+    L: { body: [48, 27], tail: [40, 10], neckLen: 13, neckAng: 0.5, head: [18, 9], leg: [25, 7.5] },
+    col: { top: '#6a5a3a', mid: '#a08a5c', belly: '#ece2c8', line: '#2a2010', acc: '#c47a3a', eye: '#3a2e1c', pat: '#4e4028', shade: '#82704a' },
+    tailUp: 0.22, armScale: 1.25, arch: 1, humpLow: true, forageQuad: true, tailWeapon: true, duckbill: true, pattern: 'dapple',
+  },
+  huallas: {
+    // slender, long-necked, a Roman nose — the kritosaur
+    name: 'Huallasaurus', full: 'Huallasaurus australis', diet: 'herb', biped: false, scale: 1.1,
+    L: { body: [44, 23], tail: [46, 9], neckLen: 17, neckAng: 0.55, head: [18, 8.5], leg: [25, 6.2] },
+    col: { top: '#4a6a3a', mid: '#7c9a58', belly: '#e4e8c4', line: '#1c2a14', acc: '#d0a040', eye: '#3a2e1c', pat: '#3a5030', shade: '#648048' },
+    tailUp: 0.26, armScale: 1.2, arch: 1, skullArch: true, forageQuad: true, tailWeapon: true, duckbill: true, pattern: 'stripes',
+  },
+  kelumapu: {
+    // mid-sized, with a tail as deep as its body — the swimmer of the seven
+    name: 'Kelumapusaura', full: 'Kelumapusaura machi', diet: 'herb', biped: false, scale: 1.05,
+    L: { body: [44, 24], tail: [50, 13], neckLen: 13, neckAng: 0.48, head: [17, 8.5], leg: [23, 6.5] },
+    col: { top: '#3e5a5a', mid: '#6a8c88', belly: '#dce8e0', line: '#142222', acc: '#c8b060', eye: '#3a2e1c', pat: '#2e4644', shade: '#567472' },
+    tailUp: 0.18, armScale: 1.2, arch: 1, forageQuad: true, tailWeapon: true, duckbill: true, paddleTail: true, pattern: 'band',
+  },
+  gilmoreo: {
+    // the basal one: longer arms, more upright, a beak instead of a bill
+    name: 'Gilmoreosaurus', full: 'Gilmoreosaurus mongoliensis', diet: 'herb', biped: false, scale: 1.1,
+    L: { body: [42, 22], tail: [44, 9], neckLen: 14, neckAng: 0.6, head: [16, 8], leg: [25, 6] },
+    col: { top: '#7a5a3a', mid: '#b08a5c', belly: '#f0e4cc', line: '#2e1e10', acc: '#c8b090', eye: '#3a2e1c', pat: '#5a4028', shade: '#94724a' },
+    tailUp: 0.28, armScale: 1.4, arch: 0.6, foreLift: 0.12, forageQuad: true, tailWeapon: true, pattern: 'dapple',
+  },
+  bactro: {
+    // stocky, short-legged, a low ridge of tall spines down the back
+    name: 'Bactrosaurus', full: 'Bactrosaurus johnsoni', diet: 'herb', biped: false, scale: 0.9,
+    L: { body: [42, 24], tail: [40, 9], neckLen: 11, neckAng: 0.45, head: [15, 8], leg: [18, 6.5] },
+    col: { top: '#5c5040', mid: '#8e8066', belly: '#e8e0cc', line: '#241e14', acc: '#b09060', eye: '#3a2e1c', pat: '#463c30', shade: '#766850' },
+    tailUp: 0.22, armScale: 1.3, arch: 1, ridge: true, forageQuad: true, tailWeapon: true, pattern: 'band',
+  },
+  plesio: {
+    // the dune runner: light, long-legged, the one that lives out on the sand
+    name: 'Plesiohadros', full: 'Plesiohadros djadokhtaensis', diet: 'herb', biped: false, scale: 1.0,
+    L: { body: [40, 20], tail: [44, 8], neckLen: 14, neckAng: 0.55, head: [16, 7.5], leg: [28, 5.5] },
+    col: { top: '#a88a5a', mid: '#d0b47e', belly: '#f6eedc', line: '#3a2a14', acc: '#c07a3a', eye: '#3a2e1c', pat: '#86683e', shade: '#b89a68' },
+    tailUp: 0.28, armScale: 1.2, arch: 1, forageQuad: true, tailWeapon: true, duckbill: true, pattern: 'streak',
+  },
+  // ---- the two land theropods ----
+  deltadro: {
+    // the sprinter: absurdly long legs on a light frame, a small head on a
+    // long neck — built to run down the ostrich herds on open sand
+    name: 'Deltadromeus', full: 'Deltadromeus agilis', diet: 'carn', biped: true, scale: 1.15,
+    L: { body: [40, 16], tail: [50, 6], neckLen: 14, neckAng: 0.5, head: [15, 7.5], leg: [36, 5] },
+    col: { top: '#6a4a34', mid: '#a67e5c', belly: '#ecdcc0', line: '#2c1a0e', acc: '#d0522a', eye: '#e8c25a', pat: '#4e3422', shade: '#8a6648' },
+    tailUp: 0.3, fuzz: true, snoutW: 0.2, mtMul: 1.4, pattern: 'streak',
+  },
+  eocarch: {
+    // "fierce-eye": a heavy carcharodontosaur with great bony brow bosses
+    // over the eyes — the belt's ambush killer at the waterside
+    name: 'Eocarcharia', full: 'Eocarcharia dinops', diet: 'carn', biped: true, scale: 1.5,
+    L: { body: [56, 26], tail: [56, 10], neckLen: 11, neckAng: 0.32, head: [26, 14], leg: [26, 8] },
+    col: { top: '#3e3a44', mid: '#6e6672', belly: '#d8d0c8', line: '#181418', acc: '#b03a2e', eye: '#f0b448', pat: '#2c2830', shade: '#565060' },
+    tailUp: 0.28, browRidge: true, skullArch: true, armScale: 0.65, snoutW: 0.3, snoutMidW: 0.5, pattern: 'stripes',
+  },
+  suchos: {
+    // the river's theropod: a croc-snouted spinosaurid, low and long, that
+    // fishes the channels and takes anything that comes down to drink
+    name: 'Suchosaurus', full: 'Suchosaurus cultridens', diet: 'carn', biped: true, scale: 1.2,
+    L: { body: [50, 22], tail: [58, 8], neckLen: 11, neckAng: 0.2, head: [26, 9], leg: [20, 6.5] },
+    col: { top: '#465a3c', mid: '#748a5c', belly: '#e0e0b8', line: '#1a2414', acc: '#c8862e', eye: '#e8c25a', pat: '#324430', shade: '#5e744c' },
+    tailUp: 0.18, armScale: 1.3, ridge: true, paddleTail: true, crocTeeth: true, nostrilBack: true, snoutW: 0.4, snoutMidW: 0.48, pattern: 'stripes',
+  },
+  // ---------------- THE DEATH DESERT ----------------
+  // six raptors, six ornithomimosaurs, one ribbon-tail — the Gobi's dune animals
+  shri: {
+    name: 'Shri', full: 'Shri devi', diet: 'carn', biped: true, scale: 0.6,
+    L: { body: [26, 12], tail: [34, 4.5], neckLen: 9, neckAng: 0.5, head: [12.5, 7.5], leg: [19, 4] },
+    col: { top: '#8a5a34', mid: '#c49262', belly: '#efe3c8', line: '#3a2410', acc: '#d0662e', eye: '#e8c25a', pat: '#6a3e22', shade: '#a67a4e' },
+    tailUp: 0.32, fuzz: true, plume: true, pattern: 'stripes',
+  },
+  kuru: {
+    name: 'Kuru', full: 'Kuru kulla', diet: 'carn', biped: true, scale: 0.68,
+    L: { body: [28, 13], tail: [36, 5], neckLen: 10, neckAng: 0.5, head: [13.5, 8], leg: [20, 4.4] },
+    col: { top: '#5a4a3c', mid: '#8c7a62', belly: '#e6dcc4', line: '#2a2018', acc: '#c04a2e', eye: '#e8c25a', pat: '#463628', shade: '#74644e' },
+    tailUp: 0.32, fuzz: true, plume: true, pattern: 'mask',
+  },
+  tsaagan: {
+    name: 'Tsaagan', full: 'Tsaagan mangas', diet: 'carn', biped: true, scale: 0.64,
+    L: { body: [27, 12], tail: [36, 4.6], neckLen: 10, neckAng: 0.48, head: [14, 7.5], leg: [20, 4.2] },
+    col: { top: '#c4b49a', mid: '#e0d2b4', belly: '#f6f0e0', line: '#4a3e2c', acc: '#b8483a', eye: '#3a2e1c', pat: '#a08a68', shade: '#c8b898' },
+    tailUp: 0.32, fuzz: true, plume: true, pattern: 'dapple',
+  },
+  mahakala: {
+    name: 'Mahakala', full: 'Mahakala omnogovae', diet: 'carn', biped: true, scale: 0.38,
+    L: { body: [18, 8], tail: [26, 3.2], neckLen: 7, neckAng: 0.55, head: [9, 5.6], leg: [14, 3] },
+    col: { top: '#3a3230', mid: '#66585a', belly: '#d4c8bc', line: '#1c1614', acc: '#e07a2a', eye: '#f0b448', pat: '#2a2220', shade: '#524648' },
+    tailUp: 0.3, fuzz: true, plume: true, bigEye: 1.2, pattern: 'streak',
+  },
+  luanchuan: {
+    name: 'Luanchuanraptor', full: 'Luanchuanraptor henanensis', diet: 'carn', biped: true, scale: 0.56,
+    L: { body: [25, 11], tail: [33, 4.2], neckLen: 9, neckAng: 0.5, head: [12, 7], leg: [19, 3.8] },
+    col: { top: '#6a5a2e', mid: '#a4924e', belly: '#ece4c4', line: '#2e2610', acc: '#d48a2a', eye: '#e8c25a', pat: '#52441e', shade: '#8a7a40' },
+    tailUp: 0.32, fuzz: true, plume: true, pattern: 'stripes',
+  },
+  adasaurus: {
+    name: 'Adasaurus', full: 'Adasaurus mongoliensis', diet: 'carn', biped: true, scale: 0.6,
+    L: { body: [26, 12], tail: [34, 4.6], neckLen: 9, neckAng: 0.5, head: [12.5, 7.6], leg: [19, 4] },
+    col: { top: '#7a3e2a', mid: '#b06a48', belly: '#ecd8bc', line: '#341a10', acc: '#e8a040', eye: '#e8c25a', pat: '#5c2c1c', shade: '#96563a' },
+    tailUp: 0.32, fuzz: true, plume: true, pattern: 'dapple',
+  },
+  garudi: {
+    name: 'Garudimimus', full: 'Garudimimus brevipes', diet: 'omni', biped: true, scale: 0.86,
+    L: { body: [30, 16], tail: [26, 4.2], neckLen: 17, neckAng: 0.98, head: [10, 6.4], leg: [26, 4.2] },
+    col: { top: '#7a6a4a', mid: '#a89a74', belly: '#f0ebda', line: '#2e2818', acc: '#c8862e', eye: '#3a3020', pat: '#5e5038', shade: '#8e8060' },
+    tailUp: 0.26, plume: true, casque: true, pattern: 'streak',
+  },
+  harpy: {
+    name: 'Harpymimus', full: 'Harpymimus okladnikovi', diet: 'omni', biped: true, scale: 0.8,
+    L: { body: [28, 15], tail: [26, 4], neckLen: 16, neckAng: 0.95, head: [10.5, 6], leg: [25, 4] },
+    col: { top: '#8c6a48', mid: '#b89a70', belly: '#f2e8d2', line: '#342614', acc: '#a04c2e', eye: '#3a3020', pat: '#6a5034', shade: '#a08862' },
+    tailUp: 0.26, plume: true, pattern: 'dapple',
+  },
+  sinorni: {
+    name: 'Sinornithomimus', full: 'Sinornithomimus dongi', diet: 'omni', biped: true, scale: 0.78,
+    L: { body: [28, 15], tail: [26, 4], neckLen: 18, neckAng: 1.0, head: [9.5, 6], leg: [27, 3.8] },
+    col: { top: '#5e6a6e', mid: '#8e9a9c', belly: '#eef0e6', line: '#262c2e', acc: '#c9b78a', eye: '#3a3020', pat: '#4a5456', shade: '#78848a' },
+    tailUp: 0.26, plume: true, pattern: 'streak',
+  },
+  kinnaree: {
+    name: 'Kinnareemimus', full: 'Kinnareemimus khonkaenensis', diet: 'omni', biped: true, scale: 0.72,
+    L: { body: [26, 14], tail: [24, 3.8], neckLen: 16, neckAng: 1.0, head: [9, 5.8], leg: [25, 3.6] },
+    col: { top: '#6a7a4a', mid: '#9aa870', belly: '#eef0dc', line: '#2a3218', acc: '#d0b060', eye: '#3a3020', pat: '#4e5c36', shade: '#829060' },
+    tailUp: 0.26, plume: true, pattern: 'dapple',
+  },
+  beishan: {
+    name: 'Beishanlong', full: 'Beishanlong grandis', diet: 'omni', biped: true, scale: 1.25,
+    L: { body: [34, 19], tail: [30, 5], neckLen: 20, neckAng: 0.95, head: [12, 7], leg: [30, 5.2] },
+    col: { top: '#6a5a44', mid: '#9c8c6c', belly: '#f0eadc', line: '#2a2418', acc: '#b48a3a', eye: '#3a3020', pat: '#544634', shade: '#847458' },
+    tailUp: 0.26, plume: true, pattern: 'streak',
+  },
+  aepyorni: {
+    name: 'Aepyornithomimus', full: 'Aepyornithomimus tugrikinensis', diet: 'omni', biped: true, scale: 0.82,
+    L: { body: [28, 15], tail: [26, 4], neckLen: 17, neckAng: 1.0, head: [10, 6.2], leg: [28, 4] },
+    col: { top: '#b48a5a', mid: '#d8b484', belly: '#f8f0dc', line: '#3a2a16', acc: '#e0a050', eye: '#3a3020', pat: '#8c6a40', shade: '#c09c70' },
+    tailUp: 0.26, plume: true, pattern: 'dapple',
+  },
+  epidex: {
+    // the ribbon-tail: a sparrow of a thing with four long tail streamers —
+    // the coelophysis' favourite meal
+    name: 'Epidexipteryx', full: 'Epidexipteryx hui', diet: 'omni', biped: true, scale: 0.42,
+    L: { body: [13, 6], tail: [9, 2.2], neckLen: 6, neckAng: 0.7, head: [7.5, 4.8], leg: [10, 2.2] },
+    col: { top: '#4a3a30', mid: '#7a6250', belly: '#e8d8c4', line: '#22180f', acc: '#d8a030', eye: '#3a2e1c', pat: '#33261e', shade: '#5e4a3c' },
+    tailUp: 0.35, fuzz: true, ribbonTail: true, bigEye: 1.3, pattern: 'streak',
+  },
   lophos: {
     // the valley's frail assassin: a slender coelophysoid (a close cousin of
     // Liliensternus) — long legs, whip tail, narrow head, a lean wispy killer.
@@ -407,6 +602,21 @@ const DINO = {
       acc: '#e8d8c0', eye: '#e8c25a', pat: '#4a2c18', shade: '#8f6a44',
     },
     tailUp: 0.24, foreLift: 0.2, fuzz: true, armScale: 1.05, armUp: 0.1, bigClaws: true, clawLen: 8, clawWeapon: true, pattern: 'mask',
+  },
+  kunduro: {
+    // THE SODDEN REACH'S WALL OF MEAT: a big flat-headed saurolophine from the
+    // Amur floodplain — crestless, deep-tailed, built like a barge. Three
+    // weapons and no bite: the tail whip, a head-butt, and the kick — it
+    // rears onto its tail and throws both hind feet forward hard enough to
+    // break bones. Deep river-purple over a lilac belly
+    name: 'Kundurosaurus', full: 'Kundurosaurus nagornyi', diet: 'herb', biped: false, scale: 1.5,
+    L: { body: [50, 27], tail: [46, 10], neckLen: 14, neckAng: 0.62, head: [17, 9], leg: [26, 8] },
+    col: {
+      top: '#4a2e5c', mid: '#7a5490', belly: '#e0d2e6', line: '#1c1024',
+      acc: '#c98ad6', eye: '#3a2e1c', pat: '#36203f', shade: '#5f4272',
+    },
+    tailUp: 0.22, armScale: 1.3, arch: 1, forageQuad: true, tailWeapon: true, headButt: true, kick: true,
+    duckbill: true, pattern: 'dapple',
   },
   kerbero: {
     // the polar edmontosaur-alike: huge, flat-headed, crestless — a wall of
@@ -1257,7 +1467,63 @@ const SKINS = {
   klanderx: { name: 'Klanderx', cost: 100, only: ['nivarex', 'tyranno'] },    // black & magenta, white stars
   litherim: { name: 'Litherim', cost: 100, only: ['orkor', 'neove'] },        // silver, light grey streaks
   granulon: { name: 'Granulon', cost: 100, only: ['moro', 'nivalo', 'eotrach', 'campto'] },  // granite & earth
+  // EARNED coats: `req` names a deed the save must hold before the swatch
+  // will sell (main.js skinReqMet reads it and says what's missing)
+  slayer: { name: 'Slayer of Giants', cost: 500, only: ['poekilo'], req: 'kunduroKill',
+    mod: { size: 1.06, hp: 1.08, dmg: 1.08 } },                                       // dark potato brown, scarred; a little bigger and stronger
+  tideripper: { name: 'Tideripper', cost: 600, only: ['coahuila'], req: 'storms3', immune: 'monsoon' },   // teal with wave patterns; the flood can't touch it
+  dunerider: { name: 'Dunerider', cost: 400, only: ['coelo'], heatResist: 0.35, feathers: true },        // a full feather coat, pale dune-sand — the sun bounces off it
 };
+// LEGACY COATS: one fixed design per species, earned by leading a family home
+// on the Great Walk (req 'settled'). Free once earned. Each palette is a nod
+// to how that animal tends to look on screen — film-park tans and olives,
+// the survival-game and park-builder liveries — tuned here, one line each.
+const LEGACY_PAL = {
+  raja:      { top: '#6a2a1e', mid: '#9c4630', belly: '#e2c9a0', shade: '#7e3626', pat: '#3a160e', acc: '#e0b040', eye: '#f0d040', line: '#200a06' },
+  campto:    { top: '#4a5a2a', mid: '#7f8f3e', belly: '#efe2a4', shade: '#63722f', pat: '#2f3a18', acc: '#d8a030', eye: '#3a2a14', line: '#1a200c' },
+  rioja:     { top: '#6a5536', mid: '#a88a5c', belly: '#eadcb8', shade: '#87704a', pat: '#4a3820', acc: '#c87a3a', eye: '#2e2416', line: '#241a0c' },
+  ichthyo:   { top: '#3e4a3a', mid: '#6f7c5c', belly: '#e4dcb8', shade: '#556348', pat: '#26301f', acc: '#e07a2a', eye: '#e8c040', line: '#141a10' },
+  qianzho:   { top: '#4a2a1c', mid: '#8c5232', belly: '#f2e6cc', shade: '#6e4026', pat: '#1e120a', acc: '#f0e0c0', eye: '#e8d878', line: '#1a0e08' },
+  scutello:  { top: '#3c5a30', mid: '#6c8a48', belly: '#e6e6b0', shade: '#507040', pat: '#26381c', acc: '#e8c84a', eye: '#3a2a14', line: '#18240f' },
+  metria:    { top: '#5c564a', mid: '#938a74', belly: '#e6dcc4', shade: '#766e5c', pat: '#2e2a22', acc: '#d8502a', eye: '#e8c040', line: '#1a1812' },
+  giganto:   { top: '#4e5450', mid: '#7e8680', belly: '#d8d6c4', shade: '#646a66', pat: '#2e3430', acc: '#d85a2a', eye: '#3a3020', line: '#181c1a' },
+  crista:    { top: '#4a4232', mid: '#7a6c50', belly: '#e6dcb8', shade: '#605640', pat: '#2a2418', acc: '#c0402a', eye: '#e8b030', line: '#181408' },
+  linhe:     { top: '#6a5a40', mid: '#a89070', belly: '#ece0c4', shade: '#887456', pat: '#2c3c5a', acc: '#3a6ab0', eye: '#e8c040', line: '#241c10' },
+  preno:     { top: '#5a4430', mid: '#8e6e4c', belly: '#e8d8b8', shade: '#74583c', pat: '#3a2a1a', acc: '#8aa8c8', eye: '#3a2a14', line: '#20160c' },
+  vulcano:   { top: '#3e4a44', mid: '#6c7a70', belly: '#d6dacb', shade: '#56645a', pat: '#2a3430', acc: '#b8c4b0', eye: '#3a3020', line: '#161c18' },
+  nothro:    { top: '#3a3028', mid: '#6a5848', belly: '#d8ccb8', shade: '#524438', pat: '#221a14', acc: '#c8b8a0', eye: '#d8a030', line: '#140e0a' },
+  aardi:     { top: '#4a5440', mid: '#7c8a68', belly: '#e6e2c8', shade: '#626e52', pat: '#1e2418', acc: '#c8a050', eye: '#e8c040', line: '#161a10' },
+  centro:    { top: '#6a4a2c', mid: '#b0864e', belly: '#f0dcb0', shade: '#8a663c', pat: '#4a2a14', acc: '#c0402a', eye: '#3a2814', line: '#24160a' },
+  omni:      { top: '#3a4450', mid: '#66727e', belly: '#dcdcd0', shade: '#505c68', pat: '#222830', acc: '#c8402a', eye: '#e8c040', line: '#12161c' },
+  eotrach:   { top: '#4a5a30', mid: '#889a54', belly: '#efe6b4', shade: '#6a7a40', pat: '#2e3a1c', acc: '#d8b040', eye: '#4a3a24', line: '#1c2410' },
+  loki:      { top: '#3a2a22', mid: '#6a4e3e', belly: '#e0ccb0', shade: '#523a2e', pat: '#1e140e', acc: '#c8402a', eye: '#e8c040', line: '#140c08' },
+  moro:      { top: '#4e5a54', mid: '#808c84', belly: '#dcdcd0', shade: '#66726a', pat: '#34403a', acc: '#a8b4aa', eye: '#3c3018', line: '#1a1e1c' },
+  spino:     { top: '#4a4038', mid: '#7a6c5e', belly: '#e2d8c4', shade: '#625648', pat: '#2a221c', acc: '#b84a2a', eye: '#e8b030', line: '#181410' },
+  tyranno:   { top: '#5a4a3a', mid: '#9a8466', belly: '#eadcc0', shade: '#7a6850', pat: '#2e2218', acc: '#d8602a', eye: '#e8c040', line: '#1c140c' },
+  eshano:    { top: '#4a4440', mid: '#7c746c', belly: '#e4e0d8', shade: '#625c56', pat: '#2a2622', acc: '#e8e0d0', eye: '#d8a030', line: '#161412' },
+  jianchang: { top: '#6a5034', mid: '#a8865a', belly: '#efe0c4', shade: '#866a46', pat: '#3a2a18', acc: '#e0d4c0', eye: '#e8c040', line: '#20160c' },
+  nivalo:    { top: '#5a6a78', mid: '#95a6b4', belly: '#eef2f6', shade: '#7a8a98', pat: '#3e4c58', acc: '#c8d8e4', eye: '#e8c040', line: '#1c2228' },
+  nanuq:     { top: '#6a6e72', mid: '#d0d4d6', belly: '#f6f6f4', shade: '#a8acb0', pat: '#2a2c30', acc: '#a83a2a', eye: '#e8d878', line: '#1e2024' },
+  nivarex:   { top: '#3a3634', mid: '#605a56', belly: '#d4ccc0', shade: '#4c4644', pat: '#1e1a18', acc: '#a83a2a', eye: '#e8c040', line: '#100e0c' },
+  simo:      { top: '#4a4c36', mid: '#767a58', belly: '#dcd8b8', shade: '#5e6248', pat: '#2a2c1c', acc: '#a8a070', eye: '#c8a030', line: '#18180e' },
+  korea:     { top: '#3e5458', mid: '#6a8a8c', belly: '#dce4dc', shade: '#567074', pat: '#283a3e', acc: '#e08a3a', eye: '#3a2a14', line: '#142022' },
+  sarco:     { top: '#8a4a24', mid: '#c07a40', belly: '#f0dcb0', shade: '#a2602e', pat: '#2a1408', acc: '#d8302a', eye: '#e8c040', line: '#241008' },
+  drypto:    { top: '#3a3c40', mid: '#64686e', belly: '#dcdcd8', shade: '#4e5256', pat: '#1c1e22', acc: '#c8a040', eye: '#e8d878', line: '#101214' },
+  gastonia:  { top: '#5a3a2a', mid: '#8e6248', belly: '#e0ccb0', shade: '#74503a', pat: '#32200f', acc: '#d8c09a', eye: '#3a2a14', line: '#1e1208' },
+  buitre:    { top: '#2c2c30', mid: '#6a6a6c', belly: '#f0f0ec', shade: '#4a4a4e', pat: '#141416', acc: '#e8a040', eye: '#e0b64a', line: '#0e0e10' },
+  hypsi:     { top: '#4a6030', mid: '#7c9a50', belly: '#eef0c0', shade: '#607a40', pat: '#2e3c1c', acc: '#e8c040', eye: '#2e2414', line: '#1a240e' },
+  adratik:   { top: '#4a5040', mid: '#7a8268', belly: '#dcd8c0', shade: '#626a54', pat: '#2c3024', acc: '#e07a2a', eye: '#3a2e18', line: '#181a12' },
+  orkor:     { top: '#3a3040', mid: '#625470', belly: '#dcd2d8', shade: '#4e4258', pat: '#221a28', acc: '#e08a3a', eye: '#e8c25a', line: '#140e18' },
+  neove:     { top: '#2e3a2a', mid: '#566a48', belly: '#d8d4b4', shade: '#42523a', pat: '#141a10', acc: '#c83a2a', eye: '#f0cc58', line: '#0e120a' },
+  coahuila:  { top: '#5a4e40', mid: '#8c7c66', belly: '#e2d8c0', shade: '#706452', pat: '#3a3226', acc: '#d8c8a0', eye: '#3a2a14', line: '#201a12' },
+  procomp:   { top: '#4a6a3a', mid: '#7c9e5c', belly: '#e8ecb8', shade: '#62844a', pat: '#2a3e1e', acc: '#e0b040', eye: '#e8c25a', line: '#18240e' },
+  homalo:    { top: '#5a5236', mid: '#8e8456', belly: '#ece4c0', shade: '#746a44', pat: '#3a3420', acc: '#6a8ab0', eye: '#3f3116', line: '#241e0e' },
+  coelo:     { top: '#8a5a2a', mid: '#c48a4a', belly: '#f0e0c0', shade: '#a67038', pat: '#2a1a0c', acc: '#d8402a', eye: '#e8c25a', line: '#2a1808' },
+  poekilo:   { top: '#3a3a2c', mid: '#626248', belly: '#dcd8bc', shade: '#4e4e3a', pat: '#1e1e14', acc: '#e07a2a', eye: '#e8c25a', line: '#121208' },
+};
+for (const sp in LEGACY_PAL) {
+  SKINS['legacy_' + sp] = { name: 'Legacy', cost: 0, only: [sp], req: 'settled', legacy: true, pal: LEGACY_PAL[sp] };
+}
 // a skin fits a species when it has no `only`, or the species is on the list
 function skinFits(sp, skinId) {
   const o = SKINS[skinId] && SKINS[skinId].only;
@@ -1287,12 +1553,24 @@ function skinColors(key, gender, skinId) {
         top: '#848d97', mid: '#b6bcc3', belly: '#f0f1f3', shade: '#98a0a8',
         pat: '#dde2e7', acc: '#eef2f5', eye: '#3c4650', line: '#272b30',
       },
+      slayer: {    // dark potato brown, the hide of something that has been bitten a lot
+        top: '#3a2a1c', mid: '#5c4530', belly: '#a89478', shade: '#46341f',
+        pat: '#2a1c11', acc: '#c9a98c', eye: '#f0c050', line: '#140c06',
+      },
+      dunerider: {   // pale dune sand, a darker cap and a warm cinnamon flank
+        top: '#b8905a', mid: '#e0c48e', belly: '#fbf2dc', shade: '#c9a672',
+        pat: '#9a6a3a', acc: '#d8842e', eye: '#f0c050', line: '#4a3418',
+      },
+      tideripper: {  // teal hide, dark sea-blue waves rolling down the flank
+        top: '#136a70', mid: '#2a9a9c', belly: '#c8ecea', shade: '#1f807f',
+        pat: '#0e3f6e', acc: '#5ce0d8', eye: '#c2f4ee', line: '#072426',
+      },
       granulon: {  // granite flecked with earthy ochres
         top: '#57534a', mid: '#8a8274', belly: '#d9d1bd', shade: '#6c665a',
         pat: '#453f36', acc: '#a5794a', eye: '#2e2820', line: '#26221c',
       },
     };
-    const P = SKIN_PALETTES[skinId];
+    const P = SKIN_PALETTES[skinId] || SKINS[skinId].pal;
     if (P) {
       for (const k in c) out[k] = P[k] ? mixHex(c[k], P[k], 0.82) : c[k];
     } else {
@@ -1327,7 +1605,12 @@ const CLADE = {
   tyranno: 'carchar', nivarex: 'carchar', titanov: 'carchar', concav: 'carchar',
   metria: 'allosaur', lourinha: 'allosaur', neove: 'allosaur', duria: 'megalosaur', poekilo: 'megalosaur',
   orkor: 'megaraptor', ichthyo: 'spinosaur', crista: 'spinosaur', spino: 'spinosaur',
-  lophos: 'coelophysoid', herrie: 'fish',
+  lophos: 'coelophysoid', coelo: 'coelophysoid', herrie: 'fish',
+  shri: 'dromaeosaur', kuru: 'dromaeosaur', tsaagan: 'dromaeosaur', mahakala: 'dromaeosaur', luanchuan: 'dromaeosaur', adasaurus: 'dromaeosaur',
+  garudi: 'ornithomimid', harpy: 'ornithomimid', sinorni: 'ornithomimid', kinnaree: 'ornithomimid', beishan: 'ornithomimid', aepyorni: 'ornithomimid',
+  epidex: 'dromaeosaur', procomp: 'coelophysoid', homalo: 'pachycephalosaur',
+  willina: 'hadrosaur', bonaparte: 'hadrosaur', huallas: 'hadrosaur', kelumapu: 'hadrosaur', plesio: 'hadrosaur',
+  gilmoreo: 'iguanodont', bactro: 'iguanodont', deltadro: 'noasaur', eocarch: 'carchar', suchos: 'spinosaur',
   hesper: 'dromaeosaur', linhe: 'dromaeosaur', shanag: 'dromaeosaur', achillo: 'dromaeosaur', dakota: 'dromaeosaur',
   gracili: 'dromaeosaur', omni: 'dromaeosaur', aardi: 'dromaeosaur', buitre: 'dromaeosaur',
   troodon: 'troodontid', pectino: 'troodontid', ornitho: 'ornithomimid', archaomim: 'ornithomimid', shuv: 'alvarezsaur',
@@ -1389,7 +1672,7 @@ function drawDino(ctx, key, o) {
   // black, never a flat ink line — it is also the colour every part shares
   const C = Object.assign({}, C0, { line: mixHex(C0.line, C0.top, 0.4) });
   const g = o.growth != null ? o.growth : 1;
-  const s = d.scale * sizeScale(g) * ((GENDER_MOD[o.gender] || GENDER_NEUTRAL).size);
+  const s = d.scale * sizeScale(g) * genderMod(o).size;   // (the skin's size mod rides in genderMod)
   const headMul = 1 + 0.95 * Math.pow(1 - g, 1.4);
   const eyeMul = 1 + 1.9 * Math.pow(1 - g, 1.6);
   const move = o.move || 0, ph = o.phase || 0;
@@ -1449,11 +1732,20 @@ function drawDino(ctx, key, o) {
   if (o.headUp > 0.3) lunge = Math.max(lunge, (0.5 + 0.5 * Math.sin(G.time * 6)) * 0.18 * o.headUp);
   // swallowing: head thrown back, jaws snapping fast as the food goes down
   if (o.gulp || tGulp > 0) lunge = Math.max(lunge, (0.5 + 0.5 * Math.sin(G.time * 13)) * 0.5 * Math.max(o.gulp ? 1 : 0, tGulp));
-  const tailAtk = d.tailWeapon ? atk : 0;
+  // atkKind names the weapon that just struck (tail / ram / kick) — a
+  // three-weapon animal (kundurosaurus) animates only that one. Absent, the
+  // species' primary weapon is assumed
+  const kind = o.atkKind || (d.tailWeapon ? 'tail' : d.headButt ? 'ram' : d.clawWeapon ? 'claw' : 'bite');
+  const tailAtk = d.tailWeapon && kind === 'tail' ? atk : 0;
   // the horn toss: driven fully forward-up at the hit frame (damage is
   // instant), recoiling through and settling — same profile as the tail whip
-  const ramPh = d.headButt && atk > 0 ? 1 - atk : -1;
+  const ramPh = d.headButt && kind === 'ram' && atk > 0 ? 1 - atk : -1;
   const ram = ramPh >= 0 ? (1 - ramPh) * Math.sin((0.25 + ramPh * 1.1) * TAU) : 0;
+  // the KICK: the animal rears onto its tail and both hind feet lash forward —
+  // same hit-frame-first profile as the whip; drives the rear-up, the
+  // backward pitch and the leg throw below
+  const kickPh = d.kick && kind === 'kick' && atk > 0 ? 1 - atk : -1;
+  const kick = kickPh >= 0 ? (1 - kickPh) * Math.sin((0.25 + kickPh * 1.1) * TAU) : 0;
   // ---- the whole body works every attack: these drives feed the weight
   // shift, the crouch and the lean, not just the weapon itself
   const swingPh = tailAtk > 0 ? 1 - tailAtk : 0;                        // 0 → 1 across the tail slam
@@ -1463,7 +1755,7 @@ function drawDino(ctx, key, o) {
   const bth = o.bathe || 0;                                             // rolling in the mud bath
 
   const bodyL = L.body[0] * s, bodyH = L.body[1] * s;
-  const legLen = L.leg[0] * s, legW = Math.max(1.3, L.leg[1] * s);
+  const legLen = L.leg[0] * s, legW = Math.max(0.9, L.leg[1] * s);   // the floor keeps hatchling legs visible without fattening the sparrows
   // resting: the whole body settles toward the ground; the legs, whose
   // segment lengths derive from hip height, fold under it on their own
   const rest = o.restT || 0;
@@ -1473,7 +1765,8 @@ function drawDino(ctx, key, o) {
     + strain * legLen * 0.13 + thrash * Math.sin(G.time * 11) * 1.2
     + callJerk * Math.abs(Math.sin(cT * 11)) * 1.5    // the threat display stamps
     + swingDrive * legLen * 0.1 + clawDrive * legLen * 0.06   // sinking into the swing
-    + bth * Math.sin(G.time * 6.5) * 1.5;             // the wallowing wriggle
+    + bth * Math.sin(G.time * 6.5) * 1.5              // the wallowing wriggle
+    + kick * legLen * 0.28;                            // the kick sits the rump back onto the tail
   const lineW = Math.max(0.55, Math.min(1.5, 1.05 * s));
 
   ctx.save();
@@ -1490,11 +1783,11 @@ function drawDino(ctx, key, o) {
   const pitch = (o.pitch || 0) + (d.forageQuad ? hdA * 0.12 : 0)
     + run * 0.06 * move - wrench * 0.18 + thrash * Math.sin(G.time * 10.3) * 0.1
     + callJerk * Math.sin(cT * 23) * 0.05
-    + lunge * 0.07 + ram * 0.12 + clawDrive * 0.09 + swingDrive * 0.06
+    + lunge * 0.07 + ram * 0.12 + clawDrive * 0.09 + swingDrive * 0.06 - kick * 0.22
     + bth * Math.sin(G.time * 5.5) * 0.15;
   // weight shift: the body DRIVES forward into bites, rams and claw swipes,
   // and rocks back onto the hips as the tail whips through
-  ctx.translate((lunge * 3.5 + ram * 4 + clawDrive * 2.5 - swingDrive * 2.2) * s, 0);
+  ctx.translate((lunge * 3.5 + ram * 4 + clawDrive * 2.5 - swingDrive * 2.2 - kick * 3) * s, 0);
   if (pitch) {
     ctx.scale(1 - 0.1 * Math.min(1, Math.abs(pitch) / 0.45), 1);
     ctx.translate(0, cy);
@@ -1511,7 +1804,7 @@ function drawDino(ctx, key, o) {
   // long front legs, the whole back sloping down toward the hips.
   // o.rear is the DYNAMIC version of the same lift: a browser rearing up
   // on its hind legs to reach the canopy, easing back down afterwards
-  const fl = ((d.foreLift || 0) + (o.rear || 0) * 0.7) * bodyH;
+  const fl = ((d.foreLift || 0) + (o.rear || 0) * 0.7 + kick * 0.85) * bodyH;
   const hipX = -bodyL * 0.22, hipY = cy + bodyH * 0.16;
   // quad front shoulder — shFwd lets a species carry its forelimbs further
   // forward on the body (the brachiosaur front-heavy stance)
@@ -1584,6 +1877,8 @@ function drawDino(ctx, key, o) {
     // raised above it and the two-bone IK solves thigh+shin to the hock.
     const reach = -hy;
     const f = footPose(off, stride, hx + (front ? 1 : 2.5) * s);
+    if (!front && kick > 0) { f.x += kick * legLen * 1.6; f.y -= kick * legLen * 1.05; }   // the hind feet thrown forward and UP
+    if (front && kick > 0) { f.y -= kick * legLen * 0.55; f.x += kick * 4 * s; }         // forelegs tucked up as it rears
     // metatarsus: theropods run on long ones; front limbs and squat
     // quadrupeds carry a short pastern (mtMul tunes it per species)
     const mt = reach * (front ? 0.16 : 0.24) * (d.mtMul || 1);
@@ -1794,7 +2089,7 @@ function drawDino(ctx, key, o) {
   const swingY = (t) => tailAtk > 0
     ? -(1 - swingPh) * Math.sin((0.25 + swingPh * 1.1) * TAU) * bodyH * 0.62 * Math.pow(t, 1.3)
     : 0;
-  const tailY = (t) => cy - d.tailUp * tailLen * 0.34 * t + sway(t) + t * t * 1.5 * s + swingY(t)
+  const tailY = (t) => cy - d.tailUp * tailLen * 0.34 * t + sway(t) + t * t * 1.5 * s + swingY(t) + kick * t * bodyH * 0.45
     - run * move * tailLen * 0.05 * t;   // streamed out level behind the sprint
   const pts = [];
   for (let i = 5; i >= 1; i--) {
@@ -1992,7 +2287,7 @@ function drawDino(ctx, key, o) {
   // sweeps toward the tail tip, so the tail streams instead of standing up in
   // bristles. (skin.top runs tail -> snout, so frac 0 is the tail end, where
   // the sweep is flattest and longest.)
-  if (d.fuzz) {
+  if (d.fuzz || (SKINS[o.skin] && SKINS[o.skin].feathers)) {
     ctx.strokeStyle = shade(C.top, 0.8);
     ctx.lineWidth = Math.max(0.6, lineW * 0.7);
     ctx.lineCap = 'round';
@@ -2016,21 +2311,36 @@ function drawDino(ctx, key, o) {
   }
   // feather coat (aardiraptor): soft shingle strokes texturing the whole
   // upper body — they thin out and STOP well above the bare underbelly
-  if (d.featherCoat) {
+  const coatSkin = !!(SKINS[o.skin] && SKINS[o.skin].feathers);   // a skin can put a full coat on a bare species
+  if (d.featherCoat || coatSkin) {
     ctx.save();
     ctx.clip(skin.path);
-    ctx.lineWidth = Math.max(0.55, lineW * 0.6);
+    ctx.lineWidth = Math.max(0.55, lineW * (coatSkin ? 0.8 : 0.6));
     const frng = speckleRng(key.charCodeAt(0) * 991 + 7);
-    for (let i = 0; i < 40; i++) {
-      const x = -bodyL * 0.5 + frng() * bodyL;
+    const nF = coatSkin ? 90 : 40, reach = coatSkin ? 0.62 : 0.52;   // a skin coat is longer and thicker
+    for (let i = 0; i < nF; i++) {
+      const x = -bodyL * 0.5 - (coatSkin ? tailLen * 0.3 : 0) + frng() * (bodyL + (coatSkin ? tailLen * 0.3 : 0));
       const yFrac = frng();                                  // 0 = spine … 1 = midline
-      const y = cy - bodyH * 0.48 + yFrac * bodyH * 0.52;    // never reaches the belly
-      ctx.globalAlpha = 0.42 + 0.4 * (1 - yFrac);
-      ctx.strokeStyle = i % 3 ? shade(C.top, 0.84) : shade(C.mid, 1.12);
+      const y = cy - bodyH * 0.48 + yFrac * bodyH * reach;   // never reaches the belly
+      ctx.globalAlpha = (coatSkin ? 0.55 : 0.42) + 0.4 * (1 - yFrac);
+      ctx.strokeStyle = i % 3 ? shade(C.top, 0.84) : i % 3 === 1 ? shade(C.mid, 1.12) : mixHex(C.belly, C.mid, 0.4);
+      const ln = coatSkin ? 4.2 : 3;
       ctx.beginPath();
       ctx.moveTo(x, y);
-      ctx.quadraticCurveTo(x - 1.5 * s, y + 1.1 * s, x - 3 * s, y + 0.8 * s);
+      ctx.quadraticCurveTo(x - ln * 0.5 * s, y + 1.3 * s, x - ln * s, y + 0.9 * s);
       ctx.stroke();
+    }
+    if (coatSkin) {
+      // and a neck ruff: long soft plumes down the back of the neck
+      ctx.lineWidth = Math.max(0.6, lineW * 0.75);
+      for (let k = 0; k < 7; k++) {
+        const t = 0.15 + k * 0.12;
+        const nx = lerp(neckBase.x, headC.x, t), ny = lerp(neckBase.y, headC.y, t);
+        const w = lerp(bodyH * 0.3, hh * 0.45, t);
+        ctx.globalAlpha = 0.7;
+        ctx.strokeStyle = k % 2 ? shade(C.top, 0.8) : shade(C.mid, 1.1);
+        ctx.beginPath(); ctx.moveTo(nx, ny - w * 0.6); ctx.quadraticCurveTo(nx - 2.5 * s, ny - w * 0.9, nx - 4.5 * s, ny - w * 0.4); ctx.stroke();
+      }
     }
     ctx.globalAlpha = 1;
     ctx.restore();
@@ -2094,7 +2404,7 @@ function drawDino(ctx, key, o) {
   // the species' own accent color, brightest at the hit frame
   const trailCol = mixHex(C.acc || '#ffe9a0', '#fff6dc', 0.55);
   ctx.lineCap = 'round';
-  if (d.tailWeapon && atk > 0.2) {
+  if (d.tailWeapon && kind === 'tail' && atk > 0.2) {
     const fade = (atk - 0.2) / 0.8;
     ctx.globalAlpha = 0.8 * fade;
     ctx.strokeStyle = trailCol;
@@ -2117,6 +2427,19 @@ function drawDino(ctx, key, o) {
       ctx.lineWidth = (3.4 - off * 6) * s * fade + 0.7;
       ctx.beginPath();
       ctx.arc(cx0, cy0, rr * (1 - off * 0.7), -1.3 + sw * 1.7, -0.55 + sw * 1.7);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  } else if (d.kick && kick > 0.25) {
+    // the kick: speed-lines bursting forward off the hind feet
+    ctx.globalAlpha = 0.85 * kick;
+    ctx.strokeStyle = trailCol;
+    ctx.lineWidth = 2 * s;
+    const kx = hipX + legLen * 0.8, ky = hipY + legLen * 0.35;
+    for (const aa of [-0.35, 0, 0.35]) {
+      ctx.beginPath();
+      ctx.moveTo(kx + Math.cos(aa) * 4 * s, ky + Math.sin(aa) * 4 * s);
+      ctx.lineTo(kx + Math.cos(aa) * (4 + 9 * kick) * s, ky + Math.sin(aa) * (4 + 9 * kick) * s);
       ctx.stroke();
     }
     ctx.globalAlpha = 1;
@@ -2519,6 +2842,56 @@ function drawPattern(ctx, key, d, C, a) {
       ctx.stroke();
       ctx.fillStyle = '#ffffff';
       ctx.beginPath(); ctx.arc(x, y, r * 0.28, 0, TAU); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    return;
+  }
+  if (a.coat === 'slayer') {
+    // slayer: the species' markings sunk into the dark hide, plus SCARS —
+    // pale healed gashes raked across the flank and hip, each with its
+    // stitch-marks, the record of every giant that fought back
+    drawPattern(ctx, key, d, C, Object.assign({}, a, { coat: null }));
+    const rng = speckleRng(key.charCodeAt(0) * 4177 + 19);
+    ctx.lineCap = 'round';
+    for (let i = 0; i < 7; i++) {
+      const x = -bodyL * 0.44 - tailLen * 0.25 + rng() * (bodyL * 0.9 + tailLen * 0.25);
+      const y = cy - bodyH * 0.38 + rng() * bodyH * 0.6;
+      const len = (4 + rng() * 9) * s, ang = -0.5 + rng() * 1.2;
+      const ex = x + Math.cos(ang) * len, ey = y + Math.sin(ang) * len;
+      ctx.globalAlpha = 0.75;
+      ctx.strokeStyle = C.acc; ctx.lineWidth = (0.9 + rng() * 0.6) * s;
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo((x + ex) / 2 + (rng() - 0.5) * 2 * s, (y + ey) / 2, ex, ey); ctx.stroke();
+      // the stitch-marks across the gash
+      ctx.lineWidth = 0.6 * s; ctx.globalAlpha = 0.55;
+      const nSt = 2 + (rng() * 2 | 0);
+      for (let k = 1; k <= nSt; k++) {
+        const t = k / (nSt + 1), px = lerp(x, ex, t), py = lerp(y, ey, t);
+        ctx.beginPath(); ctx.moveTo(px - Math.sin(ang) * 1.6 * s, py + Math.cos(ang) * 1.6 * s); ctx.lineTo(px + Math.sin(ang) * 1.6 * s, py - Math.cos(ang) * 1.6 * s); ctx.stroke();
+      }
+    }
+    ctx.globalAlpha = 1;
+    return;
+  }
+  if (a.coat === 'tideripper') {
+    // tideripper: the markings in deep sea-blue, plus WAVES — three rows of
+    // rolling crests down the flank, each with a foam-white lip
+    drawPattern(ctx, key, d, C, Object.assign({}, a, { coat: null }));
+    ctx.lineCap = 'round';
+    for (let row = 0; row < 3; row++) {
+      const y0 = cy - bodyH * (0.3 - row * 0.22);
+      const x0 = -bodyL * 0.46 - tailLen * (0.45 - row * 0.12), x1 = bodyL * (0.44 - row * 0.05);
+      const nW = Math.max(4, Math.round((x1 - x0) / (5.5 * s)));
+      for (const [col, lw, dy, al] of [[C.pat, 1.7, 0, 0.7], [mixHex(C.acc, '#ffffff', 0.5), 0.8, -0.9, 0.55]]) {
+        ctx.strokeStyle = col; ctx.lineWidth = lw * s; ctx.globalAlpha = al;
+        ctx.beginPath();
+        for (let i = 0; i <= nW; i++) {
+          const x = x0 + (x1 - x0) * i / nW, xm = x0 + (x1 - x0) * (i - 0.5) / nW;
+          const y = y0 + dy * s;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.quadraticCurveTo(xm, y - bodyH * 0.09, x, y);   // each crest curls up
+        }
+        ctx.stroke();
+      }
     }
     ctx.globalAlpha = 1;
     return;
@@ -2968,6 +3341,23 @@ function drawBodyExtras(ctx, key, d, C, a) {
         ctx.moveTo(q.x, q.y - rr * 0.8);
         ctx.lineTo(q.x - 1.2 * s, q.y - rr * 0.8 - 1.8 * s);
         ctx.stroke();
+      }
+    }
+  }
+  if (d.ribbonTail) {
+    // epidexipteryx: four long ribbon feathers streaming off the tail's end,
+    // each a thin shaft with a paddle tip, rippling as it moves
+    const tip = skin.top[1] || skin.top[0];
+    if (tip) {
+      for (let k = 0; k < 4; k++) {
+        const ang = -0.55 + k * 0.32 + Math.sin(ph * 1.2 + k) * 0.08;
+        const len = (16 + k * 2.5) * s;
+        const ex = tip.x - Math.cos(ang) * len, ey = tip.y + Math.sin(ang) * len;
+        const mx = tip.x - Math.cos(ang) * len * 0.5 + Math.sin(G.time * 3 + k) * 1.5 * s, my = tip.y + Math.sin(ang) * len * 0.5 - 2 * s;
+        ctx.strokeStyle = C.line; ctx.lineWidth = Math.max(0.5, lineW * 0.55);
+        ctx.beginPath(); ctx.moveTo(tip.x, tip.y); ctx.quadraticCurveTo(mx, my, ex, ey); ctx.stroke();
+        ctx.fillStyle = k % 2 ? C.acc : shade(C.acc, 0.8); ctx.strokeStyle = C.line; ctx.lineWidth = lineW * 0.5;
+        ctx.beginPath(); ctx.ellipse(ex, ey, 3.2 * s, 1.5 * s, ang, 0, TAU); ctx.fill(); ctx.stroke();
       }
     }
   }
@@ -3658,6 +4048,29 @@ function drawHead(ctx, key, d, C, a) {
     ctx.beginPath();
     ctx.ellipse(hPt(0.08, -0.72).x, hPt(0.08, -0.72).y, hl * 0.09, hh * 0.14, -0.3, 0, TAU);
     ctx.fill();
+  }
+  if (d.flatDome) {
+    // homalocephale: a thick FLAT table of bone over the skull roof, its
+    // rim ringed with knobs — a battering plate, not a crown
+    ctx.fillStyle = C.acc;
+    ctx.strokeStyle = C.line;
+    ctx.lineWidth = lineW * 0.8;
+    const f0 = hPt(-0.2, -0.3), f1 = hPt(0.44, -0.34);
+    ctx.beginPath();
+    ctx.moveTo(f0.x, f0.y);
+    ctx.quadraticCurveTo(hPt(-0.22, -0.66).x, hPt(-0.22, -0.66).y, hPt(-0.04, -0.68).x, hPt(-0.04, -0.68).y);
+    ctx.lineTo(hPt(0.3, -0.7).x, hPt(0.3, -0.7).y);
+    ctx.quadraticCurveTo(hPt(0.48, -0.66).x, hPt(0.48, -0.66).y, f1.x, f1.y);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    // the worn top face and a rim of knobs at the back
+    ctx.fillStyle = 'rgba(255,248,230,0.35)';
+    ctx.beginPath(); ctx.ellipse(hPt(0.13, -0.62).x, hPt(0.13, -0.62).y, hl * 0.16, hh * 0.05, headAng, 0, TAU); ctx.fill();
+    ctx.fillStyle = shade(C.acc, 0.78);
+    ctx.lineWidth = lineW * 0.55;
+    for (let k = 0; k < 4; k++) {
+      const q = hPt(-0.22 - k * 0.08, -0.34 + k * 0.03);
+      ctx.beginPath(); ctx.arc(q.x, q.y, hl * 0.04, 0, TAU); ctx.fill(); ctx.stroke();
+    }
   }
   if (d.dome) {
     // prenocephale: the high bone dome, polished from use, with a ring of
