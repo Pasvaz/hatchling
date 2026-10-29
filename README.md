@@ -35,7 +35,12 @@ rules the whiteout (Jianchangosaurus → Eshanosaurus → Nanuqsaurus →
 Nivarex) — and beyond the Wall, **The Great Moors of Martulisth**: a grey,
 sunless heath where mist rings the screen and everything beyond arm's length
 is a dark silhouette (Simosuchus → Koreaceratops →
-Sarcosaurus → Dryptosaurus → Gastonia). Somewhere
+Sarcosaurus → Dryptosaurus → Gastonia) — and, past the Reach, **The Death
+Desert**: the biggest map in the game, miles of red sand under a sun that
+means it, a green river heart of giant umbrella trees, rare waterholes, a
+**HEAT bar** that only shade, water and mud bring down, and **sandstorms**
+that sweep the open sand like an avalanche turned on its side
+(Coelophysis, for now). Somewhere
 in the high maze one hidden cave holds the **frozen giant** the mountain is
 named for — find it, and the biggest animal in the game joins your lobby
 forever, outside the ladder. Every locked card and tab tells you exactly which
@@ -146,7 +151,18 @@ remembers the last gender + skin you wore as that species — the card's little
 preview even repaints to whatever you've picked. Some skins are
 species-exclusive (`only` on the SKINS entry): **Jungell** (❖ 100) belongs to
 Tyrannotitan alone — mossy green
-over brown flanks with shining lime leaf-flecks dappled down its back.
+over brown flanks with shining lime leaf-flecks dappled down its back. Two
+coats are **earned** before they can be bought (`req` on the entry — the
+swatch stays padlocked and says what's missing): **Slayer of Giants**
+(❖ 500, Poekilopleuron) opens once a grown Poekilopleuron has killed a
+Kundurosaurus — a dark potato-brown hide raked with pale stitched scars, and
+the one coat in the game that isn't purely cosmetic: it makes him a little
+bigger, tougher and stronger. **Tideripper** (❖ 600, Coahuilaceratops)
+opens after riding out three monsoons as a Coahuilaceratops — teal with
+sea-blue wave crests rolling down the flank — and once worn the flood can't
+drag, batter or sweep it. **Dunerider** (❖ 400, Coelophysis) is a full
+feather coat in pale dune-sand that adds heat resistance — the sun bounces
+off it, so the desert's bar climbs a third slower.
 
 **Playable — Fern Valley**
 - **Rajasaurus narmadensis** — carnivore, hatches in the fern forest. Scavenge and hunt. Bites make big prey bleed: bite, run, wait. (Bleeding is visible on anyone it's happening to — a blood-red **-N 🩸** number floats up every second alongside the drips, yours included.)
@@ -252,15 +268,47 @@ getting hurt ends the stillness.
 animation — nothing like the head-down graze) for the richest mouthful in
 the game. Each tree's canopy regrows in about a minute.
 
-**Nesting.** Reach Full Adult and a full-grown mate of the opposite sex
-arrives at your nest. **Males display** — a strutting, bowing courtship
-dance: an NPC male performs on his own (press N to accept him); as a male
-YOU press N near her to display, and she judges your **condition** (health,
+**Nesting.** Breeding takes BOTH loadouts: raise a species' ♀ and its ♂ to
+Full Adult (each card shows both growth bars), and from then on whichever
+one you play, a full-grown mate of the opposite sex arrives at your nest a
+little after you reach Full Adult. Grow only one and the game tells you what
+is missing. **Males display** — a strutting, bowing courtship
+dance: an NPC male performs on his own (press **F** to accept him); as a male
+YOU press **F** near her to display, and she judges your **condition** (health,
 food, hygiene — impress her or go take a mud bath and try again). Accepted
-pairs press **N at the nest** to lay three eggs, guard them from egg thieves
-until hatch day, and then the babies follow the female until they're grown —
-every young one raised pays **❖ 150**. Your mate fights for the nest with
-its life; lose it, and the clutch is yours alone.
+pairs press **F at the nest** to lay three eggs, guard them from egg thieves
+until hatch day, and then the babies follow the female. Every courtship step
+shows up as a prompt (*F — Accept his display*, *F — Lay your eggs here*), so
+on a phone it's a **tap on the prompt's button**. Your mate fights for the
+nest with its life; lose it, and the clutch is yours alone.
+
+**The Great Walk — every species' ending.** The moment the last of a clutch
+is a sub-adult, the season turns on its own. Each land throws its own
+weather at the family for real — the valley's hunters gather, the prairie
+dries out, the coast and the delta flood, the Ash Lands erupt, the Wall's
+blizzard won't lift, the moor's mist closes in for a long night, the jungle's
+monsoon won't break, the desert's sandstorms come one after another — and a
+**rival** turns up: the land's animal that most resembles you in diet and
+build, hunting your young. Lead them to the land's **landmark** (the
+river's source, the great skull, the headland, the crater rim, the drowned
+sea, the summit — or the secret cave, if you ever found it — the standing
+stones, the headwaters, the last oasis): a gold arrow points the way and a
+column of light marks it. **How many young must arrive** depends on the
+species: fast, strong, quick-growing young are expected home in threes;
+fragile, slow-growing ones need only one. The young fight beside you when
+you're close and run when you're not. Arrive with enough of them and the
+ending plays: the season breaks, and the young walk off into the land.
+Lose too many and nothing is deleted — they grow up on their own, and the
+next clutch walks again.
+
+**Settled lines.** A settled species earns its **Legacy coat** (free, one
+fixed palette per species in the style of its film or game counterpart), a
+⚜ crest on its lobby card, and a **bloodline**: every later visit to that
+land, with any dinosaur, your young are out there near the landmark, in
+your colours, living off the land (*◆ your bloodline · GEN II*). Come back as their
+own kind and they greet you, and scatter rather than fight you. A fresh egg of a
+settled species hatches into the **next generation** — GEN II, III… — with
+a small inherited edge in health and bite (+4% a generation, up to +16%).
 
 **Resting (R).** Any dinosaur can settle down onto folded legs: you can't
 move, but you heal over twice as fast and food, water and hygiene all drain
@@ -289,7 +337,7 @@ teeth touch something (or something's teeth touch you), the whole pack piles
 onto it. Your **mate joins the pack** the moment it arrives — it runs and
 hunts with you, but never abandons a nest with eggs or little ones in it.
 Or skip the stranger entirely: once full-grown, stand beside **any
-opposite-gender packmate** and press **N** to take them as your mate (their
+opposite-gender packmate** and press **F** to take them as your mate (their
 gender coat shows from the moment they're recruited). The courtship still
 has to be danced — and your own grown young are packmates forever, never
 mates.
@@ -303,7 +351,7 @@ you're underground in a little warren of chambers and tunnels. Some hold one
 chamber and one resident, some more of either — or both. Your pack squeezes
 in with you (up to four) and fights at your side; kill every resident and
 **the burrow is your pack's**: a den where you heal fast, and where an
-accepted pair can **nest (N)** — den eggs are beyond every raider's reach,
+accepted pair can **nest (F)** — den eggs are beyond every raider's reach,
 and the hatchlings stay safely below until they emerge as sub-adults.
 
 **Playable — Lertentous Delta** (opens when Nothronychus is mastered)
@@ -362,6 +410,45 @@ zone) — they can no longer run; **tail** — they occasionally bolt in the
 wrong direction (or hobble there, if the thigh's gone too); **head** — every
 attack they make weakens; **body** (much the hardest to crack) — all of the
 above at once. More bone-breakers will join the roster in future biomes.
+
+**Playable — The Death Desert** (opens once a Poekilopleuron has reached ADULT at least once — or when Neovenator AND Coahuilaceratops are both mastered)
+
+The desert is the largest land of all — 400 tiles a side, and nearly empty:
+far fewer animals than any other land, so finding anything out on the sand is
+an event — and almost all of it wants you dead. The sun is the first thing:
+a white glare at midday that lifts the whole world, heat-haze rippling over
+the sand, a long gold evening, and only the night for relief.
+Out on the red sand a **HEAT bar** climbs every second you stand in the sun:
+the hotter you are the slower you move, and at full you go down with
+**heatstroke** — locked in place, health draining — until it passes. Only
+three things bring the heat down: standing in **water or mud**, the **shade of
+a tree** (dense forest counts, and so does the crown of any lone giant), and
+**resting in shade**, which is fastest. Night is kind. Everything green
+crowds along the **river system** in the heart of the map — a belt of giant
+umbrella trees, wallows, fish and small prey — and outside it there are only
+the rare **waterholes**, each a little oasis, a long hot walk apart.
+**Sandstorms** come with a warning (the horizon goes brown): the air fills
+with sand, the heat climbs far faster, and most storms carry a **wall of
+sand** sweeping west to east that batters and buries anything caught on the
+open sand. The river belt, the water, the wallows and any tree's shade are
+spared — the storm is a thing of the open desert.
+- **Procompsognathus** (unlocked with the land) — a miniature Coelophysis, feathered from the egg, with a slimmer, longer head and a tank that never runs dry (double anyone's stamina). Weak alone — but like the Aardiraptor it is a **pack animal**: the friendly call (2) invites wild kin to run with you, your mate and your young are pack from the first breath, and the pack hunts what you hunt.
+- **Homalocephale** (master Procompsognathus) — a pachycephalosaur with a FLAT dome, a thick table of bone where Prenocephale wears a crown; between the two runners in size. A herbivore that fights: it **rams** like its cousin, it is a **pack animal** like Procompsognathus (the friendly call gathers a herd that rams beside you), and its **pounce** comes down skull-first — land it on a limb and the **bone breaks**.
+- **Coelophysis** (master Homalocephale) — the Triassic runner: Lophostropheus' frame on shorter legs, with a deeper S-curve to the neck. Fast, dangerous, and a bleeding bite. It hunts **Epidexipteryx** under the giants. Its heat resistance is only fair — live in the belt, cross the sand with a plan.
+
+**NPCs — The Death Desert**
+- **Raptor packs of the dunes** — *Shri devi*, *Kuru kulla*, *Tsaagan mangas*, *Luanchuanraptor* and *Adasaurus*: fast, cheap, and everywhere on the open sand, growing with you like every wild pack. *Mahakala* is crow-sized and hunts Epidexipteryx in the belt — and runs from you.
+- **The ostrich herds** — *Garudimimus*, *Harpymimus*, *Sinornithomimus* (in big flocks), *Kinnareemimus* and *Aepyornithomimus*: runners that cross the sand between waterholes. *Beishanlong* is the exception: far too big to bully, and it kicks back.
+- **The hadrosaurs** — seven, and no two alike, all keeping to the water. *Willinakaqe* is the barge: the biggest, a wall that stands and swings. *Bonapartesaurus* is robust and short-tailed with a rise over the hips. *Huallasaurus* is slender and long-necked with a Roman nose. *Kelumapusaura* carries a tail as deep as its body and swims. *Gilmoreosaurus* is the old-fashioned one: longer arms, more upright, a beak instead of a bill. *Bactrosaurus* is stocky and short-legged under a ridge of tall spines. *Plesiohadros* is the light long-legged dune runner, the one hadrosaur that lives out on the sand. The little ones run, the middle ones fight only when the odds are good, the big one always stands.
+- **Deltadromeus** — the sprinter: absurdly long legs on a light frame, the fastest big thing on the sand. It runs down the ostrich herds and the smaller raptors. Only Eocarcharia frightens it.
+- **Eocarcharia** — "fierce-eye": a heavy carcharodontosaur with great bony brow bosses, the belt's ambush killer at the waterside. Its bite bleeds, it hunts every hadrosaur that comes down to drink, and it hunts you.
+- **Suchosaurus** — the river's theropod: a croc-snouted spinosaurid, low and long, that fishes the channels and takes whatever comes to the water's edge. **Megorontosuchus** shares the river with it — the ambush crocodile, a shadow under the surface.
+- **Raptor territory.** Each raptor holds its own quarter of the map (Shri the north-west sand, Kuru the north-east, Tsaagan the south-west, Adasaurus the south-east, Luanchuanraptor the northern belt, Mahakala the southern belt) and **rivals** the packs on its borders: where two quarters touch, packs that meet will now and then pick a fight with each other.
+- **Epidexipteryx hui** — a sparrow of a thing with four ribbon tail feathers, flitting through the river belt. Coelophysis food.
+- **Gar** in the river.
+
+**NPCs — The Sodden Reach**
+- **Kundurosaurus** — the Reach's wall of meat: a huge river-purple, flat-headed Amur saurolophine, tankier than the Poekilopleuron that hunts it. Placid until provoked, and then it has THREE weapons and no bite: it turns its back and **whips the tail**, or squares up to **head-butt** — and to **KICK**: it rears onto its tail and throws both hind feet forward, the hardest hit on the Reach, and a hoof on a limb **breaks the bone** (yours too — a broken leg halves your speed until it knits). Every few seconds it changes stance, so watch which end is pointed at you.
 
 **NPCs — The Great Moors of Martulisth**
 - **Graciliraptor** — spindly microraptorine ghosts; glass-fragile, all legs, bold in packs.

@@ -60,7 +60,7 @@ const ECOS = {
   },
   delta: {
     name: 'Lertentous Delta', tint: '#4fae8f', emoji: '🐟', sub: 'rainforest · a hundred islands · the drowned south',
-    seed: 20260711, cost: 1000, size: 256,   // the engine's maximum — tile packing caps at 256
+    seed: 20260711, cost: 1000, size: 256,
     gen: () => genDelta(),
   },
   wall: {
@@ -78,13 +78,18 @@ const ECOS = {
     seed: 20260825, cost: 3000, size: 240,
     gen: () => genJungle(),
   },
+  desert: {
+    name: 'The Death Desert', tint: '#d0663a', emoji: '☀️', sub: 'red sand · the river heart · sandstorms',
+    seed: 20260919, cost: 4000, size: 400,   // the largest map in the game, by a distance
+    gen: () => genDesert(),
+  },
 };
 // the river only ever occupies this x window (px) — used to cull river passes
 const RIVER_X0 = 850, RIVER_X1 = 2240;
 // one water palette for every ecosystem: river bands and pond blobs stay in sync
 const WATER_COLS = { sand: '#c8b585', foam: '#9cbfb2', shallow: '#5b8fa3', open: '#4a7b90', deep2: '#40707f', deep: '#35616f' };
 
-function waterTilePos(v) { return { x: (v & 255) * TILE + TILE / 2, y: (v >> 8) * TILE + TILE / 2 }; }
+function waterTilePos(v) { return { x: (v & 0xffff) * TILE + TILE / 2, y: (v >>> 16) * TILE + TILE / 2 }; }   // 16 bits an axis: maps past 256 tiles
 
 // worn animal trail between two landmarks (baked into the ground art)
 function addTrail(x1, y1, x2, y2) {
@@ -194,6 +199,24 @@ function coolDir(x, y) {
   }
   return 0;
 }
+// is this spot in the shade of a tree? Dense forest counts, and so does the
+// crown of any single tree close enough — the desert's lone giants are
+// shade for a whole herd. Uses the tree grid, so it's cheap to ask often
+function inTreeShade(x, y) {
+  if (forestShadePx(x, y) > 0.42) return true;
+  const grid = World.treeGrid;
+  if (!grid) return false;
+  const gx = (x / TGRID) | 0, gy = (y / TGRID) | 0;
+  for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+    const cell = grid.get((gx + dx) + ',' + (gy + dy));
+    if (!cell) continue;
+    for (const t of cell) {
+      const r = (t.kind === 3 ? 26 : 13) * t.s;                      // the desert giant throws a wide crown
+      if (Math.abs(x - t.x) < r && y < t.y + 8 && y > t.y - r * 0.9) return true;
+    }
+  }
+  return false;
+}
 function forestShadePx(x, y) {
   const tx = clamp(Math.floor(x / TILE), 0, WT - 1);
   const ty = clamp(Math.floor(y / TILE), 0, HT - 1);
@@ -242,15 +265,20 @@ function genWorld(eco) {
   W.lush = false;       // rainforest ecosystems deepen every green
   W.snowy = false;      // the Wall whitens the land and hides it in mist
   W.misty = false;      // the Moors grey the land and RING the screen in mist
+  W.monsoonWorld = false;   // only the Sodden Reach runs the storm cycle — never inherit it
+  W.desert = false;     // the Death Desert: red sand, heat, sandstorms — a green river heart
   W.caves = [];         // wind-shadow shelters (the Wall) — one hides the giant
+  W.channels = [];      // flood channels (the Reach, the desert river) — never inherit them
+  W.landmark = null;    // the Great Walk's destination (placeLandmark)
 
   ECOS[eco].gen();
   dressNests();
+  placeLandmark();
 
   // --- collect water tiles (for shimmer / fish spawns / drink search) ---
   for (let ty = 0; ty < HT; ty++) for (let tx = 0; tx < WT; tx++) {
     const t = W.ter[tIdx(tx, ty)];
-    if (t === T_WATER || t === T_DEEP) W.waterTiles.push(tx | (ty << 8));
+    if (t === T_WATER || t === T_DEEP) W.waterTiles.push(tx | (ty << 16));
   }
 
   // props that block movement
@@ -259,6 +287,7 @@ function genWorld(eco) {
     else if (p.kind === 'waterrock') W.blockers.push({ x: p.x, y: p.y, r: 6 * p.s });
     else if (p.kind === 'ribcage') W.blockers.push({ x: p.x, y: p.y, r: 6 * p.s });
     else if (p.kind === 'skull') W.blockers.push({ x: p.x, y: p.y, r: 8 * p.s });
+    else if (p.kind === 'monument') W.blockers.push({ x: p.x, y: p.y, r: 11 * p.s });
   }
 
   // spatial grid for tree collision — the rainforest holds thousands of
@@ -362,6 +391,54 @@ function genValley() {
     const px = rrange(70, 100) * TILE, py = rrange(96, 116) * TILE;
     if (!isWaterPx(px, py) && !isMudPx(px, py)) W.ferns.push({ x: px, y: py, food: 1, regrow: 0, s: rrange(0.8, 1.3) });
   }
+}
+
+// ---------------------------------------------------------------------------
+// THE GREAT WALK's destinations: one landmark per land, where a raised family
+// is led to settle. Positions are in tiles on each map's own plan (the desert
+// on its 320 plan, scaled); placeLandmark nudges the spot onto open ground,
+// clears the trees off it and raises a monument there.
+// style: 0 cairn · 1 standing stones · 2 great skull · 3 obsidian spire
+// ---------------------------------------------------------------------------
+const LANDMARK_DEFS = {
+  valley:  { at: () => [riverX(10) - 8, 10], name: "the river's source", style: 0 },
+  prairie: { at: () => [64, 78], name: 'the great skull', style: 2 },
+  coast:   { at: () => [100, 62], name: 'the headland', style: 0 },
+  ash:     { at: () => [86, 8], name: 'the crater rim', style: 3 },
+  delta:   { at: () => [118, 234], name: 'the drowned sea', style: 1 },
+  wall:    { at: () => [WT * 0.5, 12], name: 'the summit', style: 0 },
+  moor:    { at: () => [100, 26], name: 'the standing stones', style: 1 },
+  jungle:  { at: () => [80, 14], name: 'the headwaters', style: 1 },
+  desert:  { at: () => [236 * WT / 320, 52 * WT / 320], name: 'the last oasis', style: 2 },
+};
+function landmarkGround(x, y) {
+  const t = terAtPx(x, y);
+  return t !== T_WATER && t !== T_DEEP && t !== T_LAVA && t !== T_CLIFF && t !== T_MUD;
+}
+function placeLandmark() {
+  const W = World, def = LANDMARK_DEFS[W.eco];
+  if (!def) return;
+  let [tx, ty] = def.at();
+  tx = clamp(tx, 6, WT - 6); ty = clamp(ty, 6, HT - 6);
+  let px = tx * TILE, py = ty * TILE;
+  // spiral out until the monument and a ring around it stand on open ground
+  const open = (x, y) => landmarkGround(x, y) && landmarkGround(x + 40, y) && landmarkGround(x - 40, y) && landmarkGround(x, y + 30) && landmarkGround(x, y - 30);
+  if (!open(px, py)) {
+    let found = null;
+    for (let r = 1; r < 40 && !found; r++) {
+      for (let k = 0; k < 8 * r && !found; k++) {
+        const a = (k / (8 * r)) * TAU;
+        const x = px + Math.cos(a) * r * TILE, y = py + Math.sin(a) * r * TILE;
+        if (x > 5 * TILE && y > 5 * TILE && x < WORLD_W - 5 * TILE && y < WORLD_H - 5 * TILE && open(x, y)) found = [x, y];
+      }
+    }
+    if (found) [px, py] = found;
+  }
+  // clear the ground the family will gather on
+  const clear = (arr, r) => { for (let i = arr.length - 1; i >= 0; i--) if (dist(arr[i].x, arr[i].y, px, py) < r) arr.splice(i, 1); };
+  clear(W.trees, 90); clear(W.rocks, 70); clear(W.props, 70);
+  W.props.push({ kind: 'monument', x: px, y: py, s: 1.25, v: def.style, flip: 1 });
+  W.landmark = { x: px, y: py, r: 130, name: def.name, style: def.style };
 }
 
 function nearAnyNest(px, py, r) {
@@ -809,6 +886,130 @@ function genWall() {
 }
 
 // ---------------------------------------------------------------------------
+// THE DEATH DESERT — miles of red sand under a sun that means it. One river
+// system runs down the heart of the map and everything green in the world
+// crowds along it: a belt of giant umbrella trees, wallows, and the only
+// cool ground for miles. Out on the sand the heat climbs, the rare
+// waterholes are the only drink, a lone tree is the only shade, and the
+// sandstorms come for anything caught in the open.
+// ---------------------------------------------------------------------------
+function genDesert() {
+  const W = World;
+  W.desert = true;
+  // every landmark below is laid out on a 320-tile plan and scaled to the
+  // real map, so the size can grow without redrawing the river
+  const K = WT / 320;
+  const T = (v) => v * K * TILE;
+  W.nests = {
+    procomp: { x: T(140), y: T(232) },   // the southern belt, under the giants
+    homalo: { x: T(176), y: T(150) },    // the belt's heart, by the wallow
+    coelo: { x: T(150), y: T(246) },     // a river bend in the southern belt
+  };
+  // the river: one great channel from the north edge to the south, with two
+  // tributaries feeding it from the flanks — each a chain of water blobs
+  const CH = [
+    [[168, 4], [160, 40], [148, 80], [156, 120], [170, 160], [162, 200], [150, 240], [158, 280], [166, 316]],
+    [[40, 60], [70, 84], [104, 104], [136, 118]],
+    [[290, 210], [252, 196], [216, 182], [188, 168]],
+  ];
+  W.channels = [];
+  for (const path of CH) {
+    for (let k = 0; k < path.length - 1; k++) {
+      const [x0, y0] = path[k], [x1, y1] = path[k + 1];
+      const steps = Math.ceil(Math.hypot(x1 - x0, y1 - y0) * K / 3);
+      for (let t = 0; t <= steps; t++) {
+        const x = (x0 + (x1 - x0) * (t / steps)) * K, y = (y0 + (y1 - y0) * (t / steps)) * K;
+        const main = path === CH[0];
+        const r = ((main ? 3.6 : 2.6) + vnoise(x * 0.11, y * 0.11) * 2.0) * Math.sqrt(K);
+        addWaterBlob(x, y, r, main && r > 4.4 * Math.sqrt(K));
+        W.channels.push({ x: x * TILE, y: y * TILE, r: r * TILE });
+      }
+    }
+  }
+  // waterholes: rare, scattered far out on the sand — each one a little
+  // green ring with a couple of trees, the only drink for miles
+  const holes = [
+    { x: 40, y: 150 }, { x: 62, y: 262 }, { x: 250, y: 60 }, { x: 288, y: 130 },
+    { x: 262, y: 286 }, { x: 24, y: 24 }, { x: 300, y: 20 }, { x: 96, y: 300 }, { x: 226, y: 244 },
+  ];
+  for (const h of holes) { h.x *= K; h.y *= K; }
+  for (const h of holes) addWaterBlob(h.x, h.y, (2.6 + rnd() * 0.8) * Math.sqrt(K), false);
+  // wallows: most in the belt, a few out by the waterholes
+  const muds = [
+    { x: 140, y: 60, r: 3.6 }, { x: 178, y: 140, r: 3.8 }, { x: 132, y: 222, r: 3.6 }, { x: 176, y: 262, r: 3.4 },
+    { x: 96, y: 110, r: 3.2 }, { x: 236, y: 190, r: 3.2 },
+    { x: 46, y: 158, r: 3.0 }, { x: 292, y: 138, r: 3.0 }, { x: 68, y: 268, r: 2.8 }, { x: 256, y: 66, r: 2.8 },
+  ];
+  for (const m of muds) { m.x *= K; m.y *= K; m.r *= Math.sqrt(K); }
+  // --- base terrain: sand everywhere; green only near water ---
+  const chans = W.channels;
+  const distToRiver = (tx, ty) => {
+    let best = 1e9;
+    for (const c of chans) { const dd = Math.hypot(tx * TILE - c.x, ty * TILE - c.y) - c.r; if (dd < best) best = dd; }
+    return best / TILE;
+  };
+  for (let ty = 0; ty < HT; ty++) {
+    for (let tx = 0; tx < WT; tx++) {
+      const i = tIdx(tx, ty);
+      if (W.ter[i] === T_WATER || W.ter[i] === T_DEEP) continue;
+      const dr = distToRiver(tx, ty);
+      let near = 1e9;
+      for (const h of holes) near = Math.min(near, Math.hypot(tx - h.x, ty - h.y));
+      // the belt: dense out to ~14 tiles, thinning to nothing by ~26, its
+      // edge frayed by noise so it never reads as a stripe
+      const fray = (fbm(tx * 0.06 + 500, ty * 0.06 + 77) - 0.5) * 12;
+      const belt = clamp(1 - (dr + fray - 12 * K) / (14 * K), 0, 1);
+      const oasis = clamp(1 - (near - 3 * K) / (5 * K), 0, 1) * 0.55;
+      let ff = Math.max(belt * (0.55 + 0.45 * fbm(tx * 0.09 + 31, ty * 0.09 + 9)), oasis);
+      for (const m of muds) if (Math.hypot(tx - m.x, ty - m.y) < m.r + 4) ff = Math.min(ff, 0.25);
+      W.forest[i] = ff;
+      W.ter[i] = ff > 0.45 ? T_FOREST : ff > 0.12 ? T_GRASS : T_SAND;
+    }
+  }
+  for (const m of muds) addMudPool(m);
+  // --- vegetation ---
+  for (let ty = 1; ty < HT - 1; ty++) {
+    for (let tx = 1; tx < WT - 1; tx++) {
+      const i = tIdx(tx, ty), t = W.ter[i];
+      if (t === T_WATER || t === T_DEEP || t === T_MUD) continue;
+      const px = tx * TILE + rrange(2, TILE - 2), py = ty * TILE + rrange(2, TILE - 2);
+      if (nearAnyNest(px, py, 70)) continue;
+      const ff = W.forest[i], r = rnd();
+      if (t === T_SAND) {
+        // the open desert: a lone giant every so often (shade!), dead
+        // snags, red rocks, and the bones of what didn't make it
+        if (r < 0.0032) W.trees.push({ x: px, y: py, s: rrange(1.9, 2.8), kind: 3, v: 0 });
+        else if (r < 0.006) W.trees.push({ x: px, y: py, s: rrange(0.9, 1.5), kind: 2, v: 0 });
+        else if (r < 0.012) W.rocks.push({ x: px, y: py, s: rrange(0.8, 2.0) });
+        else if (r < 0.0135) W.props.push({ kind: rnd() < 0.5 ? 'skull' : 'ribcage', x: px, y: py, s: rrange(0.9, 1.5), flip: rnd() < 0.5 ? 1 : -1 });
+        continue;
+      }
+      if (ff > 0.5 && r < 0.07 + 0.14 * clamp((ff - 0.5) * 2.4, 0, 1)) {
+        // the river belt: the giants, thick, with broadleaf between them
+        const giant = rnd() < 0.55;
+        W.trees.push({ x: px, y: py, s: giant ? rrange(1.6, 2.6) : rrange(0.9, 1.6), kind: giant ? 3 : 1, v: giant ? 0 : 3 });
+      } else if (ff > 0.12 && ff <= 0.5 && r < 0.02) {
+        W.trees.push({ x: px, y: py, s: rrange(1.4, 2.2), kind: 3, v: 0 });   // the oasis rings and the belt's fringe
+      } else if (r > 0.9) {
+        W.ferns.push({ x: px, y: py, food: 1, regrow: 0, s: rrange(0.8, 1.4) });
+      } else if (r > 0.996) {
+        W.rocks.push({ x: px, y: py, s: rrange(0.7, 1.5) });
+      } else {
+        const r2 = rnd();
+        if (ff < 0.45 && r2 < 0.08) W.props.push({ kind: 'tallgrass', x: px, y: py, s: rrange(0.9, 1.5) });
+        else if (ff > 0.45 && r2 < 0.025) W.props.push({ kind: 'log', x: px, y: py, s: rrange(0.8, 1.3), flip: rnd() < 0.5 ? 1 : -1 });
+      }
+    }
+  }
+  // horsetails at every waterside
+  for (let k = 0; k < 140; k++) {
+    const wt = W.waterTiles.length ? null : null;
+    const px = rrange(4, WT - 4) * TILE, py = rrange(4, HT - 4) * TILE;
+    if (!isWaterPx(px, py) && nearWaterPx(px, py, 40)) W.horsetails.push({ x: px, y: py, food: 1, regrow: 0, s: rrange(0.8, 1.3) });
+  }
+}
+
+// ---------------------------------------------------------------------------
 // THE GREAT MOORS OF MARTULISTH — grey rolling heath under a mist that never
 // lifts. Black meres pock the waste (some deep-hearted — Koreaceratops water),
 // gnarled snags claw at a sunless sky, and everything beyond a stone's throw
@@ -1240,6 +1441,9 @@ function buildPaintData() {
     const alpha = 0.05 + crnd() * 0.055;
     let rgb;
     if (World.snowy) rgb = warm < 0.5 ? '210,224,238' : warm < 0.8 ? '176,196,216' : '150,172,196';
+    else if (World.desert) rgb = ff > 0.42
+      ? (warm < 0.45 ? '52,84,40' : warm < 0.8 ? '104,128,60' : '140,140,70')
+      : (warm < 0.4 ? '168,74,40' : warm < 0.75 ? '212,118,72' : '236,150,96');
     else if (World.misty) rgb = warm < 0.5 ? '96,102,94' : warm < 0.8 ? '120,124,112' : '138,138,124';
     else if (World.ashy) rgb = warm < 0.4 ? '74,70,62' : warm < 0.75 ? '128,120,104' : '156,120,84';
     else if (World.lush) rgb = ff > 0.42
@@ -1269,7 +1473,7 @@ function buildPaintData() {
     const x = crnd() * WORLD_W, y = crnd() * WORLD_H;
     const t = terAtPx(x, y);
     if (t !== T_GRASS && t !== T_FOREST) continue;
-    const pal = forestShadePx(x, y) > 0.42 ? FOREST_BLADES : PLAINS_BLADES;
+    const pal = forestShadePx(x, y) > 0.42 ? FOREST_BLADES : World.desert ? ['#a89448', '#c2a856', '#8c8040', '#b09a4a'] : PLAINS_BLADES;
     const clump = 3 + Math.floor(crnd() * 4);
     for (let c = 0; c < clump; c++) {
       const bx = x + (crnd() - 0.5) * 16;
@@ -1369,6 +1573,14 @@ function renderGroundRegion(ctx, rx, ry, rw, rh) {
       else if (World.lush) ground = mixHex(ground, '#3d6b38', 0.34 + ff * 0.22);
       // the Moors: every color drowns in grey — a heath the sun forgot
       else if (World.misty) ground = mixHex(ground, '#787c70', 0.58 - ff * 0.18);
+      // the desert: red sand in long soft dunes; the belt's green dusty at its
+      // fringe and deep under the giants
+      else if (World.desert) {
+        const dune = fbm(tx * 0.05 + 700, ty * 0.05 + 300);
+        const sand = mixHex(mixHex('#c96a3e', '#a84e2c', n * 0.6), dune > 0.5 ? '#d97a48' : '#9c4628', Math.abs(dune - 0.5) * 1.2);
+        const green = mixHex('#8c8a48', '#4a6a34', ff);
+        ground = t === T_SAND ? sand : mixHex(sand, green, clamp(0.35 + World.forest[i] * 1.4, 0, 1));
+      }
       // the Wall: deep snow, a hair bluer up high (north), a hair warmer under pines
       else if (World.snowy) {
         // the snowfield: wind-sculpted, bluer in the hollows and up high,
@@ -1387,7 +1599,7 @@ function renderGroundRegion(ctx, rx, ry, rw, rh) {
       // +1px overdraw: at fractional render scales adjacent rects would
       // otherwise antialias apart and show a hairline grid
       ctx.fillRect(tx * TILE, ty * TILE, TILE + 1, TILE + 1);
-      if (!World.snowy && (t === T_GRASS || t === T_FOREST) && ff > 0.15 && ff < 0.85) {
+      if (!World.snowy && (t === T_GRASS || t === T_FOREST) && ff > 0.15 && ff < 0.85 && !(World.desert && t === T_SAND)) {
         ctx.fillStyle = ff > 0.5 ? 'rgba(170,161,90,0.5)' : 'rgba(98,112,60,0.5)';
         for (let k = 0; k < 4; k++) {
           const hx = hash2(tx * 13 + k * 5, ty * 7 + k), hy = hash2(tx * 3 + k, ty * 19 + k * 3);
@@ -1602,6 +1814,26 @@ function renderGroundRegion(ctx, rx, ry, rw, rh) {
       const h = hash2(tx * 7 + 3, ty * 13 + 1);
       const ff = clamp((World.forest[i] - 0.28) / 0.3, 0, 1);
 
+      // --- the desert: wind ripples and pebbles on the sand, nothing else ---
+      if (World.desert && t === T_SAND) {
+        const wind = fbm(tx * 0.2 + 90, ty * 0.2 + 33);
+        if (wind > 0.5 && h > 0.3) {
+          const sx0 = x0 + hash2(tx * 5, ty * 3) * 8, sy0 = y0 + 4 + hash2(tx * 7, ty * 11) * 14;
+          const len = 12 + h * 10;
+          ctx.lineCap = 'round';
+          ctx.strokeStyle = 'rgba(120,48,24,0.16)'; ctx.lineWidth = 1.6;
+          ctx.beginPath(); ctx.moveTo(sx0, sy0 + 1.2); ctx.quadraticCurveTo(sx0 + len * 0.5, sy0 + 1.2 - 2, sx0 + len, sy0 + 1.2 + len * 0.15); ctx.stroke();
+          ctx.strokeStyle = 'rgba(255,200,150,0.35)'; ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.moveTo(sx0, sy0); ctx.quadraticCurveTo(sx0 + len * 0.5, sy0 - 2, sx0 + len, sy0 + len * 0.15); ctx.stroke();
+        }
+        if (h > 0.93) {
+          ctx.fillStyle = 'rgba(90,40,24,0.5)';
+          ctx.beginPath(); ctx.ellipse(x0 + h * 20, y0 + 14, 2.2, 1.3, h * 2, 0, TAU); ctx.fill();
+          ctx.fillStyle = 'rgba(255,210,170,0.45)';
+          ctx.beginPath(); ctx.ellipse(x0 + h * 20 - 0.7, y0 + 13.2, 1.1, 0.6, h * 2, 0, TAU); ctx.fill();
+        }
+        continue;
+      }
       // --- the Wall: rock walls and glittering snow instead of grass ---
       if (World.snowy) {
         const alt = 1 - ty / HT;
@@ -1970,7 +2202,7 @@ const SpriteCache = {};
 function cachedSprite(key, w, h, ox, oy, drawFn) {
   // bake at the current render scale so sprites stay sharp in crisp mode
   const RS = G.RS || 1;
-  key = key + (World.snowy ? '_sn' : '') + '@' + RS;   // the Wall dresses its trees and stones in snow
+  key = key + (World.snowy ? '_sn' : World.desert ? '_ds' : '') + '@' + RS;   // the Wall dresses its trees and stones in snow
   let sp = SpriteCache[key];
   if (!sp) {
     const cv = document.createElement('canvas');
@@ -2025,7 +2257,7 @@ function snowOnLayer(ctx, x, y, w, h, s) {
 
 function drawTree(ctx, t) {
   const s = q1(t.s), v = t.v || 0;
-  const w = Math.ceil(52 * s) + 8, h = Math.ceil(52 * s) + 12;
+  const w = Math.ceil((t.kind === 3 ? 64 : 52) * s) + 8, h = Math.ceil(52 * s) + 12;
   const sp = cachedSprite('tree' + t.kind + '_' + s + '_' + v, w, h, w / 2, h - 6,
     (c) => drawTreeRaw(c, { x: 0, y: 0, s, kind: t.kind, v }));
   ctx.drawImage(sp.cv, t.x - sp.ox, t.y - sp.oy, sp.w, sp.h);
@@ -2134,6 +2366,64 @@ function drawTreeRaw(ctx, t) {
         ctx.fill();
       }
     }
+  } else if (t.kind === 3) {
+    // THE DESERT GIANT: an umbrella tree — a thick flared trunk forking into
+    // three great boughs, and a broad flat crown of layered canopy plates,
+    // sun-bleached on top, deep and cool underneath. Big, and pretty
+    const trunk = '#6e3f26', trunkD = '#3e2214', bark = '#8a5432';
+    ctx.lineJoin = 'round';
+    ctx.fillStyle = trunk; ctx.strokeStyle = trunkD; ctx.lineWidth = 1.1;
+    ctx.beginPath();
+    ctx.moveTo(x - 4.2 * s, y);
+    ctx.quadraticCurveTo(x - 2.4 * s, y - 8 * s, x - 2.2 * s, y - 16 * s);
+    ctx.lineTo(x - 9 * s, y - 27 * s);      // left bough
+    ctx.lineTo(x - 7.4 * s, y - 28 * s);
+    ctx.lineTo(x - 1 * s, y - 20 * s);
+    ctx.lineTo(x + 0.4 * s, y - 30 * s);    // centre bough
+    ctx.lineTo(x + 2.2 * s, y - 30 * s);
+    ctx.lineTo(x + 2.6 * s, y - 20 * s);
+    ctx.lineTo(x + 9.5 * s, y - 27 * s);    // right bough
+    ctx.lineTo(x + 10.8 * s, y - 25.5 * s);
+    ctx.lineTo(x + 2.4 * s, y - 16 * s);
+    ctx.quadraticCurveTo(x + 2.6 * s, y - 8 * s, x + 4.2 * s, y);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    // bark grain
+    ctx.strokeStyle = bark; ctx.lineWidth = 0.8;
+    for (const [dx0, dx1] of [[-1.6, -1.2], [0.6, 0.9], [-0.4, 0.2]]) {
+      ctx.beginPath(); ctx.moveTo(x + dx0 * s, y - 2 * s); ctx.lineTo(x + dx1 * s, y - 14 * s); ctx.stroke();
+    }
+    // the crown: five overlapping canopy plates, back ones deep, front lit
+    const plates = [
+      [-11, -29, 12, 4.2, '#3f6a2e'], [10, -28.5, 11, 4.0, '#3f6a2e'],
+      [0, -32, 15, 5.0, '#4c7c36'],
+      [-6, -30, 11, 4.3, '#5c9040'], [7, -31, 10, 4.1, '#5c9040'],
+    ];
+    ctx.strokeStyle = '#243f1c'; ctx.lineWidth = 1;
+    for (const [px, py, rw, rh, col] of plates) {
+      ctx.fillStyle = col;
+      ctx.beginPath();
+      // a scalloped flat-bottomed plate: bumps along the top, straight underneath
+      const cx = x + px * s, cy = y + py * s, w = rw * s, hgt = rh * s;
+      ctx.moveTo(cx - w, cy);
+      for (let k = 0; k < 5; k++) {
+        const bx0 = cx - w + (2 * w) * k / 5, bx1 = cx - w + (2 * w) * (k + 1) / 5;
+        ctx.quadraticCurveTo((bx0 + bx1) / 2, cy - hgt * (k === 2 ? 2.1 : 1.6), bx1, cy - (k === 4 ? 0 : hgt * 0.5));
+      }
+      ctx.lineTo(cx + w, cy);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    }
+    // sun on the crown, shade beneath
+    ctx.fillStyle = 'rgba(232,240,150,0.35)';
+    ctx.beginPath(); ctx.ellipse(x - 2 * s, y - 37 * s, 11 * s, 2.6 * s, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = 'rgba(20,40,20,0.35)';
+    ctx.beginPath(); ctx.ellipse(x, y - 27.5 * s, 16 * s, 1.8 * s, 0, 0, TAU); ctx.fill();
+    // hanging seed pods
+    ctx.strokeStyle = '#6a4a22'; ctx.lineWidth = 0.9;
+    for (const dx of [-8, -3, 4, 9]) {
+      ctx.beginPath(); ctx.moveTo(x + dx * s, y - 27 * s); ctx.lineTo(x + dx * s + 0.6 * s, y - 23.5 * s); ctx.stroke();
+      ctx.fillStyle = '#8a6a30';
+      ctx.beginPath(); ctx.ellipse(x + dx * s + 0.7 * s, y - 22.8 * s, 0.9 * s, 1.5 * s, 0.2, 0, TAU); ctx.fill();
+    }
   } else if (t.kind === 2) {
     // dead snag
     ctx.fillStyle = '#7a6a52';
@@ -2204,11 +2494,11 @@ function drawRockRaw(ctx, r) {
   ctx.lineTo(x + 7 * s, y - 2 * s);
   ctx.lineTo(x + 6.4 * s, y);
   ctx.closePath();
-  const sn = World.snowy;
-  ctx.fillStyle = sn ? '#7c828f' : '#8b8577'; ctx.fill();
+  const sn = World.snowy, ds = World.desert;
+  ctx.fillStyle = sn ? '#7c828f' : ds ? '#a05a3a' : '#8b8577'; ctx.fill();
   ctx.strokeStyle = sn ? '#3a3e48' : '#43403a'; ctx.lineWidth = 1; ctx.lineJoin = 'round'; ctx.stroke();
   // lit top facet
-  ctx.fillStyle = sn ? '#9ba2ae' : '#a7a291';
+  ctx.fillStyle = sn ? '#9ba2ae' : ds ? '#c47a52' : '#a7a291';
   ctx.beginPath();
   ctx.moveTo(x - 5.6 * s, y - 4.6 * s);
   ctx.lineTo(x - 1.2 * s, y - 7 * s);
@@ -2216,7 +2506,7 @@ function drawRockRaw(ctx, r) {
   ctx.lineTo(x - 0.6 * s, y - 3.6 * s);
   ctx.closePath(); ctx.fill();
   // shadowed right facet
-  ctx.fillStyle = sn ? '#5d626e' : '#6f6a5e';
+  ctx.fillStyle = sn ? '#5d626e' : ds ? '#7a4028' : '#6f6a5e';
   ctx.beginPath();
   ctx.moveTo(x + 3.6 * s, y - 5.6 * s);
   ctx.lineTo(x + 7 * s, y - 2 * s);
@@ -2405,8 +2695,57 @@ const PROP_DIMS = {
   tallgrass: { w: 26, h: 22 }, ribcage: { w: 32, h: 18 }, waterrock: { w: 30, h: 16 },
   skull: { w: 34, h: 24 },
   cavemouth: { w: 64, h: 52 }, snowdrift: { w: 40, h: 20 },
+  monument: { w: 76, h: 86 },
 };
 const PROP_DRAW = {
+  // the Great Walk's landmark: a cairn, a ring of standing stones, a great
+  // skull, or an obsidian spire — tinted by the land it stands in
+  monument(c, s, v) {
+    const sn = World.snowy, ds = World.desert, ash = World.ashy;
+    const stone = sn ? '#8a909c' : ds ? '#a8603e' : ash ? '#5a5650' : '#8b8577';
+    const lite = sn ? '#c8d0dc' : ds ? '#d0885c' : ash ? '#7a756c' : '#aba592';
+    const dark = sn ? '#4e5460' : ds ? '#6e3622' : ash ? '#34312c' : '#5e594e';
+    const line = '#221e18';
+    c.lineJoin = 'round'; c.lineWidth = 1.2;
+    if (v === 2) { drawShadow(c, 0, 0, 30 * s); PROP_DRAW.skull(c, s * 2.4); return; }
+    if (v === 3) {
+      drawShadow(c, 0, 0, 22 * s);
+      for (const [x, h, w] of [[-11, 34, 7], [10, 28, 6], [0, 58, 9], [-4, 20, 5]]) {
+        c.fillStyle = '#1c1a1e'; c.strokeStyle = '#0c0a0c';
+        c.beginPath(); c.moveTo((x - w) * s, 0); c.lineTo((x - w * 0.2) * s, -h * s); c.lineTo((x + w) * s, -2 * s); c.closePath(); c.fill(); c.stroke();
+        c.strokeStyle = '#e0611f'; c.lineWidth = 1;
+        c.beginPath(); c.moveTo((x - w * 0.3) * s, -2 * s); c.lineTo((x - w * 0.15) * s, -h * 0.5 * s); c.lineTo((x - w * 0.35) * s, -h * 0.75 * s); c.stroke();
+        c.lineWidth = 1.2;
+      }
+      return;
+    }
+    if (v === 1) {
+      drawShadow(c, 0, 0, 30 * s);
+      for (const [x, y, h, w] of [[-24, -6, 30, 6], [24, -6, 28, 6], [-12, -12, 40, 7], [12, -12, 36, 7], [0, 4, 46, 8]]) {
+        c.fillStyle = stone; c.strokeStyle = line;
+        c.beginPath();
+        c.moveTo((x - w) * s, y * s); c.lineTo((x - w * 0.8) * s, (y - h) * s);
+        c.quadraticCurveTo(x * s, (y - h - 4) * s, (x + w * 0.8) * s, (y - h + 1) * s);
+        c.lineTo((x + w) * s, y * s); c.closePath(); c.fill(); c.stroke();
+        c.fillStyle = lite;
+        c.fillRect((x - w * 0.6) * s, (y - h + 2) * s, w * 0.5 * s, (h - 4) * s);
+        if (World.lush || World.misty || (!sn && !ds && !ash)) { c.fillStyle = 'rgba(96,128,64,0.7)'; c.fillRect((x - w * 0.8) * s, (y - h * 0.4) * s, w * 1.2 * s, 3 * s); }
+      }
+      return;
+    }
+    // the cairn: flat stones stacked by generations of feet
+    drawShadow(c, 0, 0, 24 * s);
+    const rows = [[0, 22, 7], [-6, 18, 6.5], [-12, 15, 6], [-17.5, 12, 5.5], [-22.5, 9, 5], [-27, 6, 4.5], [-31, 4, 4]];
+    for (const [y, w, h] of rows) {
+      c.fillStyle = stone; c.strokeStyle = line;
+      c.beginPath(); c.ellipse(0, (y - h * 0.5) * s, w * s, h * 0.62 * s, 0, 0, TAU); c.fill(); c.stroke();
+      c.fillStyle = lite;
+      c.beginPath(); c.ellipse(-w * 0.2 * s, (y - h * 0.75) * s, w * 0.6 * s, h * 0.24 * s, 0, 0, TAU); c.fill();
+      c.fillStyle = dark;
+      c.beginPath(); c.ellipse(w * 0.35 * s, (y - h * 0.25) * s, w * 0.45 * s, h * 0.2 * s, 0, 0, TAU); c.fill();
+    }
+    if (sn) { c.fillStyle = '#f2f6fa'; c.beginPath(); c.ellipse(0, -34 * s, 4.5 * s, 2 * s, 0, 0, TAU); c.fill(); }
+  },
   bush(c, s, v) {
     const dark = v ? '#565a2e' : '#2f4526', mid = v ? '#767a40' : '#476338';
     const lite = v ? '#989a54' : '#5f7d46', line = v ? '#33351a' : '#1e3018';

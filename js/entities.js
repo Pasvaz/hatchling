@@ -39,7 +39,7 @@ const PLAYER_DEF = {
   // the cheap tank: grows slowly, but a grown centrosaurus argues with anything
   // small, weak, and it LOOKS like a dumb pick — until you sound the call and the
   // jungle starts moving with you (packs, burrow raids, the works)
-  aardi: { hp: 380, dmg: 45, speed: 152, sprint: 1.9, reach: 22, atkCd: 0.45, diet: 'carn', bleedBite: false, stamMax: 160, eco: 'delta', cost: 25, growthRate: 1.3 },
+  aardi: { hp: 380, dmg: 45, speed: 152, sprint: 1.9, reach: 22, atkCd: 0.45, diet: 'carn', bleedBite: false, stamMax: 160, eco: 'delta', cost: 25, growthRate: 1.3, packSpecies: true },
   centro: { hp: 1400, dmg: 100, speed: 95, sprint: 1.6, reach: 32, atkCd: 1.0, diet: 'herb', bleedBite: false, stamMax: 140, eco: 'delta', cost: 50, growthRate: 0.7 },
   // fast, strong, cheap: the delta's working raptor
   omni: { hp: 1050, dmg: 120, speed: 138, sprint: 1.9, reach: 28, atkCd: 0.5, diet: 'carn', bleedBite: true, stamMax: 140, eco: 'delta', cost: 75 },
@@ -113,6 +113,16 @@ const PLAYER_DEF = {
   coahuila: { hp: 2600, dmg: 175, speed: 96, sprint: 1.5, reach: 40, atkCd: 1.1, diet: 'herb', bleedBite: true, bleedMul: 2.6, stamMax: 145, eco: 'jungle', cost: 1000, req: 'orkor', growthRate: 0.65 },
   // the NEW apex: a megalosaurid of keel-skulled muscle. No ambush, no
   // tricks — raw damage, thick short arms, and the M double bite
+  // --- The Death Desert: one playable for now. Its gate is its own (see
+  // main.js spUnlocked): a Poekilopleuron grown to ADULT at least once, or
+  // Full Adult Neovenator AND Coahuilaceratops together
+  // the desert's first rung: a pack animal like the aardiraptor (packSpecies),
+  // feathered from birth (heatResist), decent speed and a bottomless tank
+  procomp: { hp: 320, dmg: 40, speed: 146, sprint: 1.85, reach: 20, atkCd: 0.45, diet: 'carn', bleedBite: false, stamMax: 320, eco: 'desert', cost: 400, gate: 'desert', heatResist: 0.4, earnMul: 1.2, growthRate: 1.3, packSpecies: true },
+  // the desert's second rung: a herbivore that fights — pack animal, horn ram,
+  // and a pounce that lands skull-first hard enough to break bones (pounceBone)
+  homalo: { hp: 900, dmg: 95, speed: 138, sprint: 1.8, reach: 26, atkCd: 0.7, diet: 'herb', bleedBite: false, stamMax: 170, eco: 'desert', cost: 600, req: 'procomp', heatResist: 0.3, growthRate: 1.0, packSpecies: true, pounceBone: true },
+  coelo: { hp: 700, dmg: 85, speed: 152, sprint: 1.95, reach: 26, atkCd: 0.45, diet: 'carn', bleedBite: true, stamMax: 150, eco: 'desert', cost: 800, gate: 'desert', heatResist: 0.3, earnMul: 1.15 },
   poekilo: { hp: 3000, dmg: 260, speed: 124, sprint: 1.65, reach: 40, atkCd: 0.85, diet: 'carn', bleedBite: true, bleedMul: 1.2, stamMax: 155, eco: 'jungle', cost: 1200, req: 'neove', growthRate: 0.6, doubleBite: true, wrestler: true },
 };
 
@@ -211,6 +221,47 @@ const NPC_DEF = {
   // ---- THE NIVALOTITAN WALL ----
   // the herd on the snowfields: a huge flat-headed polar edmontosaur-alike.
   // Warm to huddle beside — until the tail comes around
+  // the Reach's tank: tankier than the poekilopleuron that hunts it. Three
+  // weapons: the tail (dmg), a head-butt (ram) and the bone-breaking kick
+  kunduro: { hp: 3600, dmg: 175, atkCd: 2.0, speed: 84, fleeSpeed: 118, detect: 190, homeR: 340, reach: 46, biome: 'forest', turn: 1.6, fearless: true, tank: true, bleedable: true, melee: { kb: 280 }, ram: { dmg: 200, cd: 4.5, kb: 380 }, kick: { dmg: 260, cd: 6.5, kb: 460, bone: true }, caution: 1.2 },
+  // --- The Death Desert ---
+  // the raptor packs of the dunes: fast, cheap, and everywhere
+  // each raptor keeps to its own quarter of the map (the spawn table's zones)
+  // and RIVALS the packs whose ground borders its own: a pack that meets a
+  // rival pack will, now and then, pick the fight
+  shri:      { hp: 260, dmg: 48, atkCd: 0.8, speed: 190, detect: 260, homeR: 380, reach: 22, biome: 'plains', turn: 4.2, patience: 8, bleedable: true, fears: [['beishan', 120], ['deltadro', 180]], rivals: ['kuru', 'tsaagan'] },
+  kuru:      { hp: 320, dmg: 56, atkCd: 0.85, speed: 182, detect: 260, homeR: 380, reach: 24, biome: 'any', turn: 4.0, patience: 9, bleedable: true, packCourage: true, rivals: ['shri', 'adasaurus'] },
+  tsaagan:   { hp: 300, dmg: 52, atkCd: 0.8, speed: 186, detect: 280, homeR: 400, reach: 23, biome: 'plains', turn: 4.2, patience: 8, bleedable: true, fears: [['deltadro', 180]], rivals: ['shri', 'adasaurus'] },
+  mahakala:  { hp: 90, dmg: 18, atkCd: 0.6, speed: 200, detect: 220, homeR: 300, reach: 14, biome: 'forest', turn: 5.0, patience: 6, bleedable: true, hunts: ['epidex'], fears: [['coelo', 150], ['shri', 120], ['kuru', 120], ['luanchuan', 120]] },
+  luanchuan: { hp: 220, dmg: 44, atkCd: 0.75, speed: 195, detect: 260, homeR: 360, reach: 21, biome: 'forest', turn: 4.4, patience: 8, bleedable: true, rivals: ['procomp', 'adasaurus'] },
+  adasaurus: { hp: 240, dmg: 46, atkCd: 0.8, speed: 188, detect: 260, homeR: 380, reach: 22, biome: 'any', turn: 4.2, patience: 8, bleedable: true, rivals: ['kuru', 'tsaagan', 'luanchuan'] },
+  // the ostrich herds: runners, and one that is far too big to run from
+  garudi:    { hp: 520, dmg: 0, atkCd: 0, speed: 176, fleeSpeed: 214, detect: 300, homeR: 420, reach: 0, biome: 'plains', turn: 3.2, bleedable: true },
+  harpy:     { hp: 480, dmg: 0, atkCd: 0, speed: 170, fleeSpeed: 206, detect: 300, homeR: 420, reach: 0, biome: 'plains', turn: 3.2, bleedable: true },
+  sinorni:   { hp: 420, dmg: 0, atkCd: 0, speed: 180, fleeSpeed: 220, detect: 320, homeR: 440, reach: 0, biome: 'plains', turn: 3.4, bleedable: true },
+  kinnaree:  { hp: 400, dmg: 0, atkCd: 0, speed: 178, fleeSpeed: 216, detect: 300, homeR: 420, reach: 0, biome: 'any', turn: 3.4, bleedable: true },
+  beishan:   { hp: 1500, dmg: 110, atkCd: 1.4, speed: 140, fleeSpeed: 176, detect: 260, homeR: 420, reach: 34, biome: 'plains', turn: 2.4, bleedable: true, melee: { kb: 260 } },
+  aepyorni:  { hp: 450, dmg: 0, atkCd: 0, speed: 184, fleeSpeed: 224, detect: 320, homeR: 440, reach: 0, biome: 'plains', turn: 3.4, bleedable: true },
+  // wild homalocephale: small herds that ram what crowds them
+  homalo:    { hp: 700, dmg: 85, atkCd: 1.2, speed: 136, fleeSpeed: 156, detect: 230, homeR: 340, reach: 26, biome: 'forest', turn: 2.6, bleedable: true, melee: { kb: 280 }, caution: 1.2 },
+  // wild procompsognathus: kin for the alpha, a nuisance for everyone else
+  procomp:   { hp: 200, dmg: 32, atkCd: 0.7, speed: 160, detect: 240, homeR: 340, reach: 18, biome: 'forest', turn: 4.6, patience: 7, packCourage: true, bleedable: true, fears: [['eocarch', 200], ['deltadro', 160]] },
+  // the hadrosaurs: the little ones run, the middle ones fight only when the
+  // odds are good, the big one stands. All keep to the water
+  willina:   { hp: 2600, dmg: 165, atkCd: 2.0, speed: 84, fleeSpeed: 120, detect: 180, homeR: 360, reach: 46, biome: 'forest', turn: 1.6, fearless: true, tank: true, bleedable: true, melee: { kb: 280 } },
+  bonaparte: { hp: 1900, dmg: 150, atkCd: 1.9, speed: 90, fleeSpeed: 126, detect: 190, homeR: 340, reach: 42, biome: 'forest', turn: 1.7, tank: true, bleedable: true, melee: { kb: 260 }, caution: 1.2 },
+  huallas:   { hp: 1100, dmg: 110, atkCd: 1.7, speed: 104, fleeSpeed: 146, detect: 220, homeR: 380, reach: 36, biome: 'forest', turn: 2.1, bleedable: true, melee: { kb: 220 }, caution: 1.4 },
+  kelumapu:  { hp: 1000, dmg: 105, atkCd: 1.7, speed: 100, fleeSpeed: 140, detect: 210, homeR: 340, reach: 36, biome: 'forest', turn: 2.0, bleedable: true, melee: { kb: 220 }, caution: 1.4 },
+  gilmoreo:  { hp: 900, dmg: 95, atkCd: 1.6, speed: 108, fleeSpeed: 148, detect: 220, homeR: 380, reach: 34, biome: 'forest', turn: 2.2, bleedable: true, melee: { kb: 200 }, caution: 1.5 },
+  bactro:    { hp: 640, dmg: 80, atkCd: 1.6, speed: 96, fleeSpeed: 136, detect: 210, homeR: 320, reach: 30, biome: 'forest', turn: 2.3, bleedable: true, melee: { kb: 180 }, caution: 1.6 },
+  plesio:    { hp: 560, dmg: 0, atkCd: 0, speed: 130, fleeSpeed: 178, detect: 280, homeR: 460, reach: 0, biome: 'plains', turn: 3.0, bleedable: true },
+  // the two land theropods
+  deltadro:  { hp: 900, dmg: 115, atkCd: 0.9, speed: 208, detect: 340, homeR: 700, reach: 30, biome: 'plains', turn: 2.4, bleedable: true, hunts: ['garudi', 'harpy', 'sinorni', 'kinnaree', 'aepyorni', 'plesio', 'shri', 'tsaagan'], caution: 0.95, fears: [['eocarch', 220]] },
+  eocarch:   { hp: 2400, dmg: 215, atkCd: 1.1, speed: 116, detect: 320, homeR: 520, reach: 40, biome: 'forest', turn: 1.9, fearless: true, bleedable: true, biteBleed: { dps: 10, dur: 8 }, hunts: ['huallas', 'gilmoreo', 'bactro', 'kelumapu', 'plesio', 'beishan', 'coelo', 'procomp'], scavR: 320, caution: 0.9 },
+  // the river's theropod and its crocodile
+  suchos:    { hp: 1100, dmg: 125, atkCd: 1.0, speed: 92, detect: 260, homeR: 300, reach: 34, biome: 'forest', turn: 2.0, fearless: true, bleedable: true, hunts: ['lepisosteus', 'kelumapu', 'epidex', 'procomp'], caution: 1.0 },   // 'beach' means sand — on this map that is the whole desert; the river belt is forest
+  // the ribbon-tail: a mouthful that lives in the river belt
+  epidex:    { hp: 40, dmg: 0, atkCd: 0, speed: 150, fleeSpeed: 190, detect: 200, homeR: 200, reach: 0, biome: 'forest', turn: 6, bleedable: false },
   kerbero: { hp: 2200, dmg: 155, atkCd: 2.0, speed: 88, fleeSpeed: 128, detect: 170, homeR: 320, reach: 44, biome: 'plains', turn: 1.7, fearless: true, tank: true, bleedable: true, melee: { kb: 260 } },
   // the shaggy guardian of the pine belt: plants itself and rakes with
   // feathered scythe arms — the wounds stay open in the cold
@@ -314,7 +365,7 @@ function makePlayer(species, gender, skin) {
     facing: 1, phase: 0, move: 0, pitch: 0,
     atkCd: 0, attackT: 0, headDown: 0, hurtT: 0, actionT: 0, action: null,
     bleed: null, exhausted: false, stage: 'Hatchling',
-    alive: true, causeOfDeath: null, bornAt: 0, wins: false,
+    alive: true, causeOfDeath: null, bornAt: 0, wins: false, gen: 1,
   };
 }
 function hpFrac(g) { return 0.12 + 0.88 * g; }
@@ -348,6 +399,7 @@ function dealDamage(target, amount, attacker, opts) {
   opts = opts || {};
   if (target.isPlayer && !target.alive) return;
   if (!target.isPlayer && target.hp <= 0) return;
+  if (G.cine && (target.isPlayer || isFamily(target) || target.cineTo)) return;
   let dmg = amount;
   let crit = false;
   let glance = false;
@@ -456,6 +508,13 @@ function killNPC(e, attacker) {
   if (attacker && attacker.isPlayer) {
     SFX.kill();
     floatText(e.x, e.y - 30, DINO[e.species].name + ' slain', '#ffd23e');
+    // DEEDS: some coats are earned. A grown Poekilopleuron that fells a
+    // Kundurosaurus has slain a giant
+    if (e.species === 'kunduro' && attacker.species === 'poekilo' && attacker.growth >= 0.9 && typeof Save !== 'undefined' && !Save.kunduroKill) {
+      Save.kunduroKill = true;
+      G.banner = { str: 'GIANT SLAIN — the Slayer of Giants coat is yours to buy.', t: 6, color: '#ffd23e' };
+      if (typeof saveSave === 'function') saveSave();
+    }
     // a kill pays out growths, scaled to how big the prey was
     if (typeof awardGrowths === 'function') {
       const mul = (PLAYER_DEF[attacker.species].earnMul || 1) * genderMod(attacker).earn;
@@ -909,7 +968,7 @@ function pounceStrike(p, bag) {
   const def = PLAYER_DEF[p.species];
   const zones = [...biteZones(p), pounceLandZone(p)];
   for (const e of G.npcs) {
-    if (e.packAlpha || e.isBaby || e === G.mate) continue;
+    if (e.packAlpha || e.isBaby || e === G.mate || kinLine(e)) continue;
     if (bag.hit.has(e.id)) continue;
     let pt = null;
     for (const z of zones) { pt = bodyHitPoint(e, z.x, z.y, z.r); if (pt) break; }
@@ -921,7 +980,7 @@ function pounceStrike(p, bag) {
       opts.bleed = { dps: (6 + 8 * p.growth) * bm, dur: 10 * Math.min(1.4, bm) };
     }
     dealDamage(e, playerDmg() * rrange(0.9, 1.1) * (bag.mul || 1), p, opts);
-    if (def.boneBreak && p.growth > 0.2) tryBoneBreak(p, e, pt.part, playerDmg());
+    if ((def.boneBreak || def.pounceBone) && p.growth > 0.2) tryBoneBreak(p, e, pt.part, playerDmg() * (def.pounceBone ? 1.6 : 1));
     SFX.bite();
     p.attackT = Math.max(p.attackT, 0.8);   // the jaws visibly snap on contact
   }
@@ -1017,6 +1076,14 @@ function tailWedgeCircle(e) {
   const pt = pitchPoint(e, 0, -weaponHeight(e));
   return { x: pt.x, y: pt.y, r: (d.L.body[0] * 0.42 + d.L.tail[0] * 0.9) * s };
 }
+// the kick: both hind feet thrown forward — a circle low and ahead of the
+// hips, a leg's reach across. Combat AND the H overlay consume this
+function kickCircle(e) {
+  const d = DINO[e.species];
+  const s = d.scale * sizeScale(e.growth != null ? e.growth : 1) * genderMod(e).size;
+  const pt = pitchPoint(e, (e.facing || 1) * d.L.body[0] * 0.5 * s, -zoneHeights(d).spine * 0.4 * s);
+  return { x: pt.x, y: pt.y, r: d.L.leg[0] * 0.6 * s + 6 };
+}
 // the nip jaws of tail-fighters that can ALSO bite (wuerhosaurus)
 function nipCircle(e) {
   const d = DINO[e.species];
@@ -1059,6 +1126,19 @@ function bodyHitPoint(victim, x, y, r) {
 // and the body core is by far the hardest. Broken thigh = no more running;
 // broken tail = it veers the wrong way; broken skull = its attacks weaken;
 // broken body = all of the above at once.
+// a kick that lands on YOU: roll against your bulk, and a lost roll breaks
+// your thigh — half speed until it knits (~40s). Only the kick does this
+function playerBoneBreak(p, dmg) {
+  p.bones = p.bones || {};
+  if (p.bones.leg) return;
+  const ch = clamp((dmg / p.maxhp) * 0.9, 0.06, 0.4);
+  if (rnd() >= ch) return;
+  p.bones.leg = true; p.boneT = 40;
+  floatText(p.x, p.y - 58, '💥 YOUR THIGH BONE BREAKS!', '#ff6a5e');
+  G.banner = { str: 'CRACK! The kick breaks your leg — you can only limp until it knits.', t: 5, color: '#ff6a5e' };
+  SFX.kill();
+  G.shake = Math.min(7, G.shake + 4);
+}
 function tryBoneBreak(attacker, t, part, dmg) {
   if (!part || t.hp <= 0 || DINO[t.species].fish) return;
   t.bones = t.bones || {};
@@ -1165,6 +1245,9 @@ function isPredatorNPC(sp) { const nd = NPC_DEF[sp]; return !!nd && DINO[sp].die
 // how sharp their teeth are (an aardiraptor mate IS a predator species, and
 // without this rule it would flag ITSELF as the danger nearest the nest)
 function isFamily(o) { return !!(o.packAlpha || o.isMate || o.isBaby); }
+// your own settled bloodline, met again while you play the same species:
+// kin — your jaws pass over them like they pass over your pack
+function kinLine(o) { return !!(o.bloodline && G.player && o.species === G.player.species); }
 
 // pack hunter (guanlong, troodon): lone vs babies, gangs up on grown prey
 function thinkPackHunter(e, d) {
@@ -1199,6 +1282,21 @@ function thinkPackHunter(e, d) {
     e.state = 'avoid'; e.target = p; e.stateT = 2; return;
   }
   if (retaliationCheck(e, d)) return;
+  // RIVALRY: a rival pack on our ground — with a packmate at our side, and
+  // now and then, we go for them (blood answers blood from there on)
+  if (d.rivals && rnd() < 0.06 && packmates(e, 160).length >= 1) {
+    let best = null, bd = d.detect * 0.8;
+    for (const o of G.npcs) {
+      if (!d.rivals.includes(o.species) || o.hp <= 0 || isFamily(o)) continue;
+      const dd = dist(e.x, e.y, o.x, o.y);
+      if (dd < bd) { bd = dd; best = o; }
+    }
+    if (best) {
+      e.state = 'chase'; e.target = best; e.stateT = 4;
+      if (Math.random() < 0.5) floatText(e.x, e.y - 30, '!', '#ffb03e');
+      return;
+    }
+  }
   // scavenge nearby carcass
   const c = nearestCarcass(e.x, e.y, 200, true);
   if (c && c.meat > 20) { e.state = 'scavenge'; e.carc = c; e.stateT = 6; return; }
@@ -1389,6 +1487,16 @@ const NPC_THINK = {
   leaellyna: thinkSkittish,
   huayango: thinkTank,
   kosmo: thinkTank,
+  kunduro: thinkHerdFighter,
+  shri: thinkPackHunter, kuru: thinkPackHunter, tsaagan: thinkPackHunter, mahakala: thinkPackHunter,
+  luanchuan: thinkPackHunter, adasaurus: thinkPackHunter,
+  garudi: thinkSkittish, harpy: thinkSkittish, sinorni: thinkSkittish, kinnaree: thinkSkittish, aepyorni: thinkSkittish,
+  beishan: thinkHerdFighter, epidex: thinkSkittish,
+  procomp: thinkPackHunter,   // (pack recruits: see the packAlpha route in thinkNPC)
+  homalo: thinkHerdFighter,
+  willina: thinkHerdFighter, bonaparte: thinkHerdFighter, huallas: thinkHerdFighter, kelumapu: thinkHerdFighter,
+  gilmoreo: thinkHerdFighter, bactro: thinkHerdFighter, plesio: thinkSkittish,
+  deltadro: thinkRunner, eocarch: thinkHunter, suchos: thinkHunter,
   scelido(e, d) {
     const p = G.player;
     if (!p || !p.alive) { defaultWander(e); return; }
@@ -1514,12 +1622,7 @@ const NPC_THINK = {
   atlas: thinkTank,
   wuerho: thinkTank,
   dakota: thinkPackHunter,
-  aardi(e, d) {
-    // a pack member follows its alpha; the wild ones hunt like any raptor
-    // (with the kin truce built into thinkPackHunter)
-    if (e.packAlpha) { thinkPackFollower(e, d); return; }
-    thinkPackHunter(e, d);
-  },
+  aardi: thinkPackHunter,   // recruits are routed to thinkPackFollower below, for every pack species
   fluvio(e, d) {
     // the river barge: tank rules for anything with teeth — and between
     // meals it seeks out a leafy tree and rears up to strip the canopy
@@ -1752,7 +1855,7 @@ function thinkMate(e, d) {
   const ns = G.nesting;
   const nest = World.nests[e.species];
   // during eggs/babies: anything hungry near the family gets fought
-  if (ns && (ns.stage === 'eggs' || ns.stage === 'babies')) {
+  if (ns && (ns.stage === 'eggs' || ns.stage === 'babies' || ns.stage === 'walk')) {
     let threat = null, td = 300;
     for (const o of G.npcs) {
       if (o === e || isFamily(o) || !isPredatorNPC(o.species)) continue;
@@ -1763,6 +1866,11 @@ function thinkMate(e, d) {
     if (threat) { e.state = 'fight'; e.target = threat; e.stateT = 2; return; }
   }
   if (e.aggroT > 0 && e.lastAttacker) { e.state = 'fight'; e.target = e.lastAttacker; e.stateT = 2.5; return; }
+  // THE GREAT WALK: the mate walks beside you, wherever you lead
+  if (ns && ns.stage === 'walk' && G.player && G.player.alive) {
+    if (dist(e.x, e.y, G.player.x, G.player.y) > 90) { e.state = 'follow'; e.target = G.player; e.stateT = 2; return; }
+    defaultWander(e, false); return;
+  }
   // courting male: walk to the player and DISPLAY
   const p = G.player;
   if (e.gender === 'm' && ns && ns.stage === 'courting' && p && p.alive) {
@@ -1783,6 +1891,7 @@ function thinkMate(e, d) {
 function thinkBaby(e, d) {
   const ns = G.nesting;
   const p = G.player;
+  if (ns && ns.stage === 'walk') { thinkYoungWalk(e, d); return; }
   const guardian = (ns && ns.guardian === 'player') || !G.mate ? p : G.mate;   // orphans follow the player
   for (const o of G.npcs) {
     if (o === e || isFamily(o)) continue;   // never flee your own family
@@ -1847,7 +1956,12 @@ function updateNPC(e, dt) {
     // don't let thinking interrupt either (a fleeing guanlong must not stop
     // to snack on its fallen friend's carcass)
     const committed = (e.state === 'windup' || e.state === 'lunge' || e.state === 'recover' || e.state === 'flee') && e.stateT > 0;
-    const think = e.isMate ? thinkMate : e.isBaby ? thinkBaby : NPC_THINK[e.species];
+    // a recruited packmate of ANY pack species runs with its alpha; mates and
+    // babies keep their own brains (they handle packAlpha themselves)
+    // the Great Walk's cast keep their own brains: the cutscene's walkers and
+    // watchers, the rival on the family's trail, and a settled bloodline
+    const think = e.cineTo ? thinkCineWalk : e.cineHold ? thinkCineHold : e.walkRival ? thinkWalkRival
+      : e.bloodline ? thinkBloodline : e.isMate ? thinkMate : e.isBaby ? thinkBaby : e.packAlpha ? thinkPackFollower : NPC_THINK[e.species];
     if (!committed) think(e, d);
   }
   // a FEUD has one ending: whoever defied the claim hunts the claimant to
@@ -2069,13 +2183,51 @@ function updateNPC(e, dt) {
       // Mid-whip the stance is committed — no spinning around while the tail
       // is still in the air, even if the knockback threw the target out of range
       const toward = t.x > e.x ? 1 : -1;
-      const swinging = DINO[e.species].tailWeapon && e.attackT > 0.15;
-      if (!swinging) faceToward(e, DINO[e.species].tailWeapon && inRange ? -toward : toward);
+      // a three-weapon animal (kundurosaurus) changes its STANCE every few
+      // seconds: back turned for the tail, or squared up to butt and kick
+      if (d.kick || d.ram) {
+        e.stanceT = (e.stanceT || 0) - dt;
+        if (e.stanceT <= 0) { e.stance = rnd() < 0.5 ? 'face' : 'tail'; e.stanceT = rrange(2.5, 4.5); }
+      }
+      const committed = e.attackT > 0.15 && (DINO[e.species].tailWeapon || d.kick || d.ram);
+      const backOn = DINO[e.species].tailWeapon && inRange && e.stance !== 'face';
+      if (!committed) faceToward(e, backOn ? -toward : toward);
       if (!inRange) stepToward(e, t.x, t.y, sp * 0.9, dt);
       else idleDrift(e, dt);
       // don't stray too far from home (the tanks barely pursue)
       if (d.tank && dist(e.x, e.y, e.home.x, e.home.y) > d.homeR + 80) { e.state = 'return'; e.stateT = 6; break; }
-      tryMelee(e, t, d, d.melee || { kb: 150 });
+      if (e.stance !== 'face' || !DINO[e.species].tailWeapon) { e.atkKind = DINO[e.species].tailWeapon ? 'tail' : null; tryMelee(e, t, d, d.melee || { kb: 150 }); }
+      // the head-butt: face-side contact with the skull, on its own clock
+      if (d.ram && e.stance === 'face') {
+        e.ramCd = Math.max(0, (e.ramCd || 0) - dt);
+        if (e.ramCd <= 0 && e.attackT <= 0.15) {
+          const rp = jawContact(e, t);
+          if (rp) {
+            e.ramCd = d.ram.cd; e.attackT = 1; e.atkKind = 'ram';
+            dealDamage(t, d.ram.dmg * rrange(0.85, 1.15), e, { kb: d.ram.kb || 300, hitX: rp.x, hitY: rp.y });
+            SFX.hit && SFX.hit();
+          }
+        }
+      }
+      // the KICK: rears and throws both hind feet — the hardest hit it has,
+      // and a hoof that lands on a limb can break it
+      if (d.kick && e.stance === 'face') {
+        e.kickCd = Math.max(0, (e.kickCd || 0) - dt);
+        if (e.kickCd <= 0 && e.attackT <= 0.15) {
+          const kc = kickCircle(e);
+          const kp = bodyHitPoint(t, kc.x, kc.y, kc.r);
+          if (kp && (kp.x - e.x) * (e.facing || 1) > -2) {
+            e.kickCd = d.kick.cd; e.attackT = 1; e.atkKind = 'kick';
+            const kd = d.kick.dmg * rrange(0.85, 1.15);
+            dealDamage(t, kd, e, { kb: d.kick.kb || 400, hitX: kp.x, hitY: kp.y });
+            G.shake = Math.min(7, (G.shake || 0) + 2);
+            if (d.kick.bone) {
+              if (t.isPlayer) playerBoneBreak(t, kd);
+              else tryBoneBreak(e, t, kp.part === 'head' ? 'leg' : kp.part, kd);
+            }
+          }
+        }
+      }
       // the occasional bite (wuerhosaurus): a target standing at its FACE —
       // out of the tail's rear arc — takes a slower, weaker nip instead
       if (d.nip) {
@@ -2398,6 +2550,7 @@ const ECO_SPAWNS = {
   jungle: [
     { sp: 'talenk', pack: 3, sizes: [3, 4, 2, 3], den: 'plains', min: 8 },
     { sp: 'macrog', pack: 2, sizes: [2, 3], den: 'plains', min: 4 },
+    { sp: 'kunduro', pack: 5, sizes: [4, 3, 5, 3, 4], den: 'plains', min: 14 },   // the Reach's commonest big animal — herds everywhere
     { sp: 'bonita', n: 2, min: 2, away: true },
     { sp: 'overo', n: 3, min: 3, away: true },
     { sp: 'skorpio', n: 3, min: 3, away: true },
@@ -2406,6 +2559,44 @@ const ECO_SPAWNS = {
     // the channels run thick with fish — a buitreraptor's whole living
     { sp: 'lepisosteus', n: 12, min: 10 },
     { sp: 'bassb', n: 7, min: 6 },
+  ],
+  desert: [
+    // a big map, and a busy one: the packs range the sand, the herds cross
+    // it between waterholes, the belt holds the little things
+    // the raptors hold quarters: shri the north-west sand, kuru the north-east,
+    // tsaagan the south-west, adasaurus the south-east, luanchuan the northern
+    // belt, mahakala the southern belt — rivals meet where the quarters touch
+    // (the desert is vast and EMPTY — the dad's call: far fewer animals than
+    // the Reach, so finding anything out on the sand is an event)
+    { sp: 'shri', pack: 2, sizes: [3, 4], min: 5, zone: [0.02, 0.02, 0.42, 0.48] },
+    { sp: 'kuru', pack: 2, sizes: [3, 3], min: 4, zone: [0.58, 0.02, 0.98, 0.48] },
+    { sp: 'tsaagan', pack: 2, sizes: [3, 3], min: 4, zone: [0.02, 0.52, 0.42, 0.98] },
+    { sp: 'adasaurus', pack: 2, sizes: [3, 3], min: 4, zone: [0.58, 0.52, 0.98, 0.98] },
+    { sp: 'luanchuan', pack: 2, sizes: [3, 3], min: 4, zone: [0.3, 0.02, 0.7, 0.45] },
+    { sp: 'mahakala', pack: 2, sizes: [4, 3], min: 5, zone: [0.3, 0.55, 0.7, 0.98] },
+    { sp: 'procomp', pack: 2, sizes: [3, 4], min: 5, zone: [0.3, 0.3, 0.7, 0.8] },
+    { sp: 'homalo', pack: 2, sizes: [3, 2], min: 4, zone: [0.3, 0.2, 0.7, 0.7] },
+    // the hadrosaurs: the belt and the waterholes
+    { sp: 'willina', pack: 1, sizes: [3], min: 2, zone: [0.3, 0.1, 0.7, 0.9] },
+    { sp: 'bonaparte', pack: 1, sizes: [2, 3], min: 2, zone: [0.3, 0.1, 0.7, 0.9] },
+    { sp: 'huallas', pack: 1, sizes: [3], min: 2, zone: [0.3, 0.1, 0.7, 0.9] },
+    { sp: 'kelumapu', pack: 1, sizes: [3], min: 2, zone: [0.3, 0.1, 0.7, 0.9] },
+    { sp: 'gilmoreo', pack: 1, sizes: [3], min: 2, zone: [0.3, 0.1, 0.7, 0.9] },
+    { sp: 'bactro', pack: 1, sizes: [3, 4], min: 2, zone: [0.3, 0.1, 0.7, 0.9] },
+    { sp: 'plesio', pack: 2, sizes: [3, 4], den: 'plains', min: 5 },
+    // the two land theropods, and the river's own
+    { sp: 'deltadro', n: 2, min: 2, away: true },
+    { sp: 'eocarch', n: 1, min: 1, away: true },
+    { sp: 'suchos', n: 2, min: 2 },
+    { sp: 'megoro', n: 2, min: 2, biome: 'water' },
+    { sp: 'garudi', pack: 2, sizes: [3, 4], den: 'plains', min: 4 },
+    { sp: 'harpy', pack: 1, sizes: [4], den: 'plains', min: 3 },
+    { sp: 'sinorni', pack: 2, sizes: [5, 6], den: 'plains', min: 7 },
+    { sp: 'kinnaree', pack: 1, sizes: [4], den: 'plains', min: 3 },
+    { sp: 'beishan', pack: 1, sizes: [2, 3], den: 'plains', min: 2 },
+    { sp: 'aepyorni', pack: 2, sizes: [4, 5], den: 'plains', min: 6 },
+    { sp: 'epidex', n: 10, min: 8 },
+    { sp: 'lepisosteus', n: 8, min: 6 },
   ],
   moor: [
     { sp: 'gracili', pack: 3, sizes: [2, 3, 2], min: 5 },
@@ -2437,11 +2628,23 @@ function awayFromNests(posFn) {
   }
   return posFn();
 }
-function spawnPack(species, count, sizes, den) {
-  // hunter packs den near the mud pools; herds (den: 'plains') out on the grass
+function spawnPack(species, count, sizes, den, zone) {
+  // hunter packs den near the mud pools; herds (den: 'plains') out on the grass;
+  // a ZONE ([x0, y0, x1, y1] as map fractions) pins the pack to its own
+  // quarter of the map — the desert raptors each hold their own ground
   for (let pk = 0; pk < count; pk++) {
     let cx, cy;
-    if (den === 'plains' || !World.mudPools.length) {
+    if (zone) {
+      let best = null;
+      for (let k = 0; k < 60 && !best; k++) {
+        const x = (zone[0] + rnd() * (zone[2] - zone[0])) * WORLD_W, y = (zone[1] + rnd() * (zone[3] - zone[1])) * WORLD_H;
+        if (isWaterPx(x, y) || isMudPx(x, y) || isCliffPx(x, y) || nearAnyNest(x, y, 420)) continue;
+        const wantForest = (NPC_DEF[species].biome === 'forest');
+        if (wantForest ? forestShadePx(x, y) > 0.35 : forestShadePx(x, y) < 0.3 || NPC_DEF[species].biome === 'any') best = { x, y };
+      }
+      if (!best) best = awayFromNests(randPlainsPos);
+      cx = best.x; cy = best.y;
+    } else if (den === 'plains' || !World.mudPools.length) {
       // herds den on the open grass — and so does everyone on worlds
       // without mud pools (the Wall has snow where the wallows would be)
       const pp = awayFromNests(randPlainsPos);
@@ -2464,13 +2667,14 @@ function spawnPack(species, count, sizes, den) {
 function spawnInitialNPCs() {
   G.npcs.length = 0;
   for (const spec of ECO_SPAWNS[World.eco]) {
-    if (spec.pack) { spawnPack(spec.sp, spec.pack, spec.sizes, spec.den); continue; }
+    if (spec.pack) { spawnPack(spec.sp, spec.pack, spec.sizes, spec.den, spec.zone); continue; }
     for (let i = 0; i < spec.n; i++) {
       const pos = spec.away ? awayFromNests(() => spawnPosFor(spec.sp, i, spec.biome)) : spawnPosFor(spec.sp, i, spec.biome);
       G.npcs.push(makeNPC(spec.sp, pos.x, pos.y));
     }
   }
   recordPackBases();   // the packs' ORIGINAL rosters anchor all pack scaling
+  if (typeof spawnBloodlines === 'function') spawnBloodlines();   // families settled here by the Great Walk
 }
 // ---------- pack scaling: the packs grow with the player ----------
 // The power model lets a growing player drop off every pack's menu for good.
@@ -2480,7 +2684,7 @@ function spawnInitialNPCs() {
 // rule is the only road back, and recruits are shed again when the player's
 // power collapses (death, species swap). Recruits are flagged packBonus so
 // maintainPopulation never counts them.
-const PACK_SCALE_SPECIES = new Set(['guanlong', 'troodon', 'hesper', 'linhe', 'dakota', 'aardi', 'pectino', 'gracili', 'masiak', 'achillo']);
+const PACK_SCALE_SPECIES = new Set(['guanlong', 'troodon', 'hesper', 'linhe', 'dakota', 'aardi', 'pectino', 'gracili', 'masiak', 'achillo', 'shri', 'kuru', 'tsaagan', 'luanchuan', 'adasaurus', 'procomp']);
 const PACK_BONUS_MAX = 5;      // at most this many recruits beyond the original roster
 const PACK_TARGET_MUL = 1.1;   // recruit until the hunt is just worth it
 const PACK_RECRUIT_MIN_D = 620;   // a recruit never appears closer to the player than this
@@ -2552,7 +2756,7 @@ function updatePackScale() {
 }
 function maintainPopulation() {
   const counts = {};
-  for (const e of G.npcs) { if (!e.packBonus) counts[e.species] = (counts[e.species] || 0) + 1; }
+  for (const e of G.npcs) { if (!e.packBonus && !e.bloodline) counts[e.species] = (counts[e.species] || 0) + 1; }
   for (const spec of ECO_SPAWNS[World.eco]) {
     if ((counts[spec.sp] || 0) < spec.min) {
       for (let k = 0; k < 30; k++) {
@@ -2696,6 +2900,11 @@ function updatePlayer(dt) {
   }
 
   // ------ stunned: thrown off a wrestle — the world spins ------
+  // a broken leg knits on its own clock
+  if (p.bones && p.bones.leg) {
+    p.boneT = (p.boneT != null ? p.boneT : 40) - dt;
+    if (p.boneT <= 0) { p.bones = null; G.banner = { str: 'Your leg has knit — you can run again.', t: 4, color: '#a3bf58' }; }
+  }
   if (p.stunT > 0) {
     p.stunT -= dt;
     p.move = lerp(p.move, 0, 0.2);
@@ -2704,6 +2913,47 @@ function updatePlayer(dt) {
     collideStatics(p, 6 + 10 * p.growth);
     G.prompt = 'stunned!';
     return;
+  }
+
+  // ------ THE HEAT (the Death Desert only) ------
+  // The mirror of the cold: the sun cooks you every second you stand on the
+  // open sand — the heat bar climbs, and the hotter you are the SLOWER you
+  // move. At 100 you go down with heatstroke: locked in place, hp draining.
+  // Water and mud cool you; the shade of a tree cools you; RESTING in shade
+  // is the fastest way back down. Night is kind. A sandstorm is not.
+  p.heatSlow = 1;
+  if (World.desert) {
+    if (p.strokeT > 0) {
+      p.strokeT -= dt;
+      p.move = lerp(p.move, 0, 0.3);
+      p.hp -= 6 * dt;
+      if (p.hp <= 0) { killPlayer('the heat'); return; }
+      if (Math.random() < dt * 5) floatText(p.x + rrange(-10, 10), p.y - 46 - rrange(0, 12), '☀', '#ffd27a');
+      if (p.strokeT <= 0) { p.heat = 70; floatText(p.x, p.y - 50, 'back on your feet… barely', '#ffd27a'); }
+      collideStatics(p, 6 + 10 * p.growth);
+      G.prompt = 'HEATSTROKE — find shade…';
+      return;
+    }
+    const resist = (def.heatResist || 0) + ((SKINS[p.skin] && SKINS[p.skin].heatResist) || 0);   // a feather coat (Dunerider) keeps the sun off
+    const wet = isWaterPx(p.x, p.y) || isMudPx(p.x, p.y);
+    const shade = wet || inTreeShade(p.x, p.y);
+    const night = (G.day && G.day.nightF) || 0;
+    if (shade || night > 0.6) {
+      // relief: mud and water fastest, shade good, resting in shade best
+      p.heat = Math.max(0, (p.heat || 0) - ((wet ? 3.2 : shade ? 1.4 : 0.8) + (p.resting ? 2.4 : 0)) * dt);
+    } else {
+      // exposure: the sun (noon worst, night nothing), doubled and more by a sandstorm
+      const sun = Math.max(0, 1 - night * 1.4);
+      const storm = G.sandstorm && G.sandstorm.on ? 2.6 : 1;
+      p.heat = Math.min(100, (p.heat || 0) + 1.5 * sun * storm * (1 - resist) * dt);
+    }
+    p.heatSlow = 1 - 0.35 * Math.pow((p.heat || 0) / 100, 1.3);
+    if (p.heat >= 100) {
+      p.strokeT = 5 + rnd() * 3;
+      p.resting = false; p.pounce = null;
+      floatText(p.x, p.y - 52, '☀ HEATSTROKE ☀', '#fff0c0');
+      G.banner = { str: 'The sun takes you. Find shade…', t: 3, color: '#ffd27a' };
+    }
   }
 
   // ------ THE COLD (the Nivalotitan Wall only) ------
@@ -3089,7 +3339,7 @@ function updatePlayer(dt) {
       const curve = def.slowStart ? 0.5 + 0.5 * p.growth : 0.62 + 0.38 * p.growth;
       let terr = terrainSpeedAt(p.x, p.y);
       if (def.swim && isWaterPx(p.x, p.y)) terr = def.swimMul || 1.15;   // a swimmer glides through water
-      let sp = def.speed * genderMod(p).speed * curve * terr * (p.coldSlow || 1);
+      let sp = def.speed * genderMod(p).speed * curve * terr * (p.coldSlow || 1) * (p.heatSlow || 1) * (p.bones && p.bones.leg ? 0.5 : 1);
       if (input.sprint && !p.exhausted && p.stamina > 0) {
         sp *= def.sprint;
         p.stamina -= 20 * dt;
@@ -3215,7 +3465,7 @@ function updatePlayer(dt) {
     let best = null, bestPt = null, bd = 1e9;
     for (const e of G.npcs) {
       // no friendly fire: never your packmates, your babies, or your mate
-      if (e.packAlpha || e.isBaby || e === G.mate) continue;
+      if (e.packAlpha || e.isBaby || e === G.mate || kinLine(e)) continue;
       // any part of the victim's body counts — but only on the weapon's side
       for (const z of zones) {
         const pt = bodyHitPoint(e, z.x, z.y, z.r);
@@ -3238,7 +3488,9 @@ function updatePlayer(dt) {
       dealDamage(best, playerDmg() * rrange(0.9, 1.1) * (p.landBiteMul || 1), p, opts);
       // the bone-breakers: sarcosaurus' whole kit, dryptosaurus' bigger jaws,
       // nanuqsaurus' polar crush — the bite CRACKS the very part it landed on
-      if (def.boneBreak && p.growth > 0.2) tryBoneBreak(p, best, bestPt.part, playerDmg());
+      // (pounceBone: only the LANDING strike cracks anything — the skull comes
+      // down with the whole animal behind it; a standing ram does not)
+      if ((def.boneBreak || (def.pounceBone && p.landBite)) && p.growth > 0.2) tryBoneBreak(p, best, bestPt.part, playerDmg() * (def.pounceBone ? 1.6 : 1));
     }
     p.landBite = false;   // the waiver lasts exactly one bite
     p.landBiteMul = 1;
@@ -3255,7 +3507,7 @@ function updatePlayer(dt) {
     const tz = trampleZone(p);
     const myS = DINO[p.species].scale * sizeScale(p.growth);
     for (const e of G.npcs) {
-      if (DINO[e.species].fish || e.packAlpha || e.isBaby || e === G.mate) continue;
+      if (DINO[e.species].fish || e.packAlpha || e.isBaby || e === G.mate || kinLine(e)) continue;
       const es = DINO[e.species].scale * sizeScale(e.growth != null ? e.growth : 1);
       if (es > myS * 0.75) continue;                       // too big to go under
       if ((e._trampleCd || 0) > G.time) continue;
@@ -3366,7 +3618,7 @@ function updatePlayer(dt) {
   // a species has one F-move or the other, never both.
   if (def.clawSecond && !p.carry && !p.fishing && p.actionT <= 0 && !p.pounce) {
     for (const e of G.npcs) {
-      if (DINO[e.species].fish || e.packAlpha || e.isBaby || e === G.mate) continue;
+      if (DINO[e.species].fish || e.packAlpha || e.isBaby || e === G.mate || kinLine(e)) continue;
       if (dist(p.x, p.y, e.x, e.y) < 150) { G.prompt = (G.prompt ? G.prompt + '    ' : '') + 'M — Claw slash'; break; }
     }
     if (input.claw && p.clawCd <= 0) {
@@ -3379,7 +3631,7 @@ function updatePlayer(dt) {
       const z = clawArcCircle(p);
       let best = null, bestPt = null, bd = 1e9;
       for (const e of G.npcs) {
-        if (e.packAlpha || e.isBaby || e === G.mate) continue;
+        if (e.packAlpha || e.isBaby || e === G.mate || kinLine(e)) continue;
         const pt = bodyHitPoint(e, z.x, z.y, z.r);
         if (!pt) continue;
         if ((pt.x - p.x) * p.facing < -2) continue;   // front side only
@@ -3401,7 +3653,7 @@ function updatePlayer(dt) {
   // damage is poekilopleuron's whole kit — this is the exclamation mark.
   if (def.doubleBite && !p.carry && !p.fishing && p.actionT <= 0 && !p.pounce) {
     for (const e of G.npcs) {
-      if (DINO[e.species].fish || e.packAlpha || e.isBaby || e === G.mate) continue;
+      if (DINO[e.species].fish || e.packAlpha || e.isBaby || e === G.mate || kinLine(e)) continue;
       if (dist(p.x, p.y, e.x, e.y) < 150) { G.prompt = (G.prompt ? G.prompt + '    ' : '') + 'M — Double bite'; break; }
     }
     if (input.claw && p.dblCd <= 0) {
@@ -3425,7 +3677,7 @@ function updatePlayer(dt) {
       if (DINO[p.species].armAndJaw) zones.push(clawArcCircle(p));
       let best = null, bestPt = null, bd = 1e9;
       for (const e of G.npcs) {
-        if (e.packAlpha || e.isBaby || e === G.mate) continue;
+        if (e.packAlpha || e.isBaby || e === G.mate || kinLine(e)) continue;
         for (const z of zones) {
           const pt = bodyHitPoint(e, z.x, z.y, z.r);
           if (!pt) continue;
@@ -3456,8 +3708,8 @@ function updatePlayer(dt) {
   G.packTargetT = Math.max(0, (G.packTargetT || 0) - dt);
   if (G.packTarget && (G.packTarget.hp <= 0 || G.packTargetT <= 0 || G.npcs.indexOf(G.packTarget) < 0)) G.packTarget = null;
   G.pack = (G.pack || []).filter(e => e.hp > 0 && e.packAlpha && G.npcs.indexOf(e) >= 0);
-  if (p.species === 'aardi') {
-    const near = G.npcs.filter(e => e.species === 'aardi' && !e.packAlpha && !e.isMate && !e.isBaby &&
+  if (def.packSpecies) {
+    const near = G.npcs.filter(e => e.species === p.species && !e.packAlpha && !e.isMate && !e.isBaby &&
       e.hp > 0 && dist(e.x, e.y, p.x, p.y) < 170);
     if (near.length) {
       // the invitation is a VOICE now: the friendly call (2) does the asking
@@ -3465,6 +3717,10 @@ function updatePlayer(dt) {
     }
   }
 
+  // an F press none of the player's own verbs used goes on to the nest and
+  // the courtship (updateNesting runs after this — it used to find the key
+  // already cleared here, so courting and laying eggs could never happen)
+  G.fFree = !!input.action;
   input.action = false;
 }
 
@@ -3618,7 +3874,7 @@ function tickDenBrood(dt) {
         bb.x = ns.den.x + rrange(-10, 10);
         bb.y = ns.den.y + rrange(6, 16);
         G.npcs.push(bb);
-        if (p.species === 'aardi') { bb.packAlpha = true; G.pack.push(bb); }
+        if (PLAYER_DEF[p.species].packSpecies) { bb.packAlpha = true; G.pack.push(bb); }
         floatText(bb.x, bb.y - 30, 'a young one emerges!', '#ffd23e');
       } else anyDen = true;
     }
@@ -3960,8 +4216,8 @@ function fireCall(p, k) {
     }
   } else if (k === 2) {
     // FRIENDLY: the invitation — kin who hear it fall in behind the alpha
-    if (p.species !== 'aardi') return;
-    const near = G.npcs.filter(e => e.species === 'aardi' && !e.packAlpha && !e.isMate && !e.isBaby &&
+    if (!PLAYER_DEF[p.species].packSpecies) return;
+    const near = G.npcs.filter(e => e.species === p.species && !e.packAlpha && !e.isMate && !e.isBaby &&
       e.hp > 0 && dist(e.x, e.y, p.x, p.y) < 170);
     for (const e of near) {
       e.packAlpha = true;
@@ -3972,7 +4228,7 @@ function fireCall(p, k) {
       G.pack.push(e);
     }
     if (near.length) {
-      G.banner = { str: 'You are the alpha! ' + G.pack.length + ' aardiraptors run with you now.', t: 4, color: '#ffd23e' };
+      G.banner = { str: 'You are the alpha! ' + G.pack.length + ' of your kind run with you now.', t: 4, color: '#ffd23e' };
       SFX.stage();
     }
   } else {
@@ -4015,6 +4271,7 @@ function fireCall(p, k) {
 // the object it applies to (a wrestle target, a carcass) on p.fActObj.
 function resolveAction(p, def) {
   p.fActObj = null;
+  if (G.courtOffer) return null;   // the nest / the mate owns F right now (updateNesting)
   if (p.bathing || p.fishing || p.hidden || p.actionT > 0) return null;
   // settled in mud: the scrub is the only thing you can do lying down
   if (p.resting) return (p.restT >= 1 && isMudPx(p.x, p.y) && p.hygiene < 100) ? 'bathe' : null;
@@ -4189,6 +4446,16 @@ function checkStage(p, oldGrowth) {
     const oldMax = PLAYER_DEF[p.species].hp * hpFrac(oldGrowth);
     p.hp = clamp(p.hp / oldMax, 0, 1) * playerMaxHp();
     SFX.stage();
+    // reaching ADULT (not just Full Adult) is a deed some gates read
+    if (p.growth >= 0.9 && typeof Save !== 'undefined') {
+      Save.adultOnce = Save.adultOnce || {};
+      if (!Save.adultOnce[p.species]) {
+        Save.adultOnce[p.species] = true;
+        if (typeof saveSave === 'function') saveSave();
+        const fresh = typeof syncEcoUnlocks === 'function' ? syncEcoUnlocks() : [];
+        if (fresh.length) setTimeout(() => { G.banner = { str: fresh.join(', ') + ' has opened!', t: 6, color: '#ffd23e' }; }, 4500);
+      }
+    }
     if (newStage === 'Full Adult') {
       p.wins = true;
       G.banner = { str: 'FULLY GROWN — you survived to adulthood!', t: 6, color: '#ffd23e' };

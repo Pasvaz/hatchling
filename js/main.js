@@ -41,10 +41,27 @@ const PROFILES_KEY = 'hatchling_profiles_v1';
 const LEGACY_SAVE_KEY = 'hatchling_save_v1';
 // earned = lifetime growths score (never spent down — it's the leaderboard)
 // ecoPaid = one flag per unlocked ecosystem, ready for however many we add
-function defaultSave() { return { growths: 0, earned: 0, ecoPaid: {}, mastery: {}, owned: {}, dino: {}, skinChoice: {}, genderChoice: {}, skinOwned: {}, discovered: {}, arrived: {}, hatched: {}, titles: {}, titleWorn: null, ecoSeen: {} }; }
+function defaultSave() { return { growths: 0, earned: 0, ecoPaid: {}, mastery: {}, owned: {}, dino: {}, skinChoice: {}, genderChoice: {}, skinOwned: {}, discovered: {}, arrived: {}, hatched: {}, titles: {}, titleWorn: null, ecoSeen: {}, settled: {} }; }
 // paid skins are bought once per species (Classic and other free skins pass)
 function skinOwned(species, skinId) {
-  return !SKINS[skinId].cost || !!(Save.skinOwned || {})[species + ':' + skinId];
+  // a free EARNED coat (the Legacy) is owned the moment its deed is done
+  if (!SKINS[skinId].cost) return !SKINS[skinId].req || skinReqMet(species, skinId);
+  return !!(Save.skinOwned || {})[species + ':' + skinId];
+}
+// earned coats: the deed the save must hold, and what to tell the player
+// if it doesn't
+const SKIN_REQS = {
+  kunduroKill: { met: () => !!Save.kunduroKill, msg: 'slay a Kundurosaurus as an Adult first' },
+  settled: { met: (sp) => !!(Save.settled || {})[sp], msg: 'lead a family home on the Great Walk first' },
+  storms3: { met: (sp) => ((Save.stormsRidden || {})[sp] || 0) >= 3, msg: (sp) => 'ride out 3 monsoons as ' + DINO[sp].name + ' first (' + ((Save.stormsRidden || {})[sp] || 0) + '/3)' },
+};
+function skinReqMet(species, skinId) {
+  const r = SKINS[skinId].req;
+  return !r || !SKIN_REQS[r] || SKIN_REQS[r].met(species);
+}
+function skinReqMsg(species, skinId) {
+  const r = SKIN_REQS[SKINS[skinId].req];
+  return typeof r.msg === 'function' ? r.msg(species) : r.msg;
 }
 // the loadout currently chosen on a species' lobby card — remembered per
 // species, defaulting to male + Classic the first time (a bad/unowned skin
@@ -97,7 +114,13 @@ const CHAIN = [
   ['buitre'], ['hypsi'], ['adratik'], ['orkor'],               // 🌴 The Sodden Reach
   ['neove', 'coahuila'],   // the fork: quiet hands or great horns — either one
   ['poekilo'],             // …opens the road to the Reach's true apex
+  ['procomp'], ['homalo'], ['coelo'],   // ☀️ The Death Desert — the first rung has its own gate (see spUnlocked)
 ];
+// the desert's door: an ADULT Poekilopleuron at least once, or Full Adult
+// Neovenator and Coahuilaceratops together
+function desertGateMet() {
+  return !!(Save.adultOnce || {}).poekilo || !!(Save.mastery.neove && Save.mastery.coahuila);
+}
 function chainRung(sp) { return CHAIN.findIndex(r => r.includes(sp)); }
 // a species is playable if: it's the chain's first rung, the rung before it
 // has a mastered member, it was bought/earned under the old economy (owned),
@@ -106,7 +129,9 @@ function spUnlocked(sp) {
   const def = PLAYER_DEF[sp];
   if (def.secret) return !!Save.owned[sp];
   if (Save.owned[sp]) return true;
+  if (def.gate === 'desert') return desertGateMet();
   const i = chainRung(sp);
+  // rungs after a gated one open the normal way (master the rung before)
   if (i < 0) return false;
   return i === 0 || CHAIN[i - 1].some(m => Save.mastery[m])
     // the Moors' gate has a second key: an ADULT frozen giant will do
@@ -117,6 +142,8 @@ function rungGuardNames(i) {
   return CHAIN[i - 1].map(m => DINO[m].name.toUpperCase()).join(' or ');
 }
 function rungHint(i) {
+  if (CHAIN[i] && PLAYER_DEF[CHAIN[i][0]].gate === 'desert')
+    return 'grow POEKILOPLEURON to ADULT once — or NEOVENATOR and COAHUILACERATOPS to FULL ADULT';
   if (CHAIN[i - 1] && CHAIN[i - 1].includes('nivarex'))
     return 'grow NIVAREX to FULL ADULT — or NIVALOTITAN to ADULT';
   return 'grow ' + rungGuardNames(i) + ' to FULL ADULT';
@@ -207,11 +234,13 @@ function saveDinoSnapshot() {
     growth: p.growth, hp: p.hp, food: p.food, water: p.water,
     stamina: p.stamina, hygiene: p.hygiene, x: p.x, y: p.y,
     cold: p.cold || 0,
+    heat: p.heat || 0,
     // the body's condition travels too — the lobby is not a hospital:
     // an open wound keeps bleeding right where you left off
     bleed: p.bleed ? { dps: p.bleed.dps, t: p.bleed.t } : null,
     bones: p.bones || null,
     exhausted: !!p.exhausted,
+    gen: p.gen || 1,
   };
   saveSave();
 }
@@ -227,6 +256,9 @@ window.addEventListener('keydown', (e) => {
   if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
   if (['Space', 'Tab', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
   if (e.repeat) return;
+  // any key skips the Great Walk's ending (after a beat, so the key that
+  // was already held down doesn't swallow it)
+  if (G.cine) { if (G.cine.t > 0.8) G.cine.skip = true; return; }
   G.keys[e.code] = true;
   if (KEYMAP[e.code]) G.input[KEYMAP[e.code]] = true;
   if (e.code === 'Space') { G.input.attack = true; G.input.atkHold = true; }
@@ -306,7 +338,8 @@ function animatePreview(canvasId, species, gender, growth, skinId) {
     c2.fillRect(0, H - 22, W, 22);
     c2.fillStyle = '#7a7d44';
     for (let i = 0; i < 8; i++) c2.fillRect(10 + i * 22, H - 22 + (i % 3) * 5, 2, 2);
-    const g = growth != null ? growth : 0.04;
+    const settled = growth == null && (Save.settled || {})[species];
+    const g = growth != null ? growth : settled ? 1 : 0.04;
     // grown previews (the gender picker) render smaller so they still fit
     let zoom = 2.8 / (0.35 + 0.65 * sizeScale(g) / sizeScale(0.04));
     // …and the giants (sauropods!) get capped by their actual footprint so a
@@ -321,6 +354,15 @@ function animatePreview(canvasId, species, gender, growth, skinId) {
     c2.save();
     c2.translate(W / 2 - 6, H - 18);
     c2.scale(zoom, zoom);
+    if (settled) {
+      // the young who made it, standing behind the parent
+      for (const [ox, gg, ph] of [[-0.26, 'f', 1.3], [0.24, 'm', 2.1]]) {
+        const yo = 0.32;
+        c2.save(); c2.translate(ox * 178 / zoom, -5);
+        drawDino(c2, species, { x: 0, y: 0, facing: 1, gender: gg, skin: skinId, growth: yo, move: 0.6, phase: t * 4.2 + ph, attackT: 0, headDown: 0, hurtT: 0 });
+        c2.restore();
+      }
+    }
     drawShadow(c2, 0, 0, 14);
     drawDino(c2, species, {
       x: 0, y: -hop, facing: 1, gender, skin: skinId,
@@ -381,6 +423,9 @@ const CARD_INFO = {
   buitre: { desc: 'A long-legged river ghost on black pin legs. Its slender snout is built for fish — and fish feed it DOUBLE. It wades deep water where others must swim, slowly, and its bite will not stop bleeding.', tag: '◆ CARNIVORE — FISHER', tagClass: 'swim' },
   hypsi: { desc: 'A tiny feathered thicket-mouse. Fast, fragile, and hunted by everything — but it can throw itself into the earth, and for ten seconds nothing on the Reach will touch it.', tag: '◆ HERBIVORE — HARD', tagClass: 'hard' },
   adratik: { desc: 'The oldest stegosaur of them all: a low spiked wall that opens wounds. Every plate edge and tail spike leaves the attacker leaking. Slow, patient, and very hard to finish.', tag: '◆ HERBIVORE — BLEED TANK', tagClass: 'mod' },
+  procomp: { desc: 'A miniature Coelophysis, feathered from the egg, with a slim long head and a tank that never runs dry. Alone it is a snack — but call your kin (2) and the pack runs with you, hunts with you, and shares your kills.', tag: '◆ CARNIVORE — THE PACK', tagClass: 'mod' },
+  homalo: { desc: 'A flat-domed pachycephalosaur between the two runners in size. A herbivore — but call your kin (2) and a whole herd rams beside you, and your POUNCE comes down skull-first: land it on a leg and the bone breaks.', tag: '◆ HERBIVORE — THE PACK', tagClass: 'mod' },
+  coelo: { desc: 'A Triassic ghost on the red sand: short legs, a deep S-curved neck, and speed that nothing in the belt can answer. The heat will kill you before the raptors do — hunt Epidexipteryx under the giants, drink where you can, and rest in the shade.', tag: '◆ CARNIVORE — THE HEAT', tagClass: 'hard' },
   orkor: { desc: 'The last of the megaraptorids — long hooked arms, blade teeth, and real speed. It opens prey with its hands as much as its jaws, and the bleeding does the rest.', tag: '◆ CARNIVORE — BLEEDER', tagClass: 'mod' },
   neove: { desc: 'The quiet hunter of the Reach. It does not chase the way the tyrants chase — it arrives. Hands and jaws together, and everything it touches bleeds.', tag: '◆ CARNIVORE — HUNTER', tagClass: 'hard' },
   coahuila: { desc: 'Possibly the longest brow horns anything ever grew, and a committed charge on the far end of them. Every wound those horns open keeps working — crazy bleed on four legs.', tag: '◆ HERBIVORE — BLEEDER', tagClass: 'mod' },
@@ -617,6 +662,8 @@ TITLES.push(
   { id: 'eight-lands', name: 'Master of the Eight Lands', icon: '🌍', desc: 'Master every dinosaur in the world', test: () => ALL_PLAYABLES.filter(sp => !PLAYER_DEF[sp].secret).every(sp => Save.mastery[sp]) },
   { id: 'giantfinder', name: 'Giantfinder', icon: '🧊', desc: 'Find what sleeps in the high maze', test: () => !!Save.owned.nivalo },
   { id: 'parent', name: 'Parent', icon: '🥚', desc: 'Raise a clutch of young', test: () => !!Save.raisedClutch },
+  { id: 'settler', name: 'Settler', icon: '⚜', desc: 'Lead a family home on the Great Walk', test: () => Object.keys(Save.settled || {}).length >= 1 },
+  { id: 'dynasty', name: 'Dynasty', icon: '👑', desc: 'Raise a bloodline to its fifth generation', test: () => Object.values(Save.settled || {}).some(r => r.gen >= 4) },
   { id: 'stormrider', name: 'Stormrider', icon: '⛈️', desc: 'Live through a whole monsoon', test: () => !!Save.stormRider },
   { id: 'packbreaker', name: 'Packbreaker', icon: '💥', desc: 'Wipe a pack out to the last', test: () => !!Save.packBreaker },
 );
@@ -679,17 +726,19 @@ function decorateEcoTab(key) {
     return sd && sd.growth >= TAB_ADULT_G;
   });
   const adults = roster.filter(isAdult);
+  const lines = roster.filter(sp => (Save.settled || {})[sp]);
   // the rim: the three feats, then one gold pip per currently-adult dino
   const rim = d ? [
     ['', !!Save.arrived[key]],
     ['', roster.every(sp => Save.hatched[sp])],
     ['', roster.every(sp => Save.mastery[sp])],
     ...adults.map(() => ['adult', true]),
+    ...lines.map(() => ['settled', true]),
   ] : [];
   const step = Math.min(TABPIP_STEP, rim.length > 1 ? 160 / (rim.length - 1) : TABPIP_STEP);
   rim.forEach(([kind, lit], i) => {
     const pip = document.createElement('span');
-    pip.className = 'tabpip' + (kind === 'adult' ? ' adult' : lit ? ' lit' : '');
+    pip.className = 'tabpip' + (kind === 'adult' ? ' adult' : kind === 'settled' ? ' settled' : lit ? ' lit' : '');
     pip.style.setProperty('--a', ((i - (rim.length - 1) / 2) * step) + 'deg');
     tab.appendChild(pip);
   });
@@ -708,6 +757,10 @@ function decorateEcoTab(key) {
     ad.className = 'tffeat' + (adults.length ? ' adult' : '');
     ad.textContent = (adults.length ? '●' : '○') + ' ' + adults.length + ' walking this land full-grown';
     feats.appendChild(ad);
+    const sl = document.createElement('div');
+    sl.className = 'tffeat' + (lines.length ? ' settled' : '');
+    sl.textContent = (lines.length ? '⚜' : '○') + ' ' + lines.length + ' bloodline' + (lines.length === 1 ? '' : 's') + ' settled here';
+    feats.appendChild(sl);
   }
   tab.classList.toggle('gold', all);
   const done = roster.filter(sp => Save.mastery[sp]).length;
@@ -857,6 +910,7 @@ function buildTitleUI() {
       // bar and skin row swallow their own clicks.
       card.innerHTML = '<div class="side"><div class="prevwrap"><canvas width="200" height="120"></canvas><span class="ownbadge"></span></div>' +
         '<div class="meta"><div class="diff"></div></div>' +
+        '<div class="crest"></div>' +
         '<div class="gsel">' +
         '<span class="gseg" data-g="f">♀ Female<span class="tip"></span></span>' +
         '<span class="gseg" data-g="m">♂ Male<span class="tip"></span></span>' +
@@ -984,6 +1038,12 @@ function refreshTitle() {
     priceEl.style.display = owned ? 'none' : '';
     // the chosen loadout's growth sits right under the difficulty tag
     fillCardGrowth(sp, card);
+    // THE CREST: a species that walked its family home says so, forever —
+    // how many times, how many young made it, and the generation hatching next
+    const st = (Save.settled || {})[sp];
+    const crest = card.querySelector('.crest');
+    crest.textContent = st ? '⚜ SETTLED' + (st.walks > 1 ? ' ×' + st.walks : '') + ' · ' + st.total + ' YOUNG HOME · NEXT GEN ' + roman(st.gen + 1) : '';
+    card.classList.toggle('settled', !!st);
     // rebuild the swatches so OWNED / affordability labels track the live
     // balance (they're first built at boot, before a profile is even chosen)
     buildCardSkins(sp, card.querySelector('.skinsel'));
@@ -1055,8 +1115,10 @@ function buildCardSkins(sp, container) {
     // it's still locked. The green ✓ check (absolute, no layout effect) marks
     // whichever swatch is currently selected — Classic included.
     const label = document.createElement('div');
-    if (!def.cost) { label.className = 'csklabel base'; label.textContent = 'BASE'; }
+    if (!def.cost && def.req) { const ok = skinReqMet(sp, id); label.className = 'csklabel ' + (ok ? 'owned' : 'poor'); label.textContent = ok ? 'LEGACY' : '🔒 LEGACY'; }
+    else if (!def.cost) { label.className = 'csklabel base'; label.textContent = 'BASE'; }
     else if (owned) { label.className = 'csklabel owned'; label.textContent = 'OWNED'; }
+    else if (!skinReqMet(sp, id)) { label.className = 'csklabel poor'; label.textContent = '🔒 ❖' + def.cost; }
     else { label.className = 'csklabel' + (Save.growths < def.cost ? ' poor' : ''); label.textContent = '❖' + def.cost; }
     sq.appendChild(label);
     if (selected) {
@@ -1069,6 +1131,7 @@ function buildCardSkins(sp, container) {
       ev.stopPropagation();
       let bought = false;
       if (!skinOwned(sp, id)) {
+        if (!skinReqMet(sp, id)) { flashTitleMsg(def.name + ' must be EARNED: ' + skinReqMsg(sp, id) + '.'); return; }
         if (Save.growths < def.cost) { flashTitleMsg(def.name + ' costs ❖ ' + def.cost + needMsg(def.cost)); return; }
         if (document.body.classList.contains('touch')) {
           const key = sp + ':' + id;
@@ -1226,6 +1289,39 @@ function drawSkinSwatch(cv, species, skinId) {
       x.moveTo(dx - r, dy + r * 0.4); x.lineTo(dx, dy - r); x.lineTo(dx + r, dy); x.lineTo(dx, dy + r);
       x.closePath(); x.fill();
     }
+  } else if (skinId === 'slayer') {
+    x.lineCap = 'round';
+    for (let k = 0; k < n; k++) {
+      const sx = (k + 0.3) / n * W, sy = H * (0.3 + rng() * 0.35), ln = H * (0.25 + rng() * 0.2), ang = -0.4 + rng() * 0.9;
+      x.strokeStyle = C.acc; x.lineWidth = H * 0.05;
+      x.beginPath(); x.moveTo(sx, sy); x.lineTo(sx + Math.cos(ang) * ln, sy + Math.sin(ang) * ln); x.stroke();
+      x.lineWidth = H * 0.03;
+      for (let j = 1; j <= 2; j++) { const t = j / 3, px = sx + Math.cos(ang) * ln * t, py = sy + Math.sin(ang) * ln * t; x.beginPath(); x.moveTo(px - Math.sin(ang) * H * 0.06, py + Math.cos(ang) * H * 0.06); x.lineTo(px + Math.sin(ang) * H * 0.06, py - Math.cos(ang) * H * 0.06); x.stroke(); }
+    }
+  } else if (skinId === 'tideripper') {
+    x.lineCap = 'round';
+    for (const [fy, col, lw] of [[0.45, C.pat, 0.06], [0.43, mixHex(C.acc, '#ffffff', 0.5), 0.03], [0.68, C.pat, 0.06], [0.66, mixHex(C.acc, '#ffffff', 0.5), 0.03]]) {
+      x.strokeStyle = col; x.lineWidth = H * lw;
+      const steps = Math.ceil(W / (H * 0.3));
+      x.beginPath();
+      for (let i = 0; i <= steps; i++) { const px = i * H * 0.3, pm = (i - 0.5) * H * 0.3; if (i === 0) x.moveTo(px, H * fy); else x.quadraticCurveTo(pm, H * fy - H * 0.1, px, H * fy); }
+      x.stroke();
+    }
+  } else if (skinId === 'dunerider') {
+    // feather shingles raking back along the coat
+    x.strokeStyle = C.pat; x.lineWidth = Math.max(1, H * 0.035); x.lineCap = 'round';
+    for (let k = 0; k < n * 2; k++) {
+      const fx = (k + 0.4) / (n * 2) * W, fy = H * (0.28 + (k % 3) * 0.16 + rng() * 0.06);
+      x.beginPath(); x.moveTo(fx, fy); x.quadraticCurveTo(fx - H * 0.08, fy + H * 0.05, fx - H * 0.16, fy + H * 0.03); x.stroke();
+    }
+  } else if (SKINS[skinId] && SKINS[skinId].legacy) {
+    // the legacy coat: the species' own banding in its screen colours, with
+    // a row of crest diamonds down the middle
+    x.fillStyle = C.acc;
+    for (let k = 0; k < n; k++) {
+      const dx = (k + 0.5) / n * W, dy = H * 0.56, r = H * 0.09;
+      x.beginPath(); x.moveTo(dx, dy - r); x.lineTo(dx + r * 0.8, dy); x.lineTo(dx, dy + r); x.lineTo(dx - r * 0.8, dy); x.closePath(); x.fill();
+    }
   } else if (skinId === 'jungell') {
     for (let k = 0; k < n; k++) {
       const dx = (k + 0.5) / n * W + (rng() - 0.5) * H * 0.2, dy = H * (0.3 + rng() * 0.4), r = H * (0.05 + rng() * 0.03);
@@ -1297,6 +1393,9 @@ const START_BANNERS = {
   hypsi: 'You hatch in the thicket. When the world comes for you, go underground.',
   adratik: 'You hatch spiked and slow. Let them come — everything you touch bleeds.',
   orkor: 'You hatch with hooks for hands. Nothing here outruns you.',
+  coelo: 'You hatch on hot sand. The shade is life. The sun is not your friend.',
+  procomp: 'You hatch small and feathered. Find your kin — the sand is no place to be alone.',
+  homalo: 'You hatch hard-headed. Gather the herd, and let nothing stand in front of you.',
   neove: 'You hatch in the green dark. Learn to arrive without being seen.',
   coahuila: 'You hatch horn-budded. One day nothing will dare stand in front of you.',
   poekilo: 'You hatch heavy-boned. Grow — the Reach will learn your name.',
@@ -1370,6 +1469,10 @@ function respawn(species, gender, skin) {
   G.particles.length = 0;
   G.floats.length = 0;
   G.player = makePlayer(species, gender, skin);
+  endWalkWeather(true);   // a walk in progress doesn't survive the lobby or a death
+  G.cine = null;
+  // a fresh egg of a settled species hatches into the NEXT generation
+  G.player.gen = ((Save.settled || {})[species] ? Save.settled[species].gen : 0) + 1;
   // the lobby remembers your dino — restore this loadout's saved progress
   const snap = Save.dino[dinoKey(species, G.player.gender)];
   if (snap && snap.growth > 0.005) {
@@ -1384,8 +1487,9 @@ function respawn(species, gender, skin) {
     p.cold = clamp(snap.cold || 0, 0, 95);   // never resume mid-freeze
     // wounds survive the lobby round-trip
     if (snap.bleed && snap.bleed.t > 0 && snap.bleed.dps > 0) p.bleed = { dps: snap.bleed.dps, t: snap.bleed.t };
-    if (snap.bones) p.bones = Object.assign({}, snap.bones);
+    if (snap.bones) { p.bones = Object.assign({}, snap.bones); p.boneT = 40; }
     p.exhausted = !!snap.exhausted;
+    p.gen = snap.gen || 1;   // a dino keeps the generation it hatched into
     const okPos = snap.x > 20 && snap.x < WORLD_W - 20 && snap.y > 20 && snap.y < WORLD_H - 20 &&
       (!isDeepPx(snap.x, snap.y) || PLAYER_DEF[species].swim);
     if (okPos) { p.x = snap.x; p.y = snap.y; }
@@ -1594,6 +1698,7 @@ function buildMinimap() {
       else if (t === T_MUD) col = [100, 74, 52];
       else if (t === T_LAVA) col = [216, 74, 30];
       else if (t === T_CLIFF) col = [78, 84, 98];                                  // the Wall's ramparts
+      else if (World.desert) col = t === T_SAND ? [196, 104, 62] : ff > 0.42 ? [66, 100, 50] : [128, 128, 66];
       else if (World.snowy) col = ff > 0.42 ? [176, 192, 200] : [222, 230, 240];   // snow, pines a shade colder
       else if (World.misty) col = ff > 0.42 ? [78, 84, 74] : [112, 116, 106];
       else if (ff > 0.42) col = World.lush ? [46, 88, 44] : [92, 104, 58];
@@ -1622,6 +1727,7 @@ function drawMinimap() {
     c2.fillStyle = k === G.player.species ? '#ffd23e' : '#c9a96a';
     c2.fillRect(n.x * sx - 1.5, n.y * sy - 1.5, 3, 3);
   }
+  drawWalkMinimap(c2, sx, sy);   // the landmark, your mate, your bloodline
   // player
   const p = G.player;
   // the scent pool: the true detectable range, live on the map — yellow as
@@ -1674,14 +1780,19 @@ function drawScentWisps(ctx, p) {
 // A full adult gets a full-adult mate of the opposite sex. The male displays
 // (an NPC male struts on his own; a player male displays with N and the
 // female judges his CONDITION — health, food, hygiene). Accepted pairs nest
-// with N: three eggs, guarded until hatch day, then the babies follow the
+// with F (a tap on phones): three eggs, guarded until hatch day, then the babies follow the
 // female until they're grown — and every one raised pays out ❖ 150.
 function updateNesting(dt) {
   const p = G.player, ns = G.nesting;
   if (!G.started || !p || !p.alive || !ns) return;
   const nest = World.nests[p.species];
-  // courtship is an F verb like any other (the loop clears the flag)
-  const nPressed = G.input.action;
+  // courtship is an F verb like any other: the press the player's own verbs
+  // left unused (updatePlayer hands it over as G.fFree)
+  const nPressed = !!G.fFree;
+  G.courtOffer = false;
+  // the words for the button: a key on a keyboard, a tap on a phone
+  const fKey = (window.TOUCH && TOUCH.enabled) ? 'tap' : 'press F';
+  const offer = (txt) => { G.courtOffer = true; G.prompt = (G.prompt ? G.prompt + '    ' : '') + 'F — ' + txt; };
 
   // mate housekeeping: a fallen mate ends the courtship — but eggs already
   // laid and babies already hatched carry on under the survivor's guard
@@ -1695,10 +1806,20 @@ function updateNesting(dt) {
     }
   }
 
+  // BREEDING NEEDS BOTH: a mate — wild or chosen from the pack — only comes
+  // once this player has raised the OTHER gender of this species to Full
+  // Adult too. One grown loadout is a survivor; two are a breeding pair.
+  const otherG = p.gender === 'f' ? 'm' : 'f';
+  const otherSave = Save.dino[dinoKey(p.species, otherG)];
+  const bothGrown = !!(otherSave && otherSave.growth >= 0.999);
+  if (ns.stage === 'none' && p.growth >= 1 && !bothGrown && !ns.pairHintShown) {
+    ns.pairHintShown = true;
+    G.banner = { str: 'Full grown — but no mate will come until you raise a ' + (otherG === 'm' ? '♂ male' : '♀ female') + ' ' + DINO[p.species].name + ' to Full Adult too.', t: 8, color: '#e8a0c0' };
+  }
   // …or choose your own: any grown opposite-gender packmate can be taken as
-  // a mate — stand close and press N (the courtship still has to be danced,
+  // a mate — stand close and press F / tap (the courtship still has to be danced,
   // and your own grown young are packmates forever, never mates)
-  if (ns.stage === 'none' && p.growth >= 1 && !G.mate && G.pack && G.pack.length) {
+  if (ns.stage === 'none' && p.growth >= 1 && bothGrown && !G.mate && G.pack && G.pack.length) {
     let cand = null, cd = 70;
     for (const e of G.pack) {
       if (e.isBaby || e.isMate || e.kinYoung || e.hp <= 0) continue;
@@ -1707,7 +1828,7 @@ function updateNesting(dt) {
       if (dd < cd) { cd = dd; cand = e; }
     }
     if (cand) {
-      G.prompt = (G.prompt ? G.prompt + '    ' : '') + 'F — Take ' + (cand.gender === 'm' ? 'him' : 'her') + ' as your mate';
+      offer('Take ' + (cand.gender === 'm' ? 'him' : 'her') + ' as your mate');
       if (nPressed) {
         const def = PLAYER_DEF[p.species];
         G.mate = cand;
@@ -1724,20 +1845,21 @@ function updateNesting(dt) {
         SFX.stage();
         G.banner = p.gender === 'f'
           ? { str: 'You choose him from your own pack — now hear him out.', t: 6, color: '#e8a0c0' }
-          : { str: 'You choose her from your own pack. Press N near her to DISPLAY!', t: 6, color: '#e8a0c0' };
+          : { str: 'You choose her from your own pack — ' + fKey + ' to DISPLAY near her!', t: 6, color: '#e8a0c0' };
         return;
       }
     }
   }
 
-  // a mate appears (a little while) after you reach full adulthood
-  if (ns.stage === 'none' && p.growth >= 1) {
+  // a mate appears (a little while) after you reach full adulthood — once
+  // the other gender has been raised too
+  if (ns.stage === 'none' && p.growth >= 1 && bothGrown) {
     ns.mateT = (ns.mateT != null ? ns.mateT : 6) - dt;
     if (ns.mateT <= 0) {
       G.mate = makeMate(p.species, p.gender === 'f' ? 'm' : 'f');
       G.npcs.push(G.mate);
-      // an aardiraptor's mate is pack the moment it arrives
-      if (p.species === 'aardi') {
+      // a pack species' mate is pack the moment it arrives
+      if (PLAYER_DEF[p.species].packSpecies) {
         G.mate.packAlpha = true;
         G.pack.push(G.mate);
         floatText(G.mate.x, G.mate.y - 34, '♦', '#ffd23e');
@@ -1745,7 +1867,7 @@ function updateNesting(dt) {
       ns.stage = 'courting'; ns.mateT = null;
       G.banner = p.gender === 'f'
         ? { str: 'A full-grown male of your kind has come to the nest — hear him out.', t: 6, color: '#e8a0c0' }
-        : { str: 'A full-grown female waits by your nest. Press N near her to DISPLAY!', t: 6, color: '#e8a0c0' };
+        : { str: 'A full-grown female waits by your nest — go to her and ' + fKey + ' to DISPLAY!', t: 6, color: '#e8a0c0' };
     }
   }
   // eggs and babies carry on without a mate; only courtship needs him/her
@@ -1756,16 +1878,18 @@ function updateNesting(dt) {
     if (p.gender === 'f') {
       // he displays — the female judges, and N beside him is a yes
       if (G.mate.state === 'display' && mateDist < 140) {
-        if (!G.prompt) G.prompt = 'F — accept his display';
+        offer('Accept his display');
         if (nPressed) {
           ns.stage = 'accepted';
           SFX.stage();
-          G.banner = { str: 'You accept! Stand at your nest and press N to lay the eggs.', t: 6, color: '#e8a0c0' };
+          G.banner = { str: 'You accept! Stand at your nest and ' + fKey + ' to LAY YOUR EGGS.', t: 6, color: '#e8a0c0' };
         }
       }
     } else {
       // the player male displays; she judges his condition
+      if (mateDist < 140 && !(p.displayT > 0)) offer('Display for her');
       if (nPressed && mateDist < 140 && !(p.displayT > 0)) {
+        G.fFree = false;
         p.displayT = 3;
         floatText(p.x, p.y - 54, 'displaying…', '#e8a0c0');
       }
@@ -1779,7 +1903,7 @@ function updateNesting(dt) {
           if (score >= 2.0) {
             ns.stage = 'accepted';
             SFX.stage();
-            G.banner = { str: 'She is impressed! Stand at the nest and press N to lay the eggs.', t: 6, color: '#e8a0c0' };
+            G.banner = { str: 'She is impressed! Stand at the nest and ' + fKey + ' to LAY YOUR EGGS.', t: 6, color: '#e8a0c0' };
           } else {
             G.banner = { str: 'She is not impressed… eat well, drink, and take a mud bath — then try again.', t: 6, color: '#c9a9b4' };
           }
@@ -1789,9 +1913,9 @@ function updateNesting(dt) {
   } else if (ns.stage === 'accepted') {
     ns.reNestT = Math.max(0, (ns.reNestT || 0) - dt);
     if (dist(p.x, p.y, nest.x, nest.y) < 100 && ns.reNestT <= 0) {
-      if (!G.prompt) G.prompt = 'F — nest here';
+      offer('Lay your eggs here');
       if (nPressed) {
-        ns.stage = 'eggs'; ns.eggs = 3; ns.hatchT = 120;
+        ns.stage = 'eggs'; ns.eggs = 3; ns.hatchT = 120; ns.walkTried = false;
         ns.raidT = rrange(18, 30); ns.eatT = 0;
         SFX.stage();
         G.banner = { str: 'THREE EGGS! Guard the nest until hatch day.', t: 6, color: '#ffd23e' };
@@ -1847,8 +1971,8 @@ function updateNesting(dt) {
       for (let i = 0; i < ns.eggs; i++) {
         const b = makeBaby(p.species, nest.x + rrange(-24, 24), nest.y + rrange(10, 30));
         ns.babies.push(b); G.npcs.push(b);
-        // aardiraptor young are PACK from their first breath
-        if (p.species === 'aardi') {
+        // a pack species' young are PACK from their first breath
+        if (PLAYER_DEF[p.species].packSpecies) {
           b.packAlpha = true;
           G.pack.push(b);
           floatText(b.x, b.y - 30, '♦', '#ffd23e');
@@ -1861,8 +1985,17 @@ function updateNesting(dt) {
           : 'She keeps them close — keep the hunters away.'), t: 7, color: '#ffd23e',
       };
     }
+  } else if (ns.stage === 'walk') {
+    updateWalk(dt);     // THE GREAT WALK (js/walk.js)
   } else if (ns.stage === 'babies') {
     tickDenBrood(dt);   // den babies grow below until sub-adult, then emerge
+    // THE GREAT WALK begins on its own the moment the last young is a
+    // sub-adult — once per clutch (a failed walk lets them grow up alone)
+    if (!ns.walkTried && ns.babies.length && World.landmark &&
+        ns.babies.every(b => !b.den && b.growth >= 0.3 && G.npcs.includes(b))) {
+      startWalk();
+      return;
+    }
     const outside = ns.babies.filter(b => !b.den);
     ns.raidT = (ns.raidT || 12) - dt;
     if (ns.raidT <= 0 && outside.length) {
@@ -1890,7 +2023,7 @@ function updateNesting(dt) {
       if (b.growth >= 0.9) {
         awardGrowths(150, b.x, b.y - 40);
         if (!Save.raisedClutch) { Save.raisedClutch = true; syncTitles(); }
-        if (b.packAlpha && p.species === 'aardi') {
+        if (b.packAlpha && PLAYER_DEF[p.species].packSpecies) {
           // an aardiraptor's young doesn't set off — it takes its place in
           // the pack, a full hunter now (kinYoung: your own blood is a
           // packmate forever, never a mate)
@@ -1966,6 +2099,7 @@ function spawnAmbient() {
   const nightF = (G.day && G.day.nightF) || 0;
   let type;
   if (World.snowy) type = 'snow';   // on the Wall the air is always falling
+  else if (World.desert && (ff < 0.3 || (G.sandstorm && G.sandstorm.on))) type = 'sand';
   else if (nightF > 0.35 && ff > 0.3) type = Math.random() < 0.75 ? 'firefly' : 'mote';
   else if (isWaterPx(x, y)) type = 'mote';
   else if (ff > 0.45) type = Math.random() < 0.55 ? 'leaf' : 'mote';
@@ -2009,7 +2143,9 @@ function inWallow(x, y) {
   return false;
 }
 function updateMonsoon(dt) {
-  if (!World.monsoonWorld) { G.monsoon = null; return; }
+  // the Reach's own storms — or the Great Walk's flood on the coast and the
+  // delta (forced), which drains away on its own once the walk is over
+  if (!World.monsoonWorld && !walkForces('flood') && !(G.monsoon && G.monsoon.forced)) { G.monsoon = null; return; }
   if (!G.monsoon) G.monsoon = { phase: 'calm', t: 50 + Math.random() * 40, rise: 0, rain: 0, shove: 0 };
   const M = G.monsoon;
   M.t -= dt;
@@ -2025,11 +2161,21 @@ function updateMonsoon(dt) {
     G.banner = { str: 'The rain thins. The water starts to fall back.', t: 4, color: '#cfe6d8' };
   } else if (M.phase === 'easing' && M.t <= 0) {
     M.phase = 'calm'; M.t = 70 + Math.random() * 50;
+    // a borrowed flood ends here: the land gets its own water back
+    if (M.forced && !World.monsoonWorld) { G.monsoon = null; restoreWalkChannels(); return; }
     // the storm has passed and you are still breathing — that earns a name
-    if (G.started && G.player && G.player.alive && !Save.stormRider) { Save.stormRider = true; syncTitles(); }
+    if (G.started && G.player && G.player.alive && World.monsoonWorld) {
+      if (!Save.stormRider) { Save.stormRider = true; syncTitles(); }
+      // every storm ridden out counts toward the Tideripper coat
+      if (!Save.stormsRidden) Save.stormsRidden = {};
+      const sp = G.player.species;
+      Save.stormsRidden[sp] = (Save.stormsRidden[sp] || 0) + 1;
+      if (sp === 'coahuila' && Save.stormsRidden[sp] === 3) G.banner = { str: 'Three monsoons ridden — the Tideripper coat is yours to buy.', t: 6, color: '#5ce0d8' };
+      saveSave();
+    }
   }
   const wantRain = M.phase === 'storm' ? 1 : M.phase === 'building' ? 0.35 : M.phase === 'easing' ? 0.4 : 0;
-  const wantRise = M.phase === 'storm' ? 1 : M.phase === 'easing' ? 0.45 : 0;
+  const wantRise = (M.phase === 'storm' ? 1 : M.phase === 'easing' ? 0.45 : 0) * (M.cap || 1);
   M.rain = lerp(M.rain, wantRain, Math.min(1, dt * 0.5));
   M.rise = lerp(M.rise, wantRise, Math.min(1, dt * 0.25));   // water is slow to come AND to go
   if (M.rise < 0.02) return;
@@ -2059,10 +2205,128 @@ function updateMonsoon(dt) {
     }
   };
   const p = G.player;
-  if (p && p.alive && !G.burrow) hit(p, true);
+  // a Tideripper walks through the flood as if it were a puddle
+  const immune = p && SKINS[p.skin] && SKINS[p.skin].immune === 'monsoon';
+  if (p && p.alive && !G.burrow && !immune) hit(p, true);
   for (const e of G.npcs) { if (e.hp > 0 && !DINO[e.species].fish) hit(e, false); }
 }
 
+// ---------- sandstorms (the Death Desert) ----------
+// The desert's storm: a warning haze, then the sand comes — visibility
+// collapses, the heat climbs 2.6× faster, and a WALL of sand sweeps the open
+// desert from west to east like an avalanche on its side. The river belt,
+// the water and the wallows are spared: the storm is a thing of the open sand
+function updateSandstorm(dt) {
+  if (!World.desert) { G.sandstorm = null; return; }
+  if (!G.sandstorm) G.sandstorm = { nextT: 60 + Math.random() * 40, warnT: 0, on: false, t: 0, haze: 0, front: null };
+  const S = G.sandstorm;
+  const target = S.on ? 0.9 : S.warnT > 0 ? 0.4 : 0;
+  S.haze = lerp(S.haze, target, Math.min(1, dt * 0.5));
+  if (S.on) {
+    S.t -= dt;
+    if (S.t <= 0) {
+      S.on = false; S.nextT = 70 + Math.random() * 50;
+      G.banner = { str: 'The wind drops. The sand settles.', t: 4, color: '#ffe0b0' };
+      if (G.started && G.player && G.player.alive) { Save.stormsRidden = Save.stormsRidden || {}; Save.stormsRidden.sand = (Save.stormsRidden.sand || 0) + 1; }
+    }
+  } else if (S.warnT > 0) {
+    S.warnT -= dt;
+    if (S.warnT <= 0) {
+      S.on = true; S.t = 18 + Math.random() * 12;
+      G.banner = { str: 'SANDSTORM! Get to the trees, the water, the mud — anything but open sand!', t: 5, color: '#ffe8c0' };
+      // most storms carry a front: the wall of sand
+      if (Math.random() < 0.7 && G.player) {
+        S.front = { x: Math.max(40, G.player.x - VIEW_W * 1.6), speed: 230, t: 0 };
+        G.banner = { str: 'THE WALL OF SAND! Run for the river — or anything green!', t: 5, color: '#ffffff' };
+        G.shake = 6;
+      }
+    }
+  } else {
+    S.nextT -= dt;
+    if (S.nextT <= 0) { S.warnT = 10; G.banner = { str: 'The horizon goes brown… the wind is coming.', t: 4, color: '#ffd27a' }; }
+  }
+  if (S.front) {
+    const F = S.front;
+    F.t += dt; F.x += F.speed * dt;
+    G.shake = Math.min(5, G.shake + dt * 5);
+    const band = 110;
+    const safe = (x, y) => inTreeShade(x, y) || isWaterPx(x, y) || isMudPx(x, y) || nearWaterPx(x, y, 40) || forestShadePx(x, y) > 0.3;
+    const p = G.player;
+    if (p && p.alive && Math.abs(p.x - F.x) < band && !safe(p.x, p.y)) {
+      p.hp -= 55 * dt;
+      p.vx += 480 * dt;                       // carried with the wind
+      p.vy += (Math.random() - 0.5) * 200 * dt;
+      p.heat = Math.min(100, (p.heat || 0) + 8 * dt);
+      if (Math.random() < dt * 8) floatText(p.x + rrange(-14, 14), p.y - 40, '·', '#ffe0b0');
+      if (p.hp <= 0) killPlayer('the sandstorm');
+    }
+    for (const e of G.npcs) {
+      if (DINO[e.species].fish) continue;
+      if (Math.abs(e.x - F.x) < band && !safe(e.x, e.y)) {
+        e.hp -= 55 * dt; e.vx += 400 * dt;
+        if (e.hp <= 0) { floatText(e.x, e.y - 26, DINO[e.species].name + ' is buried', '#ffe8c0'); killNPC(e, null); }
+      }
+    }
+    if (F.x > WORLD_W + 200 || F.t > 45) S.front = null;
+  }
+}
+// the wall of sand, in world space: a towering brown front rolling east
+function drawSandFront(camX, camY) {
+  const F = G.sandstorm && G.sandstorm.front;
+  const zw2 = VIEW_W * (G.zoom || 1), zh2 = VIEW_H * (G.zoom || 1);
+  if (!F || F.x < camX - 300 || F.x > camX + zw2 + 300) return;
+  const g = ctx.createLinearGradient(F.x - 160, 0, F.x + 60, 0);
+  g.addColorStop(0, 'rgba(120,60,30,0)');
+  g.addColorStop(0.55, 'rgba(176,96,52,0.86)');
+  g.addColorStop(1, 'rgba(208,132,84,0.96)');
+  ctx.fillStyle = g;
+  ctx.fillRect(F.x - 160, camY - 20, 220, zh2 + 40);
+  for (let y = camY - 40; y < camY + zh2 + 40; y += 30) {
+    const h = hash2(7, Math.round(y * 0.6));
+    const r = 20 + h * 26 + Math.sin(G.time * 6 + y * 0.13) * 6;
+    ctx.fillStyle = h > 0.5 ? '#d89058' : '#c07a48';
+    ctx.beginPath(); ctx.arc(F.x + 40 - r * 0.4, y, r, 0, TAU); ctx.fill();
+  }
+  ctx.fillStyle = 'rgba(255,220,170,0.7)';
+  for (let k = 0; k < 30; k++) {
+    const h1 = hash2(k * 13, Math.round(G.time * 5) % 97), h2 = hash2(k * 7 + 1, Math.round(G.time * 4) % 89);
+    ctx.fillRect(F.x + 30 - h1 * 170, camY + h2 * zh2, 2.4, 1.6);
+  }
+}
+// the storm on screen: an orange haze of blowing sand, thicker toward the
+// edges, with streaks racing across
+function drawSandstorm() {
+  const S = G.sandstorm;
+  if (!S || S.haze < 0.01) return;
+  const m = S.haze;
+  const tiles = fogTiles();
+  if (!FOG.cv || FOG.w !== VIEW_W || FOG.h !== VIEW_H) {
+    FOG.cv = document.createElement('canvas'); FOG.ring = document.createElement('canvas');
+    FOG.cv.width = FOG.ring.width = VIEW_W; FOG.cv.height = FOG.ring.height = VIEW_H;
+    FOG.w = VIEW_W; FOG.h = VIEW_H;
+  }
+  const fc = FOG.cv.getContext('2d');
+  fc.globalCompositeOperation = 'source-over';
+  fc.clearRect(0, 0, VIEW_W, VIEW_H);
+  const camX = G.camX || 0, camY = G.camY || 0;
+  for (const L of [{ t: 0, s: 2.0, vx: 180, vy: 6, par: 0.4, a: 0.9 }, { t: 1, s: 1.1, vx: 320, vy: -10, par: 0.8, a: 0.75 }]) {
+    const tile = tiles[L.t], sz = tile.width * L.s;
+    const ox = (((-(camX * L.par) - G.time * L.vx) % sz) + sz) % sz;
+    const oy = (((-(camY * L.par) - G.time * L.vy) % sz) + sz) % sz;
+    const pat = fc.createPattern(tile, 'repeat');
+    pat.setTransform(new DOMMatrix().translate(ox, oy).scale(L.s, L.s * 0.55));   // squashed: sand streams, it doesn't billow
+    fc.globalAlpha = L.a * m; fc.fillStyle = pat; fc.fillRect(0, 0, VIEW_W, VIEW_H);
+  }
+  fc.globalAlpha = 1;
+  fc.fillStyle = 'rgba(255,255,255,' + (0.18 * m).toFixed(3) + ')'; fc.fillRect(0, 0, VIEW_W, VIEW_H);
+  fc.globalCompositeOperation = 'source-in';
+  fc.fillStyle = 'rgb(214,140,84)'; fc.fillRect(0, 0, VIEW_W, VIEW_H);
+  fc.globalCompositeOperation = 'source-over';
+  ctx.drawImage(FOG.cv, 0, 0);
+  // the world goes brown-dark under the storm
+  ctx.fillStyle = 'rgba(120,60,24,' + (0.22 * m).toFixed(3) + ')';
+  ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+}
 function updateBlizzard(dt) {
   // the Moors have no storms — just a mist that never, ever lifts
   if (World.misty) { G.blizzard = null; G.mist = lerp(G.mist || 0, 0.85, Math.min(1, dt * 0.5)); return; }
@@ -2366,13 +2630,18 @@ function drawMist() {
 
 function updateAmbient(dt) {
   // snow needs a denser sky — and a blizzard needs a FULL one
-  const want = World.snowy ? (G.blizzard && G.blizzard.on ? 90 : 40) : 22;
+  const want = World.snowy ? (G.blizzard && G.blizzard.on ? 90 : 40) : World.desert ? (G.sandstorm && G.sandstorm.on ? 110 : 26) : 22;
   while (G.ambient.length < want) spawnAmbient();
   const storm = G.blizzard && G.blizzard.on;
   for (let i = G.ambient.length - 1; i >= 0; i--) {
     const a = G.ambient[i];
     a.t += dt;
-    if (a.type === 'snow') {
+    if (a.type === 'sand') {
+      // grains skitter low and fast across the ground; a storm turns them into streaks
+      const gale = G.sandstorm && G.sandstorm.on;
+      a.x += ((gale ? 420 : 60) + Math.sin(a.t * 3 + a.ph) * 20) * dt;
+      a.y += Math.sin(a.t * 2.2 + a.ph) * (gale ? 30 : 8) * dt;
+    } else if (a.type === 'snow') {
       // calm: a lazy drift down. Storm: everything flies SIDEWAYS.
       a.x += (Math.sin(a.t * 1.4 + a.ph) * 9 + (storm ? 240 : 8)) * dt;
       a.y += (26 + a.hue * 14 + (storm ? 30 : 0)) * dt;
@@ -2410,6 +2679,11 @@ function drawAmbient() {
       ctx.fillStyle = a.hue > 0.5 ? '#7d8a44' : '#a8963e';
       ctx.fillRect(-1.6, -1, 3.2, 2);
       ctx.restore();
+    } else if (a.type === 'sand') {
+      const gale = G.sandstorm && G.sandstorm.on;
+      ctx.globalAlpha = (0.35 + a.hue * 0.4) * fade;
+      ctx.fillStyle = '#f0c890';
+      ctx.fillRect(a.x, a.y, gale ? 5 + a.hue * 6 : 1.6, 1.2);
     } else if (a.type === 'snow') {
       ctx.globalAlpha = (0.55 + a.hue * 0.4) * fade;
       ctx.fillStyle = '#ffffff';
@@ -2651,6 +2925,14 @@ function loop(now) {
   // dino grows (bigger species pull back further), so a hatchling lives in
   // a close little world and an adult surveys a wide one
   const p = G.player;
+  if (G.cine) {
+    // the cutscene's camera: its own target and its own zoom
+    const c = cineCamera(dt);
+    G.zoom += (c.z - G.zoom) * Math.min(1, dt * 0.9);
+    const zvw = VIEW_W * G.zoom, zvh = VIEW_H * G.zoom;
+    G.camX = clamp(c.x - zvw / 2, 0, Math.max(0, WORLD_W - zvw));
+    G.camY = clamp(c.y - zvh / 2, 0, Math.max(0, WORLD_H - zvh));
+  } else {
   const zTarget = growZoom(p.species, p.growth);
   G.zoom += (zTarget - G.zoom) * Math.min(1, dt * 0.4);
   const zvw = VIEW_W * G.zoom, zvh = VIEW_H * G.zoom;
@@ -2659,6 +2941,7 @@ function loop(now) {
   // frame, the whole view slides up until it fits (feet have far more
   // spare room below than the head needs above)
   G.camY = clamp(Math.min(p.y - zvh / 2 - 14, headTopY(p) - 16), 0, WORLD_H - zvh);
+  }
 
   render();
   updateHUD();
@@ -2670,6 +2953,9 @@ requestAnimationFrame(loop);
 // (the caller then skips the surface-only frame work and renders the den).
 function simTick(dt) {
   G.time += dt;
+  G.fFree = false;
+  // the Great Walk's ending owns the controls while it plays
+  if (G.cine) cineLockInput();
   // underground, the burrow owns the whole frame — the world above waits
   if (G.burrow) { updateBurrow(dt); updateWorldStuff(dt); decayFx(dt); return true; }
   updatePlayer(dt);
@@ -2681,7 +2967,9 @@ function simTick(dt) {
   updateEruption(dt);
   updateBlizzard(dt);
   updateMonsoon(dt);
+  updateSandstorm(dt);
   updateNesting(dt);
+  updateCine(dt);
   // the lobby-leave countdown runs on WORLD time: dying cancels it, and the
   // banner keeps the player honest about how long they must survive
   if (G.lobbyCountdown != null) {
@@ -2958,6 +3246,8 @@ function drawEntityHitboxes(g, e) {
       dbgCircle(g, cc.x, cc.y, cc.r, '#ff5040');
     }
   }
+  if (!e.isPlayer && def.kick) { const kc = kickCircle(e); dbgCircle(g, kc.x, kc.y, kc.r, '#ff5040'); }
+  if (!e.isPlayer && def.ram) { const rc = nipCircle(e); dbgCircle(g, rc.x, rc.y, rc.r, '#ff5040'); }
   if (def.nip) {
     const nc = nipCircle(e);
     dbgCircle(g, nc.x, nc.y, nc.r, '#ffb03e');
@@ -3054,6 +3344,7 @@ function render() {
           drawShadow(ctx, e.x, e.y, bodyRadius(e) * 1.4);
           drawDino(ctx, e.species, e);
           if (e.hurtT > 0 || e.hp < e.maxhp * 0.999 && dist(e.x, e.y, p.x, p.y) < 130) drawHpBar(e);
+          if (e.bloodline || e.walkRival) drawLineTag(ctx, e, p);
         }
       });
     }
@@ -3073,9 +3364,11 @@ function render() {
   }
   // eruption target rings sit on the ground, beneath everything that walks
   drawEruption();
+  drawWalkGround(ctx);     // the Great Walk's arrival ring, on the ground
 
   draws.sort((a, b) => a.y - b.y);
   for (const d of draws) d.fn();
+  drawWalkBeacon(ctx);     // …and the column of light above the landmark
 
   // hitbox X-ray on top of everyone (H toggles)
   if (G.debugHit) {
@@ -3153,6 +3446,7 @@ function render() {
   drawCloudShadows(camX, camY);
   // the avalanche front rolls over everything it buries
   drawAvalanche(camX, camY);
+  drawSandFront(camX, camY);
   // airborne ambient life (leaves, motes, butterflies, fireflies, snow)
   drawAmbient();
 
@@ -3180,9 +3474,43 @@ function render() {
   ctx.globalAlpha = 1 - 0.75 * day.nightF;
   ctx.drawImage(warmGrade, 0, 0, VIEW_W, VIEW_H);
   ctx.globalAlpha = 1;
+  // THE DESERT SUN: a glare that means it — the whole frame lifts toward hot
+  // white at midday (a screen wash), gold toward dusk, with a shimmer of
+  // heat-haze bands low on the sand; gone at night
+  if (World.desert) {
+    const sun = (1 - day.nightF) * (1 - 0.5 * day.duskF);
+    if (sun > 0.02) {
+      ctx.globalCompositeOperation = 'screen';
+      ctx.fillStyle = 'rgba(255,214,150,' + (0.22 * sun).toFixed(3) + ')';
+      ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+      // the sun itself: a hot pool of light high in the frame
+      const sg = ctx.createRadialGradient(VIEW_W * 0.62, -VIEW_H * 0.1, 10, VIEW_W * 0.62, -VIEW_H * 0.1, VIEW_H * 0.9);
+      sg.addColorStop(0, 'rgba(255,250,230,' + (0.45 * sun).toFixed(3) + ')');
+      sg.addColorStop(0.4, 'rgba(255,236,190,' + (0.14 * sun).toFixed(3) + ')');
+      sg.addColorStop(1, 'rgba(255,236,190,0)');
+      ctx.fillStyle = sg;
+      ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+      ctx.globalCompositeOperation = 'source-over';
+      // heat haze: faint rippling bands across the lower half
+      ctx.globalAlpha = 0.06 * sun;
+      ctx.fillStyle = '#ffffff';
+      for (let k = 0; k < 6; k++) {
+        const y = VIEW_H * (0.5 + k * 0.085) + Math.sin(G.time * 1.7 + k * 1.3) * 3;
+        ctx.fillRect(0, y, VIEW_W, 2 + Math.sin(G.time * 2.3 + k) * 1.2);
+      }
+      ctx.globalAlpha = 1;
+    }
+    if (day.duskF > 0.05) {   // the long gold evening
+      ctx.fillStyle = 'rgba(255,140,60,' + (0.12 * day.duskF).toFixed(3) + ')';
+      ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+    }
+  }
   ctx.drawImage(vignette, 0, 0, VIEW_W, VIEW_H);
   drawMist();
   drawMonsoon();
+  drawSandstorm();
+  drawWalkHUD();    // the waypoint arrow and the walk's status line
+  drawCine();       // the ending: letterbox, captions, the title card
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, Math.floor(Math.random() * -30), Math.floor(Math.random() * -30));
   ctx.fillStyle = grainPattern;
@@ -3208,6 +3536,8 @@ const elWa = document.getElementById('fill-water');
 const elHy = document.getElementById('fill-hyg');
 const elCold = document.getElementById('fill-cold');
 const elColdRow = document.getElementById('row-cold');
+const elHeat = document.getElementById('fill-heat');
+const elHeatRow = document.getElementById('row-heat');
 const elStage = document.getElementById('stage');
 const elGrow = document.getElementById('growth-fill');
 const elPct = document.getElementById('growth-pct');
@@ -3228,15 +3558,21 @@ function updateHUD() {
   elHy.classList.toggle('low', p.hygiene < 25);
   // the cold bar exists only where the cold does — FULL is the danger side
   elColdRow.style.display = World.snowy ? 'flex' : 'none';
+  // …and the heat bar only where the sun does
+  elHeatRow.style.display = World.desert ? 'flex' : 'none';
+  if (World.desert) {
+    elHeat.style.width = clamp(p.heat || 0, 0, 100) + '%';
+    elHeat.classList.toggle('low', (p.heat || 0) > 75);
+  }
   if (World.snowy) {
     elCold.style.width = clamp(p.cold || 0, 0, 100) + '%';
     elCold.classList.toggle('low', (p.cold || 0) > 75);   // 'low' = the flash class: here it means NEARLY FROZEN
   }
   const dirty = p.growth < 1 && p.hygiene <= 60;
-  elStage.textContent = (p.gender === 'm' ? '♂ ' : '♀ ') + stageOf(p.growth)
-    + (p.bleed ? '  ✚ BLEEDING' : '') + (p.frozenT > 0 ? '  ❄ FROZEN' : World.snowy && p.cold > 75 ? '  ❄ FREEZING' : '')
+  elStage.textContent = (p.gender === 'm' ? '♂ ' : '♀ ') + (p.gen > 1 ? 'GEN ' + roman(p.gen) + ' · ' : '') + stageOf(p.growth)
+    + (p.bleed ? '  ✚ BLEEDING' : '') + (p.bones && p.bones.leg ? '  🦴 BROKEN LEG' : '') + (p.frozenT > 0 ? '  ❄ FROZEN' : World.snowy && p.cold > 75 ? '  ❄ FREEZING' : '') + (p.strokeT > 0 ? '  ☀ HEATSTROKE' : World.desert && p.heat > 75 ? '  ☀ OVERHEATING' : '')
     + (dirty ? '  ~ TOO DIRTY TO GROW' : '');
-  elStage.style.color = p.frozenT > 0 || (World.snowy && p.cold > 75) ? '#a8dcf0' : p.bleed ? '#ff6a5e' : dirty ? '#c9a45a' : '#f5e9c8';
+  elStage.style.color = p.frozenT > 0 || (World.snowy && p.cold > 75) ? '#a8dcf0' : p.strokeT > 0 || (World.desert && p.heat > 75) ? '#ffd27a' : p.bleed ? '#ff6a5e' : dirty ? '#c9a45a' : '#f5e9c8';
   elGrow.classList.toggle('stalled', dirty);
   elGrow.style.width = (p.growth * 100) + '%';
   elPct.textContent = Math.floor(p.growth * 100) + '%';
@@ -3283,6 +3619,7 @@ function updateHUD() {
       row('Species', DINO[p.species].full) +
       row('Sex', p.gender === 'm' ? '♂ male — big & bright' : '♀ female — quick & plain') +
       row('Skin', SKINS[p.skin] ? SKINS[p.skin].name : 'Classic') +
+      row('Bloodline', 'Gen ' + roman(p.gen || 1) + (p.gen > 1 ? ' (+' + Math.round((genEdge(p) - 1) * 100) + '% health & bite)' : '')) +
       row('Stage', stageOf(p.growth) + ' (' + Math.floor(p.growth * 100) + '%)') +
       row('Health', Math.ceil(p.hp) + ' / ' + playerMaxHp()) +
       row('Stamina', Math.floor(p.stamina) + ' / ' + PLAYER_DEF[p.species].stamMax) +

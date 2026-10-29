@@ -72,7 +72,25 @@ const GENDER_MOD = {
   m: { hp: 1.3, dmg: 1.2, speed: 0.9, size: 1.09, earn: 0.8 },
 };
 const GENDER_NEUTRAL = { hp: 1, dmg: 1, speed: 1, size: 1, earn: 1 };
-function genderMod(e) { return (e && GENDER_MOD[e.gender]) || GENDER_NEUTRAL; }
+// a skin may carry a small stat mod (Slayer of Giants): it multiplies into the
+// gender loadout everywhere the loadout is read — size, hp, damage, the lot
+const SKIN_MODS = {};
+// …and a bloodline carries an edge: every generation after the first that
+// settled the land adds 4% health and bite, up to Gen V (+16%)
+function genEdge(e) { return e && e.isPlayer && e.gen > 1 ? 1 + 0.04 * Math.min(4, e.gen - 1) : 1; }
+function genderMod(e) {
+  const g = (e && GENDER_MOD[e.gender]) || GENDER_NEUTRAL;
+  const sm = e && e.isPlayer && typeof SKINS !== 'undefined' && SKINS[e.skin] && SKINS[e.skin].mod;
+  const ge = genEdge(e);
+  if (!sm && ge === 1) return g;
+  const id = (e.gender || 'n') + ':' + e.skin + ':' + ge;
+  if (!SKIN_MODS[id]) {
+    const o = {};
+    for (const k in g) o[k] = g[k] * ((sm && sm[k]) || 1) * (k === 'hp' || k === 'dmg' ? ge : 1);
+    SKIN_MODS[id] = o;
+  }
+  return SKIN_MODS[id];
+}
 
 // ---------- tiny synth SFX ----------
 const SFX = (() => {
@@ -115,6 +133,12 @@ const SFX = (() => {
     buy() { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => tone(f, 0.12, 'triangle', 0.06), i * 80)); },
     die() { tone(180, 0.6, 'sawtooth', 0.1, 40); },
     kill() { noise(0.18, 0.12, 800); tone(90, 0.3, 'square', 0.07, 45); },
+    // the Great Walk's ending: a slow little homecoming tune
+    settle() {
+      const seq = [[392, 0, 0.4], [494, 0.42, 0.4], [587, 0.84, 0.4], [784, 1.26, 0.9],
+        [659, 2.3, 0.4], [587, 2.72, 0.4], [494, 3.14, 0.4], [587, 3.56, 0.5], [784, 4.2, 1.8]];
+      for (const [f, t, d] of seq) setTimeout(() => { tone(f, d, 'triangle', 0.07); tone(f / 2, d, 'sine', 0.04); }, t * 1000);
+    },
     // ---- calls: every playable has its OWN voice (see VOICE below) ----
     // kind 1 broadcast · 2 friendly · 3 aggressive
     call(kind, sp, growth) {
@@ -215,7 +239,16 @@ const VOICE = {
   aardi:     { style: 'chatter', f: 360 },                            // the pack's yipping tongue
   centro:    { style: 'honk',    f: 190, wave: 'square' },            // a nose-horn blast
   omni:      { style: 'shriek',  f: 320, rasp: 0.4 },                 // the working raptor's snarl
-  eotrach:   { style: 'honk',    f: 150, vib: 0.015, vibR: 4 },       // the old duckbill's crest-trumpet
+  eotrach:   { style: 'honk',    f: 150, vib: 0.015, vibR: 4 },
+  kunduro:   { style: 'honk',    f: 125, vib: 0.02, vibR: 3 },         // the Reach's barge: a flat, deep bellow-honk
+  coelo:     { style: 'shriek',  f: 340, rasp: 0.25 },                 // the desert's thin whistling scream
+  procomp:   { style: 'chatter', f: 460 },                             // the pack's quick yips
+  homalo:    { style: 'bellow',  f: 240, rasp: 0.2 },                  // the flat-head's short grunt
+  eocarch:   { style: 'roar',    f: 170, rasp: 0.7 },                  // the fierce-eye's chest-roar
+  deltadro:  { style: 'shriek',  f: 300, rasp: 0.2 },                  // the sprinter's bark
+  suchos:    { style: 'hiss',    f: 160 },                             // the river's croc gurgle
+  willina:   { style: 'honk',    f: 140, vib: 0.015, vibR: 4 },        // the barge's bellow
+  beishan:   { style: 'honk',    f: 190 },                             // the big ostrich's boom       // the old duckbill's crest-trumpet
   loki:      { style: 'honk',    f: 160, wave: 'square', rasp: 0.2 }, // the trickster's war-horn
   moro:      { style: 'boom',    f: 70 },                             // the ground answers
   spino:     { style: 'hiss',    f: 110, rasp: 0.7 },                 // gurgling thunder off the water
