@@ -413,7 +413,7 @@ above at once. More bone-breakers will join the roster in future biomes.
 
 **Playable — The Death Desert** (opens once a Poekilopleuron has reached ADULT at least once — or when Neovenator AND Coahuilaceratops are both mastered)
 
-The desert is the largest land of all — 400 tiles a side, and nearly empty:
+The desert is the largest land of all — 520 tiles a side, and nearly empty:
 far fewer animals than any other land, so finding anything out on the sand is
 an event — and almost all of it wants you dead. The sun is the first thing:
 a white glare at midday that lifts the whole world, heat-haze rippling over

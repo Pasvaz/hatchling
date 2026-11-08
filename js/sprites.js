@@ -63,6 +63,36 @@ const DINO = {
     },
     tailUp: 0.3, fuzz: true, snoutW: 0.2, neckArc: 0.14, pattern: 'stripes',
   },
+  aero: {
+    // THE DESERT'S RUNNING APEX: Orkoraptor grown big — the same long low
+    // skull, hooked hands and low hump, on much longer legs, with a feather
+    // cape down the back. Deep teal over copper, cream below, a gold flash.
+    name: 'Aerosteon', full: 'Aerosteon riocoloradensis', diet: 'carn', biped: true, scale: 1.3,
+    L: { body: [46, 18], tail: [54, 7], neckLen: 14, neckAng: 0.36, head: [24, 9.5], leg: [34, 6.5] },
+    col: {
+      top: '#1e4a52', mid: '#3e8088', belly: '#f2e6d2', line: '#0c1c20',
+      acc: '#f0b848', eye: '#ffd860', pat: '#e0703a', shade: '#2e6670',
+    },
+    tailUp: 0.3, fuzz: true, armScale: 1.35, armUp: 0.1, bigClaws: true, clawLen: 10,
+    armBend: 1, armSwipe: true, armAndJaw: true, clawSecond: true, humpLow: true,
+    snoutW: 0.22, snoutMidW: 0.44, pattern: 'streak',
+  },
+  tamery: {
+    // THE DESERT'S APEX: Poekilopleuron's barrel body and short beam-thick
+    // arms, grown to Tyrannotitan's size — but wearing Neovenator's head:
+    // the long lean allosauroid skull with its low brow ridges (clade
+    // 'allosaur', neove's snout). Sun-bleached ochre with dark rust bars.
+    name: 'Tameryraptor', full: 'Tameryraptor markgrafi', diet: 'carn', biped: true, scale: 1.42,
+    L: { body: [60, 23], tail: [62, 9], neckLen: 12, neckAng: 0.32, head: [28, 13], leg: [28, 7.5] },
+    col: {
+      top: '#7a5430', mid: '#b08250', belly: '#ecdcb6', line: '#22140a',
+      acc: '#b8402a', eye: '#f0cc58', pat: '#4e2e18', shade: '#946a40',
+    },
+    // armScale 0.79 at scale 1.42 = Poekilopleuron's exact arms (0.75 at 1.5)
+    tailUp: 0.26, browRidge: true, armScale: 0.79, armUp: 0.06,
+    bigClaws: true, clawLen: 5.5, armBend: 1, armThick: 1.7, armSwipe: true, armAndJaw: true,
+    snoutW: 0.2, snoutMidW: 0.46, pattern: 'stripes',
+  },
   procomp: {
     // THE DESERT'S FIRST PLAYABLE: a miniature coelophysoid — the same lean
     // frame at half the size, with a slimmer, longer head for its body, and
@@ -1475,54 +1505,67 @@ const SKINS = {
   dunerider: { name: 'Dunerider', cost: 400, only: ['coelo'], heatResist: 0.35, feathers: true },        // a full feather coat, pale dune-sand — the sun bounces off it
 };
 // LEGACY COATS: one fixed design per species, earned by leading a family home
-// on the Great Walk (req 'settled'). Free once earned. Each palette is a nod
-// to how that animal tends to look on screen — film-park tans and olives,
-// the survival-game and park-builder liveries — tuned here, one line each.
+// on the Great Walk (req 'settled'). Free once earned. Each is a loud,
+// one-of-a-kind livery: a saturated palette of its own plus a MOTIF that
+// repaints the markings wholesale (drawLegacyMotif) — tiger, bands, rosette,
+// dapple, ocellus, chevron, stripe, lightning, flame, speckle, garden.
+// `acc2` is a second accent some motifs use (the garden's flower hearts).
+// shade/line are optional — derived below when left out.
 const LEGACY_PAL = {
-  raja:      { top: '#6a2a1e', mid: '#9c4630', belly: '#e2c9a0', shade: '#7e3626', pat: '#3a160e', acc: '#e0b040', eye: '#f0d040', line: '#200a06' },
-  campto:    { top: '#4a5a2a', mid: '#7f8f3e', belly: '#efe2a4', shade: '#63722f', pat: '#2f3a18', acc: '#d8a030', eye: '#3a2a14', line: '#1a200c' },
-  rioja:     { top: '#6a5536', mid: '#a88a5c', belly: '#eadcb8', shade: '#87704a', pat: '#4a3820', acc: '#c87a3a', eye: '#2e2416', line: '#241a0c' },
-  ichthyo:   { top: '#3e4a3a', mid: '#6f7c5c', belly: '#e4dcb8', shade: '#556348', pat: '#26301f', acc: '#e07a2a', eye: '#e8c040', line: '#141a10' },
-  qianzho:   { top: '#4a2a1c', mid: '#8c5232', belly: '#f2e6cc', shade: '#6e4026', pat: '#1e120a', acc: '#f0e0c0', eye: '#e8d878', line: '#1a0e08' },
-  scutello:  { top: '#3c5a30', mid: '#6c8a48', belly: '#e6e6b0', shade: '#507040', pat: '#26381c', acc: '#e8c84a', eye: '#3a2a14', line: '#18240f' },
-  metria:    { top: '#5c564a', mid: '#938a74', belly: '#e6dcc4', shade: '#766e5c', pat: '#2e2a22', acc: '#d8502a', eye: '#e8c040', line: '#1a1812' },
-  giganto:   { top: '#4e5450', mid: '#7e8680', belly: '#d8d6c4', shade: '#646a66', pat: '#2e3430', acc: '#d85a2a', eye: '#3a3020', line: '#181c1a' },
-  crista:    { top: '#4a4232', mid: '#7a6c50', belly: '#e6dcb8', shade: '#605640', pat: '#2a2418', acc: '#c0402a', eye: '#e8b030', line: '#181408' },
-  linhe:     { top: '#6a5a40', mid: '#a89070', belly: '#ece0c4', shade: '#887456', pat: '#2c3c5a', acc: '#3a6ab0', eye: '#e8c040', line: '#241c10' },
-  preno:     { top: '#5a4430', mid: '#8e6e4c', belly: '#e8d8b8', shade: '#74583c', pat: '#3a2a1a', acc: '#8aa8c8', eye: '#3a2a14', line: '#20160c' },
-  vulcano:   { top: '#3e4a44', mid: '#6c7a70', belly: '#d6dacb', shade: '#56645a', pat: '#2a3430', acc: '#b8c4b0', eye: '#3a3020', line: '#161c18' },
-  nothro:    { top: '#3a3028', mid: '#6a5848', belly: '#d8ccb8', shade: '#524438', pat: '#221a14', acc: '#c8b8a0', eye: '#d8a030', line: '#140e0a' },
-  aardi:     { top: '#4a5440', mid: '#7c8a68', belly: '#e6e2c8', shade: '#626e52', pat: '#1e2418', acc: '#c8a050', eye: '#e8c040', line: '#161a10' },
-  centro:    { top: '#6a4a2c', mid: '#b0864e', belly: '#f0dcb0', shade: '#8a663c', pat: '#4a2a14', acc: '#c0402a', eye: '#3a2814', line: '#24160a' },
-  omni:      { top: '#3a4450', mid: '#66727e', belly: '#dcdcd0', shade: '#505c68', pat: '#222830', acc: '#c8402a', eye: '#e8c040', line: '#12161c' },
-  eotrach:   { top: '#4a5a30', mid: '#889a54', belly: '#efe6b4', shade: '#6a7a40', pat: '#2e3a1c', acc: '#d8b040', eye: '#4a3a24', line: '#1c2410' },
-  loki:      { top: '#3a2a22', mid: '#6a4e3e', belly: '#e0ccb0', shade: '#523a2e', pat: '#1e140e', acc: '#c8402a', eye: '#e8c040', line: '#140c08' },
-  moro:      { top: '#4e5a54', mid: '#808c84', belly: '#dcdcd0', shade: '#66726a', pat: '#34403a', acc: '#a8b4aa', eye: '#3c3018', line: '#1a1e1c' },
-  spino:     { top: '#4a4038', mid: '#7a6c5e', belly: '#e2d8c4', shade: '#625648', pat: '#2a221c', acc: '#b84a2a', eye: '#e8b030', line: '#181410' },
-  tyranno:   { top: '#5a4a3a', mid: '#9a8466', belly: '#eadcc0', shade: '#7a6850', pat: '#2e2218', acc: '#d8602a', eye: '#e8c040', line: '#1c140c' },
-  eshano:    { top: '#4a4440', mid: '#7c746c', belly: '#e4e0d8', shade: '#625c56', pat: '#2a2622', acc: '#e8e0d0', eye: '#d8a030', line: '#161412' },
-  jianchang: { top: '#6a5034', mid: '#a8865a', belly: '#efe0c4', shade: '#866a46', pat: '#3a2a18', acc: '#e0d4c0', eye: '#e8c040', line: '#20160c' },
-  nivalo:    { top: '#5a6a78', mid: '#95a6b4', belly: '#eef2f6', shade: '#7a8a98', pat: '#3e4c58', acc: '#c8d8e4', eye: '#e8c040', line: '#1c2228' },
-  nanuq:     { top: '#6a6e72', mid: '#d0d4d6', belly: '#f6f6f4', shade: '#a8acb0', pat: '#2a2c30', acc: '#a83a2a', eye: '#e8d878', line: '#1e2024' },
-  nivarex:   { top: '#3a3634', mid: '#605a56', belly: '#d4ccc0', shade: '#4c4644', pat: '#1e1a18', acc: '#a83a2a', eye: '#e8c040', line: '#100e0c' },
-  simo:      { top: '#4a4c36', mid: '#767a58', belly: '#dcd8b8', shade: '#5e6248', pat: '#2a2c1c', acc: '#a8a070', eye: '#c8a030', line: '#18180e' },
-  korea:     { top: '#3e5458', mid: '#6a8a8c', belly: '#dce4dc', shade: '#567074', pat: '#283a3e', acc: '#e08a3a', eye: '#3a2a14', line: '#142022' },
-  sarco:     { top: '#8a4a24', mid: '#c07a40', belly: '#f0dcb0', shade: '#a2602e', pat: '#2a1408', acc: '#d8302a', eye: '#e8c040', line: '#241008' },
-  drypto:    { top: '#3a3c40', mid: '#64686e', belly: '#dcdcd8', shade: '#4e5256', pat: '#1c1e22', acc: '#c8a040', eye: '#e8d878', line: '#101214' },
-  gastonia:  { top: '#5a3a2a', mid: '#8e6248', belly: '#e0ccb0', shade: '#74503a', pat: '#32200f', acc: '#d8c09a', eye: '#3a2a14', line: '#1e1208' },
-  buitre:    { top: '#2c2c30', mid: '#6a6a6c', belly: '#f0f0ec', shade: '#4a4a4e', pat: '#141416', acc: '#e8a040', eye: '#e0b64a', line: '#0e0e10' },
-  hypsi:     { top: '#4a6030', mid: '#7c9a50', belly: '#eef0c0', shade: '#607a40', pat: '#2e3c1c', acc: '#e8c040', eye: '#2e2414', line: '#1a240e' },
-  adratik:   { top: '#4a5040', mid: '#7a8268', belly: '#dcd8c0', shade: '#626a54', pat: '#2c3024', acc: '#e07a2a', eye: '#3a2e18', line: '#181a12' },
-  orkor:     { top: '#3a3040', mid: '#625470', belly: '#dcd2d8', shade: '#4e4258', pat: '#221a28', acc: '#e08a3a', eye: '#e8c25a', line: '#140e18' },
-  neove:     { top: '#2e3a2a', mid: '#566a48', belly: '#d8d4b4', shade: '#42523a', pat: '#141a10', acc: '#c83a2a', eye: '#f0cc58', line: '#0e120a' },
-  coahuila:  { top: '#5a4e40', mid: '#8c7c66', belly: '#e2d8c0', shade: '#706452', pat: '#3a3226', acc: '#d8c8a0', eye: '#3a2a14', line: '#201a12' },
-  procomp:   { top: '#4a6a3a', mid: '#7c9e5c', belly: '#e8ecb8', shade: '#62844a', pat: '#2a3e1e', acc: '#e0b040', eye: '#e8c25a', line: '#18240e' },
-  homalo:    { top: '#5a5236', mid: '#8e8456', belly: '#ece4c0', shade: '#746a44', pat: '#3a3420', acc: '#6a8ab0', eye: '#3f3116', line: '#241e0e' },
-  coelo:     { top: '#8a5a2a', mid: '#c48a4a', belly: '#f0e0c0', shade: '#a67038', pat: '#2a1a0c', acc: '#d8402a', eye: '#e8c25a', line: '#2a1808' },
-  poekilo:   { top: '#3a3a2c', mid: '#626248', belly: '#dcd8bc', shade: '#4e4e3a', pat: '#1e1e14', acc: '#e07a2a', eye: '#e8c25a', line: '#121208' },
+  raja:      { motif: 'tiger',     top: '#7a1010', mid: '#c8281e', belly: '#f4d8a8', pat: '#1a0606', acc: '#ffc21a', eye: '#ffe14a' },   // crimson tiger
+  campto:    { motif: 'dapple',    top: '#2f7a1e', mid: '#5cb82e', belly: '#f2f0a0', pat: '#1c4a10', acc: '#ffe23a' },                  // spring meadow
+  rioja:     { motif: 'bands',     top: '#a8401a', mid: '#f07a2a', belly: '#ffe2b0', pat: '#5a1e6a', acc: '#ffd040' },                  // sunset, violet saddles
+  ichthyo:   { motif: 'chevron',   top: '#0e5a6a', mid: '#1aa0a8', belly: '#dff6ea', pat: '#0a2e4a', acc: '#ffb81e' },                  // lagoon teal, gold arrows
+  qianzho:   { motif: 'stripe',    top: '#6a1e0e', mid: '#c84a1e', belly: '#fff0d8', pat: '#2a0a04', acc: '#fff4e0' },                  // rust racer, white stripe
+  scutello:  { motif: 'ocellus',   top: '#1e6a4a', mid: '#34a878', belly: '#e8f8d0', pat: '#0e3a28', acc: '#ff8a1e' },                  // jade, orange eyespots
+  metria:    { motif: 'lightning', top: '#1e2e5a', mid: '#3a5aa8', belly: '#dce4f4', pat: '#0e1630', acc: '#ffe81e' },                  // storm blue, yellow bolt
+  giganto:   { motif: 'rosette',   top: '#4a1e5a', mid: '#8a3aa0', belly: '#f0dcf0', pat: '#260e30', acc: '#ffc82a' },                  // plum, gold rosettes
+  crista:    { motif: 'flame',     top: '#0e3a6a', mid: '#2a6ab8', belly: '#e0ecf8', pat: '#08203e', acc: '#ff6a4a' },                  // deep sea, coral flame
+  linhe:     { motif: 'tiger',     top: '#7a0e4a', mid: '#d8287e', belly: '#ffe0ee', pat: '#1e0414', acc: '#3ae0ff', eye: '#3ae0ff' },   // hot magenta tiger
+  preno:     { motif: 'speckle',   top: '#2a5a9a', mid: '#4a90d8', belly: '#eaf4ff', pat: '#183a6a', acc: '#ffffff' },                  // sky dome, starlight
+  vulcano:   { motif: 'flame',     top: '#1a1414', mid: '#3a2a26', belly: '#8a5a40', pat: '#ff4a0e', acc: '#ffb01e', eye: '#ff7a1e' },   // obsidian, lava
+  nothro:    { motif: 'bands',     top: '#8a5a0e', mid: '#e0a020', belly: '#fff0c0', pat: '#3a1e08', acc: '#fff4d0' },                  // amber, chocolate saddles
+  aardi:     { motif: 'chevron',   top: '#a8400e', mid: '#f07a1e', belly: '#fff4e8', pat: '#3a1406', acc: '#ffffff' },                  // fox fire
+  centro:    { motif: 'ocellus',   top: '#8a6a0e', mid: '#e0b830', belly: '#fff4c8', pat: '#6a1e0e', acc: '#1ec8e0' },                  // gold, cyan eyespots
+  omni:      { motif: 'tiger',     top: '#0e2a7a', mid: '#2a5ad8', belly: '#e0e8ff', pat: '#0a1440', acc: '#ff7a1e' },                  // cobalt tiger
+  eotrach:   { motif: 'dapple',    top: '#3a7a0e', mid: '#7ad01e', belly: '#f4ffd0', pat: '#0e5a4a', acc: '#ffe81e' },                  // lime and teal
+  loki:      { motif: 'lightning', top: '#0e1440', mid: '#22307a', belly: '#c8d0f0', pat: '#06081e', acc: '#ffd21e', eye: '#ffd21e' },   // midnight, gold bolt
+  moro:      { motif: 'bands',     top: '#1e5a5a', mid: '#3a9a94', belly: '#e8faf4', pat: '#0e3434', acc: '#f4fff8' },                  // river teal giant
+  spino:     { motif: 'chevron',   top: '#5a0e0e', mid: '#a82020', belly: '#f4dcc0', pat: '#2a0606', acc: '#ffc81e' },                  // crimson sail, gold
+  tyranno:   { motif: 'rosette',   top: '#0e4a2a', mid: '#1e8a4a', belly: '#e4f4d8', pat: '#06240e', acc: '#ffd21e' },                  // emerald, gold rosettes
+  eshano:    { motif: 'speckle',   top: '#7aa8c8', mid: '#d8eaf8', belly: '#ffffff', pat: '#2a5a8a', acc: '#4ac8ff' },                  // arctic frost
+  jianchang: { motif: 'chevron',   top: '#8a3a0e', mid: '#d8702a', belly: '#fff0dc', pat: '#4a1a06', acc: '#2ad8c8' },                  // copper, turquoise
+  nivalo:    { motif: 'stripe',    top: '#1e4a8a', mid: '#4aa0e0', belly: '#f0faff', pat: '#0e2a5a', acc: '#6affc8' },                  // glacier, aurora stripe
+  nanuq:     { motif: 'tiger',     top: '#a8b0b8', mid: '#f4f6f8', belly: '#ffffff', pat: '#101418', acc: '#e0281e' },                  // snow tiger
+  nivarex:   { motif: 'flame',     top: '#1a1416', mid: '#3a2a2e', belly: '#c8b8b0', pat: '#c8101e', acc: '#ff5a2a', eye: '#ff5a2a' },   // charcoal, crimson fire
+  simo:      { motif: 'ocellus',   top: '#3a5a1e', mid: '#6a9a2e', belly: '#f0f4c0', pat: '#1e3a0e', acc: '#ffd81e' },                  // moss, yellow eyespots
+  korea:     { motif: 'bands',     top: '#0e6a7a', mid: '#1ec0c8', belly: '#e8fff8', pat: '#0e3a4a', acc: '#ff8a2a' },                  // aqua, orange bands
+  sarco:     { motif: 'lightning', top: '#8a1e06', mid: '#f0501e', belly: '#ffe4c8', pat: '#1a0604', acc: '#ffe81e' },                  // blood orange, bolt
+  drypto:    { motif: 'chevron',   top: '#2a1e4a', mid: '#5a3a9a', belly: '#e4dcf4', pat: '#140a2a', acc: '#e0e8ff' },                  // violet, silver arrows
+  gastonia:  { motif: 'rosette',   top: '#7a2e0e', mid: '#c85a2a', belly: '#f4dcc0', pat: '#3a1206', acc: '#ffd88a' },                  // terracotta
+  buitre:    { motif: 'stripe',    top: '#101014', mid: '#2a2a30', belly: '#ffffff', pat: '#ffffff', acc: '#ff8a1e', eye: '#ff8a1e' },   // magpie, sunset stripe
+  hypsi:     { motif: 'speckle',   top: '#1e7a2e', mid: '#3ac850', belly: '#f4fff0', pat: '#0e4a1a', acc: '#ffffff' },                  // fresh leaf
+  adratik:   { motif: 'bands',     top: '#0e4a4a', mid: '#1e8a84', belly: '#e0f4ec', pat: '#6a1e0e', acc: '#ff6a1e' },                  // teal plate, rust bands
+  orkor:     { motif: 'tiger',     top: '#3a0e5a', mid: '#7a2aa8', belly: '#ecdcf8', pat: '#1a0628', acc: '#9aff2a', eye: '#9aff2a' },   // royal purple, lime
+  neove:     { motif: 'ocellus',   top: '#0e3a1e', mid: '#2a7a3a', belly: '#e0f0d0', pat: '#061a0e', acc: '#ff2a1e' },                  // forest, scarlet eyes
+  coahuila:  { motif: 'bands',     top: '#a8780e', mid: '#f0c81e', belly: '#fff8d8', pat: '#2a1a06', acc: '#ff5a1e' },                  // sunflower, black bands
+  procomp:   { motif: 'speckle',   top: '#4a8a0e', mid: '#8ae01e', belly: '#f8ffd8', pat: '#1e4a0e', acc: '#2ab8ff' },                  // lime, blue glitter
+  homalo:    { motif: 'chevron',   top: '#2a4a8a', mid: '#4a7ad8', belly: '#eaf0ff', pat: '#14285a', acc: '#ffb01e' },                  // dome blue, amber arrows
+  // GARDEN: leaf-green over a mossy back, vines along the spine and flowers
+  // blooming down the flanks — pink petals around sunny yellow hearts
+  tamery:    { motif: 'garden',    top: '#2e5a1e', mid: '#5a9a34', belly: '#eef4c8', pat: '#1e3e12', acc: '#ff6aa8', acc2: '#ffe04a', eye: '#ffd84a', line: '#10200a' },
+  // SPLASH: a cream coat flicked all over with pastel paint — pink, mint,
+  // lavender, peach and sky blue
+  aero:      { motif: 'splash',    top: '#c4a8ec', mid: '#f8dcec', belly: '#fff6fa', shade: '#e0c0e4', pat: '#a088d8', acc: '#ff9ec4', eye: '#6ad0f4', line: '#4a3466',
+               splash: ['#ff8ebc', '#6ee4b4', '#a890ff', '#ffb070', '#78bcff', '#ffe060'] },
+  coelo:     { motif: 'tiger',     top: '#a86a0e', mid: '#f0b02a', belly: '#fff4d8', pat: '#8a0e0e', acc: '#ff3a1e' },                  // desert gold, crimson bars
+  poekilo:   { motif: 'lightning', top: '#5a3a0e', mid: '#b07a2a', belly: '#f4e4c0', pat: '#2a1a06', acc: '#2ae0d0' },                  // bronze, turquoise bolt
 };
 for (const sp in LEGACY_PAL) {
-  SKINS['legacy_' + sp] = { name: 'Legacy', cost: 0, only: [sp], req: 'settled', legacy: true, pal: LEGACY_PAL[sp] };
+  const P = LEGACY_PAL[sp];
+  P.shade = P.shade || mixHex(P.top, P.mid, 0.5);
+  P.line = P.line || shade(P.top, 0.3);
+  SKINS['legacy_' + sp] = { name: 'Legacy', cost: 0, only: [sp], req: 'settled', legacy: true, pal: P, motif: P.motif };
 }
 // a skin fits a species when it has no `only`, or the species is on the list
 function skinFits(sp, skinId) {
@@ -1571,8 +1614,10 @@ function skinColors(key, gender, skinId) {
       },
     };
     const P = SKIN_PALETTES[skinId] || SKINS[skinId].pal;
+    const legacy = !!SKINS[skinId].legacy;
     if (P) {
-      for (const k in c) out[k] = P[k] ? mixHex(c[k], P[k], 0.82) : c[k];
+      // a legacy livery is meant to be LOUD: its palette all but replaces the species'
+      for (const k in c) out[k] = P[k] ? mixHex(c[k], P[k], legacy ? 0.95 : 0.82) : c[k];
     } else {
       // ripcel: the species' own colors sunk toward black — silhouette and
       // extras keep a ghost of their identity instead of going flat
@@ -1583,8 +1628,9 @@ function skinColors(key, gender, skinId) {
       out.eye = '#d6ff6a';
     }
     // same rule as the coats: she mutes it, he turns it all the way up
-    if (gender === 'm') for (const k in out) { if (k !== 'line') out[k] = satLum(out[k], 1.35, 1.06); }
-    else if (gender === 'f') for (const k in out) { if (k !== 'line') out[k] = satLum(out[k], 0.55, 0.96); }
+    // (a legacy livery only softens on her — it never goes drab)
+    if (gender === 'm') for (const k in out) { if (k !== 'line') out[k] = satLum(out[k], legacy ? 1.15 : 1.35, legacy ? 1.03 : 1.06); }
+    else if (gender === 'f') for (const k in out) { if (k !== 'line') out[k] = satLum(out[k], legacy ? 0.8 : 0.55, 0.96); }
     GENDER_SKINS[id] = out;
   }
   return GENDER_SKINS[id];
@@ -1603,8 +1649,8 @@ const CLADE = {
   tarbo: 'tyrannosaur', qianzho: 'tyrannosaur', nanuq: 'tyrannosaur', drypto: 'tyrannosaur', yuty: 'tyrannosaur',
   guanlong: 'tyrannosauroid', moros: 'tyrannosauroid', eotyrannus: 'tyrannosauroid',
   tyranno: 'carchar', nivarex: 'carchar', titanov: 'carchar', concav: 'carchar',
-  metria: 'allosaur', lourinha: 'allosaur', neove: 'allosaur', duria: 'megalosaur', poekilo: 'megalosaur',
-  orkor: 'megaraptor', ichthyo: 'spinosaur', crista: 'spinosaur', spino: 'spinosaur',
+  metria: 'allosaur', lourinha: 'allosaur', neove: 'allosaur', tamery: 'allosaur', duria: 'megalosaur', poekilo: 'megalosaur',
+  orkor: 'megaraptor', aero: 'megaraptor', ichthyo: 'spinosaur', crista: 'spinosaur', spino: 'spinosaur',
   lophos: 'coelophysoid', coelo: 'coelophysoid', herrie: 'fish',
   shri: 'dromaeosaur', kuru: 'dromaeosaur', tsaagan: 'dromaeosaur', mahakala: 'dromaeosaur', luanchuan: 'dromaeosaur', adasaurus: 'dromaeosaur',
   garudi: 'ornithomimid', harpy: 'ornithomimid', sinorni: 'ornithomimid', kinnaree: 'ornithomimid', beishan: 'ornithomimid', aepyorni: 'ornithomimid',
@@ -2742,10 +2788,182 @@ function drawFish(ctx, key, o) {
 }
 
 // ---------------------------------------------------------------------------
+// legacy motifs (inside the silhouette clip): one bold marking scheme per
+// livery, in the coat's pat (dark) and acc (bright) — acc2 where a motif
+// needs a third color. Body-local frame: +x is the head end, the body spans
+// ±bodyL/2 around cy, and the tail runs out past -bodyL/2 for tailLen.
+// ---------------------------------------------------------------------------
+function drawLegacyMotif(ctx, key, C, a, motif, acc2, splash) {
+  const { cy, bodyL, bodyH, s, tailLen } = a;
+  const top = cy - bodyH * 0.5;
+  const x0 = -bodyL * 0.5 - tailLen * 0.85, x1 = bodyL * 0.46;   // tail tip … shoulders
+  const rng = speckleRng(key.charCodeAt(0) * 9109 + key.length * 31 + motif.length);
+  // the back of the animal at x: the tail tapers and sits a little higher
+  const backY = (x) => x > -bodyL * 0.5 ? top : top + bodyH * 0.18 * Math.min(1, (-bodyL * 0.5 - x) / tailLen);
+  const depthAt = (x) => x > -bodyL * 0.5 ? bodyH : bodyH * (0.62 - 0.5 * Math.min(1, (-bodyL * 0.5 - x) / tailLen));
+  const dot = (x, y, r, col, al) => { ctx.globalAlpha = al; ctx.fillStyle = col; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill(); };
+  const spots = (n, fn) => {
+    for (let i = 0; i < n; i++) {
+      const x = x0 + rng() * (x1 - x0);
+      fn(x, backY(x) + depthAt(x) * (0.12 + rng() * 0.55), rng());
+    }
+  };
+  ctx.save();
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  if (motif === 'tiger') {
+    // bold tapering bars hanging from the spine, a hot accent edge on each
+    for (let i = 0; i < 11; i++) {
+      const x = x1 - (i + 0.3) * (x1 - x0) / 11, d = depthAt(x), y = backY(x);
+      const w = bodyL * 0.035 * (d / bodyH + 0.4), len = d * (0.58 + 0.12 * Math.sin(i * 2.3));
+      ctx.globalAlpha = 0.92; ctx.fillStyle = C.pat;
+      ctx.beginPath();
+      ctx.moveTo(x - w, y - 2 * s);
+      ctx.quadraticCurveTo(x + w * 0.6, y + len * 0.5, x + w * 0.2, y + len);
+      ctx.quadraticCurveTo(x + w * 1.4, y + len * 0.45, x + w, y - 2 * s);
+      ctx.closePath(); ctx.fill();
+      ctx.globalAlpha = 0.7; ctx.strokeStyle = C.acc; ctx.lineWidth = 0.6 * s;
+      ctx.beginPath(); ctx.moveTo(x + w * 1.25, y); ctx.quadraticCurveTo(x + w * 1.6, y + len * 0.4, x + w * 0.5, y + len * 0.95); ctx.stroke();
+    }
+  } else if (motif === 'bands') {
+    // broad saddles across the back and rings down the tail, accent-piped
+    for (let i = 0; i < 6; i++) {
+      const x = x1 - (i + 0.5) * (x1 - x0) / 6, d = depthAt(x), y = backY(x), w = bodyL * 0.075 * (d / bodyH + 0.3);
+      ctx.globalAlpha = 0.9; ctx.fillStyle = C.pat;
+      ctx.beginPath(); ctx.ellipse(x, y + d * 0.18, w, d * 0.62, 0.12, 0, TAU); ctx.fill();
+      ctx.globalAlpha = 0.85; ctx.strokeStyle = C.acc; ctx.lineWidth = 0.9 * s;
+      ctx.beginPath(); ctx.ellipse(x, y + d * 0.18, w + 1.2 * s, d * 0.62 + 1.2 * s, 0.12, 0, TAU); ctx.stroke();
+    }
+  } else if (motif === 'rosette') {
+    // leopard rosettes: a broken dark ring around a bright heart
+    spots(16, (x, y, r) => {
+      const R = (1.6 + r * 1.4) * s;
+      dot(x, y, R * 0.7, C.acc, 0.9);
+      ctx.globalAlpha = 0.95; ctx.strokeStyle = C.pat; ctx.lineWidth = R * 0.45;
+      for (let k = 0; k < 4; k++) { ctx.beginPath(); ctx.arc(x, y, R, k * TAU / 4 + r, k * TAU / 4 + r + 1.15); ctx.stroke(); }
+    });
+  } else if (motif === 'dapple') {
+    // sun-dapple: soft bright blots over darker ones
+    spots(14, (x, y, r) => dot(x, y, (1.6 + r * 1.8) * s, C.pat, 0.55));
+    spots(22, (x, y, r) => dot(x, y, (0.9 + r * 1.3) * s, C.acc, 0.85));
+  } else if (motif === 'ocellus') {
+    // eyespots in a row down the flank: dark ring, bright iris, dark pupil
+    for (let i = 0; i < 7; i++) {
+      const x = x1 - (i + 0.6) * (x1 - x0) / 7.4, d = depthAt(x), y = backY(x) + d * 0.38, R = Math.max(1.2 * s, d * 0.2);
+      dot(x, y, R * 1.25, C.pat, 0.95);
+      dot(x, y, R * 0.95, C.acc, 1);
+      dot(x + R * 0.15, y, R * 0.42, C.pat, 1);
+      dot(x - R * 0.3, y - R * 0.35, R * 0.2, '#ffffff', 0.8);
+    }
+  } else if (motif === 'chevron') {
+    // arrowheads marching along the spine toward the head, on a dark saddle stripe
+    ctx.globalAlpha = 0.6; ctx.strokeStyle = C.pat; ctx.lineWidth = bodyH * 0.22;
+    ctx.beginPath();
+    for (let i = 0; i <= 16; i++) { const x = x0 + (x1 - x0) * i / 16; const y = backY(x) + depthAt(x) * 0.08; if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y); }
+    ctx.stroke();
+    ctx.globalAlpha = 0.95; ctx.strokeStyle = C.acc;
+    for (let i = 0; i < 9; i++) {
+      const x = x1 - (i + 0.4) * (x1 - x0) / 9, d = depthAt(x), y = backY(x), h = d * 0.32;
+      ctx.lineWidth = Math.max(0.8, 1.3 * s * (d / bodyH + 0.3));
+      ctx.beginPath(); ctx.moveTo(x - h * 0.7, y - 1 * s); ctx.lineTo(x, y + h * 0.5); ctx.lineTo(x - h * 0.7, y + h); ctx.stroke();
+    }
+  } else if (motif === 'stripe') {
+    // one bold racing stripe from shoulder to tail tip, dark-edged
+    const path = () => {
+      ctx.beginPath();
+      for (let i = 0; i <= 20; i++) {
+        const x = x1 - (x1 - x0) * i / 20, y = backY(x) + depthAt(x) * 0.42;
+        if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y);
+      }
+    };
+    ctx.globalAlpha = 0.95; ctx.strokeStyle = C.pat; ctx.lineWidth = bodyH * 0.3; path(); ctx.stroke();
+    ctx.strokeStyle = C.acc; ctx.lineWidth = bodyH * 0.17; path(); ctx.stroke();
+  } else if (motif === 'lightning') {
+    // a jagged bolt down the whole flank, dark halo under a bright core
+    const pts = [];
+    for (let i = 0; i <= 12; i++) {
+      const x = x1 - (x1 - x0) * i / 12;
+      pts.push([x, backY(x) + depthAt(x) * (i % 2 ? 0.62 : 0.2)]);
+    }
+    const bolt = () => { ctx.beginPath(); pts.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); };
+    ctx.lineJoin = 'miter';
+    ctx.globalAlpha = 0.95; ctx.strokeStyle = C.pat; ctx.lineWidth = 3.2 * s; bolt(); ctx.stroke();
+    ctx.strokeStyle = C.acc; ctx.lineWidth = 1.6 * s; bolt(); ctx.stroke();
+    ctx.strokeStyle = mixHex(C.acc, '#ffffff', 0.6); ctx.lineWidth = 0.5 * s; bolt(); ctx.stroke();
+  } else if (motif === 'flame') {
+    // tongues of fire licking up from the belly, a hot core in each
+    for (let i = 0; i < 9; i++) {
+      const x = x1 - (i + 0.4) * (x1 - x0) / 9, d = depthAt(x), base = backY(x) + d * 1.02, h = d * (0.6 + 0.2 * Math.sin(i * 1.9)), w = bodyL * 0.05 * (d / bodyH + 0.35);
+      for (const [col, k] of [[C.pat, 1], [C.acc, 0.58]]) {
+        ctx.globalAlpha = 0.92; ctx.fillStyle = col;
+        ctx.beginPath();
+        ctx.moveTo(x - w * k, base);
+        ctx.quadraticCurveTo(x - w * k * 0.9, base - h * k * 0.55, x + w * 0.5, base - h * k);
+        ctx.quadraticCurveTo(x + w * k * 0.3, base - h * k * 0.45, x + w * k, base);
+        ctx.closePath(); ctx.fill();
+      }
+    }
+  } else if (motif === 'speckle') {
+    // a dark cape over the back, then a scatter of glinting points
+    ctx.globalAlpha = 0.55; ctx.strokeStyle = C.pat; ctx.lineWidth = bodyH * 0.34;
+    ctx.beginPath();
+    for (let i = 0; i <= 16; i++) { const x = x0 + (x1 - x0) * i / 16; const y = backY(x) + depthAt(x) * 0.06; if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y); }
+    ctx.stroke();
+    spots(40, (x, y, r) => {
+      dot(x, y - depthAt(x) * 0.12, (0.45 + r * 0.7) * s, C.acc, 0.95);
+    });
+  } else if (motif === 'splash') {
+    // paint flicked over the hide: pastel blots, each with a few satellite
+    // droplets and a short drip, every color from the livery's splash list
+    const cols = splash || [C.acc, C.pat];
+    spots(26, (x, y, r) => {
+      const col = cols[Math.floor(r * 997) % cols.length], R = (1.7 + r * 2) * s;
+      dot(x, y, R, col, 0.95);
+      for (let k = 0; k < 4; k++) {
+        const ang = rng() * TAU, dd = R * (1.3 + rng() * 0.9);
+        dot(x + Math.cos(ang) * dd, y + Math.sin(ang) * dd, R * (0.18 + rng() * 0.22), col, 0.95);
+      }
+      ctx.globalAlpha = 0.9; ctx.strokeStyle = col; ctx.lineWidth = R * 0.4;
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + R * 0.2, y + R * (1.2 + r)); ctx.stroke();
+    });
+  } else if (motif === 'garden') {
+    // a vine trails the spine, leaves sprouting off it, and flowers bloom
+    // down the flank: five petals around a bright heart
+    ctx.globalAlpha = 0.9; ctx.strokeStyle = C.pat; ctx.lineWidth = 1.1 * s;
+    ctx.beginPath();
+    for (let i = 0; i <= 24; i++) {
+      const x = x0 + (x1 - x0) * i / 24, y = backY(x) + depthAt(x) * (0.16 + 0.07 * Math.sin(i * 1.3));
+      if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y);
+    }
+    ctx.stroke();
+    const leafCol = mixHex(C.mid, '#b8f060', 0.45);
+    for (let i = 0; i < 14; i++) {
+      const x = x0 + (x1 - x0) * (i + 0.5) / 14, y = backY(x) + depthAt(x) * (0.16 + 0.07 * Math.sin((i + 0.5) / 14 * 24 * 1.3));
+      const up = i % 2 ? -1 : 1, L = (1.8 + rng() * 1.2) * s;
+      ctx.globalAlpha = 0.95; ctx.fillStyle = i % 3 ? leafCol : C.pat;
+      ctx.beginPath(); ctx.ellipse(x + L * 0.4, y + up * L * 0.5, L, L * 0.42, up * 0.7, 0, TAU); ctx.fill();
+    }
+    const heart = acc2 || mixHex(C.acc, '#ffffff', 0.5);
+    spots(16, (x, y, r) => {
+      const R = (1.35 + r * 0.9) * s * Math.min(1, depthAt(x) / bodyH + 0.35);
+      const col = r < 0.3 ? mixHex(C.acc, '#ffffff', 0.45) : r > 0.8 ? mixHex(C.acc, '#a040e0', 0.4) : C.acc;
+      for (let k = 0; k < 5; k++) {
+        const ang = k * TAU / 5 + r * 3;
+        dot(x + Math.cos(ang) * R, y + Math.sin(ang) * R, R * 0.72, col, 0.95);
+      }
+      dot(x, y, R * 0.55, heart, 1);
+    });
+  }
+  ctx.restore();
+}
+
+// ---------------------------------------------------------------------------
 // species pattern layers (called inside silhouette clip)
 // ---------------------------------------------------------------------------
 function drawPattern(ctx, key, d, C, a) {
   const { cy, bodyL, bodyH, s, tailLen } = a;
+  // a legacy livery repaints the markings wholesale with its motif
+  const lsk = a.coat && SKINS[a.coat];
+  if (lsk && lsk.motif) { drawLegacyMotif(ctx, key, C, a, lsk.motif, lsk.pal.acc2, lsk.pal.splash); return; }
   // the ripcel skin repaints the markings wholesale: navy flank stripes and
   // shining lime dots (bright rim, hot core) from the shoulders down the tail
   if (a.coat === 'ripcel') {

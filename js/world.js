@@ -80,7 +80,7 @@ const ECOS = {
   },
   desert: {
     name: 'The Death Desert', tint: '#d0663a', emoji: '☀️', sub: 'red sand · the river heart · sandstorms',
-    seed: 20260919, cost: 4000, size: 400,   // the largest map in the game, by a distance
+    seed: 20260919, cost: 4000, size: 520,   // the largest map in the game, by a distance
     gen: () => genDesert(),
   },
 };
@@ -904,6 +904,8 @@ function genDesert() {
     procomp: { x: T(140), y: T(232) },   // the southern belt, under the giants
     homalo: { x: T(176), y: T(150) },    // the belt's heart, by the wallow
     coelo: { x: T(150), y: T(246) },     // a river bend in the southern belt
+    tamery: { x: T(170), y: T(110) },    // the northern belt, where the hadrosaurs drink
+    aero: { x: T(196), y: T(186) },      // the belt's eastern edge, facing the open sand it runs
   };
   // the river: one great channel from the north edge to the south, with two
   // tributaries feeding it from the flanks — each a chain of water blobs
@@ -1001,8 +1003,9 @@ function genDesert() {
       }
     }
   }
-  // horsetails at every waterside
-  for (let k = 0; k < 140; k++) {
+  // horsetails at every waterside (tries scale with area: same density at any size)
+  const tries = Math.round(140 * (WT * HT) / (400 * 400));
+  for (let k = 0; k < tries; k++) {
     const wt = W.waterTiles.length ? null : null;
     const px = rrange(4, WT - 4) * TILE, py = rrange(4, HT - 4) * TILE;
     if (!isWaterPx(px, py) && nearWaterPx(px, py, 40)) W.horsetails.push({ x: px, y: py, food: 1, regrow: 0, s: rrange(0.8, 1.3) });

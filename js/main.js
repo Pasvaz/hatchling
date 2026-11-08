@@ -44,6 +44,7 @@ const LEGACY_SAVE_KEY = 'hatchling_save_v1';
 function defaultSave() { return { growths: 0, earned: 0, ecoPaid: {}, mastery: {}, owned: {}, dino: {}, skinChoice: {}, genderChoice: {}, skinOwned: {}, discovered: {}, arrived: {}, hatched: {}, titles: {}, titleWorn: null, ecoSeen: {}, settled: {} }; }
 // paid skins are bought once per species (Classic and other free skins pass)
 function skinOwned(species, skinId) {
+  if (allFree()) return true;
   // a free EARNED coat (the Legacy) is owned the moment its deed is done
   if (!SKINS[skinId].cost) return !SKINS[skinId].req || skinReqMet(species, skinId);
   return !!(Save.skinOwned || {})[species + ':' + skinId];
@@ -56,6 +57,7 @@ const SKIN_REQS = {
   storms3: { met: (sp) => ((Save.stormsRidden || {})[sp] || 0) >= 3, msg: (sp) => 'ride out 3 monsoons as ' + DINO[sp].name + ' first (' + ((Save.stormsRidden || {})[sp] || 0) + '/3)' },
 };
 function skinReqMet(species, skinId) {
+  if (allFree()) return true;
   const r = SKINS[skinId].req;
   return !r || !SKIN_REQS[r] || SKIN_REQS[r].met(species);
 }
@@ -92,7 +94,23 @@ function saveSave() {
 }
 // growing ANY dinosaur to Full Adult opens the door to new ecosystems
 function anyMastery() { return Object.keys(Save.mastery).some(k => Save.mastery[k]); }
-function ecoPaid(key) { return !ECOS[key].cost || !!Save.ecoPaid[key]; }
+function ecoPaid(key) { return allFree() || !ECOS[key].cost || !!Save.ecoPaid[key]; }
+
+// ---------- unlock codes ----------
+// typed into the lobby's code box; stored per profile so a code only frees
+// the player who entered it. EVAX opens every land, dino (secret giant too)
+// and skin — the ladder and the ❖ price tags are simply skipped.
+const CODES = { EVAX: 'allFree' };
+function allFree() { return !!Save.allFree; }
+function redeemCode(raw) {
+  const flag = CODES[String(raw).trim().toUpperCase()];
+  if (!flag) { flashTitleMsg('Unknown code.'); return false; }
+  Save[flag] = true;
+  saveSave();
+  refreshTitle();
+  flashTitleMsg('🔓 Code accepted — every dinosaur, land and skin is free!');
+  return true;
+}
 
 // ---------- the mastery ladder ----------
 // One long chain: grow each species to FULL ADULT to unlock the next rung.
@@ -115,6 +133,7 @@ const CHAIN = [
   ['neove', 'coahuila'],   // the fork: quiet hands or great horns — either one
   ['poekilo'],             // …opens the road to the Reach's true apex
   ['procomp'], ['homalo'], ['coelo'],   // ☀️ The Death Desert — the first rung has its own gate (see spUnlocked)
+  ['tamery', 'aero'],      // …and the desert's apex fork, once Coelophysis is mastered: brawn or the endless chase
 ];
 // the desert's door: an ADULT Poekilopleuron at least once, or Full Adult
 // Neovenator and Coahuilaceratops together
@@ -127,6 +146,7 @@ function chainRung(sp) { return CHAIN.findIndex(r => r.includes(sp)); }
 // or — for the secret giant — the mountain itself gave it to you
 function spUnlocked(sp) {
   const def = PLAYER_DEF[sp];
+  if (allFree()) return true;
   if (def.secret) return !!Save.owned[sp];
   if (Save.owned[sp]) return true;
   if (def.gate === 'desert') return desertGateMet();
@@ -426,6 +446,8 @@ const CARD_INFO = {
   procomp: { desc: 'A miniature Coelophysis, feathered from the egg, with a slim long head and a tank that never runs dry. Alone it is a snack — but call your kin (2) and the pack runs with you, hunts with you, and shares your kills.', tag: '◆ CARNIVORE — THE PACK', tagClass: 'mod' },
   homalo: { desc: 'A flat-domed pachycephalosaur between the two runners in size. A herbivore — but call your kin (2) and a whole herd rams beside you, and your POUNCE comes down skull-first: land it on a leg and the bone breaks.', tag: '◆ HERBIVORE — THE PACK', tagClass: 'mod' },
   coelo: { desc: 'A Triassic ghost on the red sand: short legs, a deep S-curved neck, and speed that nothing in the belt can answer. The heat will kill you before the raptors do — hunt Epidexipteryx under the giants, drink where you can, and rest in the shade.', tag: '◆ CARNIVORE — THE HEAT', tagClass: 'hard' },
+  tamery: { desc: 'The apex of the Death Desert: Poekilopleuron\'s barrel of muscle at Tyrannotitan\'s size, under Neovenator\'s long lean skull. Raw damage, arms like beams, a double bite (M) — and the great hadrosaurs of the river belt are its larder. Big and thin-skinned: the sun finds it first.', tag: '◆ CARNIVORE — APEX', tagClass: 'hard' },
+  aero: { desc: 'Tameryraptor\'s rival for the desert crown: a great megaraptorid on long legs, feathered down the back. Lighter and smaller — but it runs almost forever, its hooks and teeth leave wounds that bleed for half a minute, and call your kin (2) and two more run with you. Never more than three.', tag: '◆ CARNIVORE — PURSUIT', tagClass: 'hard' },
   orkor: { desc: 'The last of the megaraptorids — long hooked arms, blade teeth, and real speed. It opens prey with its hands as much as its jaws, and the bleeding does the rest.', tag: '◆ CARNIVORE — BLEEDER', tagClass: 'mod' },
   neove: { desc: 'The quiet hunter of the Reach. It does not chase the way the tyrants chase — it arrives. Hands and jaws together, and everything it touches bleeds.', tag: '◆ CARNIVORE — HUNTER', tagClass: 'hard' },
   coahuila: { desc: 'Possibly the longest brow horns anything ever grew, and a committed charge on the far end of them. Every wound those horns open keeps working — crazy bleed on four legs.', tag: '◆ HERBIVORE — BLEEDER', tagClass: 'mod' },
@@ -1001,7 +1023,7 @@ function refreshTitle() {
     sect.classList.toggle('locked', !paid);
     sect.querySelector('.ecosub').textContent = paid ? eco.sub : '🔒 ' + ecoUnlockHint(key);
     const roster = ALL_PLAYABLES.filter(sp => (PLAYER_DEF[sp].eco || 'valley') === key
-      && (!PLAYER_DEF[sp].secret || Save.owned[sp]));
+      && (!PLAYER_DEF[sp].secret || spUnlocked(sp)));
     const done = roster.filter(sp => Save.mastery[sp]).length;
     sect.querySelector('.ecomast').textContent = done + ' / ' + roster.length + ' mastered';
   }
@@ -1013,7 +1035,7 @@ function refreshTitle() {
     row.classList.toggle('open', !done && sps.some(spUnlocked));
     // a secret's whole rung stays off the ladder until the world gives it
     if (sps.every(sp => PLAYER_DEF[sp].secret))
-      row.style.display = sps.some(sp => Save.owned[sp]) ? '' : 'none';
+      row.style.display = sps.some(spUnlocked) ? '' : 'none';
   }
   // per-card ownership badge / price / progress state
   for (const sp of ALL_PLAYABLES) {
@@ -1022,8 +1044,8 @@ function refreshTitle() {
     const def = PLAYER_DEF[sp];
     // a SECRET dino's card doesn't exist until the world gives it to you
     if (def.secret) {
-      card.style.display = Save.owned[sp] ? '' : 'none';
-      if (!Save.owned[sp]) continue;
+      card.style.display = spUnlocked(sp) ? '' : 'none';
+      if (!spUnlocked(sp)) continue;
     }
     const owned = spUnlocked(sp);
     card.classList.toggle('locked', !owned);
@@ -1219,8 +1241,36 @@ function tryPlay(species) {
   Save.skinChoice[species] = sk;
   Save.genderChoice[species] = g;
   saveSave();
+  // the EVAX code adds one step: pick the growth stage to spawn at
+  if (allFree()) { openStagePick(species, g, (gr) => startGame(species, g, sk, gr)); return; }
   startGame(species, g, sk);
 }
+// ---------- the EVAX stage picker ----------
+// a fresh dino at its nest, already grown to the chosen stage. Growth is set
+// directly, so checkStage never fires: no masteries or gates are faked.
+const STAGE_PICKS = [['Hatchling', 0], ['Juvenile', 0.1], ['Adolescent', 0.2], ['Sub-adult', 0.3], ['Adult', 0.9], ['Full Adult', 1]];
+function openStagePick(species, gender, onPick) {
+  const box = document.getElementById('stagepick');
+  const opts = document.getElementById('sp-opts');
+  document.getElementById('sp-title').textContent = DINO[species].name.toUpperCase() + ' — CHOOSE YOUR STAGE';
+  opts.innerHTML = '';
+  const add = (label, gr) => {
+    const b = document.createElement('button');
+    b.textContent = label;
+    b.addEventListener('click', () => { box.classList.add('hidden'); onPick(gr); });
+    opts.appendChild(b);
+  };
+  // a saved dino can still be resumed exactly as it was
+  const snap = Save.dino[dinoKey(species, gender)];
+  if (snap && snap.growth > 0.005 && !G.started) add('▶ CONTINUE (' + Math.floor(snap.growth * 100) + '%)', null);
+  for (const [label, gr] of STAGE_PICKS) add(label.toUpperCase(), gr);
+  box.classList.remove('hidden');
+}
+document.getElementById('sp-cancel').addEventListener('click', () => {
+  document.getElementById('stagepick').classList.add('hidden');
+  // backing out of a death-screen pick returns to the death screen
+  if (G.started && G.player && !G.player.alive) document.getElementById('death').classList.remove('hidden');
+});
 
 // ---------- skin swatches (painted onto each species card) ----------
 // one square per skin — a little painted swatch of that skin's markings
@@ -1333,7 +1383,9 @@ function drawSkinSwatch(cv, species, skinId) {
 }
 document.getElementById('btn-respawn').addEventListener('click', () => {
   document.getElementById('death').classList.add('hidden');
-  respawn(G.player.species, G.player.gender, G.player.skin);
+  const p = G.player;
+  if (allFree()) { openStagePick(p.species, p.gender, (gr) => respawn(p.species, p.gender, p.skin, gr)); return; }
+  respawn(p.species, p.gender, p.skin);
 });
 function exitToLobby(force) {
   // force: the lobby countdown already debounced this exit — the wall-clock
@@ -1394,6 +1446,8 @@ const START_BANNERS = {
   adratik: 'You hatch spiked and slow. Let them come — everything you touch bleeds.',
   orkor: 'You hatch with hooks for hands. Nothing here outruns you.',
   coelo: 'You hatch on hot sand. The shade is life. The sun is not your friend.',
+  tamery: 'You hatch where the river meets the sand. The herds drink here — and so will you.',
+  aero: 'You hatch with long legs and hooked hands. Whatever runs from you, you will outlast.',
   procomp: 'You hatch small and feathered. Find your kin — the sand is no place to be alone.',
   homalo: 'You hatch hard-headed. Gather the herd, and let nothing stand in front of you.',
   neove: 'You hatch in the green dark. Learn to arrive without being seen.',
@@ -1431,7 +1485,8 @@ const START_BANNERS = {
   gastonia: 'You hatch armored. Let the moor gnaw — it will tire before you do.',
   nivalo: 'You wake from the ice. The wall was named for you. Remind it why.',
 };
-function startGame(species, gender, skin) {
+// growth: optional spawn stage (the EVAX picker) — omitted, the saved dino resumes
+function startGame(species, gender, skin, growth) {
   const def = PLAYER_DEF[species];
   if (!spUnlocked(species)) return;   // never start a locked rung (or an unfound secret)
   const eco = def.eco || 'valley';
@@ -1448,16 +1503,18 @@ function startGame(species, gender, skin) {
   document.getElementById('hud').classList.remove('hidden');
   document.getElementById('ic-food').className = 'sicon ' + (def.diet === 'carn' ? 'ic-meat' : 'ic-leaf');
   G.started = true;
-  respawn(species, gender, skin);
+  respawn(species, gender, skin, growth);
   const gWord = G.player.gender === 'm' ? 'male' : 'female';
-  if (G.player.growth > 0.005) {
+  if (growth != null) {
+    G.banner = { str: 'You enter the world as ' + (G.player.stage === 'Adult' ? 'an' : 'a') + ' ' + G.player.stage + ' ' + DINO[species].name + '.', t: 5, color: '#ffe9a0' };
+  } else if (G.player.growth > 0.005) {
     G.banner = { str: 'Welcome back! Your ' + gWord + ' ' + DINO[species].name + ' is ' + Math.floor(G.player.growth * 100) + '% grown.', t: 5, color: '#ffe9a0' };
   } else {
     G.banner = { str: START_BANNERS[species] || 'You hatch. Grow. Survive.', t: 6, color: '#ffe9a0' };
   }
 }
 
-function respawn(species, gender, skin) {
+function respawn(species, gender, skin, growth) {
   spawnInitialNPCs();
   G.mate = null;
   G.nesting = { stage: 'none', babies: [] };
@@ -1474,7 +1531,8 @@ function respawn(species, gender, skin) {
   // a fresh egg of a settled species hatches into the NEXT generation
   G.player.gen = ((Save.settled || {})[species] ? Save.settled[species].gen : 0) + 1;
   // the lobby remembers your dino — restore this loadout's saved progress
-  const snap = Save.dino[dinoKey(species, G.player.gender)];
+  // (unless a stage was picked: that's a fresh dino at the nest)
+  const snap = growth == null ? Save.dino[dinoKey(species, G.player.gender)] : null;
   if (snap && snap.growth > 0.005) {
     const p = G.player;
     p.growth = clamp(snap.growth, 0, 1);
@@ -1493,6 +1551,12 @@ function respawn(species, gender, skin) {
     const okPos = snap.x > 20 && snap.x < WORLD_W - 20 && snap.y > 20 && snap.y < WORLD_H - 20 &&
       (!isDeepPx(snap.x, snap.y) || PLAYER_DEF[species].swim);
     if (okPos) { p.x = snap.x; p.y = snap.y; }
+  }
+  if (growth != null) {
+    const p = G.player;
+    p.growth = clamp(growth, 0, 1);
+    p.stage = stageOf(p.growth);
+    p.hp = playerMaxHp();
   }
   G.player.bornAt = G.time;
   // ledger ink: this dino has hatched, and this land has been walked
@@ -1631,6 +1695,12 @@ function showProfiles() {
 document.getElementById('btn-create').addEventListener('click', createProfile);
 document.getElementById('new-name').addEventListener('keydown', (e) => { if (e.key === 'Enter') createProfile(); });
 document.getElementById('gr-balance').addEventListener('click', showProfiles);
+document.getElementById('code-box').addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter' || !e.target.value.trim()) return;
+  redeemCode(e.target.value);
+  e.target.value = '';
+  e.target.blur();
+});
 buildTitleUI();
 renderProfiles();
 refreshTitle();
@@ -1859,7 +1929,7 @@ function updateNesting(dt) {
       G.mate = makeMate(p.species, p.gender === 'f' ? 'm' : 'f');
       G.npcs.push(G.mate);
       // a pack species' mate is pack the moment it arrives
-      if (PLAYER_DEF[p.species].packSpecies) {
+      if (PLAYER_DEF[p.species].packSpecies && packRoom(p) > 0) {
         G.mate.packAlpha = true;
         G.pack.push(G.mate);
         floatText(G.mate.x, G.mate.y - 34, '♦', '#ffd23e');
@@ -1972,7 +2042,7 @@ function updateNesting(dt) {
         const b = makeBaby(p.species, nest.x + rrange(-24, 24), nest.y + rrange(10, 30));
         ns.babies.push(b); G.npcs.push(b);
         // a pack species' young are PACK from their first breath
-        if (PLAYER_DEF[p.species].packSpecies) {
+        if (PLAYER_DEF[p.species].packSpecies && packRoom(p) > 0) {
           b.packAlpha = true;
           G.pack.push(b);
           floatText(b.x, b.y - 30, '♦', '#ffd23e');

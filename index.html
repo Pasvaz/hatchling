@@ -198,6 +198,15 @@
   }
   #gr-balance:hover { border-color: #d8a534; transform: translateY(-2px); }
   #gr-balance .pname { color: #f5e9c8; }
+  #code-box {
+    font-family: inherit; font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+    background: rgba(9,6,3,0.85); color: #f5e9c8;
+    border: 2px solid #57452a; border-radius: 8px;
+    padding: 6px 10px; width: 84px; outline: none;
+    -webkit-user-select: text; user-select: text;
+  }
+  #code-box:focus { border-color: #d8a534; }
+  #code-box::placeholder { color: #6e5c3e; }
   #gr-balance .swap { font-size: 10px; color: #a5936c; margin-left: 6px; }
 
   /* ---------- profiles ---------- */
@@ -680,6 +689,7 @@
   body.touch #profiles .sub { font-size: 9px; letter-spacing: 2px; margin-bottom: 8px; }
   body.touch #topbar { right: 8px; top: 8px; gap: 7px; padding: 4px 6px; border-radius: 10px; background: rgba(22,17,10,0.86); }
   body.touch #gr-balance { font-size: 12px; padding: 5px 10px; }
+  body.touch #code-box { font-size: 11px; padding: 5px 8px; width: 64px; }
   body.touch #btn-titles { width: 27px; height: 32px; }
   body.touch #btn-titles span { font-size: 11px; padding-bottom: 6px; }
   body.touch #jhead { padding: calc(14px + env(safe-area-inset-top)) 0 2px; }
@@ -795,6 +805,10 @@
   button:hover { background: #6a5433; }
   #pause h2 { font-size: 30px; letter-spacing: 8px; color: #ffe9a0; }
   #pause-lobby { margin-top: 22px; }
+  #sp-title { font-size: 20px; letter-spacing: 4px; color: #ffe9a0; margin-bottom: 18px; text-align: center; padding: 0 16px; }
+  #sp-opts { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 640px; margin-bottom: 22px; padding: 0 16px; }
+  #sp-opts button { margin: 0; min-width: 150px; }
+  #sp-cancel { background: transparent; }
   #help .helpbox {
     background: rgba(24,17,9,0.95); border: 3px solid #57452a; padding: 20px 30px;
   }
@@ -849,6 +863,7 @@
 
   <div id="title" class="screen hidden">
     <div id="topbar">
+      <input id="code-box" type="text" maxlength="12" placeholder="CODE" autocomplete="off" spellcheck="false" title="Enter a code and press Enter">
       <div id="btn-titles" title="Your titles"><span>★</span></div>
       <div id="gr-balance">❖ 0</div>
     </div>
@@ -882,6 +897,12 @@
       <button id="btn-respawn">HATCH AGAIN</button>
       <button id="btn-title">CHANGE SPECIES</button>
     </div>
+  </div>
+
+  <div id="stagepick" class="screen trans hidden" style="z-index:15">
+    <h2 id="sp-title">CHOOSE YOUR STAGE</h2>
+    <div id="sp-opts"></div>
+    <button id="sp-cancel">BACK</button>
   </div>
 
   <div id="pause" class="screen trans hidden"><h2>PAUSED</h2>

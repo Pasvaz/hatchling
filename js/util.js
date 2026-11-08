@@ -242,6 +242,8 @@ const VOICE = {
   eotrach:   { style: 'honk',    f: 150, vib: 0.015, vibR: 4 },
   kunduro:   { style: 'honk',    f: 125, vib: 0.02, vibR: 3 },         // the Reach's barge: a flat, deep bellow-honk
   coelo:     { style: 'shriek',  f: 340, rasp: 0.25 },                 // the desert's thin whistling scream
+  tamery:    { style: 'roar',    f: 120, rasp: 0.7 },                  // the desert apex: a dry, rolling roar
+  aero:      { style: 'shriek',  f: 190, rasp: 0.5 },                  // orkoraptor's scream, deeper and longer-winded
   procomp:   { style: 'chatter', f: 460 },                             // the pack's quick yips
   homalo:    { style: 'bellow',  f: 240, rasp: 0.2 },                  // the flat-head's short grunt
   eocarch:   { style: 'roar',    f: 170, rasp: 0.7 },                  // the fierce-eye's chest-roar

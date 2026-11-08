@@ -123,6 +123,15 @@ const PLAYER_DEF = {
   // and a pounce that lands skull-first hard enough to break bones (pounceBone)
   homalo: { hp: 900, dmg: 95, speed: 138, sprint: 1.8, reach: 26, atkCd: 0.7, diet: 'herb', bleedBite: false, stamMax: 170, eco: 'desert', cost: 600, req: 'procomp', heatResist: 0.3, growthRate: 1.0, packSpecies: true, pounceBone: true },
   coelo: { hp: 700, dmg: 85, speed: 152, sprint: 1.95, reach: 26, atkCd: 0.45, diet: 'carn', bleedBite: true, stamMax: 150, eco: 'desert', cost: 800, gate: 'desert', heatResist: 0.3, earnMul: 1.15 },
+  // the desert's apex: Poekilopleuron's niche and build at Tyrannotitan's
+  // size — raw damage, thick short arms, the M double bite, and the big
+  // hadrosaurs of the belt as its larder. Thin-skinned in the sun.
+  tamery: { hp: 2600, dmg: 225, speed: 120, sprint: 1.65, reach: 38, atkCd: 0.85, diet: 'carn', bleedBite: true, bleedMul: 1.2, stamMax: 155, eco: 'desert', cost: 1200, req: 'coelo', heatResist: 0.15, growthRate: 0.6, doubleBite: true, wrestler: true },
+  // the desert's OTHER apex (a fork with Tameryraptor): a big megaraptorid —
+  // smaller and lighter, but it runs almost forever (stamMax), its wounds
+  // bleed for half a minute (bleedDur), and it can pack — two kin at most
+  // (packMax: three hunters counting you)
+  aero: { hp: 1900, dmg: 170, speed: 148, sprint: 1.85, reach: 34, atkCd: 0.6, diet: 'carn', bleedBite: true, bleedMul: 1.5, bleedDur: 2.2, stamMax: 420, eco: 'desert', cost: 1200, req: 'coelo', heatResist: 0.3, growthRate: 0.7, clawSecond: true, packSpecies: true, packMax: 2 },
   poekilo: { hp: 3000, dmg: 260, speed: 124, sprint: 1.65, reach: 40, atkCd: 0.85, diet: 'carn', bleedBite: true, bleedMul: 1.2, stamMax: 155, eco: 'jungle', cost: 1200, req: 'neove', growthRate: 0.6, doubleBite: true, wrestler: true },
 };
 
@@ -255,8 +264,11 @@ const NPC_DEF = {
   gilmoreo:  { hp: 900, dmg: 95, atkCd: 1.6, speed: 108, fleeSpeed: 148, detect: 220, homeR: 380, reach: 34, biome: 'forest', turn: 2.2, bleedable: true, melee: { kb: 200 }, caution: 1.5 },
   bactro:    { hp: 640, dmg: 80, atkCd: 1.6, speed: 96, fleeSpeed: 136, detect: 210, homeR: 320, reach: 30, biome: 'forest', turn: 2.3, bleedable: true, melee: { kb: 180 }, caution: 1.6 },
   plesio:    { hp: 560, dmg: 0, atkCd: 0, speed: 130, fleeSpeed: 178, detect: 280, homeR: 460, reach: 0, biome: 'plains', turn: 3.0, bleedable: true },
+  // wild aerosteon: pairs and trios that never give up a chase (no patience),
+  // never rout while a packmate stands, and leave wounds that bleed and bleed
+  aero:      { hp: 1500, dmg: 140, atkCd: 0.8, speed: 172, detect: 320, homeR: 620, reach: 32, biome: 'plains', turn: 3.2, packCourage: true, bleedable: true, biteBleed: { dps: 9, dur: 24 }, hunts: ['huallas', 'gilmoreo', 'bactro', 'kelumapu', 'plesio', 'garudi', 'harpy', 'kinnaree', 'aepyorni'], fears: [['eocarch', 200]] },
   // the two land theropods
-  deltadro:  { hp: 900, dmg: 115, atkCd: 0.9, speed: 208, detect: 340, homeR: 700, reach: 30, biome: 'plains', turn: 2.4, bleedable: true, hunts: ['garudi', 'harpy', 'sinorni', 'kinnaree', 'aepyorni', 'plesio', 'shri', 'tsaagan'], caution: 0.95, fears: [['eocarch', 220]] },
+  deltadro: { hp: 900, dmg: 115, atkCd: 0.9, speed: 208, detect: 340, homeR: 700, reach: 30, biome: 'plains', turn: 2.4, bleedable: true, hunts: ['garudi', 'harpy', 'sinorni', 'kinnaree', 'aepyorni', 'plesio', 'shri', 'tsaagan'], caution: 0.95, fears: [['eocarch', 220]] },
   eocarch:   { hp: 2400, dmg: 215, atkCd: 1.1, speed: 116, detect: 320, homeR: 520, reach: 40, biome: 'forest', turn: 1.9, fearless: true, bleedable: true, biteBleed: { dps: 10, dur: 8 }, hunts: ['huallas', 'gilmoreo', 'bactro', 'kelumapu', 'plesio', 'beishan', 'coelo', 'procomp'], scavR: 320, caution: 0.9 },
   // the river's theropod and its crocodile
   suchos:    { hp: 1100, dmg: 125, atkCd: 1.0, speed: 92, detect: 260, homeR: 300, reach: 34, biome: 'forest', turn: 2.0, fearless: true, bleedable: true, hunts: ['lepisosteus', 'kelumapu', 'epidex', 'procomp'], caution: 1.0 },   // 'beach' means sand — on this map that is the whole desert; the river belt is forest
@@ -710,6 +722,12 @@ function playerVisibleTo(e, detectR) {
   r = Math.max(r, scentRange(p));
   return dist(e.x, e.y, p.x, p.y) < r;
 }
+// how many more kin the player's pack can take (packMax caps it, e.g. the
+// aerosteon's trio; uncapped species have endless room)
+function packRoom(p) {
+  const m = PLAYER_DEF[p.species].packMax;
+  return m == null ? Infinity : m - (G.pack || []).filter(e => e.hp > 0).length;
+}
 function packmates(e, radius) {
   const out = [];
   for (const o of G.npcs) {
@@ -977,7 +995,7 @@ function pounceStrike(p, bag) {
     const opts = { hitX: pt.x, hitY: pt.y, kb: 130 };
     if (def.bleedBite && (NPC_DEF[e.species] || {}).bleedable && p.growth > 0.25) {
       const bm = def.bleedMul || 1;
-      opts.bleed = { dps: (6 + 8 * p.growth) * bm, dur: 10 * Math.min(1.4, bm) };
+      opts.bleed = { dps: (6 + 8 * p.growth) * bm, dur: 10 * Math.min(1.4, bm) * (def.bleedDur || 1) };
     }
     dealDamage(e, playerDmg() * rrange(0.9, 1.1) * (bag.mul || 1), p, opts);
     if ((def.boneBreak || def.pounceBone) && p.growth > 0.2) tryBoneBreak(p, e, pt.part, playerDmg() * (def.pounceBone ? 1.6 : 1));
@@ -1493,6 +1511,7 @@ const NPC_THINK = {
   garudi: thinkSkittish, harpy: thinkSkittish, sinorni: thinkSkittish, kinnaree: thinkSkittish, aepyorni: thinkSkittish,
   beishan: thinkHerdFighter, epidex: thinkSkittish,
   procomp: thinkPackHunter,   // (pack recruits: see the packAlpha route in thinkNPC)
+  aero: thinkPackHunter,
   homalo: thinkHerdFighter,
   willina: thinkHerdFighter, bonaparte: thinkHerdFighter, huallas: thinkHerdFighter, kelumapu: thinkHerdFighter,
   gilmoreo: thinkHerdFighter, bactro: thinkHerdFighter, plesio: thinkSkittish,
@@ -2587,6 +2606,7 @@ const ECO_SPAWNS = {
     // the two land theropods, and the river's own
     { sp: 'deltadro', n: 2, min: 2, away: true },
     { sp: 'eocarch', n: 1, min: 1, away: true },
+    { sp: 'aero', pack: 2, sizes: [2, 3], den: 'plains', min: 3 },   // pairs and trios, never more
     { sp: 'suchos', n: 2, min: 2 },
     { sp: 'megoro', n: 2, min: 2, biome: 'water' },
     { sp: 'garudi', pack: 2, sizes: [3, 4], den: 'plains', min: 4 },
@@ -3483,7 +3503,7 @@ function updatePlayer(dt) {
       // (bleedMul: tyrannotitan's whole kit is the wound that keeps working)
       if (def.bleedBite && (NPC_DEF[best.species] || {}).bleedable && p.growth > 0.25) {
         const bm = def.bleedMul || 1;
-        opts.bleed = { dps: (6 + 8 * p.growth) * bm, dur: 10 * Math.min(1.4, bm) };
+        opts.bleed = { dps: (6 + 8 * p.growth) * bm, dur: 10 * Math.min(1.4, bm) * (def.bleedDur || 1) };
       }
       dealDamage(best, playerDmg() * rrange(0.9, 1.1) * (p.landBiteMul || 1), p, opts);
       // the bone-breakers: sarcosaurus' whole kit, dryptosaurus' bigger jaws,
@@ -3641,7 +3661,7 @@ function updatePlayer(dt) {
       if (best) {
         const opts = { hitX: bestPt.x, hitY: bestPt.y, kb: 70 };
         if ((NPC_DEF[best.species] || {}).bleedable && p.growth > 0.25)
-          opts.bleed = { dps: 6 + 8 * p.growth, dur: 9 };
+          opts.bleed = { dps: 6 + 8 * p.growth, dur: 9 * (def.bleedDur || 1) };
         dealDamage(best, playerDmg() * 0.85 * rrange(0.9, 1.1), p, opts);
       }
     }
@@ -3690,7 +3710,7 @@ function updatePlayer(dt) {
         const opts = { hitX: bestPt.x, hitY: bestPt.y, kb: 110 };
         if (def.bleedBite && (NPC_DEF[best.species] || {}).bleedable && p.growth > 0.25) {
           const bm = def.bleedMul || 1;
-          opts.bleed = { dps: (6 + 8 * p.growth) * bm, dur: 10 * Math.min(1.4, bm) };
+          opts.bleed = { dps: (6 + 8 * p.growth) * bm, dur: 10 * Math.min(1.4, bm) * (def.bleedDur || 1) };
         }
         dealDamage(best, playerDmg() * DBL_BITE_MUL * rrange(0.9, 1.1), p, opts);
       }
@@ -3874,7 +3894,7 @@ function tickDenBrood(dt) {
         bb.x = ns.den.x + rrange(-10, 10);
         bb.y = ns.den.y + rrange(6, 16);
         G.npcs.push(bb);
-        if (PLAYER_DEF[p.species].packSpecies) { bb.packAlpha = true; G.pack.push(bb); }
+        if (PLAYER_DEF[p.species].packSpecies && packRoom(p) > 0) { bb.packAlpha = true; G.pack.push(bb); }
         floatText(bb.x, bb.y - 30, 'a young one emerges!', '#ffd23e');
       } else anyDen = true;
     }
@@ -4217,8 +4237,10 @@ function fireCall(p, k) {
   } else if (k === 2) {
     // FRIENDLY: the invitation — kin who hear it fall in behind the alpha
     if (!PLAYER_DEF[p.species].packSpecies) return;
+    const room = packRoom(p);
+    if (room <= 0) { G.banner = { str: 'Your pack is full — ' + DINO[p.species].name + ' hunts in threes at most.', t: 3, color: '#ffe9a0' }; return; }
     const near = G.npcs.filter(e => e.species === p.species && !e.packAlpha && !e.isMate && !e.isBaby &&
-      e.hp > 0 && dist(e.x, e.y, p.x, p.y) < 170);
+      e.hp > 0 && dist(e.x, e.y, p.x, p.y) < 170).slice(0, room);
     for (const e of near) {
       e.packAlpha = true;
       // up close you can finally tell: every recruit shows its gender coat
