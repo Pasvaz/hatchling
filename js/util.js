@@ -72,6 +72,10 @@ const GENDER_MOD = {
   m: { hp: 1.3, dmg: 1.2, speed: 0.9, size: 1.09, earn: 0.8 },
 };
 const GENDER_NEUTRAL = { hp: 1, dmg: 1, speed: 1, size: 1, earn: 1 };
+// an ELDER giant (incredibly rare) is a fifth again the size of the rest —
+// the art and every hitbox read size from here; its hits are scaled in dealDamage
+const ELDER_MOD = { hp: 1, dmg: 1, speed: 1, size: 1.2, earn: 1 };
+const ELDER_DMG = 1.25;
 // a skin may carry a small stat mod (Slayer of Giants): it multiplies into the
 // gender loadout everywhere the loadout is read — size, hp, damage, the lot
 const SKIN_MODS = {};
@@ -79,6 +83,7 @@ const SKIN_MODS = {};
 // settled the land adds 4% health and bite, up to Gen V (+16%)
 function genEdge(e) { return e && e.isPlayer && e.gen > 1 ? 1 + 0.04 * Math.min(4, e.gen - 1) : 1; }
 function genderMod(e) {
+  if (e && e.elder) return ELDER_MOD;
   const g = (e && GENDER_MOD[e.gender]) || GENDER_NEUTRAL;
   const sm = e && e.isPlayer && typeof SKINS !== 'undefined' && SKINS[e.skin] && SKINS[e.skin].mod;
   const ge = genEdge(e);
@@ -121,8 +126,56 @@ const SFX = (() => {
     const g = a.createGain(); g.gain.value = vol || 0.1;
     src.connect(f); f.connect(g); g.connect(a.destination); src.start();
   }
+  // ---- boss music: a stomping little D-minor loop, each step scheduled a
+  // moment ahead on the audio clock (so frame hitches never stutter it).
+  // Bass gallop + kick every bar; the motif rides the back half of every
+  // other loop. Fades in when a boss bar appears and out when it goes.
+  let boss = null;
+  const BOSS_STEP = 0.15;
+  const BOSS_ROOT = [73.42, 73.42, 58.27, 55.0];   // D D B♭ A
+  const BOSS_LEAD = { 0: 293.66, 3: 349.23, 6: 329.63, 8: 293.66, 12: 220, 16: 233.08, 19: 220, 22: 196, 24: 220 };
+  function bossNote(bus, t, f, dur, type, vol, slide) {
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    if (slide) o.frequency.exponentialRampToValueAtTime(slide, t + dur);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(bus); o.start(t); o.stop(t + dur + 0.02);
+  }
+  function bossHit(bus, t, dur, vol, lp) {
+    const len = Math.floor(ac.sampleRate * dur), buf = ac.createBuffer(1, len, ac.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+    const src = ac.createBufferSource(); src.buffer = buf;
+    const f = ac.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = lp;
+    const g = ac.createGain(); g.gain.value = vol;
+    src.connect(f); f.connect(g); g.connect(bus); src.start(t);
+  }
+  function bossStep(bus, t, n) {
+    const s = n % 16, bar = (n >> 4) % 4, root = BOSS_ROOT[bar];
+    if (s === 0 || s === 8 || (bar === 3 && s === 6)) { bossHit(bus, t, 0.25, 0.16, 160); bossNote(bus, t, 70, 0.22, 'sine', 0.12, 30); }
+    if (s === 4 || s === 12) bossHit(bus, t, 0.09, 0.04, 2600);
+    if ([0, 2, 3, 6, 8, 10, 11, 14].includes(s)) bossNote(bus, t, s === 3 || s === 11 ? root * 2 : root, BOSS_STEP * 0.9, 'square', 0.03);
+    if ((n >> 6) % 2 === 1 && bar >= 2) { const f = BOSS_LEAD[n % 32]; if (f) bossNote(bus, t, f, BOSS_STEP * 2.6, 'triangle', 0.045); }
+  }
   return {
-    toggleMute() { muted = !muted; return muted; },
+    bossMusic(on) {
+      if (on && !muted) {
+        const a = ctx(); if (!a) return;
+        if (!boss) {
+          const bus = a.createGain();
+          bus.gain.setValueAtTime(0.0001, a.currentTime);
+          bus.gain.exponentialRampToValueAtTime(1, a.currentTime + 1.2);
+          bus.connect(a.destination);
+          boss = { bus, next: a.currentTime + 0.08, n: 0 };
+        }
+        if (boss.next < a.currentTime) boss.next = a.currentTime + 0.05;   // the tab slept: pick up from now
+        while (boss.next < a.currentTime + 0.3) { bossStep(boss.bus, boss.next, boss.n++); boss.next += BOSS_STEP; }
+      } else if (boss) {
+        const b = boss; boss = null;
+        b.bus.gain.setTargetAtTime(0.0001, ac.currentTime, 0.5);
+        setTimeout(() => { try { b.bus.disconnect(); } catch (e) { } }, 3000);
+      }
+    },
+    toggleMute() { muted = !muted; if (muted) this.bossMusic(false); return muted; },
     bite() { noise(0.09, 0.16, 1400); tone(110, 0.1, 'square', 0.06, 60); },
     hurt() { tone(240, 0.22, 'sawtooth', 0.09, 70); },
     eat() { noise(0.06, 0.1, 700); setTimeout(() => noise(0.06, 0.08, 600), 90); },
@@ -133,6 +186,8 @@ const SFX = (() => {
     buy() { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => tone(f, 0.12, 'triangle', 0.06), i * 80)); },
     die() { tone(180, 0.6, 'sawtooth', 0.1, 40); },
     kill() { noise(0.18, 0.12, 800); tone(90, 0.3, 'square', 0.07, 45); },
+    // the giant's front end coming down: a thud you feel in your teeth
+    stomp() { noise(0.55, 0.22, 200); tone(52, 0.7, 'sine', 0.16, 26); },
     // the Great Walk's ending: a slow little homecoming tune
     settle() {
       const seq = [[392, 0, 0.4], [494, 0.42, 0.4], [587, 0.84, 0.4], [784, 1.26, 0.9],
@@ -242,6 +297,7 @@ const VOICE = {
   eotrach:   { style: 'honk',    f: 150, vib: 0.015, vibR: 4 },
   kunduro:   { style: 'honk',    f: 125, vib: 0.02, vibR: 3 },         // the Reach's barge: a flat, deep bellow-honk
   coelo:     { style: 'shriek',  f: 340, rasp: 0.25 },                 // the desert's thin whistling scream
+  regali:    { style: 'honk',    f: 140, rasp: 0.25, wave: 'square' }, // the crowned wall: a rough, low horn-blast
   tamery:    { style: 'roar',    f: 120, rasp: 0.7 },                  // the desert apex: a dry, rolling roar
   aero:      { style: 'shriek',  f: 190, rasp: 0.5 },                  // orkoraptor's scream, deeper and longer-winded
   procomp:   { style: 'chatter', f: 460 },                             // the pack's quick yips
@@ -272,4 +328,6 @@ const VOICE = {
   neove:     { style: 'roar',    f: 165, rasp: 0.55 },                // the quiet hunter, finally loud
   coahuila:  { style: 'honk',    f: 135, wave: 'square', rasp: 0.25 },// the great horns' war-trumpet
   poekilo:   { style: 'roar',    f: 112, rasp: 0.75 },                // the apex: gravel and thunder
+  yunmeng:   { style: 'boom',    f: 44, vib: 0.012, vibR: 2 },        // the giant: felt more than heard
+  aegisu:    { style: 'hiss',    f: 84, rasp: 0.6 },                  // the guardian's pond-bottom growl
 };

@@ -152,6 +152,15 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.4);
   }
   #btn-lobby:hover { background: #57452a; color: #ffe9a0; }
+  /* the boss bar: the giant (or the Cradle's guardian) while it's fighting you */
+  #bossbar {
+    position: absolute; left: 50%; top: 42px; transform: translateX(-50%);
+    min-width: 250px; padding: 4px 12px 7px; text-align: center;
+  }
+  #bossbar .bb-name { font-size: 11px; letter-spacing: 2px; color: #ff9a5e; text-shadow: 0 1px 0 rgba(0,0,0,0.6); }
+  #bossbar .bar { width: 100%; margin-top: 4px; }
+  #bb-fill { background: linear-gradient(180deg, #e4685a, #a52f24); }
+  #hud.boss #banner { top: calc(16% + 30px); }
   #keys {
     position: absolute; right: 12px; top: 12px;
     font-size: 10px; color: #a5936c; text-align: right; line-height: 1.5;
@@ -633,6 +642,16 @@
     position: absolute; right: calc(104px + env(safe-area-inset-right)); bottom: calc(190px + env(safe-area-inset-bottom));
     width: 50px; height: 50px; font-size: 20px;
   }
+  /* CROUCH sits out past pounce, the stalk-then-leap pair side by side; it
+     glows while you're down and turns green once the spring is coiled.
+     Sauropods can't crouch — the button leaves with them */
+  #btn-crouch {
+    position: absolute; right: calc(200px + env(safe-area-inset-right)); bottom: calc(24px + env(safe-area-inset-bottom));
+    width: 54px; height: 54px; font-size: 22px;
+  }
+  #btn-crouch.held { background: rgba(216,165,52,0.42); border-color: #ffd23e; }
+  #btn-crouch.coiled { border-color: #9fe434; box-shadow: 0 0 16px rgba(159,228,52,0.6); }
+  #btn-crouch.gone { display: none; }
   .tbtn.ctxb { display: none; }
   .tbtn.ctxb.on { display: flex; }
   #btn-pause {
@@ -679,6 +698,8 @@
   body.touch #prompt { display: none; }
   body.touch #banner { font-size: 14px; top: 12%; }
   body.touch #btn-lobby { font-size: 11px; padding: 9px 18px; }
+  body.touch #bossbar { top: max(52px, calc(env(safe-area-inset-top) + 44px)); min-width: 200px; }
+  body.touch #hud.boss #banner { top: calc(12% + 52px); }
 
   /* ---------- compact lobby for touch screens ----------
      phone screens are narrow: the trail moves to the left edge, every card
@@ -831,6 +852,7 @@
       <div id="growthscount" title="Growths — earned every minute; spend them in the lobby">❖ 0</div>
     </div>
     <button id="btn-lobby" title="Back to species select — your dino keeps its progress">⌂ LOBBY</button>
+    <div id="bossbar" class="panel hidden"><div class="bb-name" id="bb-name"></div><div class="bar"><div class="fill" id="bb-fill"></div></div></div>
     <div id="stats" class="panel">
       <div class="statrow"><span class="sicon ic-hp" title="Health"></span><div class="bar"><div class="fill" id="fill-hp"></div></div></div>
       <div class="statrow"><span class="sicon ic-stam" title="Stamina"></span><div class="bar"><div class="fill" id="fill-stam"></div></div></div>
@@ -843,7 +865,7 @@
     <canvas id="minimap" width="120" height="120"></canvas>
     <div id="prompt" style="opacity:0"></div>
     <div id="banner" style="opacity:0"></div>
-    <div id="keys">WASD move &nbsp;·&nbsp; SHIFT sprint<br>SPACE bite &nbsp;·&nbsp; E / F do what the prompt says<br>TAB health menu &nbsp;·&nbsp; F1 help</div>
+    <div id="keys">WASD move &nbsp;·&nbsp; SHIFT sprint<br>SPACE bite &nbsp;·&nbsp; C crouch &nbsp;·&nbsp; E / F do what the prompt says<br>TAB health menu &nbsp;·&nbsp; F1 help</div>
     <div id="statspanel" class="hidden">
       <h3>HEALTH MENU</h3>
       <div id="sp-body"></div>
@@ -947,6 +969,8 @@
         <tr><td>TAB</td><td>health menu</td></tr>
         <tr><td>ESC / U</td><td>pause / mute</td></tr>
         <tr><td>R</td><td>rest — a 3s settle; heal faster, drain slower (sit 1s, then move to rise)</td></tr>
+        <tr><td>C</td><td>crouch — tap to toggle, hold to stay down (on a phone: 🤫). Creep slowly; a crouched hunter is noticed late by prey, the more so the faster and longer-winded you are than them. Your mark is outlined in gold. Ten seconds down, then stand (C, sprint, bite or pounce) to SPRING +15% speed for 7s. Calling from the crouch gives you away — prey bolts 15% faster. Sauropods can't crouch</td></tr>
+        <tr><td>Stamina</td><td>NPCs tire too: a chaser that runs out of wind gives up, and a winded animal is slow (the gold strip under its health bar)</td></tr>
         <tr><td>SPACE (hold)</td><td>+ a direction to pounce — the bite flows into a coil, and the leap strikes EVERYTHING it crosses, takeoff to landing (tail-fighters: hold to spin)</td></tr>
         <tr><td>1 / 2 / 3</td><td>calls — broadcast (claim a carcass) · friendly (invite the pack) · aggressive (threaten)</td></tr>
         <tr><td>H</td><td>hitbox X-ray (red = attack, cyan = body)</td></tr>
@@ -972,6 +996,7 @@
     <div class="tbtn ctxb" id="btn-eat">💧</div>
     <div class="tbtn" id="btn-rest">💤</div>
     <div class="tbtn" id="btn-call" title="Aggressive call — threaten">📣</div>
+    <div class="tbtn" id="btn-crouch" title="Crouch — tap to toggle">🤫</div>
     <div class="tbtn" id="btn-pause">❚❚</div>
     <div id="swipezone"></div>
   </div>

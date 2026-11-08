@@ -118,6 +118,47 @@ const DINO = {
     },
     tailUp: 0.3, headButt: true, flatDome: true, snoutW: 0.3, snoutMidW: 0.5, pattern: 'dapple',
   },
+  regali: {
+    // THE CROWNED WALL: the desert's last rung before the apex fork. A
+    // centrosaur-built ceratopsian whose frill margin carries a CROWN of great
+    // pentagonal plates (crownFrill), one tall nose horn and only nubs for
+    // brow horns. A brick-red display patch on a sand-coloured shield
+    name: 'Regaliceratops', full: 'Regaliceratops peterhewsi', diet: 'herb', biped: false, scale: 1.18,
+    L: { body: [56, 29], tail: [27, 9.5], neckLen: 6, neckAng: 0.15, head: [24, 15], leg: [16.5, 8] },
+    col: {
+      top: '#8a5a30', mid: '#c89a5a', belly: '#f2e2bc', line: '#2e180a',
+      acc: '#a84e2e', eye: '#3a2412', pat: '#6a3a1c', shade: '#a87a46',
+    },
+    tailUp: 0.1, frill: 'plain', crownFrill: true, frillMul: 1.08, noseHorn: 1.25, headButt: true, pattern: 'band',
+  },
+  yunmeng: {
+    // THE GIANT OF THE RED SAND: a euhelopodid at Nivalotitan's scale — the
+    // shoulders stand above the hips, the long neck is carried high (not
+    // the frozen giant's tower: a crane's reach, out and up into the
+    // canopy), the tail is short and heavy. Rust saddle over ochre flanks.
+    // Elders (o.scar) wear a pale claw-rake across the eye
+    name: 'Yunmenglong', full: 'Yunmenglong ruyangensis', diet: 'herb', biped: false, scale: 2.15,
+    L: { body: [80, 36], tail: [50, 11.5], neckLen: 84, neckAng: 1.02, head: [13.5, 8.5], leg: [34, 12] },
+    col: {
+      top: '#7a4426', mid: '#b98250', belly: '#f0dcb4', line: '#2a160a',
+      acc: '#d9a05a', eye: '#3a2a14', pat: '#58301a', shade: '#9a6a3e',
+    },
+    tailUp: 0.26, neckW: 0.8, neckArc: 0.1, sauroHead: true, beak: false, foreLift: 0.5, chest: 1.15, shFwd: 0.05,
+    neckGrow: true, snoutW: 0.44, snoutMidW: 0.58, highBrowse: true, tailWeapon: true, pattern: 'band',
+  },
+  aegisu: {
+    // THE GUARDIAN OF THE GIANTS' CRADLE: the shieldcroc — a flat, broad
+    // skull with a raised boss of bone over the eyes (shieldSkull), on a
+    // body bigger than anything else in the water. Underwater it is a
+    // ghost; ashore, a slab of armoured mud
+    name: 'Aegisuchus', full: 'Aegisuchus witmeri', diet: 'carn', biped: false, scale: 2.0,
+    L: { body: [60, 18], tail: [56, 10], neckLen: 5, neckAng: 0.08, head: [26, 8], leg: [7, 4.5] },
+    col: {
+      top: '#3e3a2a', mid: '#6a6448', belly: '#d2ccaa', line: '#16140c',
+      acc: '#6e6440', eye: '#c8d070', pat: '#2a281c', shade: '#555038',
+    },
+    tailUp: 0.04, scutes: true, shieldSkull: true, pattern: 'band', ghostWater: true,
+  },
   // ---- the hadrosaurs of the desert: seven, no two alike ----
   willina: {
     // the biggest: a barge of a saurolophine, long low skull, deep tail
@@ -1369,14 +1410,14 @@ const DINO = {
 // ---------------------------------------------------------------------------
 function headWorldPos(e) {
   const d = DINO[e.species], L = d.L;
-  const s = d.scale * sizeScale(e.growth != null ? e.growth : 1);
+  const s = d.scale * sizeScale(e.growth != null ? e.growth : 1) * (e.elder ? ELDER_MOD.size : 1);
   const fwd = (L.body[0] * 0.38 + Math.cos(L.neckAng) * L.neckLen + L.head[0] * 0.35) * s;
   const up = (L.leg[0] + L.body[1] * 0.55 + Math.sin(L.neckAng) * L.neckLen) * s;
   return { x: e.x + (e.facing || 1) * fwd, y: e.y - up };
 }
 function bodyRadius(e) {
   const d = DINO[e.species];
-  return d.L.body[0] * 0.32 * d.scale * sizeScale(e.growth != null ? e.growth : 1);
+  return d.L.body[0] * 0.32 * d.scale * sizeScale(e.growth != null ? e.growth : 1) * (e.elder ? ELDER_MOD.size : 1);
 }
 function drawShadow(ctx, x, y, w) {
   ctx.fillStyle = 'rgba(24,20,8,0.26)';
@@ -1558,6 +1599,7 @@ const LEGACY_PAL = {
   // lavender, peach and sky blue
   aero:      { motif: 'splash',    top: '#c4a8ec', mid: '#f8dcec', belly: '#fff6fa', shade: '#e0c0e4', pat: '#a088d8', acc: '#ff9ec4', eye: '#6ad0f4', line: '#4a3466',
                splash: ['#ff8ebc', '#6ee4b4', '#a890ff', '#ffb070', '#78bcff', '#ffe060'] },
+  regali:    { motif: 'ocellus',   top: '#4a1e6a', mid: '#7a3aa8', belly: '#f4e8ff', pat: '#2a0e40', acc: '#ffc21a' },                  // royal purple, gold eyespots
   coelo:     { motif: 'tiger',     top: '#a86a0e', mid: '#f0b02a', belly: '#fff4d8', pat: '#8a0e0e', acc: '#ff3a1e' },                  // desert gold, crimson bars
   poekilo:   { motif: 'lightning', top: '#5a3a0e', mid: '#b07a2a', belly: '#f4e4c0', pat: '#2a1a06', acc: '#2ae0d0' },                  // bronze, turquoise bolt
 };
@@ -1654,7 +1696,7 @@ const CLADE = {
   lophos: 'coelophysoid', coelo: 'coelophysoid', herrie: 'fish',
   shri: 'dromaeosaur', kuru: 'dromaeosaur', tsaagan: 'dromaeosaur', mahakala: 'dromaeosaur', luanchuan: 'dromaeosaur', adasaurus: 'dromaeosaur',
   garudi: 'ornithomimid', harpy: 'ornithomimid', sinorni: 'ornithomimid', kinnaree: 'ornithomimid', beishan: 'ornithomimid', aepyorni: 'ornithomimid',
-  epidex: 'dromaeosaur', procomp: 'coelophysoid', homalo: 'pachycephalosaur',
+  epidex: 'dromaeosaur', procomp: 'coelophysoid', homalo: 'pachycephalosaur', regali: 'ceratopsian', yunmeng: 'sauropod', aegisu: 'croc',
   willina: 'hadrosaur', bonaparte: 'hadrosaur', huallas: 'hadrosaur', kelumapu: 'hadrosaur', plesio: 'hadrosaur',
   gilmoreo: 'iguanodont', bactro: 'iguanodont', deltadro: 'noasaur', eocarch: 'carchar', suchos: 'spinosaur',
   hesper: 'dromaeosaur', linhe: 'dromaeosaur', shanag: 'dromaeosaur', achillo: 'dromaeosaur', dakota: 'dromaeosaur',
@@ -1759,8 +1801,10 @@ function drawDino(ctx, key, o) {
     : callK === 2 ? callBow * 0.2
     : callJerk * (Math.sin(cT * 21) > 0 ? 0.45 : 0.06);
 
+  // the CROUCH: belly low, head carried low and level — the stalk
+  const crouch = o.crouch || 0;
   // the effective head-drop: the performances drive the neck themselves
-  const hdA = Math.max(hd, dDip * 1.08, cDown, tDown * 1.05);
+  const hdA = Math.max(hd, dDip * 1.08, cDown, tDown * 1.05, crouch * 0.28);
 
   const breathe = Math.sin(G.time * 2.1 + (o.x || 0) * 0.05) * 0.5 * (1 - move);
   // running adds spring: a deeper bob plus an airborne beat between strides
@@ -1812,7 +1856,8 @@ function drawDino(ctx, key, o) {
     + callJerk * Math.abs(Math.sin(cT * 11)) * 1.5    // the threat display stamps
     + swingDrive * legLen * 0.1 + clawDrive * legLen * 0.06   // sinking into the swing
     + bth * Math.sin(G.time * 6.5) * 1.5              // the wallowing wriggle
-    + kick * legLen * 0.28;                            // the kick sits the rump back onto the tail
+    + kick * legLen * 0.28                             // the kick sits the rump back onto the tail
+    + crouch * legLen * 0.45;                          // knees folded, belly to the ground
   const lineW = Math.max(0.55, Math.min(1.5, 1.05 * s));
 
   ctx.save();
@@ -2436,7 +2481,7 @@ function drawDino(ctx, key, o) {
   // a settled-down dino sleeps with its eyes closed (restT rides in on o)
   const blink = (o.restT || 0) > 0.55 || (hdA < 0.05 && ((G.time + (o.x || 0) * 0.137 + ph * 0.05) % 3.8) < 0.13);
   drawHead(ctx, key, d, C, {
-    hPt, hl, hh, s, g, lineW, open, hinge, snout, eyeMul, headAng, blink,
+    hPt, hl, hh, s, g, lineW, open, hinge, snout, eyeMul, headAng, blink, scar: o.scar,
   });
 
   // ---------------- near limbs & arms ----------------
@@ -2526,22 +2571,26 @@ function drawCrocShadow(ctx, e) {
   const wid = d.L.body[1] * 0.55 * s;
   const ang = e.move > 0.2 && e.heading != null ? e.heading : (e.facing === 1 ? 0 : Math.PI);
   const sway = Math.sin(G.time * 1.1 + e.id * 2.7) * 0.05;
+  // the Guardian of the Giants' Cradle is all but invisible down there:
+  // a ghost of a shape, eyes that only catch the light now and then
+  const gh = d.ghostWater ? 0.22 : 1;
+  const glint = d.ghostWater ? 0.15 + 0.35 * Math.max(0, Math.sin(G.time * 0.7 + e.id)) : 0.75;
   ctx.save();
   ctx.translate(e.x, e.y);
   ctx.rotate(ang + sway);
   // body, snout and tail as soft dark lobes — barely more than murk
-  ctx.fillStyle = 'rgba(14,32,28,0.32)';
+  ctx.fillStyle = 'rgba(14,32,28,' + (0.32 * gh).toFixed(3) + ')';
   ctx.beginPath(); ctx.ellipse(0, 0, len * 0.42, wid, 0, 0, TAU); ctx.fill();
-  ctx.fillStyle = 'rgba(14,32,28,0.26)';
+  ctx.fillStyle = 'rgba(14,32,28,' + (0.26 * gh).toFixed(3) + ')';
   ctx.beginPath(); ctx.ellipse(len * 0.5, 0, len * 0.24, wid * 0.5, 0, 0, TAU); ctx.fill();
   ctx.beginPath(); ctx.ellipse(-len * 0.52, 0, len * 0.3, wid * 0.45, 0, 0, TAU); ctx.fill();
   // eyes just breaking the surface — the only warning there is
-  ctx.fillStyle = 'rgba(214,196,92,0.75)';
+  ctx.fillStyle = 'rgba(214,196,92,' + glint.toFixed(3) + ')';
   ctx.beginPath(); ctx.arc(len * 0.36, -wid * 0.34, 1.1 * s, 0, TAU); ctx.fill();
   ctx.beginPath(); ctx.arc(len * 0.36, wid * 0.34, 1.1 * s, 0, TAU); ctx.fill();
   ctx.restore();
   // faint wake ripple
-  const pulse = 0.10 + 0.06 * Math.sin(G.time * 1.6 + e.id);
+  const pulse = (0.10 + 0.06 * Math.sin(G.time * 1.6 + e.id)) * gh;
   ctx.strokeStyle = 'rgba(225,240,238,' + pulse.toFixed(3) + ')';
   ctx.lineWidth = 1;
   ctx.beginPath(); ctx.ellipse(e.x, e.y, len * 0.55, wid * 1.7, 0, 0, TAU); ctx.stroke();
@@ -3614,7 +3663,7 @@ function drawBodyExtras(ctx, key, d, C, a) {
 // heads: mouth, jaw, teeth/beak, eye, brow, nostril, crests
 // ---------------------------------------------------------------------------
 function drawHead(ctx, key, d, C, a) {
-  const { hPt, hl, hh, s, g, lineW, open, hinge, snout, eyeMul, blink, headAng } = a;
+  const { hPt, hl, hh, s, g, lineW, open, hinge, snout, eyeMul, blink, headAng, scar } = a;
   const carn = d.diet === 'carn';
   // one beak decision for the whole head: herbivores/omnivores wear the
   // horny sheath — except duckbills, whose spoonbill IS their beak (both at
@@ -3829,6 +3878,50 @@ function drawHead(ctx, key, d, C, a) {
     { const r0 = hPt(-0.06, -0.3); ctx.translate(r0.x, r0.y); ctx.rotate(-headAng * 0.65); ctx.translate(-r0.x, -r0.y); }
     const frillCol = mixHex(mixHex(C.acc, C.mid, 0.45), C.belly, 0.2);
     const fTop = hPt(0.16, -0.5), fBack = fP(-0.95, -1.55), fLow = fP(-0.95, -0.05), fChin = hPt(-0.06, 0.4);
+    // crownFrill (regaliceratops): a CROWN of great pentagonal plates standing
+    // off the margin — drawn before the shield, so its edge overlaps their
+    // roots and they read as growing out of the bone. Biggest over the back
+    // corner, smaller toward the brow and the jaw
+    if (d.crownFrill) {
+      const cC = fP(-0.5, -0.7);   // the shield's middle: every plate points away from it
+      const qPt = (a, c, b, t) => ({ x: (1 - t) * (1 - t) * a.x + 2 * (1 - t) * t * c.x + t * t * b.x,
+                                     y: (1 - t) * (1 - t) * a.y + 2 * (1 - t) * t * c.y + t * t * b.y });
+      const cTop = fP(-0.3, -1.45), cRear = fP(-1.4, -0.9);
+      const spots = [[fTop, cTop, fBack, 0.5, 0.75], [fTop, cTop, fBack, 0.82, 0.95], [fBack, cRear, fLow, 0.08, 1.12],
+                     [fBack, cRear, fLow, 0.34, 1.1], [fBack, cRear, fLow, 0.6, 0.95], [fBack, cRear, fLow, 0.86, 0.72]];
+      const plateCol = shade(C.belly, 0.94), jewel = mixHex(C.acc, C.belly, 0.35);
+      ctx.lineJoin = 'round';
+      for (let k = 0; k < spots.length; k++) {
+        const [a, c, b, t, big] = spots[k];
+        const q = qPt(a, c, b, t);
+        let ux = q.x - cC.x, uy = q.y - cC.y;
+        const ul = Math.hypot(ux, uy) || 1; ux /= ul; uy /= ul;   // outward
+        const S = hh * 0.42 * fm * big, W = S * 0.52;
+        const P = (along, out) => ({ x: q.x - uy * along + ux * out, y: q.y + ux * along + uy * out });
+        const plate = (sc) => {
+          ctx.beginPath();
+          for (const [al, ou] of [[-W, -S * 0.3], [-W * 0.92, S * 0.42], [0, S], [W * 0.92, S * 0.42], [W, -S * 0.3]]) {
+            const v = P(al * sc, ou * sc + (1 - sc) * S * 0.25); ctx.lineTo(v.x, v.y);
+          }
+          ctx.closePath();
+        };
+        ctx.fillStyle = k % 2 ? shade(plateCol, 0.9) : plateCol;
+        ctx.strokeStyle = C.line;
+        ctx.lineWidth = lineW * 0.75;
+        plate(1); ctx.fill(); ctx.stroke();
+        // the jewel: each plate's face blushes with the display colour
+        ctx.fillStyle = jewel;
+        ctx.globalAlpha = 0.65;
+        plate(0.55); ctx.fill();
+        ctx.globalAlpha = 1;
+        // a lit keel down the middle
+        ctx.strokeStyle = 'rgba(255,240,215,0.45)';
+        ctx.lineWidth = lineW * 0.55;
+        ctx.beginPath();
+        ctx.moveTo(P(0, S * 0.1).x, P(0, S * 0.1).y); ctx.lineTo(P(0, S * 0.82).x, P(0, S * 0.82).y);
+        ctx.stroke();
+      }
+    }
     ctx.fillStyle = frillCol;
     ctx.strokeStyle = C.line;
     ctx.lineWidth = lineW * 0.9;
@@ -3866,10 +3959,11 @@ function drawHead(ctx, key, d, C, a) {
     ctx.quadraticCurveTo(fP(-0.55, -0.7).x, fP(-0.55, -0.7).y, fP(-1.05, -0.75).x, fP(-1.05, -0.75).y);
     ctx.stroke();
     // epoccipitals: a row of low bone knobs scalloping the rear margin
+    // (the crown's plates take their place)
     ctx.fillStyle = shade(C.belly, 0.9);
     ctx.strokeStyle = C.line;
     ctx.lineWidth = lineW * 0.6;
-    for (let k = 0; k < 5; k++) {
+    for (let k = 0; k < (d.crownFrill ? 0 : 5); k++) {
       const t = k / 4;
       // walk the rear margin from top-back to low-back
       const q = { x: (1 - t) * (1 - t) * fBack.x + 2 * (1 - t) * t * fP(-1.4, -0.9).x + t * t * fLow.x,
@@ -3877,6 +3971,18 @@ function drawHead(ctx, key, d, C, a) {
       ctx.beginPath(); ctx.ellipse(q.x, q.y, hl * 0.04, hh * 0.05, 0, 0, TAU); ctx.fill(); ctx.stroke();
     }
     ctx.restore();
+    // the crowned frill's brow horns are mere nubs over the eyes
+    if (d.crownFrill) {
+      const bh = hPt(0.14, -0.3);
+      ctx.fillStyle = shade(C.belly, 0.92);
+      ctx.strokeStyle = C.line;
+      ctx.lineWidth = lineW * 0.7;
+      ctx.beginPath();
+      ctx.moveTo(bh.x - hl * 0.05, bh.y);
+      ctx.quadraticCurveTo(bh.x - hl * 0.01, bh.y - hh * 0.2, bh.x + hl * 0.05, bh.y - hh * 0.15);
+      ctx.lineTo(bh.x + hl * 0.06, bh.y);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    }
     // longHorns (coahuilaceratops, the magnacuerna): the kosmo hornlets are
     // replaced by a matched PAIR of brow horns longer than the skull itself,
     // sweeping up and forward — the far horn drawn first and dimmer
@@ -4180,6 +4286,21 @@ function drawHead(ctx, key, d, C, a) {
     dome(0.44, -0.46, 0.085);   // the nasal boss, riding the muzzle
     dome(0.05, -0.60, 0.07);    // the lacrimal boss, over the eye
   }
+  if (d.shieldSkull) {
+    // the SHIELD: a broad low boss of bone rising from the skull roof behind
+    // the eyes — flat-topped, rimmed, the thing the shieldcroc is named for
+    const c = hPt(-0.02, -0.48);
+    ctx.fillStyle = shade(C.mid, 1.08);
+    ctx.strokeStyle = C.line;
+    ctx.lineWidth = lineW * 0.8;
+    ctx.beginPath();
+    ctx.ellipse(c.x, c.y, hl * 0.2, hh * 0.32, headAng, Math.PI, TAU);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,244,222,0.25)';
+    ctx.beginPath();
+    ctx.ellipse(c.x - hl * 0.03, c.y - hh * 0.14, hl * 0.12, hh * 0.1, headAng, 0, TAU);
+    ctx.fill();
+  }
   if (key === 'nivalo') {
     // the titanosauriform badge: ONE smooth nasal dome bulging from the
     // crown, nostril riding high on its face — the giraffatitan profile.
@@ -4418,6 +4539,21 @@ function drawHead(ctx, key, d, C, a) {
     ctx.strokeStyle = C.line;
     ctx.lineWidth = lineW * 0.6;
     ctx.beginPath(); ctx.ellipse(ep.x, ep.y, er * 1.25, er * 1.05, -0.1, 0, TAU); ctx.stroke();
+  }
+  // an ELDER's scar: three pale rake lines torn across the eye, brow to
+  // cheek, old enough to have healed raised and light
+  if (scar) {
+    ctx.lineCap = 'round';
+    for (const [k, w] of [[-1, 0.7], [0, 1], [1, 0.7]]) {
+      const a0 = hPt(-0.06 + k * 0.1, -0.8), a1 = hPt(0.24 + k * 0.1, 0.4);
+      ctx.strokeStyle = C.line; ctx.globalAlpha = 0.5;
+      ctx.lineWidth = lineW * 1.7 * w;
+      ctx.beginPath(); ctx.moveTo(a0.x, a0.y); ctx.lineTo(a1.x, a1.y); ctx.stroke();
+      ctx.strokeStyle = '#f4dcc4'; ctx.globalAlpha = 0.9;
+      ctx.lineWidth = lineW * 0.9 * w;
+      ctx.beginPath(); ctx.moveTo(a0.x, a0.y); ctx.lineTo(a1.x, a1.y); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
   }
 }
 
@@ -4764,9 +4900,26 @@ function drawCarcass(ctx, c) {
   }
   if (d.frill) {
     // kosmoceratops' frill disc behind the fallen head
-    ctx.fillStyle = tint(shade(C.acc, 0.9));
+    const fcx = hx - hl2 * 0.45, fcy = -hh2 * 0.75, frx = hl2 * 0.42, fry = hh2 * 0.58;
     ctx.strokeStyle = C.line; ctx.lineWidth = Math.max(0.8, s);
-    ctx.beginPath(); ctx.ellipse(hx - hl2 * 0.45, -hh2 * 0.75, hl2 * 0.42, hh2 * 0.58, -0.35, 0, TAU);
+    if (d.crownFrill) {
+      // the crown survives its owner: plates fanned around the disc's rim
+      ctx.fillStyle = tint(shade(C.belly, 0.85));
+      for (let k = 0; k < 6; k++) {
+        const a = -0.35 - 2.6 + k * 0.62;
+        const ca = Math.cos(a), sa = Math.sin(a);
+        const bx = fcx + ca * frx * 0.9, by = fcy + sa * fry * 0.9, r = hh2 * 0.3;
+        ctx.beginPath();
+        ctx.moveTo(bx - sa * r * 0.5, by + ca * r * 0.5);
+        ctx.lineTo(bx + ca * r * 0.6 - sa * r * 0.45, by + sa * r * 0.6 + ca * r * 0.45);
+        ctx.lineTo(bx + ca * r * 1.05, by + sa * r * 1.05);
+        ctx.lineTo(bx + ca * r * 0.6 + sa * r * 0.45, by + sa * r * 0.6 - ca * r * 0.45);
+        ctx.lineTo(bx + sa * r * 0.5, by - ca * r * 0.5);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+      }
+    }
+    ctx.fillStyle = tint(shade(C.acc, 0.9));
+    ctx.beginPath(); ctx.ellipse(fcx, fcy, frx, fry, -0.35, 0, TAU);
     ctx.fill(); ctx.stroke();
   }
 

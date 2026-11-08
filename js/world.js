@@ -270,6 +270,7 @@ function genWorld(eco) {
   W.caves = [];         // wind-shadow shelters (the Wall) — one hides the giant
   W.channels = [];      // flood channels (the Reach, the desert river) — never inherit them
   W.landmark = null;    // the Great Walk's destination (placeLandmark)
+  W.cradle = null;      // the desert's hidden nursery (genDesert)
 
   ECOS[eco].gen();
   dressNests();
@@ -904,6 +905,7 @@ function genDesert() {
     procomp: { x: T(140), y: T(232) },   // the southern belt, under the giants
     homalo: { x: T(176), y: T(150) },    // the belt's heart, by the wallow
     coelo: { x: T(150), y: T(246) },     // a river bend in the southern belt
+    regali: { x: T(132), y: T(196) },    // the belt's western bank, among the wallows
     tamery: { x: T(170), y: T(110) },    // the northern belt, where the hadrosaurs drink
     aero: { x: T(196), y: T(186) },      // the belt's eastern edge, facing the open sand it runs
   };
@@ -928,11 +930,17 @@ function genDesert() {
       }
     }
   }
+  // THE GIANTS' CRADLE — tucked into the far north-west corner, on no map:
+  // a green hollow thick with cycads around one big deep pond, where the
+  // giants leave their young, and where the Guardian lies under the water
+  const CR = { x: 30 * K, y: 30 * K, r: 21 * K, pr: 8.5 * Math.sqrt(K) };   // tiles
+  addWaterBlob(CR.x, CR.y, CR.pr, true);
+  W.cradle = { x: CR.x * TILE, y: CR.y * TILE, r: CR.r * TILE, pond: { x: CR.x * TILE, y: CR.y * TILE, r: CR.pr * TILE } };
   // waterholes: rare, scattered far out on the sand — each one a little
   // green ring with a couple of trees, the only drink for miles
   const holes = [
     { x: 40, y: 150 }, { x: 62, y: 262 }, { x: 250, y: 60 }, { x: 288, y: 130 },
-    { x: 262, y: 286 }, { x: 24, y: 24 }, { x: 300, y: 20 }, { x: 96, y: 300 }, { x: 226, y: 244 },
+    { x: 262, y: 286 }, { x: 300, y: 20 }, { x: 96, y: 300 }, { x: 226, y: 244 },
   ];
   for (const h of holes) { h.x *= K; h.y *= K; }
   for (const h of holes) addWaterBlob(h.x, h.y, (2.6 + rnd() * 0.8) * Math.sqrt(K), false);
@@ -963,6 +971,10 @@ function genDesert() {
       const belt = clamp(1 - (dr + fray - 12 * K) / (14 * K), 0, 1);
       const oasis = clamp(1 - (near - 3 * K) / (5 * K), 0, 1) * 0.55;
       let ff = Math.max(belt * (0.55 + 0.45 * fbm(tx * 0.09 + 31, ty * 0.09 + 9)), oasis);
+      // the cradle: one thick green hollow, its rim frayed into the sand
+      const cfray = (fbm(tx * 0.08 + 211, ty * 0.08 + 403) - 0.5) * 10;
+      const cradle = clamp(1 - (Math.hypot(tx - CR.x, ty - CR.y) + cfray - CR.r * 0.74) / (CR.r * 0.3), 0, 1);
+      ff = Math.max(ff, cradle * (0.66 + 0.34 * fbm(tx * 0.1 + 61, ty * 0.1 + 17)));
       for (const m of muds) if (Math.hypot(tx - m.x, ty - m.y) < m.r + 4) ff = Math.min(ff, 0.25);
       W.forest[i] = ff;
       W.ter[i] = ff > 0.45 ? T_FOREST : ff > 0.12 ? T_GRASS : T_SAND;
@@ -977,6 +989,17 @@ function genDesert() {
       const px = tx * TILE + rrange(2, TILE - 2), py = ty * TILE + rrange(2, TILE - 2);
       if (nearAnyNest(px, py, 70)) continue;
       const ff = W.forest[i], r = rnd();
+      if (t !== T_SAND && inCradle(px, py)) {
+        // the cradle's thicket: cycads shoulder to shoulder with ferns between
+        // (the babies' browse), and a ring of tall broadleaf shading the pond
+        const pd = dist(px, py, W.cradle.pond.x, W.cradle.pond.y) / W.cradle.pond.r;
+        if (pd < 1.25) { if (r < 0.03) W.ferns.push({ x: px, y: py, food: 1, regrow: 0, s: rrange(0.9, 1.3) }); }
+        else if (r < 0.075) W.trees.push({ x: px, y: py, s: rrange(1.1, 1.9), kind: 4, v: 0 });
+        else if (r < 0.088 && pd < 2.4) W.trees.push({ x: px, y: py, s: rrange(1.4, 2.1), kind: 1, v: 3 });
+        else if (r > 0.8) W.ferns.push({ x: px, y: py, food: 1, regrow: 0, s: rrange(0.9, 1.5) });
+        else if (r > 0.79) W.props.push({ kind: 'log', x: px, y: py, s: rrange(0.8, 1.2), flip: rnd() < 0.5 ? 1 : -1 });
+        continue;
+      }
       if (t === T_SAND) {
         // the open desert: a lone giant every so often (shade!), dead
         // snags, red rocks, and the bones of what didn't make it
@@ -1010,6 +1033,18 @@ function genDesert() {
     const px = rrange(4, WT - 4) * TILE, py = rrange(4, HT - 4) * TILE;
     if (!isWaterPx(px, py) && nearWaterPx(px, py, 40)) W.horsetails.push({ x: px, y: py, food: 1, regrow: 0, s: rrange(0.8, 1.3) });
   }
+  // …and the cradle pond is ringed in them
+  const cp = W.cradle.pond;
+  for (let k = 0; k < 70; k++) {
+    const a = rnd() * TAU, rr = cp.r * rrange(0.9, 1.35);
+    const px = cp.x + Math.cos(a) * rr, py = cp.y + Math.sin(a) * rr;
+    if (!isWaterPx(px, py)) W.horsetails.push({ x: px, y: py, food: 1, regrow: 0, s: rrange(0.9, 1.4) });
+  }
+}
+// inside the Giants' Cradle (desert only; pad grows or shrinks the ring)
+function inCradle(x, y, pad) {
+  const c = World.cradle;
+  return !!c && dist(x, y, c.x, c.y) < c.r + (pad || 0);
 }
 
 // ---------------------------------------------------------------------------
@@ -3084,7 +3119,7 @@ function randPlainsPos() {
   const R = PLAINS_RANGE[World.eco] || PLAINS_RANGE.prairie;
   for (let k = 0; k < 60; k++) {
     const x = rrange(R.xa, R.xb) * WORLD_W, y = rrange(0.05, R.yb) * WORLD_H;
-    if (!isWaterPx(x, y) && !isMudPx(x, y) && !isLavaPx(x, y) && forestShadePx(x, y) < 0.3) return { x, y };
+    if (!isWaterPx(x, y) && !isMudPx(x, y) && !isLavaPx(x, y) && forestShadePx(x, y) < 0.3 && !inCradle(x, y, 200)) return { x, y };
   }
   return { x: WORLD_W * 0.7, y: WORLD_H * 0.4 };
 }
@@ -3127,7 +3162,7 @@ function randForestPos() {
   const xa = World.eco === 'valley' ? 0.05 : 0.04, xb = World.eco === 'valley' ? 0.45 : 0.96;
   for (let k = 0; k < 60; k++) {
     const x = rrange(xa, xb) * WORLD_W, y = rrange(0.05, 0.95) * WORLD_H;
-    if (!isWaterPx(x, y) && !isMudPx(x, y) && !isLavaPx(x, y) && forestShadePx(x, y) > 0.35) return { x, y };
+    if (!isWaterPx(x, y) && !isMudPx(x, y) && !isLavaPx(x, y) && forestShadePx(x, y) > 0.35 && !inCradle(x, y, 200)) return { x, y };
   }
   return World.eco === 'valley' ? { x: WORLD_W * 0.25, y: WORLD_H * 0.5 } : randPlainsPos();
 }
@@ -3135,7 +3170,7 @@ function randWaterPos() {
   if (!World.waterTiles.length) return { x: WORLD_W / 2, y: WORLD_H / 2 };
   for (let k = 0; k < 40; k++) {
     const p = waterTilePos(World.waterTiles[Math.floor(rnd() * World.waterTiles.length)]);
-    if (isWaterPx(p.x, p.y)) return p;
+    if (isWaterPx(p.x, p.y) && !inCradle(p.x, p.y)) return p;   // the cradle pond has its own keeper
   }
   return waterTilePos(World.waterTiles[0]);
 }
