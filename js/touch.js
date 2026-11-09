@@ -123,6 +123,11 @@
   // the threat display has no prompt (it works anywhere), so it gets a
   // button of its own; the broadcast and friendly calls arrive as prompts
   press(document.getElementById('btn-call'), () => { G.input.call3 = true; });
+  // crouch mirrors the C key: a tap toggles, a hold crouches until let go
+  const crouchBtn = document.getElementById('btn-crouch');
+  press(crouchBtn,
+    () => { G.input.crouchPress = true; G.input.crouchKey = true; },
+    () => { if (G.input.crouchKey) { G.input.crouchKey = false; G.input.crouchRelease = true; } });
   // the health menu: TAB on a keyboard, a tap on the stat bars here — and a
   // tap on the open menu closes it again
   const statsPanel = document.getElementById('statspanel');
@@ -193,6 +198,12 @@
     if (on && G.player.species !== pncSp) {
       pncSp = G.player.species;
       pncBtn.textContent = DINO[pncSp].tailWeapon ? '🌀' : '🐾';
+    }
+    if (on) {
+      const p = G.player;
+      crouchBtn.classList.toggle('gone', !canCrouch(p));
+      crouchBtn.classList.toggle('held', !!p.crouching);
+      crouchBtn.classList.toggle('coiled', !!(p.crouching && p.crouchSec >= CROUCH_CHARGE_T || p.crouchBoostT > 0));
     }
     layer.classList.toggle('paused', !!(on && G.paused));
     layer.classList.toggle('wrestling', !!(on && G.wrestle));

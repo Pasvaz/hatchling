@@ -73,6 +73,7 @@ No build step, no dependencies — plain HTML5 canvas + JavaScript.
 | M | Second weapon — claw slash (riojasaurus, orkoraptor, neovenator) · double bite (poekilopleuron) |
 | B | Dig your burrow, anywhere (simosuchus) — press it beside the burrow to collapse it |
 | SPACE (hold) + direction | **Pounce** — the press bites, and keeping SPACE down flows into the coil: the dino loads (bigger = longer), leaps (faster = farther) and strikes EVERYTHING the leap crosses — the hit zones are live from the first inch of the jump to a beat after the landing, one strike per victim. Tail-fighters instead hold SPACE to **tail-swing**: continuous hits on a metronome, but the feet are planted until you let go. |
+| C | **Crouch** — a tap toggles, a hold stays down until you let go. See *Stalking* below. Sauropods can't crouch. |
 | R | Rest — a deliberate **3-second** settle onto folded legs (you stop moving first). Heal faster, needs drain slower. You're committed: sit at least **1 second**, then a step (or R) starts the equally slow **3-second** rise — no popping up. |
 | 1 / 2 / 3 | **Calls** — every playable has its OWN voice, matched to its playstyle (the `VOICE` registry, js/util.js): carnivores rasp and roar, duckbills and horned dinos trumpet, sauropods answer with sub-bass booms, raptors scream, the pack species yips, croc-snouts gurgle, and the Wall's dinos cry over the wind — all pitched up while young, and each call type is that same voice in a different mood. **1 Broadcast:** head craned to the sky, a long droning call — a carnivore claims every carcass in earshot (⚑): NPCs outside your pack must kill you before they may eat it. Most back off… rarely one defies the claim and hunts you TO THE DEATH. **2 Friendly:** short and smooth, a soft bow — this is how an aardiraptor invites its kin to the pack now. **3 Aggressive:** long, jagged, full of sharp sudden movements — smaller dinosaurs scatter, bolder ones may be provoked into attacking, and aimed at a close packmate it casts them out of the pack. |
 | TAB | Health menu |
@@ -88,7 +89,9 @@ joystick** on the left — it appears wherever your thumb lands, with a dashed
 stick and ring flare gold while the run is latched, and it lets go when you
 ease well back toward the center). On the right, an **icon button cluster**:
 🦷 attack, 🐾 pounce (🌀 tail-swing on tail-fighters — hold it like the P key),
-💤 rest, 📣 the aggressive call (the broadcast and friendly calls arrive as
+💤 rest, 🤫 crouch (tap to toggle, hold to stay down — it glows while
+you're down and turns green once the spring is coiled; sauropods don't get
+it), 📣 the aggressive call (the broadcast and friendly calls arrive as
 prompt pills when they apply), and two buttons that only exist when the world offers them — ✊ grab
 appears beside a carcass (tap to carry, hold to tear a chunk) and a fourth
 slot appears as 💧/🌿/🍖 to drink or eat whatever you're standing at. Rarer
@@ -117,6 +120,32 @@ gender/skin/delete controls are finger-sized, and buying a skin takes two taps
 keeps the game's retro look — same font, same panels — just resized and
 repositioned for thumbs. To play on your phone, run the dev server and open
 `http://<your-pc-ip>:8642` on the same wifi.
+
+## Stalking and stamina
+
+**Crouch (C).** Belly to the ground: you creep at under half speed and can't
+sprint, but a crouched **carnivore** is noticed late by prey — every
+non-carnivore NPC's detection range shrinks, and by how much depends on the
+matchup. The faster your sprint is than its flight, and the longer your wind
+lasts against its own, the closer you get: an evenly matched hunter is seen at
+65% of the usual range, a much faster, longer-winded one at as little as 30%,
+a slow one barely helps (90%). While you're down, the **nearest prey on
+screen** is rimmed in gold — your mark. Stay down **10 seconds** and the crouch
+coils: stand up yourself (C again, sprint, bite or pounce) and you **spring**,
++15% speed for 7 seconds. A forced stand (rest, eat, a call, a wrestle) wastes
+the coil. And don't call from the crouch: the roar gives you away, and every
+prey animal in earshot bolts **15% faster** than usual for 7 seconds.
+Herbivores can crouch for the spring too, they just have nothing to stalk.
+Sauropods (and the long-necked giants) can't crouch at all.
+
+**NPC stamina.** Wild dinosaurs tire like you do. Chasing, fleeing, rallying
+and lunging burn their wind; resting, grazing and drinking get it back. A
+winded animal is slower, and a **winded chaser gives up** the hunt — so the
+long-legged, long-winded playables can outlast what they can't outfight, and
+the slow tanks can't follow what runs from them. Tanks carry a shorter tank
+of wind than everyone else. A thin gold strip under an NPC's health bar shows
+its wind when it's spent any (it darkens when they're winded). Your own
+family, the Great Walk's rival and aquatic animals don't tire.
 
 ## The dinosaurs
 
@@ -435,6 +464,7 @@ spared — the storm is a thing of the open desert.
 - **Procompsognathus** (unlocked with the land) — a miniature Coelophysis, feathered from the egg, with a slimmer, longer head and a tank that never runs dry (double anyone's stamina). Weak alone — but like the Aardiraptor it is a **pack animal**: the friendly call (2) invites wild kin to run with you, your mate and your young are pack from the first breath, and the pack hunts what you hunt.
 - **Homalocephale** (master Procompsognathus) — a pachycephalosaur with a FLAT dome, a thick table of bone where Prenocephale wears a crown; between the two runners in size. A herbivore that fights: it **rams** like its cousin, it is a **pack animal** like Procompsognathus (the friendly call gathers a herd that rams beside you), and its **pounce** comes down skull-first — land it on a limb and the **bone breaks**.
 - **Coelophysis** (master Homalocephale) — the Triassic runner: Lophostropheus' frame on shorter legs, with a deeper S-curve to the neck. Fast, dangerous, and a bleeding bite. It hunts **Epidexipteryx** under the giants. Its heat resistance is only fair — live in the belt, cross the sand with a plan.
+- **Regaliceratops** (master Coelophysis) — the crowned wall: a ceratopsian whose frill is ringed with great pentagonal plates. High health, a heavy horn that **breaks bones**, and thick hide that takes **half the bleed** (less damage, wounds that close twice as fast). But its wind is short — it can hold its ground against anything, it just can't chase what attacks it. Mastering it opens the desert's apex fork, **Tameryraptor** and **Aerosteon**.
 
 **NPCs — The Death Desert**
 - **Raptor packs of the dunes** — *Shri devi*, *Kuru kulla*, *Tsaagan mangas*, *Luanchuanraptor* and *Adasaurus*: fast, cheap, and everywhere on the open sand, growing with you like every wild pack. *Mahakala* is crow-sized and hunts Epidexipteryx in the belt — and runs from you.
@@ -443,6 +473,8 @@ spared — the storm is a thing of the open desert.
 - **Deltadromeus** — the sprinter: absurdly long legs on a light frame, the fastest big thing on the sand. It runs down the ostrich herds and the smaller raptors. Only Eocarcharia frightens it.
 - **Eocarcharia** — "fierce-eye": a heavy carcharodontosaur with great bony brow bosses, the belt's ambush killer at the waterside. Its bite bleeds, it hunts every hadrosaur that comes down to drink, and it hunts you.
 - **Suchosaurus** — the river's theropod: a croc-snouted spinosaurid, low and long, that fishes the channels and takes whatever comes to the water's edge. **Megorontosuchus** shares the river with it — the ambush crocodile, a shadow under the surface.
+- **Yunmenglong** — the giant of the red sand, and the desert's boss: a euhelopodid sauropod as big as the Nivalotitan, with ten thousand health, a thick hide that takes the edge off every bite, and wounds that close almost as fast as you open them. It plods from tree to tree rearing up to strip the crowns, and leaves you alone until you start something. Then it fights back: it **shoulders and tramples** whatever stands at its front feet, turns its back and **swings the tail** (rarely, a bone cracks), and — its real weapon — **rears up and stomps**. The rear-up is slow and a red circle marks where the feet will land: get out from under. Caught at the centre, even a grown Aerosteon is **crushed outright**; the ring around it still hurts and throws you. A Tameryraptor is the wrong animal for this — it dies fast. An Aerosteon alone dies too. With one packmate an Aerosteon has a slim chance; with two, a hard fight it can win if it's lucky. A boss bar shows while it fights you. Very rarely an **Elder** spawns — bigger, harder-hitting and tougher still, with an old claw scar across the eye — and every Aerosteon player is told the moment one walks the desert.
+- **The Giants' Cradle** — a hidden nursery in the desert's north-west, missing from the map: a ring of forest around a cycad thicket so dense you push through it, where Yunmenglong calves graze beside a herd of Homalocephale. At its heart is a big pond, and in the pond lies **Aegisuchus**, the **Guardian of the Giants' Cradle** — a crocodile big enough to kill an Aerosteon, almost invisible under the water. It takes anything with teeth that comes to drink (its jaws close faster than Megorontosuchus' — struggle hard), and every minute or two it hauls out and walks the nursery, fighting any meat-eater it finds.
 - **Raptor territory.** Each raptor holds its own quarter of the map (Shri the north-west sand, Kuru the north-east, Tsaagan the south-west, Adasaurus the south-east, Luanchuanraptor the northern belt, Mahakala the southern belt) and **rivals** the packs on its borders: where two quarters touch, packs that meet will now and then pick a fight with each other.
 - **Epidexipteryx hui** — a sparrow of a thing with four ribbon tail feathers, flitting through the river belt. Coelophysis food.
 - **Gar** in the river.

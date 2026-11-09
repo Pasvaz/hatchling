@@ -133,7 +133,8 @@ const CHAIN = [
   ['neove', 'coahuila'],   // the fork: quiet hands or great horns — either one
   ['poekilo'],             // …opens the road to the Reach's true apex
   ['procomp'], ['homalo'], ['coelo'],   // ☀️ The Death Desert — the first rung has its own gate (see spUnlocked)
-  ['tamery', 'aero'],      // …and the desert's apex fork, once Coelophysis is mastered: brawn or the endless chase
+  ['regali'],              // …the crowned wall the hunters must get past…
+  ['tamery', 'aero'],      // …and the desert's apex fork, once Regaliceratops is mastered: brawn or the endless chase
 ];
 // the desert's door: an ADULT Poekilopleuron at least once, or Full Adult
 // Neovenator and Coahuilaceratops together
@@ -296,6 +297,8 @@ window.addEventListener('keydown', (e) => {
   if (e.code === 'Digit2') G.input.call2 = true;
   if (e.code === 'Digit3') G.input.call3 = true;
   if (e.code === 'KeyR') G.input.rest = true;
+  // C crouches: a tap toggles, a hold crouches until it's let go
+  if (e.code === 'KeyC') { G.input.crouchPress = true; G.input.crouchKey = true; }
   // pounce lives on SPACE now: the press bites, a continuous hold coils
   // (P was retired; CTRL was tried before that and abandoned — Ctrl+letter
   // combos are browser shortcuts and can't be prevented.)
@@ -324,12 +327,13 @@ window.addEventListener('keyup', (e) => {
   G.keys[e.code] = false;
   if (KEYMAP[e.code]) G.input[KEYMAP[e.code]] = false;
   if (e.code === 'Space') G.input.atkHold = false;
+  if (e.code === 'KeyC') { G.input.crouchKey = false; G.input.crouchRelease = true; }
 });
 // losing focus (a browser shortcut fired, a tab switch) eats the keyups —
 // clear every held flag so nothing stays latched behind our back
 window.addEventListener('blur', () => {
   const i = G.input;
-  i.up = i.down = i.left = i.right = i.sprint = i.pounceHold = i.atkHold = false;
+  i.up = i.down = i.left = i.right = i.sprint = i.pounceHold = i.atkHold = i.crouchKey = false;
   G.keys = {};
 });
 
@@ -446,8 +450,9 @@ const CARD_INFO = {
   procomp: { desc: 'A miniature Coelophysis, feathered from the egg, with a slim long head and a tank that never runs dry. Alone it is a snack — but call your kin (2) and the pack runs with you, hunts with you, and shares your kills.', tag: '◆ CARNIVORE — THE PACK', tagClass: 'mod' },
   homalo: { desc: 'A flat-domed pachycephalosaur between the two runners in size. A herbivore — but call your kin (2) and a whole herd rams beside you, and your POUNCE comes down skull-first: land it on a leg and the bone breaks.', tag: '◆ HERBIVORE — THE PACK', tagClass: 'mod' },
   coelo: { desc: 'A Triassic ghost on the red sand: short legs, a deep S-curved neck, and speed that nothing in the belt can answer. The heat will kill you before the raptors do — hunt Epidexipteryx under the giants, drink where you can, and rest in the shade.', tag: '◆ CARNIVORE — THE HEAT', tagClass: 'hard' },
+  regali: { desc: 'A crown of great pentagonal plates around the frill, and a nose horn that cracks bone. Claws barely open its hide, and it stands where it stands — huge health, huge damage. But its wind is the shortest on the sand: it wins the fight in front of it, and can never chase anyone down.', tag: '◆ HERBIVORE — CROWNED WALL', tagClass: 'mod' },
   tamery: { desc: 'The apex of the Death Desert: Poekilopleuron\'s barrel of muscle at Tyrannotitan\'s size, under Neovenator\'s long lean skull. Raw damage, arms like beams, a double bite (M) — and the great hadrosaurs of the river belt are its larder. Big and thin-skinned: the sun finds it first.', tag: '◆ CARNIVORE — APEX', tagClass: 'hard' },
-  aero: { desc: 'Tameryraptor\'s rival for the desert crown: a great megaraptorid on long legs, feathered down the back. Lighter and smaller — but it runs almost forever, its hooks and teeth leave wounds that bleed for half a minute, and call your kin (2) and two more run with you. Never more than three.', tag: '◆ CARNIVORE — PURSUIT', tagClass: 'hard' },
+  aero: { desc: 'Tameryraptor\'s rival for the desert crown: a great megaraptorid on long legs, feathered down the back. Lighter and smaller — but it runs almost forever, its hooks and teeth leave wounds that bleed for half a minute, and call your kin (2) and two more run with you. Never more than three — and three is what it takes to bring down a Yunmenglong.', tag: '◆ CARNIVORE — PURSUIT', tagClass: 'hard' },
   orkor: { desc: 'The last of the megaraptorids — long hooked arms, blade teeth, and real speed. It opens prey with its hands as much as its jaws, and the bleeding does the rest.', tag: '◆ CARNIVORE — BLEEDER', tagClass: 'mod' },
   neove: { desc: 'The quiet hunter of the Reach. It does not chase the way the tyrants chase — it arrives. Hands and jaws together, and everything it touches bleeds.', tag: '◆ CARNIVORE — HUNTER', tagClass: 'hard' },
   coahuila: { desc: 'Possibly the longest brow horns anything ever grew, and a committed charge on the far end of them. Every wound those horns open keeps working — crazy bleed on four legs.', tag: '◆ HERBIVORE — BLEEDER', tagClass: 'mod' },
@@ -1446,6 +1451,7 @@ const START_BANNERS = {
   adratik: 'You hatch spiked and slow. Let them come — everything you touch bleeds.',
   orkor: 'You hatch with hooks for hands. Nothing here outruns you.',
   coelo: 'You hatch on hot sand. The shade is life. The sun is not your friend.',
+  regali: 'You hatch crowned in bone. Let them come to you — you were never built to follow.',
   tamery: 'You hatch where the river meets the sand. The herds drink here — and so will you.',
   aero: 'You hatch with long legs and hooked hands. Whatever runs from you, you will outlast.',
   procomp: 'You hatch small and feathered. Find your kin — the sand is no place to be alone.',
@@ -1757,9 +1763,12 @@ function buildMinimap() {
   const mm = document.getElementById('minimap');
   const c2 = mm.getContext('2d');
   const img = c2.createImageData(WT, HT);
+  const cr = World.cradle;
   for (let ty = 0; ty < HT; ty++) {
     for (let tx = 0; tx < WT; tx++) {
-      const t = World.ter[tIdx(tx, ty)];
+      let t = World.ter[tIdx(tx, ty)];
+      // the Giants' Cradle is on no map: its hollow reads as open sand
+      if (cr && inCradle((tx + 0.5) * TILE, (ty + 0.5) * TILE, 6 * TILE)) t = T_SAND;
       const ff = World.forest[tIdx(tx, ty)];
       let col;
       if (t === T_DEEP) col = [44, 74, 88];
@@ -2968,6 +2977,32 @@ function drawEruption() {
   }
 }
 
+// the giant's STOMP telegraph, on the ground under the reared-up front end:
+// a red core (UNDER: crushed) inside a dusty ring (near: hurt). The core
+// fills as the front end climbs — when it's full, the feet come down.
+// True circles: the hit test is round too
+function drawStompMarks() {
+  for (const e of G.npcs) {
+    if (e.state !== 'stomp' || e.stompPhase !== 'up') continue;
+    const st = NPC_DEF[e.species].stomp, em = e.elder ? ELDER_MOD.size : 1;
+    const R = st.r * em, U = st.under * em;
+    const f = clamp(e.stompT / e.stompWind, 0, 1);
+    const blink = f > 0.7 && Math.floor(G.time * 10) % 2 === 0;
+    ctx.fillStyle = 'rgba(255,150,70,' + (0.05 + 0.08 * f).toFixed(3) + ')';
+    ctx.beginPath(); ctx.arc(e.stompX, e.stompY, R, 0, TAU); ctx.fill();
+    ctx.setLineDash([6, 5]);
+    ctx.strokeStyle = 'rgba(255,170,80,' + (0.3 + 0.4 * f).toFixed(3) + ')';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(e.stompX, e.stompY, R, 0, TAU); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.strokeStyle = blink ? 'rgba(255,230,200,0.95)' : 'rgba(230,50,36,0.85)';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(e.stompX, e.stompY, U, 0, TAU); ctx.stroke();
+    ctx.fillStyle = 'rgba(220,40,30,' + (0.18 + 0.3 * f).toFixed(3) + ')';
+    ctx.beginPath(); ctx.arc(e.stompX, e.stompY, U * f, 0, TAU); ctx.fill();
+  }
+}
+
 // ---------- game loop ----------
 let lastT = performance.now();
 let popT = 0;
@@ -2977,8 +3012,8 @@ function loop(now) {
   requestAnimationFrame(loop);
   let dt = Math.min(0.05, (now - lastT) / 1000);
   lastT = now;
-  if (!G.started) return;
-  if (G.paused) { render(); return; }
+  if (!G.started) { SFX.bossMusic(false); return; }
+  if (G.paused) { SFX.bossMusic(false); render(); return; }
 
   if (simTick(dt)) {
     // the burrow owned this step — render the den (or the world, if the
@@ -3038,6 +3073,7 @@ function simTick(dt) {
   updateBlizzard(dt);
   updateMonsoon(dt);
   updateSandstorm(dt);
+  updateDesertSpecials(dt);
   updateNesting(dt);
   updateCine(dt);
   // the lobby-leave countdown runs on WORLD time: dying cancels it, and the
@@ -3393,6 +3429,7 @@ function render() {
     }
   }
   for (const c of G.carcasses) if (c.x > x0 && c.x < x1 && c.y > y0 && c.y < y1) draws.push({ y: c.y, fn: () => drawCarcass(ctx, c) });
+  const mark = stalkMark(p, camX, camY, zw, zh);
   for (const e of G.npcs) {
     if (e.x > x0 && e.x < x1 && e.y > y0 && e.y < y1) {
       draws.push({
@@ -3400,6 +3437,8 @@ function render() {
           // a submerged croc is only a shadow under the surface — no hp bar,
           // no outline, just a dark shape and two eyes
           if (e.submerged && isWaterPx(e.x, e.y)) { drawCrocShadow(ctx, e); return; }
+          // the crouched hunter's mark: rimmed in gold, under the sprite
+          if (e === mark) drawRim(e, 'rgba(255,214,70,' + (0.75 + 0.25 * Math.sin(G.time * 5)).toFixed(2) + ')');
           // THE MOORS: anything past arm's length is a SILHOUETTE —
           // darkened to a shape in the grey, drawn at its true size
           const far = World.misty ? clamp((dist(e.x, e.y, p.x, p.y) - 150) / 130, 0, 1) : 0;
@@ -3413,7 +3452,9 @@ function render() {
           }
           drawShadow(ctx, e.x, e.y, bodyRadius(e) * 1.4);
           drawDino(ctx, e.species, e);
-          if (e.hurtT > 0 || e.hp < e.maxhp * 0.999 && dist(e.x, e.y, p.x, p.y) < 130) drawHpBar(e);
+          // (and a tired animal near you shows its spent tank)
+          const pd = dist(e.x, e.y, p.x, p.y);
+          if (e.hurtT > 0 || (e.hp < e.maxhp * 0.999 || e.stam < e.stamMax * 0.999) && pd < 130 || e.winded && pd < 320) drawHpBar(e);
           if (e.bloodline || e.walkRival) drawLineTag(ctx, e, p);
         }
       });
@@ -3434,6 +3475,7 @@ function render() {
   }
   // eruption target rings sit on the ground, beneath everything that walks
   drawEruption();
+  drawStompMarks();
   drawWalkGround(ctx);     // the Great Walk's arrival ring, on the ground
 
   draws.sort((a, b) => a.y - b.y);
@@ -3592,10 +3634,58 @@ function drawHpBar(e) {
   const w = 22;
   const d = DINO[e.species];
   const y = e.y - (d.L.leg[0] + d.L.body[1] * 1.7) * d.scale - 10;
+  // a spent tank shows as a thin strip under the health (dim when winded)
+  const st = e.stamMax && e.stam < e.stamMax * 0.999;
   ctx.fillStyle = 'rgba(10,8,4,0.7)';
-  ctx.fillRect(e.x - w / 2 - 1, y - 1, w + 2, 4);
+  ctx.fillRect(e.x - w / 2 - 1, y - 1, w + 2, st ? 5 : 4);
   ctx.fillStyle = e.bleed ? '#d43a2a' : '#b8352a';
   ctx.fillRect(e.x - w / 2, y, w * clamp(e.hp / e.maxhp, 0, 1), 2);
+  if (st) {
+    ctx.fillStyle = e.winded ? '#7a6a48' : '#e8d27a';
+    ctx.fillRect(e.x - w / 2, y + 2.6, w * clamp(e.stam / e.stamMax, 0, 1), 1);
+  }
+}
+
+// THE STALK: a crouched carnivore has its eye on one animal — the nearest
+// prey on screen — picked out with a bright rim. The rim is the sprite's own
+// silhouette, flooded with one colour offscreen and stamped around it
+function stalkMark(p, vx, vy, vw, vh) {
+  if (!p || !p.alive || !p.crouching || PLAYER_DEF[p.species].diet !== 'carn') return null;
+  let best = null, bd = 1e9;
+  for (const e of G.npcs) {
+    if (e.hp <= 0 || !isPrey(e) || e.x < vx || e.x > vx + vw || e.y < vy || e.y > vy + vh) continue;
+    if (e.submerged && isWaterPx(e.x, e.y)) continue;
+    const dd = dist(e.x, e.y, p.x, p.y);
+    if (dd < bd) { bd = dd; best = e; }
+  }
+  return best;
+}
+const rimCv = document.createElement('canvas'), rimCtx = rimCv.getContext('2d');
+const RIM_DIRS = [[-1, 0], [1, 0], [0, -1], [0, 1], [-0.7, -0.7], [0.7, -0.7], [-0.7, 0.7], [0.7, 0.7]];
+function drawRim(e, color) {
+  const T = ctx.getTransform();
+  const d = DINO[e.species], L = d.L;
+  // a generous world box around the sprite (neck and tail included)
+  const R = (L.body[0] + L.tail[0] * 1.5 + L.head[0] + (L.neckLen || 0) * 1.5 + L.leg[0]) * d.scale * 0.75 + 12;
+  const pad = 4;
+  const w = Math.ceil(T.a * 2 * R) + pad * 2, h = Math.ceil(T.d * 1.7 * R) + pad * 2;
+  if (rimCv.width < w || rimCv.height < h) { rimCv.width = Math.max(rimCv.width, w); rimCv.height = Math.max(rimCv.height, h); }
+  const ox = Math.floor(T.a * (e.x - R) + T.e) - pad, oy = Math.floor(T.d * (e.y - 1.4 * R) + T.f) - pad;
+  rimCtx.setTransform(1, 0, 0, 1, 0, 0);
+  rimCtx.globalCompositeOperation = 'source-over';
+  rimCtx.clearRect(0, 0, rimCv.width, rimCv.height);
+  rimCtx.setTransform(T.a, T.b, T.c, T.d, T.e - ox, T.f - oy);
+  drawDino(rimCtx, e.species, e);
+  rimCtx.setTransform(1, 0, 0, 1, 0, 0);
+  rimCtx.globalCompositeOperation = 'source-in';
+  rimCtx.fillStyle = color;
+  rimCtx.fillRect(0, 0, w, h);
+  rimCtx.globalCompositeOperation = 'source-over';
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  const k = Math.max(1.5, T.a * 1.1);   // about a world pixel, never thinner than 1.5 screen px
+  for (const [dx, dy] of RIM_DIRS) ctx.drawImage(rimCv, 0, 0, w, h, ox + dx * k, oy + dy * k, w, h);
+  ctx.restore();
 }
 
 // ---------- HUD ----------
@@ -3613,6 +3703,40 @@ const elGrow = document.getElementById('growth-fill');
 const elPct = document.getElementById('growth-pct');
 const elPrompt = document.getElementById('prompt');
 const elBanner = document.getElementById('banner');
+const elHud = document.getElementById('hud');
+const elBoss = document.getElementById('bossbar');
+const elBossName = document.getElementById('bb-name');
+const elBossFill = document.getElementById('bb-fill');
+// the boss the bar follows: a grown giant or the Cradle's guardian that is
+// fighting you or your pack, within sight — held a few seconds so it doesn't flicker
+function bossInFight() {
+  const p = G.player;
+  if (!p || !p.alive) return null;
+  const ours = o => o && (o === p || isFamily(o));
+  let best = null, bd = 760;
+  for (const e of G.npcs) {
+    if (!(e.species === 'yunmeng' && !e.cradle) && e.species !== 'aegisu') continue;
+    const engaged = (ours(e.target) && e.state !== 'idle' && e.state !== 'lurk' && e.state !== 'wander')
+      || (e.aggroT > 0 && ours(e.lastAttacker));
+    if (!engaged) continue;
+    const dd = dist(e.x, e.y, p.x, p.y);
+    if (dd < bd) { bd = dd; best = e; }
+  }
+  return best;
+}
+function updateBossBar() {
+  const b = bossInFight();
+  if (b) { G.bossShown = b; G.bossHoldT = 3; }
+  else if (G.bossShown && ((G.bossHoldT -= 1 / 60) <= 0 || G.bossShown.hp <= 0 || G.npcs.indexOf(G.bossShown) < 0)) G.bossShown = null;
+  const e = G.bossShown;
+  elBoss.classList.toggle('hidden', !e);
+  elHud.classList.toggle('boss', !!e);
+  SFX.bossMusic(!!e);   // the boss theme plays exactly while the bar shows
+  if (!e) return;
+  elBossName.textContent = e.species === 'aegisu' ? "AEGISUCHUS — GUARDIAN OF THE GIANTS' CRADLE"
+    : (e.elder ? 'ELDER YUNMENGLONG' : 'YUNMENGLONG — THE GIANT OF THE RED SAND');
+  elBossFill.style.width = clamp(e.hp / e.maxhp * 100, 0, 100) + '%';
+}
 
 function updateHUD() {
   const p = G.player;
@@ -3641,7 +3765,8 @@ function updateHUD() {
   const dirty = p.growth < 1 && p.hygiene <= 60;
   elStage.textContent = (p.gender === 'm' ? '♂ ' : '♀ ') + (p.gen > 1 ? 'GEN ' + roman(p.gen) + ' · ' : '') + stageOf(p.growth)
     + (p.bleed ? '  ✚ BLEEDING' : '') + (p.bones && p.bones.leg ? '  🦴 BROKEN LEG' : '') + (p.frozenT > 0 ? '  ❄ FROZEN' : World.snowy && p.cold > 75 ? '  ❄ FREEZING' : '') + (p.strokeT > 0 ? '  ☀ HEATSTROKE' : World.desert && p.heat > 75 ? '  ☀ OVERHEATING' : '')
-    + (dirty ? '  ~ TOO DIRTY TO GROW' : '');
+    + (dirty ? '  ~ TOO DIRTY TO GROW' : '')
+    + (p.crouchBoostT > 0 ? '  » SPRING' : p.crouching ? (p.crouchSec >= CROUCH_CHARGE_T ? '  ▼ COILED' : '  ▼ CROUCHED ' + Math.floor(p.crouchSec) + 's') : '');
   elStage.style.color = p.frozenT > 0 || (World.snowy && p.cold > 75) ? '#a8dcf0' : p.strokeT > 0 || (World.desert && p.heat > 75) ? '#ffd27a' : p.bleed ? '#ff6a5e' : dirty ? '#c9a45a' : '#f5e9c8';
   elGrow.classList.toggle('stalled', dirty);
   elGrow.style.width = (p.growth * 100) + '%';
@@ -3675,6 +3800,7 @@ function updateHUD() {
     }
   }
   elPrompt.style.opacity = G.prompt ? 1 : 0;
+  updateBossBar();
   if (G.banner) {
     elBanner.textContent = G.banner.str;
     elBanner.style.color = G.banner.color || '#ffe9a0';

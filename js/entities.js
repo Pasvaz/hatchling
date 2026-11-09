@@ -123,15 +123,20 @@ const PLAYER_DEF = {
   // and a pounce that lands skull-first hard enough to break bones (pounceBone)
   homalo: { hp: 900, dmg: 95, speed: 138, sprint: 1.8, reach: 26, atkCd: 0.7, diet: 'herb', bleedBite: false, stamMax: 170, eco: 'desert', cost: 600, req: 'procomp', heatResist: 0.3, growthRate: 1.0, packSpecies: true, pounceBone: true },
   coelo: { hp: 700, dmg: 85, speed: 152, sprint: 1.95, reach: 26, atkCd: 0.45, diet: 'carn', bleedBite: true, stamMax: 150, eco: 'desert', cost: 800, gate: 'desert', heatResist: 0.3, earnMul: 1.15 },
+  // the desert's crowned wall, the last rung before the apex fork: huge hp
+  // and a horn that breaks bones, a hide the claws barely open (bleedResist
+  // takes the wound's dps AND its duration) — but the shortest tank on the
+  // sand: it wins the fight where it stands, and can never run anyone down
+  regali: { hp: 2700, dmg: 185, speed: 90, sprint: 1.5, reach: 40, atkCd: 1.05, diet: 'herb', bleedBite: false, bleedResist: 0.5, boneBreak: true, stamMax: 80, eco: 'desert', cost: 1000, req: 'coelo', heatResist: 0.25, growthRate: 0.65 },
   // the desert's apex: Poekilopleuron's niche and build at Tyrannotitan's
   // size — raw damage, thick short arms, the M double bite, and the big
   // hadrosaurs of the belt as its larder. Thin-skinned in the sun.
-  tamery: { hp: 2600, dmg: 225, speed: 120, sprint: 1.65, reach: 38, atkCd: 0.85, diet: 'carn', bleedBite: true, bleedMul: 1.2, stamMax: 155, eco: 'desert', cost: 1200, req: 'coelo', heatResist: 0.15, growthRate: 0.6, doubleBite: true, wrestler: true },
+  tamery: { hp: 2600, dmg: 225, speed: 120, sprint: 1.65, reach: 38, atkCd: 0.85, diet: 'carn', bleedBite: true, bleedMul: 1.2, stamMax: 155, eco: 'desert', cost: 1200, req: 'regali', heatResist: 0.15, growthRate: 0.6, doubleBite: true, wrestler: true },
   // the desert's OTHER apex (a fork with Tameryraptor): a big megaraptorid —
   // smaller and lighter, but it runs almost forever (stamMax), its wounds
   // bleed for half a minute (bleedDur), and it can pack — two kin at most
   // (packMax: three hunters counting you)
-  aero: { hp: 1900, dmg: 170, speed: 148, sprint: 1.85, reach: 34, atkCd: 0.6, diet: 'carn', bleedBite: true, bleedMul: 1.5, bleedDur: 2.2, stamMax: 420, eco: 'desert', cost: 1200, req: 'coelo', heatResist: 0.3, growthRate: 0.7, clawSecond: true, packSpecies: true, packMax: 2 },
+  aero: { hp: 1900, dmg: 170, speed: 148, sprint: 1.85, reach: 34, atkCd: 0.6, diet: 'carn', bleedBite: true, bleedMul: 1.5, bleedDur: 2.2, stamMax: 420, eco: 'desert', cost: 1200, req: 'regali', heatResist: 0.3, growthRate: 0.7, clawSecond: true, packSpecies: true, packMax: 2 },
   poekilo: { hp: 3000, dmg: 260, speed: 124, sprint: 1.65, reach: 40, atkCd: 0.85, diet: 'carn', bleedBite: true, bleedMul: 1.2, stamMax: 155, eco: 'jungle', cost: 1200, req: 'neove', growthRate: 0.6, doubleBite: true, wrestler: true },
 };
 
@@ -274,6 +279,17 @@ const NPC_DEF = {
   suchos:    { hp: 1100, dmg: 125, atkCd: 1.0, speed: 92, detect: 260, homeR: 300, reach: 34, biome: 'forest', turn: 2.0, fearless: true, bleedable: true, hunts: ['lepisosteus', 'kelumapu', 'epidex', 'procomp'], caution: 1.0 },   // 'beach' means sand — on this map that is the whole desert; the river belt is forest
   // the ribbon-tail: a mouthful that lives in the river belt
   epidex:    { hp: 40, dmg: 0, atkCd: 0, speed: 150, fleeSpeed: 190, detect: 200, homeR: 200, reach: 0, biome: 'forest', turn: 6, bleedable: false },
+  // THE GIANT OF THE RED SAND: one Yunmenglong plods the whole desert from
+  // crown to crown. Ten thousand hp, wounds that barely bleed, a tail that
+  // can crack bone — and the STOMP: up on the hind legs (slowly: that's the
+  // warning), then the whole front comes down. Near it hurts; UNDER it kills
+  yunmeng:   { hp: 10000, dmg: 260, atkCd: 2.1, speed: 46, detect: 120, homeR: 3200, reach: 64, biome: 'forest', turn: 0.9, fearless: true, tank: true, giant: true, bleedable: true, bleedResist: 0.3, hide: 0.55, melee: { kb: 560 },
+               tailBone: { mul: 0.6, max: 0.14 }, trample: { dmg: 180, cd: 1.2 },
+               stomp: { cd: 5, wind: 1.7, r: 260, under: 80, dmg: 440, underDmg: 3000 } },
+  // THE GUARDIAN OF THE GIANTS' CRADLE: a shieldcroc as long as a hadrosaur,
+  // all but invisible under its pond. Takes whatever comes down to the
+  // water — and every so often it hauls out to walk the nursery
+  aegisu:    { hp: 3400, dmg: 300, atkCd: 1.5, speed: 78, detect: 330, homeR: 130, reach: 46, biome: 'water', turn: 1.8, fearless: true, aquatic: true, amphibious: true, bleedable: true, bleedResist: 0.5, gripDrain: 0.3, melee: { kb: 240, bleed: { dps: 12, dur: 8 } } },
   kerbero: { hp: 2200, dmg: 155, atkCd: 2.0, speed: 88, fleeSpeed: 128, detect: 170, homeR: 320, reach: 44, biome: 'plains', turn: 1.7, fearless: true, tank: true, bleedable: true, melee: { kb: 260 } },
   // the shaggy guardian of the pine belt: plants itself and rakes with
   // feathered scythe arms — the wounds stay open in the cold
@@ -417,6 +433,9 @@ function dealDamage(target, amount, attacker, opts) {
   let glance = false;
   // a broken skull (or body) takes the force out of every attack it makes
   if (attacker && !attacker.isPlayer) dmg *= crippleBiteMul(attacker);
+  if (attacker && attacker.elder) dmg *= ELDER_DMG;   // the old giants hit harder
+  // a sauropod's hide: every blow lands at a fraction (the bleed has its own resist)
+  if (!target.isPlayer && (NPC_DEF[target.species] || {}).hide) dmg *= NPC_DEF[target.species].hide;
   // simosuchus down its burrow: only the armored backside shows — bites
   // barely scratch it, and the frustrated attacker gives the whole thing up
   if (target.isPlayer && target.hidden) {
@@ -462,7 +481,8 @@ function dealDamage(target, amount, attacker, opts) {
   bloodBurst(target.x, target.y, crit ? 10 : 5);
   if (opts.bleed) {
     // armored playables (scutellosaurus) shrug off most of a bleed wound
-    const br = target.isPlayer ? (PLAYER_DEF[target.species].bleedResist || 1) : 1;
+    // (and so does the giant's hide: NPC_DEF bleedResist)
+    const br = (target.isPlayer ? PLAYER_DEF[target.species].bleedResist : (NPC_DEF[target.species] || {}).bleedResist) || 1;
     target.bleed = { dps: opts.bleed.dps * br, t: opts.bleed.dur * br };
     floatText(target.x, target.y - 52, br < 1 ? 'bleeding (resisted)' : 'BLEEDING', '#d43a2a');
   }
@@ -516,6 +536,9 @@ function killNPC(e, attacker) {
     if (attacker && attacker.isPlayer && fled >= 2) {
       floatText(e.x, e.y - 44, 'The pack scatters!', '#ffe9a0');
     }
+  }
+  if (e.species === 'yunmeng' && !e.cradle && G.player && dist(e.x, e.y, G.player.x, G.player.y) < 900) {
+    G.banner = { str: (e.elder ? 'THE ELDER FALLS' : 'THE GIANT FALLS') + ' — a mountain of meat for whoever holds it.', t: 6, color: '#ffd23e' };
   }
   if (attacker && attacker.isPlayer) {
     SFX.kill();
@@ -721,6 +744,95 @@ function playerVisibleTo(e, detectR) {
   // wind well past sight (scentRange grows the longer the player stands)
   r = Math.max(r, scentRange(p));
   return dist(e.x, e.y, p.x, p.y) < r;
+}
+
+// ---------- stamina: running is borrowed breath ----------
+// Wild animals burn their tank in the run states (chasing, fleeing, rallying,
+// lunging) and pay it back everywhere else. Empty the tank and the animal
+// is WINDED: it labours along at NPC_WINDED_MUL until half the tank is back.
+// A winded hunter gives the chase up; winded prey is finally catchable.
+const NPC_STAM = 120;          // a wild animal's default tank (def.stam overrides)
+const NPC_STAM_TANK = 70;      // the heavyweights barely run at all
+const NPC_STAM_BURN = { chase: 9, flee: 8, rally: 5, lunge: 24 };   // per second
+const NPC_STAM_REGEN = 8;      // per second off the run states (×1.5 standing about)
+const NPC_WINDED_MUL = 0.62;   // a winded animal's top speed
+const NPC_WIND_BACK = 0.5;     // …until the tank refills this far
+const PLAYER_SPRINT_BURN = 20; // the player's sprint, per second
+function npcStamMax(d) { return d.stam || (d.tank ? NPC_STAM_TANK : NPC_STAM); }
+// spend breath in a run state. The player's family keeps pace on the
+// player's own legs, the Walk's actors follow their script, a feud never
+// tires, and fish don't run out of water
+function npcBurn(e, d, dt) {
+  if (isFamily(e) || e.bloodline || e.cineTo || e.cineHold || e.walkRival || e.feud || d.aquatic) return;
+  e.burnt = true;
+  e.stam = Math.max(0, e.stam - (NPC_STAM_BURN[e.state] || 0) * dt);
+  if (e.stam <= 0 && !e.winded) {
+    e.winded = true;
+    const p = G.player;
+    if (p && dist(e.x, e.y, p.x, p.y) < 420) floatText(e.x, e.y - 30, 'winded', '#cbb98a');
+  }
+}
+
+// ---------- the crouch: belly to the ground ----------
+// Everything but the long-necked giants can drop low: creeping steps, no
+// sprint — and a crouched CARNIVORE is noticed late by prey. How late is
+// the matchup: the more the hunter outruns (and, less so, outlasts) the
+// animal it's creeping on, the closer it gets before heads come up.
+// Ten seconds down and standing up SPRINGS you; calling from the crouch
+// gives you away and sends the herd off faster than ever.
+const CROUCH_SPEED = 0.45;     // creeping pace
+const CROUCH_HOLD_T = 0.4;     // C held longer than this = hold-to-crouch (release stands)
+const CROUCH_CHARGE_T = 10;    // seconds down before getting up springs you…
+const CROUCH_BOOST = 1.15;     // …this much faster…
+const CROUCH_BOOST_T = 7;      // …for this long
+const CROUCH_DETECT = 0.65;    // prey's detect range vs an evenly-matched crouched hunter
+const CROUCH_DETECT_MIN = 0.3, CROUCH_DETECT_MAX = 0.9;
+const SPOOK_R = 520;           // a call from the crouch carries this far…
+const SPOOK_T = 7;             // …and the prey that heard it bolts for this long…
+const SPOOK_MUL = 1.15;        // …this much faster
+function canCrouch(p) { return CLADE[p.species] !== 'sauropod'; }
+function isPrey(e) { return DINO[e.species].diet !== 'carn' && !DINO[e.species].fish && !isFamily(e); }
+// the multiplier on THIS prey's detect range for the player right now
+function preyDetectMul(e) {
+  const p = G.player;
+  if (!p || !p.alive || !p.crouching || !isPrey(e)) return 1;
+  const pd = PLAYER_DEF[p.species];
+  if (pd.diet !== 'carn') return 1;
+  const d = defOf(e);
+  // speed: the hunter's flat-out sprint against the prey's flight
+  const curve = pd.slowStart ? 0.5 + 0.5 * p.growth : 0.62 + 0.38 * p.growth;
+  const mySp = pd.speed * pd.sprint * genderMod(p).speed * curve;
+  const itsSp = d.fleeSpeed || d.speed || 1;
+  // stamina: seconds of running each tank buys
+  const myEnd = pd.stamMax / PLAYER_SPRINT_BURN;
+  const itsEnd = (e.stamMax || npcStamMax(d)) / NPC_STAM_BURN.flee;
+  const spAdv = clamp((mySp - itsSp) / itsSp, -1, 1.5);
+  const endAdv = clamp((myEnd - itsEnd) / itsEnd, -1, 1.5);
+  return clamp(CROUCH_DETECT - 0.3 * spAdv - 0.12 * endAdv, CROUCH_DETECT_MIN, CROUCH_DETECT_MAX);
+}
+// a prey brain's detect range for the player
+function preyDetect(e, r) { return r * preyDetectMul(e); }
+// standing up out of the crouch. `release` = the player's own doing (C, a
+// sprint, a bite, a pounce) — only that springs you; being knocked out of
+// it (rest, a call, eating…) doesn't
+function crouchUp(p, release) {
+  if (!p.crouching) return;
+  if (release && p.crouchSec >= CROUCH_CHARGE_T) {
+    p.crouchBoostT = CROUCH_BOOST_T;
+    floatText(p.x, p.y - 50, 'SPRING! +15% speed', '#9fe434');
+  }
+  p.crouching = false; p.crouchSec = 0;
+}
+// a call from the crouch: every prey animal in earshot knows exactly where
+// the hunter is now — the runners bolt, and anything that runs runs faster
+function crouchSpook(p) {
+  for (const e of G.npcs) {
+    if (e.hp <= 0 || !isPrey(e) || dist(e.x, e.y, p.x, p.y) > SPOOK_R) continue;
+    const d = defOf(e);
+    e.spookT = SPOOK_T;
+    if (!d.tank && !d.fearless && !d.aquatic) { e.state = 'flee'; e.target = p; e.stateT = rrange(3.5, 5); }
+  }
+  floatText(p.x, p.y - 50, 'they heard you!', '#ff6a5e');
 }
 // how many more kin the player's pack can take (packMax caps it, e.g. the
 // aerosteon's trio; uncapped species have endless room)
@@ -1145,15 +1257,17 @@ function bodyHitPoint(victim, x, y, r) {
 // broken tail = it veers the wrong way; broken skull = its attacks weaken;
 // broken body = all of the above at once.
 // a kick that lands on YOU: roll against your bulk, and a lost roll breaks
-// your thigh — half speed until it knits (~40s). Only the kick does this
-function playerBoneBreak(p, dmg) {
+// your thigh — half speed until it knits (~40s). The kick does this, and the
+// giant's tail (rarely) and its stomp (easily): `how` names the blow, `mul`
+// and `max` bend the odds
+function playerBoneBreak(p, dmg, how, mul, max) {
   p.bones = p.bones || {};
   if (p.bones.leg) return;
-  const ch = clamp((dmg / p.maxhp) * 0.9, 0.06, 0.4);
+  const ch = clamp((dmg / p.maxhp) * 0.9 * (mul || 1), 0.06, max || 0.4);
   if (rnd() >= ch) return;
   p.bones.leg = true; p.boneT = 40;
   floatText(p.x, p.y - 58, '💥 YOUR THIGH BONE BREAKS!', '#ff6a5e');
-  G.banner = { str: 'CRACK! The kick breaks your leg — you can only limp until it knits.', t: 5, color: '#ff6a5e' };
+  G.banner = { str: 'CRACK! ' + (how || 'The kick') + ' breaks your leg — you can only limp until it knits.', t: 5, color: '#ff6a5e' };
   SFX.kill();
   G.shake = Math.min(7, G.shake + 4);
 }
@@ -1167,7 +1281,7 @@ function tryBoneBreak(attacker, t, part, dmg) {
   t.bones[part] = true;
   const names = { leg: 'THIGH', tail: 'TAIL', head: 'SKULL', body: 'BODY' };
   floatText(t.x, t.y - 58, '💥 ' + names[part] + ' BONE BREAKS!', '#ffd23e');
-  G.banner = { str: 'CRACK! You broke the ' + DINO[t.species].name + "'s " + names[part].toLowerCase() + ' bone!', t: 3, color: '#ffd23e' };
+  if (attacker && attacker.isPlayer) G.banner = { str: 'CRACK! You broke the ' + DINO[t.species].name + "'s " + names[part].toLowerCase() + ' bone!', t: 3, color: '#ffd23e' };
   SFX.kill();
   G.shake = Math.min(7, G.shake + 3);
 }
@@ -1206,7 +1320,9 @@ function tryMelee(e, target, def, opts) {
   e.atkCd = def.atkCd;
   e.attackT = 1;
   opts = Object.assign({ hitX: pt.x, hitY: pt.y }, opts);
-  dealDamage(target, def.dmg * rrange(0.85, 1.15), e, opts);
+  pt.dmg = def.dmg * rrange(0.85, 1.15);
+  dealDamage(target, pt.dmg, e, opts);
+  return pt;   // where (and how hard) it landed, for the bone-breakers
 }
 // the jaw zone alone, for tail-fighters that can ALSO bite (wuerhosaurus'
 // nip): same face-side rules as regular jaws, ignoring the tail weapon
@@ -1346,6 +1462,22 @@ function thinkPackFollower(e, d) {
   e.stateT = rrange(1, 2.5);
 }
 
+// a giant rearing up for a stomp: the pack reads it and scatters — mostly.
+// Checked even mid-bite (a packmate drops its lunge to get out from under)
+function stompDodge(e) {
+  if (e.state === 'flee') return false;
+  for (const g of G.npcs) {
+    if (g.state !== 'stomp' || g.stompPhase !== 'up' || g.stompT < 0.25) continue;
+    const R = NPC_DEF[g.species].stomp.r * (g.elder ? ELDER_MOD.size : 1);
+    if (dist(e.x, e.y, g.stompX, g.stompY) < R + 30 && rnd() < 0.8) {
+      e.state = 'flee'; e.target = { x: g.stompX, y: g.stompY };
+      e.stateT = Math.max(0.4, g.stompWind - g.stompT + 0.25);
+      return true;
+    }
+  }
+  return false;
+}
+
 // fast open-ground hunter (moros, eotyrannus): runs down the young, hates shade
 function thinkRunner(e, d) {
   const p = G.player;
@@ -1376,7 +1508,7 @@ function thinkSkittish(e, d) {
   let threat = null, td = 1e9;
   if (p && p.alive && PLAYER_DEF[p.species].diet === 'carn' && powerOf(p) > powerOf(e) * SKITTISH_FLEE_MUL) {
     const dd = dist(e.x, e.y, p.x, p.y);
-    if (dd < d.detect) { threat = p; td = dd; }
+    if (dd < preyDetect(e, d.detect)) { threat = p; td = dd; }   // a crouched hunter is noticed late
   }
   for (const o of G.npcs) {
     if (isPredatorNPC(o.species)) {
@@ -1402,7 +1534,7 @@ function tankThreat(e, d) {
   const p = G.player;
   if (p && p.alive && PLAYER_DEF[p.species].diet === 'carn' && !trivialPrey(e, p)) {
     const dd = dist(e.x, e.y, p.x, p.y);
-    if (dd < d.detect) { threat = p; td = dd; }
+    if (dd < preyDetect(e, d.detect)) { threat = p; td = dd; }
   }
   for (const o of G.npcs) {
     if (isPredatorNPC(o.species) && !NPC_DEF[o.species].tank) {
@@ -1434,7 +1566,7 @@ function thinkHerdFighter(e, d) {
     }
   }
   // a stalking carnivore gets the tail before it can strike
-  if (p && p.alive && PLAYER_DEF[p.species].diet === 'carn' && !trivialPrey(e, p) && dist(e.x, e.y, p.x, p.y) < d.detect * 0.55) {
+  if (p && p.alive && PLAYER_DEF[p.species].diet === 'carn' && !trivialPrey(e, p) && dist(e.x, e.y, p.x, p.y) < preyDetect(e, d.detect * 0.55)) {
     e.state = confident(e, p) ? 'fight' : 'guard';
     e.target = p; e.stateT = 1.6; return;
   }
@@ -1495,6 +1627,308 @@ function thinkSurfKing(e, d) {
   e.stateT = rrange(2, 5);
 }
 
+// ---- THE GIANT OF THE RED SAND (yunmenglong) ----
+// One adult plods the whole desert from crown to crown, stripping the big
+// trees. It is a tank: anything with teeth that crowds it — or bites it —
+// gets the tail if it stands behind, the STOMP if it stands in front.
+// Its young live in the Giants' Cradle (e.cradle) and only ever run.
+function giantSize(e) {
+  return DINO.yunmeng.scale * sizeScale(e.growth != null ? e.growth : 1) * (e.elder ? ELDER_MOD.size : 1);
+}
+function thinkGiant(e, d) {
+  if (e.cradle) { thinkGiantBaby(e, d); return; }
+  // a grudge carries further than the tank's short fuse
+  let t = null;
+  const la = e.lastAttacker;
+  if (e.aggroT > 0 && la && (la.isPlayer ? la.alive : la.hp > 0) && dist(e.x, e.y, la.x, la.y) < 460) t = la;
+  if (!t) t = tankThreat(e, d);
+  if (t) {
+    if (e.state !== 'fight' || e.target !== t) { e.state = 'fight'; e.target = t; }
+    e.stateT = 2.5;
+    return;
+  }
+  // it has no home: wherever it stands is home (the tank leash never trips)
+  e.home.x = e.x; e.home.y = e.y;
+  if (e.stateT > 0) return;
+  // the next crown: the one it's already plodding to (re-picking the nearest
+  // on every think, it hopped trunk to trunk through the river belt and never
+  // ate), else the nearest big leafy tree outside the Cradle
+  let tree = e.goalTree;
+  if (tree && (tree.leaf === 0 || e.goalTries >= 3)) { e.lastTree = tree; tree = null; }   // stripped, or no way through
+  if (!tree && rnd() < 0.75) {
+    let bd = 560;
+    for (const tr of World.trees) {
+      if (tr.kind === 2 || tr.kind >= 4 || tr.leaf === 0 || tr === e.lastTree) continue;
+      const dd = dist(e.x, e.y, tr.x, tr.y);
+      if (dd < bd && !inCradle(tr.x, tr.y, 160)) { bd = dd; tree = tr; }
+    }
+  }
+  if (tree) {
+    // stand off to the side, at a neck's length — the head goes INTO the crown
+    const side = e.x < tree.x ? 1 : -1, reach = 130 * giantSize(e) / DINO.yunmeng.scale;
+    const sx = tree.x - side * reach, sy = tree.y + 8;
+    if (dist(e.x, e.y, sx, sy) < 34) {
+      e.facing = side;
+      e.state = 'browse'; e.stateT = rrange(7, 12); e.browseTree = tree; e.lastTree = tree; e.goalTree = null;
+    } else {
+      e.goalTries = tree === e.goalTree ? e.goalTries + 1 : 0;
+      e.goalTree = tree;
+      e.state = 'wander'; e.tx = sx; e.ty = sy; e.stateT = 14;
+    }
+    return;
+  }
+  e.goalTree = null;
+  // no crowns in reach: plod on across the sand
+  for (let k = 0; k < 12; k++) {
+    const a = rnd() * TAU, rr = rrange(300, 900);
+    const tx = e.x + Math.cos(a) * rr, ty = e.y + Math.sin(a) * rr;
+    if (tx < 120 || ty < 120 || tx > WORLD_W - 120 || ty > WORLD_H - 120) continue;
+    if (isWaterPx(tx, ty) || isCliffPx(tx, ty) || inCradle(tx, ty, 200)) continue;
+    e.tx = tx; e.ty = ty;
+    e.state = 'wander'; e.stateT = rrange(10, 18);
+    return;
+  }
+  e.state = 'idle'; e.stateT = rrange(2, 4);
+}
+// the Cradle's young: quick for their size, nervous, never far from the
+// cycads — they don't fight, they run (and the guardian minds the pond)
+function thinkGiantBaby(e, d) {
+  const c = World.cradle;
+  let threat = null, td = 1e9;
+  const p = G.player;
+  if (p && p.alive && PLAYER_DEF[p.species].diet === 'carn') {
+    const dd = dist(e.x, e.y, p.x, p.y);
+    if (dd < preyDetect(e, 260)) { threat = p; td = dd; }
+  }
+  for (const o of G.npcs) {
+    if (!isPredatorNPC(o.species) || o.species === 'aegisu') continue;
+    const dd = dist(e.x, e.y, o.x, o.y);
+    if (dd < 260 && dd < td) { threat = o; td = dd; }
+  }
+  if (threat) { e.state = 'flee'; e.target = threat; e.stateT = 2.5; return; }
+  if (e.stateT > 0) return;
+  if (c && dist(e.x, e.y, c.x, c.y) > c.r * 0.8) {
+    const p2 = cradlePos(0.2, 0.55);
+    e.state = 'wander'; e.tx = p2.x; e.ty = p2.y; e.stateT = 8; return;
+  }
+  const r = rnd();
+  if (r < 0.35) { e.state = 'graze'; e.stateT = rrange(2.5, 5); }
+  else if (r < 0.55) { e.state = 'idle'; e.stateT = rrange(1, 3); }
+  else { const p2 = cradlePos(0.2, 0.7); e.state = 'wander'; e.tx = p2.x; e.ty = p2.y; e.stateT = rrange(4, 8); }
+}
+// a dry spot inside the Cradle, between rMin and rMax of its radius
+function cradlePos(rMin, rMax) {
+  const c = World.cradle;
+  for (let k = 0; k < 30; k++) {
+    const a = rnd() * TAU, rr = rrange(rMin, rMax) * c.r;
+    const x = c.x + Math.cos(a) * rr, y = c.y + Math.sin(a) * rr;
+    if (!isWaterPx(x, y) && !nearWaterPx(x, y, 20) && !isCliffPx(x, y)) return { x, y };
+  }
+  return { x: c.x + c.pond.r * 1.6, y: c.y };
+}
+// the giant's own fight: what stands BEHIND the hips gets the tail, what
+// stands in FRONT gets the stomp (and walking into it gets you trampled)
+function giantFight(e, d, t, dt, sp) {
+  const dd = dist(e.x, e.y, t.x, t.y);
+  const toward = t.x > e.x ? 1 : -1;
+  const eRad = bodyRadius(e), tRad = bodyRadius(t);
+  const front = (t.x - e.x) * (e.facing || 1) > -eRad * 0.3;
+  const s = giantSize(e);
+  const fx = e.x + (e.facing || 1) * DINO.yunmeng.L.body[0] * 0.3 * s;
+  const em = e.elder ? ELDER_MOD.size : 1;
+  if (front && e.growth >= 0.6 && (e.stompCd || 0) <= 0 && e.attackT <= 0.15 &&
+      dist(fx, e.y, t.x, t.y) < d.stomp.r * em * 0.7) {
+    startStomp(e, d, t);
+    return;
+  }
+  const committed = e.attackT > 0.15;
+  if (!front) {
+    // keep the back turned and swing — a hard enough blow can crack bone
+    e.atkKind = 'tail';
+    const pt = tryMelee(e, t, d, d.melee);
+    if (pt && d.tailBone) {
+      if (t.isPlayer) playerBoneBreak(t, pt.dmg, 'The tail', d.tailBone.mul, d.tailBone.max);
+      else tryBoneBreak(e, t, pt.part === 'head' ? 'leg' : pt.part, pt.dmg * d.tailBone.mul);
+    }
+    // out past the club's reach — or tucked in under the hips, where the
+    // swing passes overhead: swing round to face it instead (no safe spot)
+    if (!committed && (dd > tailWedgeCircle(e).r + tRad || (e.atkCd <= 0 && !weaponContact(e, t)))) faceToward(e, toward);
+  } else if (!committed) faceToward(e, toward);
+  // plod in on whatever stands off — and shoulder on into it once there:
+  // anything that stays at the front feet gets walked over (giantTrample)
+  if (front) stepToward(e, t.x, t.y, sp * (dd > eRad + tRad - 4 ? 0.9 : 0.6), dt);
+  else if (!front && dd > tailWedgeCircle(e).r + tRad) stepToward(e, t.x, t.y, sp * 0.9, dt);
+  else idleDrift(e, dt);
+}
+// the guardian on land: a croc's weapon is the tip of a long snout, so it
+// comes in LEVEL with the quarry, from one side, instead of parking against
+// it (bodies are solid: from above or below the jaws would never reach)
+function guardianFight(e, d, t, dt, sp) {
+  // keep the side it's on — dead under the quarry it would flip-flop
+  if (!e.fightSide || Math.abs(t.x - e.x) > 30) e.fightSide = t.x > e.x ? -1 : 1;
+  if (e.attackT <= 0.15) faceToward(e, -e.fightSide);
+  const off = bodyRadius(e) + (t.isPlayer ? 8 + 10 * t.growth : bodyRadius(t));   // just clear of its body
+  // wedged dead against a cycad trunk (the push-out cancels the stride
+  // exactly): slip off sideways for a moment, then come on again
+  const moved = e.fx0 == null ? 1 : dist(e.x, e.y, e.fx0, e.fy0);
+  e.fx0 = e.x; e.fy0 = e.y;
+  if (e.slipT > 0) {
+    e.slipT -= dt;
+    stepToward(e, e.x + Math.cos(e.slipA) * 40, e.y + Math.sin(e.slipA) * 40, sp * 0.9, dt);
+  } else if (!weaponContact(e, t)) {
+    stepToward(e, t.x + e.fightSide * off, t.y, sp * 0.9, dt);
+    e.stuckT = moved < 0.05 ? (e.stuckT || 0) + dt : 0;
+    if (e.stuckT > 0.3) { e.slipT = 0.5; e.slipA = e.heading + (rnd() < 0.5 ? 1.3 : -1.3); e.stuckT = 0; }
+  } else idleDrift(e, dt);
+  e.atkKind = null;
+  tryMelee(e, t, d, d.melee);
+}
+// up on the hind legs: the stomp lands where the front feet were AIMED —
+// at the target, a little past the feet — so the rear-up is the warning
+function startStomp(e, d, t) {
+  const s = giantSize(e);
+  const fx = e.x + (e.facing || 1) * DINO.yunmeng.L.body[0] * 0.3 * s;
+  const a = angTo(fx, e.y, t.x, t.y), reach = Math.min(dist(fx, e.y, t.x, t.y), 70 * s / DINO.yunmeng.scale);
+  e.stompX = fx + Math.cos(a) * reach; e.stompY = e.y + Math.sin(a) * reach;
+  e.state = 'stomp'; e.stompPhase = 'up'; e.stompT = 0; e.stateT = 6;
+  e.stompWind = d.stomp.wind * (e.elder ? 0.8 : 1);
+  e.move = 0;
+  if (G.player && dist(e.x, e.y, G.player.x, G.player.y) < 900) SFX.call(3, 'yunmeng', 1);
+}
+// …and down. Under the feet: crushed (a grown Aerosteon dies outright, and
+// the bone almost always goes). Around them: the ground itself hits you
+function giantSlam(e, d) {
+  const st = d.stomp, em = e.elder ? ELDER_MOD.size : 1;
+  const R = st.r * em, U = st.under * em;
+  e.stompPhase = 'down'; e.stateT = 0.9; e.attackT = 1;
+  e.stompCd = st.cd * rrange(0.85, 1.2) * (e.elder ? 0.85 : 1);
+  for (let i = 0; i < 26; i++) {
+    const a = rnd() * TAU, sp = rrange(60, 160);
+    G.particles.push({
+      x: e.stompX + Math.cos(a) * U * 0.6, y: e.stompY + Math.sin(a) * U * 0.3,
+      vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * 0.4 - 30,
+      t: 0, life: rrange(0.6, 1.1), r: rrange(2, 4.5), color: rnd() < 0.5 ? '#c8a070' : '#a8804e', grav: 60,
+    });
+  }
+  const p = G.player;
+  if (p) {
+    const pd = dist(e.stompX, e.stompY, p.x, p.y);
+    if (pd < 900) { G.shake = Math.min(12, (G.shake || 0) + 10 * (1 - pd / 900)); SFX.stomp && SFX.stomp(); }
+  }
+  for (const v of [G.player, ...G.npcs]) {
+    if (!v || v === e) continue;
+    if (v.isPlayer ? (!v.alive || v.hidden) : (v.hp <= 0 || v.species === 'yunmeng')) continue;
+    const dd = dist(e.stompX, e.stompY, v.x, v.y) - bodyRadius(v) * 0.6;   // the bulky get out from under last
+    if (dd > R) continue;
+    let dmg;
+    if (dd <= U) {
+      dmg = st.underDmg * rrange(0.92, 1.08);
+      dealDamage(v, dmg, e, { kb: 380 });
+      if (v.isPlayer) { floatText(v.x, v.y - 70, 'CRUSHED!', '#ff6a5e'); if (v.alive) playerBoneBreak(v, dmg, 'The stomp', 4, 0.85); }
+      else if (v.hp > 0) tryBoneBreak(e, v, rnd() < 0.7 ? 'leg' : 'body', dmg * 3);
+    } else {
+      const f = 1 - (dd - U) / Math.max(1, R - U);
+      dmg = st.dmg * (0.35 + 0.65 * f);
+      // (the ring only bruises and throws — bones go under the feet)
+      dealDamage(v, dmg, e, { kb: 200 + 300 * f });
+    }
+  }
+}
+// walking INTO the giant's path: anything at the leading feet gets run over
+function giantTrample(e, d, dt) {
+  e.trampleCd = Math.max(0, (e.trampleCd || 0) - dt);
+  if (e.trampleCd > 0 || e.move < 0.35 || e.growth < 0.6) return;
+  const eRad = bodyRadius(e), hx = Math.cos(e.heading || 0), hy = Math.sin(e.heading || 0);
+  // the feet that come down are the FRONT feet: the zone sits under the chest
+  const fx = e.x + (e.facing || 1) * DINO.yunmeng.L.body[0] * 0.3 * giantSize(e);
+  let hit = false;
+  for (const v of [G.player, ...G.npcs]) {
+    if (!v || v === e) continue;
+    if (v.isPlayer ? (!v.alive || v.hidden) : (v.hp <= 0 || v.species === 'yunmeng')) continue;
+    // only its quarry gets run down — a calm giant steps round the little things
+    if (!v.isPlayer && e.state !== 'fight') continue;
+    if (dist(fx, e.y, v.x, v.y) > eRad * 0.8 + bodyRadius(v) + 6) continue;
+    if ((v.x - e.x) * hx + (v.y - e.y) * hy < 0) continue;   // behind the stride
+    dealDamage(v, d.trample.dmg * rrange(0.85, 1.15), e, { kb: 320 });
+    floatText(v.x, v.y - 60, 'TRAMPLED!', '#ff9a5e');
+    hit = true;
+  }
+  if (hit) e.trampleCd = d.trample.cd;
+}
+
+// ---- THE GUARDIAN OF THE GIANTS' CRADLE (aegisuchus) ----
+// Lies in the Cradle's pond, a ghost under the water: anything with teeth
+// that comes down to drink is taken like a megorontosuchus takes its prey.
+// Every minute or two it hauls out and walks the nursery — and whatever
+// meat-eater it finds there, it fights. The nursery's own are never prey.
+function guardianMayHunt(o) {
+  if (!o) return false;
+  if (o.isPlayer) return o.alive && !o.grabbed && !o.hidden && inCradle(o.x, o.y, 120);
+  return o.hp > 0 && o.species !== 'aegisu' && isPredatorNPC(o.species) && inCradle(o.x, o.y, 120);
+}
+function thinkGuardian(e, d) {
+  const c = World.cradle;
+  if (!c) { thinkSurfKing(e, d); return; }
+  const p = G.player;
+  if (e.patrolAt == null) e.patrolAt = G.time + rrange(45, 90);
+  if (G.time >= e.patrolAt && e.state !== 'gripping' && e.state !== 'strike') {
+    e.patrolEnd = G.time + rrange(25, 40);
+    e.patrolAt = e.patrolEnd + rrange(60, 120);
+  }
+  if (p && p.alive && !G.guardianSeen && dist(e.x, e.y, p.x, p.y) < 320 && (!e.submerged || e.target === p)) {
+    G.guardianSeen = true;
+    G.banner = { str: "AEGISUCHUS — the Guardian of the Giants' Cradle", t: 5, color: '#ff9a5e' };
+  }
+  if (e.state === 'stalk' || e.state === 'strike' || e.state === 'gripping' || e.state === 'cooldown') return;
+  // a fight ends the moment its quarry leaves the Cradle
+  if (e.state === 'fight' && !guardianMayHunt(e.target)) { e.state = 'return'; e.target = null; e.stateT = 10; return; }
+  if (e.aggroT > 0 && guardianMayHunt(e.lastAttacker)) {
+    e.submerged = false; e.state = 'fight'; e.target = e.lastAttacker; e.stateT = 2; return;
+  }
+  if (G.time < (e.patrolEnd || 0)) {
+    // ON PATROL: out of the water and walking the nursery
+    e.submerged = false;
+    let best = null, bd = d.detect;
+    for (const o of [p, ...G.npcs]) {
+      if (o === e || !guardianMayHunt(o)) continue;
+      const dd = dist(e.x, e.y, o.x, o.y);
+      if (dd < bd) { bd = dd; best = o; }
+    }
+    if (best) { e.state = 'fight'; e.target = best; e.stateT = 2; return; }
+    if (e.state === 'fight' || e.stateT > 0) return;
+    const wp = cradlePos(0.3, 0.75);
+    e.tx = wp.x; e.ty = wp.y; e.state = rnd() < 0.3 ? 'idle' : 'wander'; e.stateT = rrange(5, 9);
+    return;
+  }
+  // patrol's over: back down into the pond
+  const pond = c.pond;
+  if (dist(e.x, e.y, pond.x, pond.y) > pond.r * 0.7) {
+    if (e.state !== 'return') { e.state = 'return'; e.target = null; e.stateT = 12; }
+    e.home.x = pond.x; e.home.y = pond.y;
+    return;
+  }
+  // in the pond: the ghost waits for anything with teeth that wades in
+  let best = null, bd = d.detect;
+  if (p && p.alive && !p.grabbed && !p.fishing && !p.hidden && (isWaterPx(p.x, p.y) || nearWaterPx(p.x, p.y, 34)) && inCradle(p.x, p.y)) {
+    const dd = dist(e.x, e.y, p.x, p.y);
+    if (dd < bd) { bd = dd; best = p; }
+  }
+  for (const o of G.npcs) {
+    if (o === e || !guardianMayHunt(o)) continue;
+    if (!isWaterPx(o.x, o.y) && !nearWaterPx(o.x, o.y, 30)) continue;
+    const dd = dist(e.x, e.y, o.x, o.y);
+    if (dd < bd) { bd = dd; best = o; }
+  }
+  if (best && (e.tiredT || 0) <= 0) { e.state = 'stalk'; e.target = best; e.stateT = 14; return; }
+  if (e.stateT > 0) return;
+  for (let k = 0; k < 10; k++) {
+    const a = rnd() * TAU, rr = rrange(10, pond.r * 0.6);
+    const tx = pond.x + Math.cos(a) * rr, ty = pond.y + Math.sin(a) * rr;
+    if (isWaterPx(tx, ty)) { e.tx = tx; e.ty = ty; break; }
+  }
+  e.state = 'lurk'; e.stateT = rrange(3, 7);
+}
+
 const NPC_THINK = {
   guanlong: thinkPackHunter,
   troodon: thinkPackHunter,
@@ -1520,7 +1954,7 @@ const NPC_THINK = {
     const p = G.player;
     if (!p || !p.alive) { defaultWander(e); return; }
     const drinking = e.state === 'drink';
-    const detect = drinking ? 42 : d.detect;
+    const detect = preyDetect(e, drinking ? 42 : d.detect);
     const pd = dist(e.x, e.y, p.x, p.y);
     const carnPlayer = PLAYER_DEF[p.species].diet === 'carn';
     if (retaliationCheck(e, d, 'fight')) return;
@@ -1670,7 +2104,7 @@ const NPC_THINK = {
     // little bigger, and never forgives a slight
     const p = G.player;
     if (retaliationCheck(e, d, 'fight')) return;
-    if (p && p.alive && !trivialPrey(e, p) && confident(e, p) && dist(e.x, e.y, p.x, p.y) < d.detect) {
+    if (p && p.alive && !trivialPrey(e, p) && confident(e, p) && dist(e.x, e.y, p.x, p.y) < preyDetect(e, d.detect)) {
       e.state = 'fight'; e.target = p; e.stateT = 2; return;
     }
     defaultWander(e, true);
@@ -1685,7 +2119,7 @@ const NPC_THINK = {
     const p = G.player;
     if (p && p.alive && PLAYER_DEF[p.species].diet === 'carn' && !trivialPrey(e, p)) {
       const dd = dist(e.x, e.y, p.x, p.y);
-      if (dd < d.detect) { threat = p; td = dd; }
+      if (dd < preyDetect(e, d.detect)) { threat = p; td = dd; }
     }
     for (const o of G.npcs) {
       if (isPredatorNPC(o.species) && !NPC_DEF[o.species].tank) {
@@ -1760,6 +2194,9 @@ NPC_THINK.skorpio = thinkHunter;        // the bulldog abelisaur hunts by face
 NPC_THINK.masiak = thinkPackHunter;     // hook-toothed gangs of the leaf litter
 NPC_THINK.arari = thinkHunter;          // the dog-croc runs its prey down on land
 NPC_THINK.titanov = thinkHunter;        // the titan-killer: caution so low a grown nivalotitan reads as DINNER
+// --- the Death Desert's giant and the Cradle's guardian ---
+NPC_THINK.yunmeng = thinkGiant;
+NPC_THINK.aegisu = thinkGuardian;
 
 function defaultWander(e, mayDrink) {
   // let any in-progress state (rally, chase, flee, drink…) run its timer out
@@ -1962,7 +2399,7 @@ function updateNPC(e, dt) {
   e.vx *= Math.pow(0.02, dt); e.vy *= Math.pow(0.02, dt);
 
   // a reared-up browser eases back onto all fours the moment it's disturbed
-  if (e.state !== 'browse' && e.rear) {
+  if (e.state !== 'browse' && e.state !== 'stomp' && e.rear) {
     e.rear = lerp(e.rear, 0, 0.08);
     e.headUp = lerp(e.headUp || 0, 0, 0.1);
     if (e.rear < 0.01) { e.rear = 0; e.headUp = 0; }
@@ -1974,14 +2411,15 @@ function updateNPC(e, dt) {
     // an attack in motion is committed, and panic can't be reasoned with —
     // don't let thinking interrupt either (a fleeing guanlong must not stop
     // to snack on its fallen friend's carcass)
-    const committed = (e.state === 'windup' || e.state === 'lunge' || e.state === 'recover' || e.state === 'flee') && e.stateT > 0;
+    const committed = (e.state === 'windup' || e.state === 'lunge' || e.state === 'recover' || e.state === 'flee' || e.state === 'stomp') && e.stateT > 0;
     // a recruited packmate of ANY pack species runs with its alpha; mates and
     // babies keep their own brains (they handle packAlpha themselves)
     // the Great Walk's cast keep their own brains: the cutscene's walkers and
     // watchers, the rival on the family's trail, and a settled bloodline
     const think = e.cineTo ? thinkCineWalk : e.cineHold ? thinkCineHold : e.walkRival ? thinkWalkRival
       : e.bloodline ? thinkBloodline : e.isMate ? thinkMate : e.isBaby ? thinkBaby : e.packAlpha ? thinkPackFollower : NPC_THINK[e.species];
-    if (!committed) think(e, d);
+    if (e.packAlpha && stompDodge(e)) { /* out from under the giant first */ }
+    else if (!committed) think(e, d);
   }
   // a FEUD has one ending: whoever defied the claim hunts the claimant to
   // the death — no fatigue, no fear, no giving up, no going home
@@ -1998,12 +2436,19 @@ function updateNPC(e, dt) {
 
   // broken bones cripple: a cracked thigh (or body) means no more running,
   // and a cracked tail (or body) sends it veering the wrong way at random
-  let sp = d.speed;
+  let sp = d.speed * (e.spMul || 1);   // (the Cradle's young are quick for their size)
+  if (d.stomp) e.stompCd = Math.max(0, (e.stompCd || 0) - dt);
   if (e.bones) {
     if (e.bones.leg || e.bones.body) sp *= 0.45;
     if ((e.bones.tail || e.bones.body) && Math.random() < dt * 0.6) e.wrongT = rrange(0.4, 0.9);
   }
   if (e.wrongT > 0) e.wrongT -= dt;
+  // stamina (see npcBurn): the run states below spend it, and a winded
+  // animal can only labour along
+  if (e.stamMax == null) e.stamMax = e.stam = npcStamMax(d);
+  e.burnt = false;
+  if (e.winded) sp *= NPC_WINDED_MUL;
+  e.spookT = Math.max(0, (e.spookT || 0) - dt);
   // ---- animation blends (consumed by drawDino): the run gait for the fast
   // states, the drink/graze/feed performances for the calm ones. actT is
   // each animal's own performance clock — spawn times desync the herd.
@@ -2052,6 +2497,7 @@ function updateNPC(e, dt) {
       e.headDown = 0;
       if (!e.target || e.target.hp <= 0) { e.state = 'idle'; e.stateT = 0.5; break; }
       stepToward(e, e.target.x, e.target.y, sp, dt);
+      npcBurn(e, d, dt);
       // gathered — but the pack only commits if its summed power says so
       // (checked at think cadence, not every frame: confident scans the map)
       e.rallyEvalT = (e.rallyEvalT || 0) - dt;
@@ -2093,7 +2539,8 @@ function updateNPC(e, dt) {
       const leash = Math.max(d.detect * 2.2, t.isPlayer ? scentRange(t) : 0);
       if (dd > leash) { e.state = 'return'; e.target = null; e.stateT = 6; break; }
       // a prey that keeps its legs going outlasts the hunter's patience
-      if (d.patience && e.pursuitT > d.patience) {
+      // …and so does an empty tank: a winded hunter breaks off and walks home
+      if ((d.patience && e.pursuitT > d.patience) || (e.winded && !e.feud)) {
         e.state = 'return'; e.target = null; e.stateT = 6; e.tiredT = 7; e.pursuitT = 0;
         break;
       }
@@ -2101,15 +2548,19 @@ function updateNPC(e, dt) {
       const strikeR = d.chargeR || (d.reach + (t.isPlayer ? 8 + 10 * t.growth : bodyRadius(t)) + 14);
       if (dd > strikeR) {
         stepToward(e, t.x, t.y, sp, dt);
+        npcBurn(e, d, dt);   // the run costs breath; circling at the jaws doesn't
       } else {
         // in striking distance: circle the prey, wait for an opening, telegraph
-        const packBusy = G.npcs.some(o => o !== e && o.species === e.species &&
+        // (a giant is big enough for every jaw at once)
+        const vsGiant = (NPC_DEF[t.species] || {}).giant;
+        const packBusy = !vsGiant && G.npcs.some(o => o !== e && o.species === e.species &&
           (o.state === 'windup' || o.state === 'lunge') && dist(o.x, o.y, e.x, e.y) < 220);
         if (e.atkCd <= 0 && !packBusy) {
           e.state = 'windup';
           // the tell is the pounce prep: proportional to the dino's size
-          // (chargers never telegraph shorter than their old 0.45)
-          e.stateT = Math.max(d.chargeR ? 0.45 : 0, pouncePrep(e.species, e.growth));
+          // (chargers never telegraph shorter than their old 0.45; your own
+          // pack, working a giant that never sidesteps, barely crouches)
+          e.stateT = Math.max(d.chargeR ? 0.45 : 0, pouncePrep(e.species, e.growth)) * (vsGiant && e.packAlpha ? 0.5 : 1);
           e.lungeA = angTo(e.x, e.y, t.x, aimYAt(e, t));   // aim locks here — dodge the lunge!
         } else {
           const selfA = angTo(t.x, t.y, e.x, e.y);
@@ -2152,6 +2603,7 @@ function updateNPC(e, dt) {
         e.lungeA += clamp(dA, -2.4 * dt, 2.4 * dt);
       }
       const sp2 = d.speed * (d.lungeMul || 2.4);
+      npcBurn(e, d, dt);
       e.x += Math.cos(e.lungeA) * sp2 * dt;
       e.y += Math.sin(e.lungeA) * sp2 * dt;
       e.heading = e.lungeA;
@@ -2171,9 +2623,11 @@ function updateNPC(e, dt) {
         }
       }
       if (e.stateT <= 0) {
-        e.atkCd = d.atkCd + rrange(0.4, 1.1);
+        // your pack works a giant in relays: no backing far off between bites
+        const relay = e.packAlpha && t && (NPC_DEF[t.species] || {}).giant;
+        e.atkCd = d.atkCd + (relay ? 0 : rrange(0.4, 1.1));
         e.state = 'recover';
-        e.stateT = rrange(0.7, 1.2);
+        e.stateT = relay ? rrange(0.3, 0.45) : rrange(0.7, 1.2);
         e.recA = t ? awayDir(e, t) + rrange(-0.7, 0.7) : e.heading + Math.PI;
       }
       break;
@@ -2194,6 +2648,8 @@ function updateNPC(e, dt) {
       const t = e.target;
       const gone = !t || (t.isPlayer ? !t.alive : t.hp <= 0);
       if (gone || e.stateT <= 0) { e.state = 'idle'; e.stateT = 1; break; }
+      if (d.giant) { giantFight(e, d, t, dt, sp); break; }
+      if (e.species === 'aegisu') { guardianFight(e, d, t, dt, sp); break; }
       const dd = dist(e.x, e.y, t.x, t.y);
       const effReach = d.reach + (t.isPlayer ? 8 + 10 * t.growth : bodyRadius(t));
       const inRange = dd <= effReach * 0.85;
@@ -2261,14 +2717,34 @@ function updateNPC(e, dt) {
       }
       break;
     }
+    case 'stomp': {
+      // THE STOMP (yunmenglong): up onto the hind legs — slowly, that's the
+      // warning — then the whole front end comes down where it was aimed
+      idleDrift(e, dt);
+      e.headDown = lerp(e.headDown, 0, 0.15);
+      if (e.stompPhase === 'up') {
+        e.stompT += dt;
+        e.rear = clamp(e.stompT / e.stompWind, 0, 1);
+        e.headUp = lerp(e.headUp || 0, 1, 0.08);
+        if (e.stompT >= e.stompWind) giantSlam(e, d);
+      } else {
+        // planted, settling: the window to get back in
+        e.rear = lerp(e.rear || 0, 0, 0.3);
+        e.headUp = lerp(e.headUp || 0, 0, 0.2);
+        if (e.stateT <= 0) { e.state = 'fight'; e.stateT = 1.5; }
+      }
+      break;
+    }
     case 'flee': {
       e.headDown = 0;
       const t = e.target;
       if (!t || e.stateT <= 0) { e.state = 'idle'; e.stateT = 1; break; }
       const a = awayDir(e, t);
-      // a broken thigh can't even flee at speed — the cripple cap holds
-      const fsp = (d.fleeSpeed || d.speed) * (sp / d.speed);
+      // a broken thigh can't even flee at speed — the cripple cap holds (and
+      // so does an empty tank); prey that heard a crouched hunter call bolts
+      const fsp = (d.fleeSpeed || d.speed) * (sp / d.speed) * (e.spookT > 0 ? SPOOK_MUL : 1);
       stepToward(e, e.x + Math.cos(a) * 90, e.y + Math.sin(a) * 90, fsp, dt);
+      npcBurn(e, d, dt);
       break;
     }
     case 'guard': {
@@ -2436,12 +2912,21 @@ function updateNPC(e, dt) {
     }
     default: e.state = 'idle'; e.stateT = 1;
   }
+  // no run this frame: get the wind back (faster standing about)
+  if (!e.burnt) {
+    const calm = e.state === 'idle' || e.state === 'graze' || e.state === 'drink' || e.state === 'browse';
+    e.stam = Math.min(e.stamMax, e.stam + NPC_STAM_REGEN * (calm ? 1.5 : 1) * dt);
+    if (e.winded && e.stam >= e.stamMax * NPC_WIND_BACK) e.winded = false;
+  }
 
   // ease heading pitch in while moving, out while standing
   e.pitch = lerp(e.pitch || 0, e.move > 0.25 ? (e.pitchT || 0) : 0, Math.min(1, dt * 6));
 
+  if (d.trample) giantTrample(e, d, dt);
   const eRad = bodyRadius(e);
-  collideStatics(e, eRad);
+  // the giant straddles the scrub: only its feet need clear ground (and the
+  // guardian, low and heavy, ploughs through the Cradle's cycad fronds)
+  collideStatics(e, d.giant ? eRad * 0.45 : e.species === 'aegisu' ? eRad * 0.5 : eRad);
   // gentle separation between npcs
   for (const o of G.npcs) {
     if (o === e) continue;
@@ -2658,7 +3143,7 @@ function spawnPack(species, count, sizes, den, zone) {
       let best = null;
       for (let k = 0; k < 60 && !best; k++) {
         const x = (zone[0] + rnd() * (zone[2] - zone[0])) * WORLD_W, y = (zone[1] + rnd() * (zone[3] - zone[1])) * WORLD_H;
-        if (isWaterPx(x, y) || isMudPx(x, y) || isCliffPx(x, y) || nearAnyNest(x, y, 420)) continue;
+        if (isWaterPx(x, y) || isMudPx(x, y) || isCliffPx(x, y) || nearAnyNest(x, y, 420) || inCradle(x, y, 200)) continue;
         const wantForest = (NPC_DEF[species].biome === 'forest');
         if (wantForest ? forestShadePx(x, y) > 0.35 : forestShadePx(x, y) < 0.3 || NPC_DEF[species].biome === 'any') best = { x, y };
       }
@@ -2693,8 +3178,117 @@ function spawnInitialNPCs() {
       G.npcs.push(makeNPC(spec.sp, pos.x, pos.y));
     }
   }
+  G.guardianSeen = G.cradleFound = false;
+  G.giantRespawnAt = G.guardianRespawnAt = G.elderAlertT = null;
+  if (World.eco === 'desert') spawnDesertSpecials();
   recordPackBases();   // the packs' ORIGINAL rosters anchor all pack scaling
   if (typeof spawnBloodlines === 'function') spawnBloodlines();   // families settled here by the Great Walk
+}
+// ---------- the Death Desert's specials (not in ECO_SPAWNS: hand-placed) ----------
+// ONE giant walks the desert (an elder, very rarely), and the Giants' Cradle
+// keeps its own little world: baby yunmenglong, a homalocephale herd and the
+// guardian in the pond. None of them count toward the ECO_SPAWNS floors.
+const ELDER_CHANCE = 0.03;        // per giant spawned: incredibly rare
+const GIANT_RESPAWN = 180;        // seconds after the giant falls before another walks in
+const GUARDIAN_RESPAWN = 300;
+function spawnGiant(initial) {
+  const p = G.player;
+  let pos = null;
+  for (let k = 0; k < 40 && !pos; k++) {
+    const q = randForestPos();
+    if (nearAnyNest(q.x, q.y, 500) || inCradle(q.x, q.y, 300)) continue;
+    if (p && dist(q.x, q.y, p.x, p.y) < (initial ? 1500 : 1800)) continue;
+    pos = q;
+  }
+  if (!pos) return null;
+  const e = makeNPC('yunmeng', pos.x, pos.y);
+  e.stompCd = rrange(1.5, 3);
+  // (a true dice roll: rnd() is still on the world-gen seed here, so it would
+  // give the same answer on the first desert game of every page load)
+  if (Math.random() < ELDER_CHANCE || G.forceElder) {
+    // an ELDER: bigger, harder-hitting, slower to die — and the old claw-rake
+    // across the eye that marks it
+    e.elder = e.scar = true;
+    e.hp = e.maxhp = 13000;
+    G.elderAlertT = initial ? 6 : 0.5;   // (the alert itself is for Aerosteon players only)
+  }
+  G.npcs.push(e);
+  return e;
+}
+function spawnCradleBaby() {
+  const q = cradlePos(0.2, 0.7);
+  const e = makeNPC('yunmeng', q.x, q.y);
+  e.cradle = true;
+  e.growth = rrange(0.12, 0.3);
+  e.hp = e.maxhp = Math.round(NPC_DEF.yunmeng.hp * 0.09 * (e.growth / 0.2));
+  e.spMul = 2.4;
+  e.home = { x: q.x, y: q.y };
+  G.npcs.push(e);
+  return e;
+}
+function spawnCradleHomalo(n) {
+  const q = cradlePos(0.3, 0.45);
+  for (let i = 0; i < n; i++) {
+    const e = makeNPC('homalo', q.x + rrange(-50, 50), q.y + rrange(-50, 50), 900);
+    e.cradle = true;
+    e.home = { x: q.x, y: q.y };   // (homeR keeps the herd among the cycads)
+    G.npcs.push(e);
+  }
+}
+function spawnGuardian() {
+  const pond = World.cradle.pond;
+  const e = makeNPC('aegisu', pond.x + rrange(-20, 20), pond.y + rrange(-20, 20));
+  e.home = { x: pond.x, y: pond.y };
+  G.npcs.push(e);
+  return e;
+}
+function spawnDesertSpecials() {
+  spawnGiant(true);
+  if (!World.cradle) return;
+  const nb = 3 + Math.floor(rnd() * 3);
+  for (let i = 0; i < nb; i++) spawnCradleBaby();
+  spawnCradleHomalo(4 + Math.floor(rnd() * 2));
+  spawnGuardian();
+}
+// per frame: the elder alert, the Cradle's discovery
+function updateDesertSpecials(dt) {
+  const p = G.player;
+  if (!p || !p.alive || World.eco !== 'desert') return;
+  if (G.elderAlertT != null) {
+    G.elderAlertT -= dt;
+    if (G.elderAlertT <= 0) {
+      G.elderAlertT = null;
+      if (p.species === 'aero' && G.npcs.some(e => e.elder)) {
+        G.banner = { str: '⚠ An ELDER Yunmenglong walks the desert — scarred, huge, and very old.', t: 7, color: '#ffd23e' };
+        SFX.call(1, 'yunmeng', 1);
+      }
+    }
+  }
+  if (!G.cradleFound && inCradle(p.x, p.y)) {
+    G.cradleFound = true;
+    G.banner = { str: "THE GIANTS' CRADLE — a hidden nursery. Something watches from the pond.", t: 6, color: '#a3bf58' };
+  }
+}
+// the 10-second population pass for the specials: respawn timers for the
+// giant and the guardian, a trickle of new young for the nursery
+function maintainDesertSpecials() {
+  const p = G.player;
+  let giant = 0, babies = 0, guard = 0, herd = 0;
+  for (const e of G.npcs) {
+    if (e.species === 'yunmeng') { if (e.cradle) babies++; else giant++; }
+    else if (e.species === 'aegisu') guard++;
+    else if (e.species === 'homalo' && e.cradle) herd++;
+  }
+  if (giant) G.giantRespawnAt = null;
+  else if (G.giantRespawnAt == null) G.giantRespawnAt = G.time + GIANT_RESPAWN;
+  else if (G.time >= G.giantRespawnAt && spawnGiant(false)) G.giantRespawnAt = null;
+  if (!World.cradle) return;
+  const far = !p || !inCradle(p.x, p.y, 400);   // the nursery restocks unseen
+  if (guard) G.guardianRespawnAt = null;
+  else if (G.guardianRespawnAt == null) G.guardianRespawnAt = G.time + GUARDIAN_RESPAWN;
+  else if (G.time >= G.guardianRespawnAt && far) { spawnGuardian(); G.guardianRespawnAt = null; }
+  if (babies < 2 && far && rnd() < 0.35) spawnCradleBaby();
+  if (herd < 2 && far && rnd() < 0.2) spawnCradleHomalo(3);
 }
 // ---------- pack scaling: the packs grow with the player ----------
 // The power model lets a growing player drop off every pack's menu for good.
@@ -2776,7 +3370,8 @@ function updatePackScale() {
 }
 function maintainPopulation() {
   const counts = {};
-  for (const e of G.npcs) { if (!e.packBonus && !e.bloodline) counts[e.species] = (counts[e.species] || 0) + 1; }
+  for (const e of G.npcs) { if (!e.packBonus && !e.bloodline && !e.cradle) counts[e.species] = (counts[e.species] || 0) + 1; }
+  if (World.eco === 'desert') maintainDesertSpecials();
   for (const spec of ECO_SPAWNS[World.eco]) {
     if ((counts[spec.sp] || 0) < spec.min) {
       for (let k = 0; k < 30; k++) {
@@ -2828,9 +3423,10 @@ function updatePlayer(dt) {
   if (p.grabbed) {
     const gr = p.grabbed;
     const croc = gr.croc;
+    crouchUp(p, false); p.crouch = 0;
     if (!croc || croc.hp <= 0) { p.grabbed = null; return; }   // saved by someone else's fight
     gr.t += dt;
-    gr.meter -= dt * 0.22;                                     // the grip tightens on its own
+    gr.meter -= dt * ((NPC_DEF[croc.species] || {}).gripDrain || 0.22);   // the grip tightens on its own (the guardian's faster)
     if (input.attack) {
       input.attack = false;
       // every SPACE is a thrash — small dinos thrash smaller, and the
@@ -2856,7 +3452,7 @@ function updatePlayer(dt) {
       G.banner = { str: 'You broke free — OUT OF THE WATER!', t: 3, color: '#8ad04e' };
       SFX.stage();
     } else if (gr.meter <= 0) {
-      killPlayer('dragged under by Megorontosuchus');
+      killPlayer('dragged under by ' + DINO[croc.species].name);
     }
     return;
   }
@@ -3135,9 +3731,40 @@ function updatePlayer(dt) {
     const k = input.call1 ? 1 : input.call2 ? 2 : 3;
     p.call = { k, t: 0, dur: k === 1 ? 2.2 : k === 2 ? 0.7 : 1.7, fired: false };
     p.resting = false;
+    if (p.crouching && def.diet === 'carn') crouchSpook(p);   // …and from the crouch, it gives the hunter away
     SFX.call(k, p.species, p.growth);   // in this species' own voice (VOICE, util.js)
   }
   input.call1 = input.call2 = input.call3 = false;
+
+  // ------ CROUCH (C, or the touch button): belly to the ground ------
+  // a tap toggles; a hold crouches only for as long as it's held. Creeping
+  // pace, no sprint, prey notices late (preyDetectMul) — and ten seconds
+  // down, getting up yourself springs you forward (crouchUp)
+  if (input.crouchPress) {
+    input.crouchPress = false;
+    if (p.crouching) crouchUp(p, true);
+    else if (canCrouch(p) && !p.resting && !p.hidden && !p.fishing && !p.pounce && !p.call && p.actionT <= 0 && !G.wrestle) {
+      p.crouching = true; p.crouchSec = 0; p.crouchReady = false;
+    }
+  }
+  if (input.crouchRelease) {
+    input.crouchRelease = false;
+    if (p.crouching && (input.crouchHeldT || 0) > CROUCH_HOLD_T) crouchUp(p, true);
+  }
+  input.crouchHeldT = input.crouchKey ? (input.crouchHeldT || 0) + dt : 0;
+  if (p.crouching) {
+    if (p.pounce) crouchUp(p, true);   // the ambush leap IS the release
+    else if (p.call || p.resting || p.hidden || p.fishing || p.bathing || p.actionT > 0 || G.wrestle || !canCrouch(p)) crouchUp(p, false);
+    else {
+      p.crouchSec += dt;
+      if (p.crouchSec >= CROUCH_CHARGE_T && !p.crouchReady) {
+        p.crouchReady = true;
+        floatText(p.x, p.y - 46, 'coiled — stand to spring', '#9fe434');
+      }
+    }
+  }
+  p.crouchBoostT = Math.max(0, (p.crouchBoostT || 0) - dt);
+  p.crouch = lerp(p.crouch || 0, p.crouching ? 1 : 0, Math.min(1, dt * 8));   // drawDino's pose blend
 
   // action animation (eat / drink) locks movement briefly
   let pitchTarget = 0;
@@ -3360,9 +3987,12 @@ function updatePlayer(dt) {
       let terr = terrainSpeedAt(p.x, p.y);
       if (def.swim && isWaterPx(p.x, p.y)) terr = def.swimMul || 1.15;   // a swimmer glides through water
       let sp = def.speed * genderMod(p).speed * curve * terr * (p.coldSlow || 1) * (p.heatSlow || 1) * (p.bones && p.bones.leg ? 0.5 : 1);
-      if (input.sprint && !p.exhausted && p.stamina > 0) {
+      if (p.crouching && input.sprint) crouchUp(p, true);   // bursting up into the run
+      if (p.crouchBoostT > 0) sp *= CROUCH_BOOST;
+      if (p.crouching) sp *= CROUCH_SPEED;
+      else if (input.sprint && !p.exhausted && p.stamina > 0) {
         sp *= def.sprint;
-        p.stamina -= 20 * dt;
+        p.stamina -= PLAYER_SPRINT_BURN * dt;
         input.sprinting = true;
         if (p.stamina <= 0) { p.stamina = 0; p.exhausted = true; }
       }
@@ -3456,6 +4086,7 @@ function updatePlayer(dt) {
     input.attack = false;
     p.resting = false;                    // up and biting
     p.hidden = false;                     // …and out of the burrow to do it
+    crouchUp(p, true);                    // …and up out of the crouch
     p.atkCd = def.atkCd;
     p.attackT = 1;
     // tail-fighters (gigantspinosaurus) swing what's BEHIND them: the weapon
