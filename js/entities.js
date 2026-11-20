@@ -283,9 +283,12 @@ const NPC_DEF = {
   // crown to crown. Ten thousand hp, wounds that barely bleed, a tail that
   // can crack bone — and the STOMP: up on the hind legs (slowly: that's the
   // warning), then the whole front comes down. Near it hurts; UNDER it kills
-  yunmeng:   { hp: 10000, dmg: 260, atkCd: 2.1, speed: 46, detect: 120, homeR: 3200, reach: 64, biome: 'forest', turn: 0.9, fearless: true, tank: true, giant: true, bleedable: true, bleedResist: 0.3, hide: 0.55, melee: { kb: 560 },
+  yunmeng:   { hp: 11500, dmg: 260, atkCd: 2.1, speed: 46, detect: 120, homeR: 3200, reach: 64, biome: 'forest', turn: 0.9, fearless: true, tank: true, giant: true, bleedable: true, bleedResist: 0.3, hide: 0.55, melee: { kb: 560 },
                tailBone: { mul: 0.6, max: 0.14 }, trample: { dmg: 180, cd: 1.2 },
-               stomp: { cd: 5, wind: 1.7, r: 260, under: 80, dmg: 440, underDmg: 3000 } },
+               stomp: { cd: 5, wind: 1.7, r: 260, under: 80, dmg: 440, underDmg: 3000 },
+               // the PUNCH: a fast forefoot jab at whatever crowds the front feet
+               // (wind = the brief lift that warns of it; reach/r in adult-scale px)
+               punch: { dmg: 750, cd: 2.2, wind: 0.28, reach: 62, r: 46, kb: 460 } },
   // THE GUARDIAN OF THE GIANTS' CRADLE: a shieldcroc as long as a hadrosaur,
   // all but invisible under its pond. Takes whatever comes down to the
   // water — and every so often it hauls out to walk the nursery
@@ -466,6 +469,11 @@ function dealDamage(target, amount, attacker, opts) {
   target.hurtT = 0.35;
   target.lastAttacker = attacker;
   target.aggroT = 6;
+  // an aerosteon at war with a giant calls its kin — once per giant
+  if (G.player && G.player.species === 'aero' && attacker) {
+    if (attacker === G.player && target.species === 'yunmeng') kinJoinsBloodshed(target);
+    else if (target === G.player && attacker.species === 'yunmeng') kinJoinsBloodshed(attacker);
+  }
   // the pack hunts WITH the alpha: whatever the alpha bites — and whatever
   // bites the alpha — becomes the whole pack's quarry
   if (G.pack && G.pack.length && G.player) {
@@ -840,6 +848,41 @@ function packRoom(p) {
   const m = PLAYER_DEF[p.species].packMax;
   return m == null ? Infinity : m - (G.pack || []).filter(e => e.hp > 0).length;
 }
+// AEROSTEON vs YUNMENGLONG: the first blow traded with a giant brings one
+// more of your kin sprinting in from beyond the edge of the screen — on top
+// of the pack cap, and once per giant. It comes from the side away from the
+// giant, so you see it run the whole way in.
+function kinJoinsBloodshed(giant) {
+  const p = G.player;
+  if (!p || !p.alive || p.species !== 'aero' || !giant || giant.kinCalled || giant.hp <= 0) return null;
+  giant.kinCalled = true;
+  const z = G.zoom || 1, hw = VIEW_W * z / 2, hh = VIEW_H * z / 2;
+  // the camera centres on the player, so the view is the box around them
+  const cx = p.x, cy = p.y;
+  const base = Math.atan2(p.y - giant.y, p.x - giant.x);
+  const offView = (x, y) => Math.abs(x - cx) > hw + 60 || Math.abs(y - cy) > hh + 60;
+  let pos = null;
+  for (let k = 0; k < 36 && !pos; k++) {
+    // the first tries hug the far side; later ones sweep the whole ring
+    const a = base + (k < 12 ? rrange(-0.8, 0.8) : rrange(-Math.PI, Math.PI));
+    const c = Math.abs(Math.cos(a)), s = Math.abs(Math.sin(a));
+    const r = Math.min(c > 1e-3 ? hw / c : 1e9, s > 1e-3 ? hh / s : 1e9) + 110 + (k % 4) * 30;
+    const x = clamp(cx + Math.cos(a) * r, 80, WORLD_W - 80), y = clamp(cy + Math.sin(a) * r, 80, WORLD_H - 80);
+    if (offView(x, y) && !isWaterPx(x, y) && !isLavaPx(x, y) && !isCliffPx(x, y)) pos = { x, y };
+  }
+  if (!pos) return null;
+  const e = makeNPC('aero', pos.x, pos.y);
+  e.packAlpha = true; e.kinJoined = true;
+  e.gender = rnd() < 0.5 ? 'f' : 'm';
+  // runs straight to the alpha; once in range, the pack hunt takes it onto the giant
+  e.state = 'follow'; e.target = p; e.stateT = 2;
+  G.npcs.push(e);
+  (G.pack || (G.pack = [])).push(e);
+  G.packTarget = giant; G.packTargetT = 8;
+  G.banner = { str: 'Another of your kin joins the bloodshed!', t: 4, color: '#ff6a5e' };
+  SFX.stage();
+  return e;
+}
 function packmates(e, radius) {
   const out = [];
   for (const o of G.npcs) {
@@ -1040,9 +1083,12 @@ function hitZonesOf(d) {
         dy: 0,
         dz: spine + L.body[1] * 0.14 + Math.sin(L.neckAng) * L.neckLen * t + (d.foreLift || 0) * L.body[1] * 0.6,
         r: Math.max(3.5, L.body[1] * 0.3 * (d.neckW || 1)),
-        part: 'body',
+        part: 'body', neck: true,
       });
     }
+    // headOutOfReach (yunmenglong): the head and neck ride far above anything
+    // that could bite them — only the body, hips and tail are hittable
+    if (d.headOutOfReach) d._zones = d._zones.filter(z => z.part !== 'head' && !z.neck);
     for (const z of d._zones) {
       if (z.dz == null) z.dz = spine;   // hand-tuned arrays may omit dz
       if (!z.part) z.part = 'body';     // …and their parts default to body
@@ -1736,6 +1782,22 @@ function giantFight(e, d, t, dt, sp) {
   const s = giantSize(e);
   const fx = e.x + (e.facing || 1) * DINO.yunmeng.L.body[0] * 0.3 * s;
   const em = e.elder ? ELDER_MOD.size : 1;
+  // THE PUNCH: a brief lift of the near forefoot (the tell), then it jabs —
+  // the giant stands planted for the instant of the windup
+  e.punchCd = Math.max(0, (e.punchCd || 0) - dt);
+  if (e.punchT != null) {
+    e.punchT -= dt;
+    if (e.punchT <= 0) giantPunch(e, d);
+    else { idleDrift(e, dt); return; }
+  }
+  if (front && e.growth >= 0.6 && e.punchCd <= 0 && e.attackT <= 0.15) {
+    const z = punchZone(e, d);
+    if (dist(z.x, z.y, t.x, t.y) < z.r + bodyRadius(t) * 0.6) {
+      faceToward(e, toward);
+      e.punchT = d.punch.wind * (e.elder ? 0.85 : 1);
+      return;
+    }
+  }
   if (front && e.growth >= 0.6 && (e.stompCd || 0) <= 0 && e.attackT <= 0.15 &&
       dist(fx, e.y, t.x, t.y) < d.stomp.r * em * 0.7) {
     startStomp(e, d, t);
@@ -1833,6 +1895,29 @@ function giantSlam(e, d) {
       dealDamage(v, dmg, e, { kb: 200 + 300 * f });
     }
   }
+}
+// where the punch lands: just ahead of the front feet, scaled with the giant
+function punchZone(e, d) {
+  const k = giantSize(e) / DINO.yunmeng.scale, f = e.facing || 1;
+  const fx = e.x + f * DINO.yunmeng.L.body[0] * 0.3 * giantSize(e);
+  return { x: fx + f * d.punch.reach * k, y: e.y, r: d.punch.r * k };
+}
+// …and the jab itself: everything in the zone takes the full blow (the
+// elder's extra weight rides in dealDamage's ELDER_DMG)
+function giantPunch(e, d) {
+  e.punchT = null;
+  e.punchCd = d.punch.cd * rrange(0.9, 1.15) * (e.elder ? 0.85 : 1);
+  e.atkKind = 'punch'; e.attackT = 1;
+  const z = punchZone(e, d);
+  for (const v of [G.player, ...G.npcs]) {
+    if (!v || v === e) continue;
+    if (v.isPlayer ? (!v.alive || v.hidden) : (v.hp <= 0 || v.species === 'yunmeng')) continue;
+    if (dist(z.x, z.y, v.x, v.y) > z.r + bodyRadius(v) * 0.6) continue;
+    dealDamage(v, d.punch.dmg * rrange(0.95, 1.05), e, { kb: d.punch.kb, hitX: z.x, hitY: v.y - 20 });
+    floatText(v.x, v.y - 64, 'PUNCHED!', '#ff9a5e');
+  }
+  const p = G.player;
+  if (p && dist(z.x, z.y, p.x, p.y) < 600) { G.shake = Math.min(12, (G.shake || 0) + 4); SFX.bite(); }
 }
 // walking INTO the giant's path: anything at the leading feet gets run over
 function giantTrample(e, d, dt) {
@@ -3201,18 +3286,56 @@ function spawnGiant(initial) {
     pos = q;
   }
   if (!pos) return null;
-  const e = makeNPC('yunmeng', pos.x, pos.y);
-  e.stompCd = rrange(1.5, 3);
   // (a true dice roll: rnd() is still on the world-gen seed here, so it would
   // give the same answer on the first desert game of every page load)
-  if (Math.random() < ELDER_CHANCE || G.forceElder) {
+  const e = makeGiant(pos.x, pos.y, Math.random() < ELDER_CHANCE || G.forceElder);
+  if (e.elder) G.elderAlertT = initial ? 6 : 0.5;   // (the alert itself is for Aerosteon players only)
+  return e;
+}
+function makeGiant(x, y, elder) {
+  const e = makeNPC('yunmeng', x, y);
+  e.stompCd = rrange(1.5, 3);
+  if (elder) {
     // an ELDER: bigger, harder-hitting, slower to die — and the old claw-rake
     // across the eye that marks it
     e.elder = e.scar = true;
-    e.hp = e.maxhp = 13000;
-    G.elderAlertT = initial ? 6 : 0.5;   // (the alert itself is for Aerosteon players only)
+    e.hp = e.maxhp = 14000;
   }
   G.npcs.push(e);
+  return e;
+}
+// TEST MODE (the EVAX code): spawns on dry ground about `r` px off, on
+// whichever side of the player isn't water. Desert only, like its animals.
+function testSpawnPos(r0) {
+  const p = G.player;
+  if (!p || !p.alive || World.eco !== 'desert') return null;
+  for (let k = 0; k < 24; k++) {
+    const a = (k % 2 ? Math.PI : 0) + (p.facing < 0 ? Math.PI : 0) + rrange(-0.9, 0.9);
+    const r = r0 + k * 15;
+    const x = clamp(p.x + Math.cos(a) * r, 80, WORLD_W - 80), y = clamp(p.y + Math.sin(a) * r * 0.6, 80, WORLD_H - 80);
+    if (!isWaterPx(x, y) && !isLavaPx(x, y) && !isCliffPx(x, y)) return { x, y };
+  }
+  return null;
+}
+const TEST_AERO_MAX = 2;          // test-spawned aerosteon alive at once
+const TEST_AERO_PACK = 4242;      // they hunt together as one little pack
+function testAeroCount() { return G.npcs.filter(e => e.testSpawn && e.species === 'aero' && e.hp > 0).length; }
+// returns the new aerosteon, or a reason string when it can't spawn one
+function spawnTestAero() {
+  if (testAeroCount() >= TEST_AERO_MAX) return 'Two test Aerosteon are already out — at most ' + TEST_AERO_MAX + ' at a time.';
+  const pos = testSpawnPos(260);
+  if (!pos) return 'No dry ground nearby to put an Aerosteon on.';
+  const e = makeNPC('aero', pos.x, pos.y, TEST_AERO_PACK);
+  e.testSpawn = true;
+  G.npcs.push(e);
+  G.banner = { str: 'An Aerosteon runs in (test mode) — ' + testAeroCount() + ' / ' + TEST_AERO_MAX + '.', t: 4, color: '#ffd23e' };
+  return e;
+}
+function spawnTestGiant(elder) {
+  const pos = testSpawnPos(380);
+  if (!pos) return null;
+  const e = makeGiant(pos.x, pos.y, elder);
+  G.banner = { str: (elder ? '⚠ An ELDER Yunmenglong' : 'A Yunmenglong') + ' walks in (test mode).', t: 4, color: '#ffd23e' };
   return e;
 }
 function spawnCradleBaby() {
@@ -3220,7 +3343,7 @@ function spawnCradleBaby() {
   const e = makeNPC('yunmeng', q.x, q.y);
   e.cradle = true;
   e.growth = rrange(0.12, 0.3);
-  e.hp = e.maxhp = Math.round(NPC_DEF.yunmeng.hp * 0.09 * (e.growth / 0.2));
+  e.hp = e.maxhp = Math.round(900 * (e.growth / 0.2));   // (the young stay soft: not scaled off the adult)
   e.spMul = 2.4;
   e.home = { x: q.x, y: q.y };
   G.npcs.push(e);

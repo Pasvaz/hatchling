@@ -1438,8 +1438,20 @@ document.getElementById('pause-lobby').addEventListener('click', (ev) => {
   if (ev.detail === 0) return;
   requestLobby();
 });
+// test mode (EVAX): spawn the desert giant on demand, normal or elder
+for (const [id, elder] of [['btn-giant', false], ['btn-elder', true]]) {
+  document.getElementById(id).addEventListener('click', (ev) => {
+    if (ev.detail === 0 || !allFree() || !G.started || World.eco !== 'desert') return;
+    if (!spawnTestGiant(elder)) G.banner = { str: 'No dry ground nearby to put a giant on.', t: 3, color: '#ffe9a0' };
+  });
+}
+document.getElementById('btn-aero').addEventListener('click', (ev) => {
+  if (ev.detail === 0 || !allFree() || !G.started || World.eco !== 'desert') return;
+  const r = spawnTestAero();
+  if (typeof r === 'string') G.banner = { str: r, t: 3, color: '#ffe9a0' };
+});
 // buttons must never hold keyboard focus, or SPACE (bite!) re-clicks them mid-game
-for (const id of ['btn-lobby', 'btn-respawn', 'btn-title', 'pause-lobby']) {
+for (const id of ['btn-lobby', 'btn-respawn', 'btn-title', 'pause-lobby', 'btn-giant', 'btn-elder', 'btn-aero']) {
   const b = document.getElementById(id);
   b.setAttribute('tabindex', '-1');
   b.addEventListener('mousedown', (ev) => ev.preventDefault());   // click still fires; focus never sticks
@@ -3738,9 +3750,11 @@ function updateBossBar() {
   elBossFill.style.width = clamp(e.hp / e.maxhp * 100, 0, 100) + '%';
 }
 
+const elTestbar = document.getElementById('testbar');
 function updateHUD() {
   const p = G.player;
   if (!p) return;
+  elTestbar.classList.toggle('hidden', !allFree() || World.eco !== 'desert');   // the giant lives only in the desert
   elHp.style.width = clamp(p.hp / playerMaxHp() * 100, 0, 100) + '%';
   elSt.style.width = clamp(p.stamina / PLAYER_DEF[p.species].stamMax * 100, 0, 100) + '%';
   elFo.style.width = clamp(p.food, 0, 100) + '%';

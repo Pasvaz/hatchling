@@ -145,6 +145,7 @@ const DINO = {
     },
     tailUp: 0.26, neckW: 0.8, neckArc: 0.1, sauroHead: true, beak: false, foreLift: 0.5, chest: 1.15, shFwd: 0.05,
     neckGrow: true, snoutW: 0.44, snoutMidW: 0.58, highBrowse: true, tailWeapon: true, pattern: 'band',
+    headOutOfReach: true,   // no hit circles on the head or neck (entities.js hitZonesOf)
   },
   aegisu: {
     // THE GUARDIAN OF THE GIANTS' CRADLE: the shieldcroc — a flat, broad
@@ -1759,6 +1760,8 @@ function drawDino(ctx, key, o) {
   // illustrated line: the outline is the hide's own colour sunk toward
   // black, never a flat ink line — it is also the colour every part shares
   const C = Object.assign({}, C0, { line: mixHex(C0.line, C0.top, 0.4) });
+  // an ELDER has faded with age: its whole hide dimmer and greyer than the young
+  if (o.elder) for (const k in C) { if (k !== 'line') C[k] = satLum(C[k], 0.45, 0.9); }
   const g = o.growth != null ? o.growth : 1;
   const s = d.scale * sizeScale(g) * genderMod(o).size;   // (the skin's size mod rides in genderMod)
   const headMul = 1 + 0.95 * Math.pow(1 - g, 1.4);
@@ -1836,6 +1839,12 @@ function drawDino(ctx, key, o) {
   // backward pitch and the leg throw below
   const kickPh = d.kick && kind === 'kick' && atk > 0 ? 1 - atk : -1;
   const kick = kickPh >= 0 ? (1 - kickPh) * Math.sin((0.25 + kickPh * 1.1) * TAU) : 0;
+  // the giant's PUNCH: the near forefoot lifts and draws back through the
+  // windup (o.punchT counting down), then shoots forward at the hit frame
+  const punchLift = o.punchT != null ? clamp(1 - o.punchT / 0.28, 0, 1) : 0;
+  const punchPh = kind === 'punch' && atk > 0 ? 1 - atk : -1;
+  // (held at full extension for the first third, so the jab reads at speed)
+  const punch = punchPh >= 0 ? (punchPh < 0.3 ? 1 : 1 - (punchPh - 0.3) / 0.7) : 0;
   // ---- the whole body works every attack: these drives feed the weight
   // shift, the crouch and the lean, not just the weapon itself
   const swingPh = tailAtk > 0 ? 1 - tailAtk : 0;                        // 0 → 1 across the tail slam
@@ -1970,6 +1979,8 @@ function drawDino(ctx, key, o) {
     const f = footPose(off, stride, hx + (front ? 1 : 2.5) * s);
     if (!front && kick > 0) { f.x += kick * legLen * 1.6; f.y -= kick * legLen * 1.05; }   // the hind feet thrown forward and UP
     if (front && kick > 0) { f.y -= kick * legLen * 0.55; f.x += kick * 4 * s; }         // forelegs tucked up as it rears
+    if (front && !far && punchLift > 0) { f.y -= punchLift * legLen * 0.4; f.x -= punchLift * legLen * 0.12; }   // the punch's tell: foot up, drawn back
+    if (front && !far && punch > 0) { f.x += punch * legLen * 0.95; f.y -= punch * legLen * 0.3; }               // …and the jab
     // metatarsus: theropods run on long ones; front limbs and squat
     // quadrupeds carry a short pastern (mtMul tunes it per species)
     const mt = reach * (front ? 0.16 : 0.24) * (d.mtMul || 1);
@@ -4541,13 +4552,14 @@ function drawHead(ctx, key, d, C, a) {
     ctx.beginPath(); ctx.ellipse(ep.x, ep.y, er * 1.25, er * 1.05, -0.1, 0, TAU); ctx.stroke();
   }
   // an ELDER's scar: three pale rake lines torn across the eye, brow to
-  // cheek, old enough to have healed raised and light
+  // cheek, old enough to have healed raised and light — kept short so they
+  // stay on the skull even with the head craned up
   if (scar) {
     ctx.lineCap = 'round';
     for (const [k, w] of [[-1, 0.7], [0, 1], [1, 0.7]]) {
-      const a0 = hPt(-0.06 + k * 0.1, -0.8), a1 = hPt(0.24 + k * 0.1, 0.4);
+      const a0 = hPt(-0.01 + k * 0.08, -0.46), a1 = hPt(0.19 + k * 0.08, 0.3);
       ctx.strokeStyle = C.line; ctx.globalAlpha = 0.5;
-      ctx.lineWidth = lineW * 1.7 * w;
+      ctx.lineWidth = lineW * 1.3 * w;
       ctx.beginPath(); ctx.moveTo(a0.x, a0.y); ctx.lineTo(a1.x, a1.y); ctx.stroke();
       ctx.strokeStyle = '#f4dcc4'; ctx.globalAlpha = 0.9;
       ctx.lineWidth = lineW * 0.9 * w;

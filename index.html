@@ -152,6 +152,16 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.4);
   }
   #btn-lobby:hover { background: #57452a; color: #ffe9a0; }
+  /* test mode (EVAX): spawn buttons for the desert giant */
+  #testbar { position: absolute; right: 12px; top: 64px; display: flex; gap: 6px; pointer-events: auto; }
+  #testbar.hidden { display: none; }
+  #testbar button {
+    font-family: inherit; font-size: 10px; letter-spacing: 1px; margin: 0; padding: 4px 9px; cursor: pointer;
+    color: #e8d8a8; background: linear-gradient(180deg, rgba(48,37,20,0.85), rgba(27,20,11,0.9));
+    border: 1px solid #7a5c34; border-radius: 7px;
+  }
+  #testbar button:hover { background: #57452a; color: #ffe9a0; }
+  #btn-elder { color: #ffb070; }
   /* the boss bar: the giant (or the Cradle's guardian) while it's fighting you */
   #bossbar {
     position: absolute; left: 50%; top: 42px; transform: translateX(-50%);
@@ -698,6 +708,8 @@
   body.touch #prompt { display: none; }
   body.touch #banner { font-size: 14px; top: 12%; }
   body.touch #btn-lobby { font-size: 11px; padding: 9px 18px; }
+  body.touch #testbar { top: calc(max(8px, env(safe-area-inset-top)) + 86px); right: calc(62px + env(safe-area-inset-right)); }
+  body.touch #testbar button { font-size: 11px; padding: 8px 12px; }
   body.touch #bossbar { top: max(52px, calc(env(safe-area-inset-top) + 44px)); min-width: 200px; }
   body.touch #hud.boss #banner { top: calc(12% + 52px); }
 
@@ -852,6 +864,11 @@
       <div id="growthscount" title="Growths — earned every minute; spend them in the lobby">❖ 0</div>
     </div>
     <button id="btn-lobby" title="Back to species select — your dino keeps its progress">⌂ LOBBY</button>
+    <div id="testbar" class="hidden">
+      <button id="btn-giant" title="Test mode: spawn a Yunmenglong nearby">🦕 YUNMENGLONG</button>
+      <button id="btn-elder" title="Test mode: spawn an ELDER Yunmenglong nearby">⚠ ELDER</button>
+      <button id="btn-aero" title="Test mode: spawn a wild Aerosteon nearby (two at a time at most)">🦖 AEROSTEON</button>
+    </div>
     <div id="bossbar" class="panel hidden"><div class="bb-name" id="bb-name"></div><div class="bar"><div class="fill" id="bb-fill"></div></div></div>
     <div id="stats" class="panel">
       <div class="statrow"><span class="sicon ic-hp" title="Health"></span><div class="bar"><div class="fill" id="fill-hp"></div></div></div>
