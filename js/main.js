@@ -135,6 +135,13 @@ const CHAIN = [
   ['procomp'], ['homalo'], ['coelo'],   // ☀️ The Death Desert — the first rung has its own gate (see spUnlocked)
   ['regali'],              // …the crowned wall the hunters must get past…
   ['tamery', 'aero'],      // …and the desert's apex fork, once Regaliceratops is mastered: brawn or the endless chase
+  ['ekrix'],               // 🏝️ The Lesser Archipelago — either desert apex, mastered, opens the sea
+  ['iani'],                // …the ornithopod of Drevan and Kesh
+  ['chenani'],             // …the bigger, slower island abelisaur
+  ['kaiwhe'],              // …and the plesiosaur, out into the sea itself
+  ['ptero'],               // …and then up off the water altogether: the first flyer
+  ['tethys', 'magyaro'],   // …the islands' prey, grown up under the giant's sky: either one opens…
+  ['hatzego'],             // …and the biggest flyer that ever lived
 ];
 // the desert's door: an ADULT Poekilopleuron at least once, or Full Adult
 // Neovenator and Coahuilaceratops together
@@ -246,7 +253,7 @@ function headTopY(p) {
   const ng = d.neckGrow ? 0.55 + 0.45 * p.growth : 1;
   const rise = L.leg[0] + L.body[1] * (0.55 + 0.6 * (d.foreLift || 0)) +
     Math.sin(L.neckAng) * L.neckLen * ng + L.head[1] * 1.5;
-  return p.y - rise * s;
+  return p.y - (p.alt || 0) - rise * s;
 }
 function saveDinoSnapshot() {
   const p = G.player;
@@ -282,14 +289,17 @@ window.addEventListener('keydown', (e) => {
   if (G.cine) { if (G.cine.t > 0.8) G.cine.skip = true; return; }
   G.keys[e.code] = true;
   if (KEYMAP[e.code]) G.input[KEYMAP[e.code]] = true;
-  if (e.code === 'Space') { G.input.attack = true; G.input.atkHold = true; }
+  // a FLYER (pterodactylus) remaps the two weapon keys: SPACE is the wingbeat
+  // (hold to climb), and M is its bite
+  const flyer = G.player && !G.player.grabbed && (PLAYER_DEF[G.player.species] || {}).flyer;   // (in a croc's jaws SPACE is the thrash, as ever)
+  if (e.code === 'Space') { if (flyer) G.input.flap = true; else { G.input.attack = true; G.input.atkHold = true; } }
   if (e.code === 'KeyE') G.input.interact = true;
   // F is the SECOND context key: fish · grab · wrestle · claw · bathe · dig ·
   // court · leave a den — whichever one the situation offers (resolveAction)
   if (e.code === 'KeyF') G.input.action = true;
   // ALWAYS-AVAILABLE moves keep their own keys — they have no situational cue
   // to hang a prompt on, so they must never share the context keys
-  if (e.code === 'KeyM') G.input.claw = true;   // claw slash — the clawSecond species' second weapon
+  if (e.code === 'KeyM') { if (flyer) G.input.attack = true; else G.input.claw = true; }   // claw slash — the clawSecond species' second weapon
   if (e.code === 'KeyB') G.input.dig = true;    // the digger's burrow, anywhere
   if (G.wrestle && WRESTLE_KEYS.includes(e.code)) G.wrestle.pressed = e.code;
   // the CALLS: 1 broadcast (claim), 2 friendly (invite), 3 aggressive (threat)
@@ -326,14 +336,14 @@ window.addEventListener('keydown', (e) => {
 window.addEventListener('keyup', (e) => {
   G.keys[e.code] = false;
   if (KEYMAP[e.code]) G.input[KEYMAP[e.code]] = false;
-  if (e.code === 'Space') G.input.atkHold = false;
+  if (e.code === 'Space') { G.input.atkHold = false; G.input.flap = false; }
   if (e.code === 'KeyC') { G.input.crouchKey = false; G.input.crouchRelease = true; }
 });
 // losing focus (a browser shortcut fired, a tab switch) eats the keyups —
 // clear every held flag so nothing stays latched behind our back
 window.addEventListener('blur', () => {
   const i = G.input;
-  i.up = i.down = i.left = i.right = i.sprint = i.pounceHold = i.atkHold = i.crouchKey = false;
+  i.up = i.down = i.left = i.right = i.sprint = i.pounceHold = i.atkHold = i.flap = i.crouchKey = false;
   G.keys = {};
 });
 
@@ -453,6 +463,14 @@ const CARD_INFO = {
   regali: { desc: 'A crown of great pentagonal plates around the frill, and a nose horn that cracks bone. Claws barely open its hide, and it stands where it stands — huge health, huge damage. But its wind is the shortest on the sand: it wins the fight in front of it, and can never chase anyone down.', tag: '◆ HERBIVORE — CROWNED WALL', tagClass: 'mod' },
   tamery: { desc: 'The apex of the Death Desert: Poekilopleuron\'s barrel of muscle at Tyrannotitan\'s size, under Neovenator\'s long lean skull. Raw damage, arms like beams, a double bite (M) — and the great hadrosaurs of the river belt are its larder. Big and thin-skinned: the sun finds it first.', tag: '◆ CARNIVORE — APEX', tagClass: 'hard' },
   aero: { desc: 'Tameryraptor\'s rival for the desert crown: a great megaraptorid on long legs, feathered down the back. Lighter and smaller — but it runs almost forever, its hooks and teeth leave wounds that bleed for half a minute, and call your kin (2) and two more run with you. Never more than three — and three is what it takes to bring down a Yunmenglong.', tag: '◆ CARNIVORE — PURSUIT', tagClass: 'hard' },
+  ekrix: { desc: 'The first animal of the Lesser Archipelago: a stocky grey abelisaur with a short, deep, rugged skull and arms that are barely there. It hatches on Utoriana, an island with little on it — and grows too big and too slow to catch the homalocephale that live there. It swims decently; the sea between the islands is open to it. But the pathway off Utoriana belongs to Garamirala, and Garamirala does not let the young cross.', tag: '◆ CARNIVORE — SWIMMER', tagClass: 'swim' },
+  iani: { desc: 'A light, long-legged ornithopod with a strong jaw for its size. Herds of every age live on Drevan and on its neighbour Kesh. Quick on its feet and a fair swimmer, but the sea is no place to linger.', tag: '◆ HERBIVORE — ISLAND RUNNER', tagClass: 'mod' },
+  chenani: { desc: 'The second abelisaur of the islands, out of the Moroccan phosphate beds: bigger and harder-hitting than Ekrixinatosaurus, with a skull cut off short and deep. It hatches on Narapa, next to Utoriana, where grown Chenanisaurus already hunt the duckbill herds. Its hatchlings are speedsters, and it slows down as it grows into its size.', tag: '◆ CARNIVORE — SWIMMER', tagClass: 'swim' },
+  kaiwhe: { desc: 'A plesiosaur from the seas off New Zealand: blue above, white below, with a round head full of fine needle teeth. It swims fully under the surface, fast and agile, with stamina to spare, and hunts small fish. Its bite bleeds, for whatever tries to cross its water. It hatches on Okiri, a speck of sand in an empty sea. On land it can barely move.', tag: '◆ CARNIVORE — MARINE', tagClass: 'swim' },
+  ptero: { desc: 'A small pterosaur from the Jurassic lagoons of Germany, here a gull of the islands: a long thin beak of fine teeth, a little crest, wings of skin. It is a pest, not a fighter. It lives by finding the dead. HOLD SPACE to climb into the air. Let go and it glides down until it lands, on the ground or on the water, where it floats. M bites. High up, only other flyers at its height can reach it. Its shadow stays on the ground, to show where it really is.', tag: '◆ SCAVENGER — FLYER', tagClass: 'swim' },
+  tethys: { desc: 'A dwarf hadrosauroid of the European islands, long and low, with a strange narrow bill edged with saw-like teeth. Herds live on the islands round Taku Rei. Until you are full grown, a wild Hatzegopteryx can carry you off: when one is about, get in among a stand of trees, where no wild one will follow. Caught? Mash SPACE to struggle free.', tag: '◆ HERBIVORE — ISLAND PREY', tagClass: 'mod' },
+  magyaro: { desc: 'A dwarf titanosaur from Hateg Island, a sauropod no longer than a minibus. Herds of every age live on Taku Rei, and a few hold out on other islands. A full-grown one is just too heavy for Hatzegopteryx to lift; until then you are prey from the sky. Keep near the stands of trees: no wild Hatzegopteryx will follow you in. Caught? Mash SPACE to struggle free.', tag: '◆ HERBIVORE — DWARF SAUROPOD', tagClass: 'mod' },
+  hatzego: { desc: 'The largest pterosaur, from Hateg Island in Romania: an azhdarchid with a skull three metres long on a short, massively strong neck. Standing, it is taller than Morosaurus. It runs fast, flies well, and hits harder than anything else on the islands. Press F beside an animal with half your health or less to pick it up in your jaws; up to two-thirds, you take it in your feet. You can snatch from the air too: come in low and keep still, and you hover over it. Carrying costs stamina. Bite what you hold, or drop it from high up.', tag: '◆ TITAN — FLYER', tagClass: 'swim' },
   orkor: { desc: 'The last of the megaraptorids — long hooked arms, blade teeth, and real speed. It opens prey with its hands as much as its jaws, and the bleeding does the rest.', tag: '◆ CARNIVORE — BLEEDER', tagClass: 'mod' },
   neove: { desc: 'The quiet hunter of the Reach. It does not chase the way the tyrants chase — it arrives. Hands and jaws together, and everything it touches bleeds.', tag: '◆ CARNIVORE — HUNTER', tagClass: 'hard' },
   coahuila: { desc: 'Possibly the longest brow horns anything ever grew, and a committed charge on the far end of them. Every wound those horns open keeps working — crazy bleed on four legs.', tag: '◆ HERBIVORE — BLEEDER', tagClass: 'mod' },
@@ -1466,6 +1484,14 @@ const START_BANNERS = {
   regali: 'You hatch crowned in bone. Let them come to you — you were never built to follow.',
   tamery: 'You hatch where the river meets the sand. The herds drink here — and so will you.',
   aero: 'You hatch with long legs and hooked hands. Whatever runs from you, you will outlast.',
+  ekrix: 'You hatch on Utoriana — an island in an endless sea. The only way off is across the water, and something guards it.',
+  iani: 'You hatch on Drevan, among the herds. Kesh is just across the strait.',
+  chenani: 'You hatch on Narapa, among the duckbill herds. Grown Chenanisaurus hunt here. You are fast now, so run while you can.',
+  kaiwhe: 'You hatch on Okiri, a speck of sand in an empty sea. Get into the water: on land you can barely move.',
+  ptero: 'You hatch on Brekka. HOLD SPACE to fly, let go to glide down, M to bite. Find the dead.',
+  tethys: 'You hatch on Ekkalia. Watch the sky: until you are full grown, a Hatzegopteryx can carry you off. The stands of trees are cover.',
+  magyaro: 'You hatch on Taku Rei. Watch the sky: until you are full grown, a Hatzegopteryx can carry you off. The stands of trees are cover.',
+  hatzego: 'You hatch on Saruun. SPACE flies, M bites. Press F by a smaller animal to snatch it up.',
   procomp: 'You hatch small and feathered. Find your kin — the sand is no place to be alone.',
   homalo: 'You hatch hard-headed. Gather the herd, and let nothing stand in front of you.',
   neove: 'You hatch in the green dark. Learn to arrive without being seen.',
@@ -1532,6 +1558,15 @@ function startGame(species, gender, skin, growth) {
   }
 }
 
+// your herd's leader: a small gold crown over it
+function drawLeadMark(ctx, e) {
+  const y = e.y - (e.alt || 0) - bodyRadius(e) * 2.4 - 14;
+  ctx.save();
+  ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'center';
+  ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.fillStyle = '#ffd23e';
+  ctx.strokeText('♛', e.x, y); ctx.fillText('♛', e.x, y);
+  ctx.restore();
+}
 function respawn(species, gender, skin, growth) {
   spawnInitialNPCs();
   G.mate = null;
@@ -1539,6 +1574,7 @@ function respawn(species, gender, skin, growth) {
   G.wrestle = null;
   G.pack = [];
   G.burrow = null;
+  G.herd = null; G.herdTried = false; G.herdFoe = null; G.hatzNextVisit = null;
   G.myBurrow = null;   // the digger starts homeless
   G.carcasses.length = 0;
   G.particles.length = 0;
@@ -1783,7 +1819,8 @@ function buildMinimap() {
       if (cr && inCradle((tx + 0.5) * TILE, (ty + 0.5) * TILE, 6 * TILE)) t = T_SAND;
       const ff = World.forest[tIdx(tx, ty)];
       let col;
-      if (t === T_DEEP) col = [44, 74, 88];
+      if (t === T_SWIM) col = [26, 56, 76];                                       // swimmer's depth: the open ocean
+      else if (t === T_DEEP) col = [44, 74, 88];
       else if (t === T_WATER) col = [64, 104, 118];
       else if (t === T_SAND) col = [186, 170, 128];
       else if (t === T_MUD) col = [100, 74, 52];
@@ -3050,14 +3087,15 @@ function loop(now) {
     G.camX = clamp(c.x - zvw / 2, 0, Math.max(0, WORLD_W - zvw));
     G.camY = clamp(c.y - zvh / 2, 0, Math.max(0, WORLD_H - zvh));
   } else {
-  const zTarget = growZoom(p.species, p.growth);
-  G.zoom += (zTarget - G.zoom) * Math.min(1, dt * 0.4);
+  // a flyer high up pulls the view back further, so body and shadow both fit
+  const zTarget = growZoom(p.species, p.growth) * (1 + (p.alt || 0) / 420);
+  G.zoom += (zTarget - G.zoom) * Math.min(1, dt * (DINO[p.species].flyer ? 1.6 : 0.4));
   const zvw = VIEW_W * G.zoom, zvh = VIEW_H * G.zoom;
   G.camX = clamp(p.x - zvw / 2, 0, WORLD_W - zvw);
   // the head is sacred: if a tall dino's skull would leave the top of the
   // frame, the whole view slides up until it fits (feet have far more
   // spare room below than the head needs above)
-  G.camY = clamp(Math.min(p.y - zvh / 2 - 14, headTopY(p) - 16), 0, WORLD_H - zvh);
+  G.camY = clamp(Math.min(p.y - (p.alt || 0) * 0.5 - zvh / 2 - 14, headTopY(p) - 16), 0, WORLD_H - zvh);
   }
 
   render();
@@ -3440,12 +3478,14 @@ function render() {
       draws.push({ y: cv2.y + 30, fn: () => drawFrozenGiant(ctx, cv2) });
     }
   }
-  for (const c of G.carcasses) if (c.x > x0 && c.x < x1 && c.y > y0 && c.y < y1) draws.push({ y: c.y, fn: () => drawCarcass(ctx, c) });
+  // (a carcass carried by a high flyer draws up there with it, over the ground)
+  for (const c of G.carcasses) if (c.x > x0 && c.x < x1 && c.y > y0 && c.y - (c.carried ? c.liftY || 0 : 0) < y1) draws.push({ y: c.carried && p.carry && p.carry.c === c && (p.alt || 0) > 25 ? p.y + 1e6 + 1 : c.y, fn: () => drawCarcass(ctx, c) });
   const mark = stalkMark(p, camX, camY, zw, zh);
   for (const e of G.npcs) {
-    if (e.x > x0 && e.x < x1 && e.y > y0 && e.y < y1) {
+    if (e.x > x0 && e.x < x1 && e.y > y0 && e.y - (e.alt || 0) < y1) {   // (a flyer counts from its shadow up to its body)
+      if (isAirborne(e)) draws.push({ y: -1e9, fn: () => drawFlyShadow(ctx, e) });
       draws.push({
-        y: e.y, fn: () => {
+        y: isAirborne(e) && e.alt > 25 ? e.y + 1e6 : e.y, fn: () => {
           // a submerged croc is only a shadow under the surface — no hp bar,
           // no outline, just a dark shape and two eyes
           if (e.submerged && isWaterPx(e.x, e.y)) { drawCrocShadow(ctx, e); return; }
@@ -3462,8 +3502,10 @@ function render() {
             ctx.restore();
             return;   // no shadow, no hp bar — just the shape in the grey
           }
-          drawShadow(ctx, e.x, e.y, bodyRadius(e) * 1.4);
+          if (!isDeepPx(e.x, e.y) && !DINO[e.species].flyer && !isAirborne(e)) drawShadow(ctx, e.x, e.y, bodyRadius(e) * 1.4);   // (a swimmer casts none; a flyer's is drawn on the ground)
+          else if (DINO[e.species].flyer && !isAirborne(e) && !isDeepPx(e.x, e.y)) drawFlyShadow(ctx, e);
           drawDino(ctx, e.species, e);
+          if (G.herd && G.herd.leader === e) drawLeadMark(ctx, e);
           // (and a tired animal near you shows its spent tank)
           const pd = dist(e.x, e.y, p.x, p.y);
           if (e.hurtT > 0 || (e.hp < e.maxhp * 0.999 || e.stam < e.stamMax * 0.999) && pd < 130 || e.winded && pd < 320) drawHpBar(e);
@@ -3479,12 +3521,14 @@ function render() {
   }
   if (p.alive) {
     draws.push({
-      y: p.y, fn: () => {
-        drawShadow(ctx, p.x, p.y, (8 + 14 * p.growth) * genderMod(p).size);
+      y: isAirborne(p) && p.alt > 25 ? p.y + 1e6 : p.y, fn: () => {
+        if (!isDeepPx(p.x, p.y) && !(DINO[p.species].marine && isWaterPx(p.x, p.y)) && !DINO[p.species].flyer) drawShadow(ctx, p.x, p.y, (8 + 14 * p.growth) * genderMod(p).size);
         drawDino(ctx, p.species, p);
       }
     });
   }
+  // a flyer's shadow stays on the ground under it: that is where it really is
+  if (p.alive && DINO[p.species].flyer && (isAirborne(p) || !isDeepPx(p.x, p.y))) draws.push({ y: isAirborne(p) ? -1e9 : p.y - 0.01, fn: () => drawFlyShadow(ctx, p) });
   // eruption target rings sit on the ground, beneath everything that walks
   drawEruption();
   drawStompMarks();
@@ -3598,6 +3642,7 @@ function render() {
   ctx.globalAlpha = 1 - 0.75 * day.nightF;
   ctx.drawImage(warmGrade, 0, 0, VIEW_W, VIEW_H);
   ctx.globalAlpha = 1;
+  drawAltimeter();
   // THE DESERT SUN: a glare that means it — the whole frame lifts toward hot
   // white at midday (a screen wash), gold toward dusk, with a shimmer of
   // heat-haze bands low on the sand; gone at night
@@ -3840,5 +3885,35 @@ function updateHUD() {
       row('Bleeding', p.bleed ? 'YES — find safety!' : 'no');
   }
   drawMinimap();
+}
+// ---------- the ALTIMETER (flyers only) ----------
+// A thin gauge down the right edge: your own height as a bright notch, and
+// every other flyer within reach as a tick at ITS height (red: wild, green:
+// your family). Line your notch up with a tick and your shadows meeting is
+// all a fight still needs.
+function drawAltimeter() {
+  const p = G.player;
+  if (!p || !p.alive || !DINO[p.species].flyer) return;
+  const top = 64, bot = VIEW_H - 64, x = VIEW_W - 16;
+  const yOf = (a) => bot - (bot - top) * clamp(a / FLY_CEIL, 0, 1);
+  ctx.save();
+  ctx.fillStyle = 'rgba(20,16,10,0.42)';
+  ctx.fillRect(x - 3, top - 4, 6, bot - top + 8);
+  ctx.strokeStyle = 'rgba(245,233,200,0.35)';
+  ctx.lineWidth = 1;
+  for (let a = 0; a <= FLY_CEIL; a += 120) { ctx.beginPath(); ctx.moveTo(x - 5, yOf(a)); ctx.lineTo(x + 5, yOf(a)); ctx.stroke(); }
+  for (const e of G.npcs) {
+    if (!isAirborne(e) || dist(e.x, e.y, p.x, p.y) > 520) continue;
+    const near = Math.abs((e.alt || 0) - (p.alt || 0)) < AIR_BAND;
+    ctx.fillStyle = isFamily(e) ? '#8ad04e' : near ? '#ff5a3e' : '#d08a5a';
+    ctx.fillRect(x - 8, yOf(e.alt) - 1.5, 7, 3);
+  }
+  const py = yOf(p.alt || 0);
+  ctx.fillStyle = '#f5e9c8';
+  ctx.beginPath(); ctx.moveTo(x + 4, py); ctx.lineTo(x + 11, py - 5); ctx.lineTo(x + 11, py + 5); ctx.closePath(); ctx.fill();
+  ctx.font = 'bold 8px monospace';
+  ctx.textAlign = 'right';
+  ctx.fillText(Math.round(p.alt || 0) + '', x - 7, py - 6);
+  ctx.restore();
 }
 function row(k, v) { return '<div class="sprow"><span>' + k + '</span><b>' + v + '</b></div>'; }

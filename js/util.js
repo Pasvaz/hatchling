@@ -299,6 +299,14 @@ const VOICE = {
   coelo:     { style: 'shriek',  f: 340, rasp: 0.25 },                 // the desert's thin whistling scream
   regali:    { style: 'honk',    f: 140, rasp: 0.25, wave: 'square' }, // the crowned wall: a rough, low horn-blast
   tamery:    { style: 'roar',    f: 120, rasp: 0.7 },                  // the desert apex: a dry, rolling roar
+  ekrix:     { style: 'roar',    f: 160, rasp: 0.65 },                 // the island abelisaur: a wet, gravelly bellow
+  iani:      { style: 'honk',    f: 340 },                            // a bright, reedy call
+  chenani:   { style: 'roar',    f: 125, rasp: 0.75 },                 // the bigger abelisaur: deeper, rougher
+  kaiwhe:    { style: 'hiss',    f: 260 },                            // a plesiosaur's breath, blown out at the surface
+  ptero:     { style: 'shriek',  f: 640, rasp: 0.35 },                 // a gull's cry, thin and harsh
+  hatzego:   { style: 'boom',    f: 95, rasp: 0.4 },                   // a huge throat: a low, hollow, rasping boom
+  tethys:    { style: 'honk',    f: 270 },                            // a reedy island honk
+  magyaro:   { style: 'boom',    f: 120, rasp: 0.15 },                // a small sauropod's hollow call
   aero:      { style: 'shriek',  f: 190, rasp: 0.5 },                  // orkoraptor's scream, deeper and longer-winded
   procomp:   { style: 'chatter', f: 460 },                             // the pack's quick yips
   homalo:    { style: 'bellow',  f: 240, rasp: 0.2 },                  // the flat-head's short grunt

@@ -318,7 +318,7 @@ function beginSettle() {
 function cineLockInput() {
   const i = G.input;
   i.up = i.down = i.left = i.right = i.sprint = i.sprinting = false;
-  i.attack = i.atkHold = i.pounceHold = i.interact = i.action = i.rest = false;
+  i.attack = i.atkHold = i.flap = i.pounceHold = i.interact = i.action = i.rest = false;
   i.claw = i.dig = i.call1 = i.call2 = i.call3 = false;
   G.keys = {};
 }
