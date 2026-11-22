@@ -11,6 +11,9 @@ let WORLD_W = WT * TILE, WORLD_H = HT * TILE;
 const T_GRASS = 0, T_FOREST = 1, T_SAND = 2, T_WATER = 3, T_DEEP = 4, T_MUD = 5, T_LAVA = 6;
 // the Nivalotitan Wall adds rock walls (the climbing maze) and frozen ponds
 const T_CLIFF = 7, T_ICE = 8;
+// the Lesser Archipelago adds SWIMMER'S DEPTH: open ocean past the island shelves —
+// only swimmers cross it (deep water anywhere else is wadeable, slowly)
+const T_SWIM = 9;
 
 const TGRID = 96;   // tree-collision grid cell size (px)
 const World = {
@@ -80,14 +83,21 @@ const ECOS = {
   },
   desert: {
     name: 'The Death Desert', tint: '#d0663a', emoji: '☀️', sub: 'red sand · the river heart · sandstorms',
-    seed: 20260919, cost: 4000, size: 520,   // the largest map in the game, by a distance
+    seed: 20260919, cost: 4000, size: 520,
     gen: () => genDesert(),
+  },
+  archi: {
+    name: 'The Lesser Archipelago', tint: '#2f8fb8', emoji: '🏝️', sub: "open ocean · thirty-three islands · swimmer's depth",
+    seed: 20261120, cost: 5000, size: 1440,   // nearly three times the desert: the largest map in the game
+    gen: () => genArchipelago(),
   },
 };
 // the river only ever occupies this x window (px) — used to cull river passes
 const RIVER_X0 = 850, RIVER_X1 = 2240;
 // one water palette for every ecosystem: river bands and pond blobs stay in sync
 const WATER_COLS = { sand: '#c8b585', foam: '#9cbfb2', shallow: '#5b8fa3', open: '#4a7b90', deep2: '#40707f', deep: '#35616f' };
+// the open ocean's own darker steps, past the shelves (the Archipelago)
+const OCEAN_COLS = { shelf: '#2c5869', swim: '#1d4257', swim2: '#204a62' };
 
 function waterTilePos(v) { return { x: (v & 0xffff) * TILE + TILE / 2, y: (v >>> 16) * TILE + TILE / 2 }; }   // 16 bits an axis: maps past 256 tiles
 
@@ -169,8 +179,9 @@ function terAtPx(x, y) {
   const ty = clamp(Math.floor(y / TILE), 0, HT - 1);
   return World.ter[tIdx(tx, ty)];
 }
-function isWaterPx(x, y) { const t = terAtPx(x, y); return t === T_WATER || t === T_DEEP; }
-function isDeepPx(x, y) { return terAtPx(x, y) === T_DEEP; }
+function isWaterPx(x, y) { const t = terAtPx(x, y); return t === T_WATER || t === T_DEEP || t === T_SWIM; }
+function isDeepPx(x, y) { const t = terAtPx(x, y); return t === T_DEEP || t === T_SWIM; }
+function isSwimPx(x, y) { return terAtPx(x, y) === T_SWIM; }   // swimmer's depth (Archipelago only)
 function isMudPx(x, y) { return terAtPx(x, y) === T_MUD; }
 function isLavaPx(x, y) { return terAtPx(x, y) === T_LAVA; }
 function isCliffPx(x, y) { return terAtPx(x, y) === T_CLIFF; }
@@ -198,6 +209,46 @@ function coolDir(x, y) {
     }
   }
   return 0;
+}
+// TREE COVER: standing among a stand of trees (two or more trunks close
+// round, or deep in a forest) hides an animal from the sky. No wild
+// Hatzegopteryx will go in after it (see NPC_DEF.hatzego.noCover)
+const COVER_R = 36;
+function treeCover(x, y) {
+  if (forestShadePx(x, y) > 0.55) return true;
+  const grid = World.treeGrid;
+  if (!grid) return false;
+  const gx = (x / TGRID) | 0, gy = (y / TGRID) | 0;
+  let n = 0;
+  for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+    const cell = grid.get((gx + dx) + ',' + (gy + dy));
+    if (!cell) continue;
+    for (const t of cell) {
+      const ex = t.x - x, ey = t.y - y;
+      if (ex * ex + ey * ey < COVER_R * COVER_R && ++n >= 2) return true;
+    }
+  }
+  return false;
+}
+// the nearest spot with cover, within R (or null)
+function nearestCover(x, y, R) {
+  const grid = World.treeGrid;
+  if (!grid) return null;
+  const gx = (x / TGRID) | 0, gy = (y / TGRID) | 0, k = Math.ceil(R / TGRID);
+  let best = null, bd = R;
+  for (let dy = -k; dy <= k; dy++) for (let dx = -k; dx <= k; dx++) {
+    const cell = grid.get((gx + dx) + ',' + (gy + dy));
+    if (!cell) continue;
+    for (const t of cell) {
+      const d = Math.hypot(t.x - x, t.y - y);
+      if (d >= bd) continue;
+      // stand just off the trunk, on the side it comes from
+      const a = Math.atan2(y - t.y, x - t.x), sx = t.x + Math.cos(a) * 10, sy = t.y + Math.sin(a) * 10;
+      if (isWaterPx(sx, sy) || !treeCover(sx, sy)) continue;
+      bd = d; best = { x: sx, y: sy };
+    }
+  }
+  return best;
 }
 // is this spot in the shade of a tree? Dense forest counts, and so does the
 // crown of any single tree close enough — the desert's lone giants are
@@ -271,6 +322,8 @@ function genWorld(eco) {
   W.channels = [];      // flood channels (the Reach, the desert river) — never inherit them
   W.landmark = null;    // the Great Walk's destination (placeLandmark)
   W.cradle = null;      // the desert's hidden nursery (genDesert)
+  W.ocean = false;      // the Archipelago: open sea everywhere, islands painted as shores
+  W.isles = []; W.isleMap = null; W.straits = []; W.isleLinks = [];
 
   ECOS[eco].gen();
   dressNests();
@@ -279,6 +332,8 @@ function genWorld(eco) {
   // --- collect water tiles (for shimmer / fish spawns / drink search) ---
   for (let ty = 0; ty < HT; ty++) for (let tx = 0; tx < WT; tx++) {
     const t = W.ter[tIdx(tx, ty)];
+    // (swimmer's depth stays off the list: the drink and spawn searches want
+    // the island waters, not a million tiles of open ocean)
     if (t === T_WATER || t === T_DEEP) W.waterTiles.push(tx | (ty << 16));
   }
 
@@ -1477,6 +1532,7 @@ function buildPaintData() {
     const r = 55 + crnd() * 130;
     const warm = crnd();
     const alpha = 0.05 + crnd() * 0.055;
+    if (World.ocean && isWaterPx(x, y)) continue;   // (the sea carries no land tint)
     let rgb;
     if (World.snowy) rgb = warm < 0.5 ? '210,224,238' : warm < 0.8 ? '176,196,216' : '150,172,196';
     else if (World.desert) rgb = ff > 0.42
@@ -1595,8 +1651,9 @@ function renderGroundRegion(ctx, rx, ry, rw, rh) {
   const inR = (x, y, m) => x > rx - m && x < rx + rw + m && y > ry - m && y < ry + rh + m;
 
   // ---- pass 1: land base + forest-edge dither ----
-  for (let ty = ty0; ty <= ty1; ty++) {
-    for (let tx = tx0; tx <= tx1; tx++) {
+  // (one tile's paint is a function: the Archipelago repaints its islands'
+  // land over the shore bands, clipped to the smooth coastline)
+  const paintTile = (tx, ty) => {
       const i = tIdx(tx, ty);
       const n = fbm(tx * 0.18, ty * 0.18);
       const big = fbm(tx * 0.045 + 40, ty * 0.045 + 40);
@@ -1605,6 +1662,8 @@ function renderGroundRegion(ctx, rx, ry, rw, rh) {
       const ff = clamp((World.forest[i] - 0.28) / 0.3, 0, 1);
       const t = World.ter[i];
       let ground = mixHex(grass, forest, ff);
+      // the Archipelago's beaches and sandy clearings: pale sea-sand
+      if (World.ocean && t === T_SAND && World.isleS[i] > ARCHI_BEACH + 0.6) ground = mixHex('#d2bf8e', '#c3ac7a', n);
       // ashfall: the whole land is grey with ash, greener only under the groves
       if (World.ashy) ground = mixHex(ground, '#736c60', 0.55 - ff * 0.25);
       // rainforest: everything sinks toward deep wet green, jungle deepest
@@ -1644,8 +1703,36 @@ function renderGroundRegion(ctx, rx, ry, rw, rh) {
           ctx.fillRect(tx * TILE + hx * 22, ty * TILE + hy * 22, 2, 2);
         }
       }
+  };
+  // the open ocean: the whole region starts as the dark of swimmer's depth,
+  // in one seamless sheet with slow soft swells across it — the shore bands
+  // paint the shelves and shallows over it
+  if (World.ocean) {
+    ctx.fillStyle = OCEAN_COLS.swim;
+    ctx.fillRect(rx - TILE, ry - TILE, rw + TILE * 2, rh + TILE * 2);
+    const SW = 420;
+    for (let sy = Math.floor(ry / SW) - 1; sy <= Math.ceil((ry + rh) / SW); sy++) {
+      for (let sx = Math.floor(rx / SW) - 1; sx <= Math.ceil((rx + rw) / SW); sx++) {
+        const h = hash2(sx * 17 + 5, sy * 31 + 9);
+        const cx = (sx + hash2(sx, sy * 3)) * SW, cy = (sy + hash2(sx * 7, sy)) * SW, r = SW * (0.6 + h * 0.7);
+        const g = ctx.createRadialGradient(cx, cy, r * 0.1, cx, cy, r);
+        const col = h > 0.5 ? '38,84,108' : '20,52,72';
+        g.addColorStop(0, 'rgba(' + col + ',0.45)'); g.addColorStop(1, 'rgba(' + col + ',0)');
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.ellipse(cx, cy, r, r * 0.7, h * 3, 0, TAU); ctx.fill();
+      }
     }
   }
+  for (let ty = ty0; ty <= ty1; ty++) {
+    for (let tx = tx0; tx <= tx1; tx++) {
+      if (World.ocean) {
+        const t = World.ter[tIdx(tx, ty)];
+        if (t === T_WATER || t === T_DEEP || t === T_SWIM) continue;
+      }
+      paintTile(tx, ty);
+    }
+  }
+  if (World.ocean) drawIsleShores(ctx, rx, ry, rw, rh, paintTile);
 
   // ---- pass 1b: tonal clouds ----
   for (const cl of Paint.clouds) {
@@ -3080,7 +3167,7 @@ function drawWaterShimmer(ctx, camX, camY, vw, vh) {
         }
         continue;
       }
-      if (t !== T_WATER && t !== T_DEEP) continue;
+      if (t !== T_WATER && t !== T_DEEP && t !== T_SWIM) continue;
       const h = hash2(tx * 3 + 7, ty * 5 + 2);
       if (h < 0.55) continue;
       const ph = (G.time * (0.5 + h) + h * 9) % 3;

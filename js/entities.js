@@ -137,6 +137,35 @@ const PLAYER_DEF = {
   // bleed for half a minute (bleedDur), and it can pack — two kin at most
   // (packMax: three hunters counting you)
   aero: { hp: 1900, dmg: 170, speed: 148, sprint: 1.85, reach: 34, atkCd: 0.6, diet: 'carn', bleedBite: true, bleedMul: 1.5, bleedDur: 2.2, stamMax: 420, eco: 'desert', cost: 1200, req: 'regali', heatResist: 0.3, growthRate: 0.7, clawSecond: true, packSpecies: true, packMax: 2 },
+  // THE LESSER ARCHIPELAGO — its first playable: a grey island abelisaur,
+  // stocky and slow on land (a grown one is only a hair faster than the
+  // homalocephale it chases), but a decent swimmer — the only way off
+  // Utoriana is across Garamirala's pathway
+  ekrix: { hp: 2400, dmg: 200, speed: 118, sprint: 1.4, reach: 34, atkCd: 0.7, diet: 'carn', bleedBite: true, stamMax: 130, eco: 'archi', cost: 1500, req: 'tamery', growthRate: 0.65, swim: true, swimMul: 0.8, babyFast: true },
+  // CHENANISAURUS: the second island abelisaur — bigger and harder-hitting
+  // than Ekrixinatosaurus, but slower. Like it, a speedster as a baby
+  // that slows down as it grows (babyFast)
+  iani: { hp: 1100, dmg: 70, speed: 140, sprint: 1.6, reach: 22, atkCd: 0.8, diet: 'herb', bleedBite: false, stamMax: 180, eco: 'archi', cost: 1750, req: 'ekrix', growthRate: 1.0, swim: true, swimMul: 0.6 },
+  chenani: { hp: 3300, dmg: 265, speed: 100, sprint: 1.35, reach: 38, atkCd: 0.85, diet: 'carn', bleedBite: true, stamMax: 135, eco: 'archi', cost: 2000, req: 'iani', growthRate: 0.55, swim: true, swimMul: 0.7, babyFast: true },
+  // KAIWHEKEA: the plesiosaur. Lives fully under the water (marine): fast
+  // and agile there with a huge stamina pool, a fish-catcher (fishFeast),
+  // but hauled out on land it can barely drag itself along (landMul).
+  // Its bite bleeds — for whatever tries to cross its water
+  kaiwhe: { hp: 1100, dmg: 80, speed: 150, sprint: 1.55, reach: 30, atkCd: 0.45, diet: 'carn', bleedBite: true, stamMax: 320, eco: 'archi', cost: 2500, req: 'chenani', growthRate: 0.8, swim: true, swimMul: 1, marine: true, landMul: 0.15, fishFeast: 2.5 },
+  // PTERODACTYLUS: a small pest on the wing. SPACE climbs, letting go glides it
+  // down until it lands (on water it floats and paddles); M bites. Up high,
+  // only other flyers at its height can touch it — a scavenger, not a fighter
+  ptero: { hp: 150, dmg: 16, speed: 60, sprint: 1.5, reach: 16, atkCd: 0.45, diet: 'carn', stamMax: 200, eco: 'archi', cost: 3000, req: 'kaiwhe', growthRate: 1.1, swim: true, swimMul: 0.6, flyer: true, flyMul: 2.7 },
+  // HATZEGOPTERYX: the biggest pterosaur of all, an azhdarchid titan. Flies
+  // well, runs fast, hits like nothing else on the islands, and SNATCHES:
+  // press F by an animal to pick it up (jaws if it has half your health
+  // or less, feet up to two-thirds), to carry off, bite, or drop from the sky
+  // the islands' prey: a dwarf hadrosauroid and a dwarf titanosaur. A FULL
+  // ADULT of either is just too heavy for Hatzegopteryx to lift (over two-
+  // thirds of its 2100); every younger one can be carried off
+  tethys: { hp: 1440, dmg: 75, speed: 116, sprint: 1.5, reach: 28, atkCd: 1.3, diet: 'herb', stamMax: 170, eco: 'archi', cost: 3200, req: 'ptero', growthRate: 0.9, swim: true, swimMul: 0.6, herdBorn: true },
+  magyaro: { hp: 1480, dmg: 130, speed: 84, sprint: 1.35, reach: 40, atkCd: 1.6, diet: 'herb', stamMax: 150, eco: 'archi', cost: 3200, req: 'ptero', growthRate: 0.6, swim: true, swimMul: 0.55, herdBorn: true },
+  hatzego: { hp: 2100, dmg: 240, speed: 132, sprint: 1.45, reach: 44, atkCd: 0.95, diet: 'carn', stamMax: 300, eco: 'archi', cost: 3500, req: 'magyaro', growthRate: 0.55, swim: true, swimMul: 0.55, flyer: true, flyMul: 1.65, snatch: true },
   poekilo: { hp: 3000, dmg: 260, speed: 124, sprint: 1.65, reach: 40, atkCd: 0.85, diet: 'carn', bleedBite: true, bleedMul: 1.2, stamMax: 155, eco: 'jungle', cost: 1200, req: 'neove', growthRate: 0.6, doubleBite: true, wrestler: true },
 };
 
@@ -230,6 +259,9 @@ const NPC_DEF = {
   lourinha: { hp: 1700, dmg: 160, atkCd: 1.3, speed: 128, detect: 320, homeR: 650, reach: 34, biome: 'plains', turn: 2.0, fearless: true, bleedable: true, biteBleed: { dps: 13, dur: 8 }, hunts: ['proto', 'dakota', 'oloro'], caution: 0.75, scavR: 300 },
   // the sawfish: lethal and angry — anything that touches its water is prey
   onchop: { hp: 500, dmg: 95, atkCd: 1.2, speed: 175, detect: 230, homeR: 400, reach: 26, biome: 'lake', turn: 3.5, fearless: true, aquatic: true, hunts: ['lepisosteus', 'bassb', 'scutelich'] },
+  // ICHTHYODECTES: the archipelago's sea barracuda — quick, toothy, a minor
+  // threat to a plesiosaur and a big one to small fish
+  ichthyod: { hp: 240, dmg: 22, atkCd: 0.9, speed: 210, detect: 240, homeR: 700, reach: 22, biome: 'ocean', turn: 4.6, fearless: true, aquatic: true, bleedable: true, hunts: ['lepisosteus', 'bassb', 'scutelich'] },
   // the great coelacanth: immensely tanky, strong, and goes exactly nowhere
   mawsonia: { hp: 1600, dmg: 110, atkCd: 1.7, speed: 50, detect: 130, homeR: 220, reach: 32, biome: 'sea', turn: 2.2, fearless: true, tank: true, aquatic: true, bleedable: true, melee: { kb: 240 } },
   // ---- THE NIVALOTITAN WALL ----
@@ -257,7 +289,7 @@ const NPC_DEF = {
   beishan:   { hp: 1500, dmg: 110, atkCd: 1.4, speed: 140, fleeSpeed: 176, detect: 260, homeR: 420, reach: 34, biome: 'plains', turn: 2.4, bleedable: true, melee: { kb: 260 } },
   aepyorni:  { hp: 450, dmg: 0, atkCd: 0, speed: 184, fleeSpeed: 224, detect: 320, homeR: 440, reach: 0, biome: 'plains', turn: 3.4, bleedable: true },
   // wild homalocephale: small herds that ram what crowds them
-  homalo:    { hp: 700, dmg: 85, atkCd: 1.2, speed: 136, fleeSpeed: 156, detect: 230, homeR: 340, reach: 26, biome: 'forest', turn: 2.6, bleedable: true, melee: { kb: 280 }, caution: 1.2 },
+  homalo:    { hp: 700, dmg: 85, atkCd: 1.2, speed: 136, fleeSpeed: 156, detect: 230, homeR: 340, reach: 26, biome: 'forest', turn: 2.6, bleedable: true, melee: { kb: 280 }, caution: 1.2, meatMul: 0.6 },   // a small animal: little meat on it
   // wild procompsognathus: kin for the alpha, a nuisance for everyone else
   procomp:   { hp: 200, dmg: 32, atkCd: 0.7, speed: 160, detect: 240, homeR: 340, reach: 18, biome: 'forest', turn: 4.6, patience: 7, packCourage: true, bleedable: true, fears: [['eocarch', 200], ['deltadro', 160]] },
   // the hadrosaurs: the little ones run, the middle ones fight only when the
@@ -283,9 +315,12 @@ const NPC_DEF = {
   // crown to crown. Ten thousand hp, wounds that barely bleed, a tail that
   // can crack bone — and the STOMP: up on the hind legs (slowly: that's the
   // warning), then the whole front comes down. Near it hurts; UNDER it kills
-  yunmeng:   { hp: 10000, dmg: 260, atkCd: 2.1, speed: 46, detect: 120, homeR: 3200, reach: 64, biome: 'forest', turn: 0.9, fearless: true, tank: true, giant: true, bleedable: true, bleedResist: 0.3, hide: 0.55, melee: { kb: 560 },
+  yunmeng:   { hp: 11500, dmg: 260, atkCd: 2.1, speed: 46, detect: 120, homeR: 3200, reach: 64, biome: 'forest', turn: 0.9, fearless: true, tank: true, giant: true, bleedable: true, bleedResist: 0.3, hide: 0.55, melee: { kb: 560 },
                tailBone: { mul: 0.6, max: 0.14 }, trample: { dmg: 180, cd: 1.2 },
-               stomp: { cd: 5, wind: 1.7, r: 260, under: 80, dmg: 440, underDmg: 3000 } },
+               stomp: { cd: 5, wind: 1.7, r: 260, under: 80, dmg: 440, underDmg: 3000 },
+               // the PUNCH: a fast forefoot jab at whatever crowds the front feet
+               // (wind = the brief lift that warns of it; reach/r in adult-scale px)
+               punch: { dmg: 750, cd: 2.2, wind: 0.28, reach: 62, r: 46, kb: 460 } },
   // THE GUARDIAN OF THE GIANTS' CRADLE: a shieldcroc as long as a hadrosaur,
   // all but invisible under its pond. Takes whatever comes down to the
   // water — and every so often it hauls out to walk the nursery
@@ -360,6 +395,33 @@ const NPC_DEF = {
   // the dog-croc: long-legged, land-going, and utterly at home when the
   // rivers climb their banks
   arari: { hp: 420, dmg: 62, atkCd: 1.0, speed: 128, detect: 230, homeR: 380, reach: 22, biome: 'any', turn: 3.0, amphibious: true, swims: true, bleedable: true, hunts: ['hypsi'], caution: 1.1 },
+  // ---- the Lesser Archipelago ----
+  // the island ornithopods: squat little zalmoxes on every island but
+  // Utoriana, and Narapa's herds of plain small duckbills
+  zalmox: { hp: 420, dmg: 55, atkCd: 1.4, speed: 112, fleeSpeed: 140, detect: 210, homeR: 320, reach: 24, biome: 'any', turn: 2.6, bleedable: true, melee: { kb: 160 }, caution: 1.2 },
+  iani: { hp: 1100, dmg: 70, atkCd: 1.2, speed: 120, fleeSpeed: 150, detect: 230, homeR: 360, reach: 22, biome: 'any', turn: 2.8, bleedable: true, melee: { kb: 140 }, caution: 1.2 },
+  hypsi: { hp: 300, dmg: 18, atkCd: 0.8, speed: 140, fleeSpeed: 190, detect: 240, homeR: 220, reach: 14, biome: 'any', turn: 4.0, bleedable: true, caution: 2.0, landBound: true },
+  fylax: { hp: 520, dmg: 68, atkCd: 1.6, speed: 104, fleeSpeed: 138, detect: 220, homeR: 340, reach: 28, biome: 'plains', turn: 2.4, bleedable: true, melee: { kb: 180 }, caution: 1.2 },
+  // CHENANISAURUS: Narapa's own abelisaur. Big, slow and fearless; it
+  // hunts the island's herds and anything else that comes ashore
+  chenani: { hp: 2900, dmg: 230, atkCd: 1.4, speed: 100, detect: 300, homeR: 700, reach: 36, biome: 'any', turn: 1.8, fearless: true, bleedable: true, hunts: ['zalmox', 'telmato', 'fylax'], caution: 1.0 },
+  // PTERODACTYLUS: the gulls of the archipelago — they fly (npcFlight), so
+  // the sea is no barrier, and their whole life is the next carcass
+  ptero: { hp: 110, dmg: 12, atkCd: 0.8, speed: 55, fleeSpeed: 60, detect: 160, homeR: 700, reach: 14, biome: 'any', turn: 4.2, swims: true, flyer: true, flyMul: 2.8, scavR: 1100, bleedable: true, caution: 1.4 },
+  // the islands' prey (herds of every age: see `ages` in the spawns)
+  tethys: { hp: 1440, dmg: 75, atkCd: 1.6, speed: 104, fleeSpeed: 136, detect: 220, homeR: 340, reach: 28, biome: 'any', turn: 2.4, bleedable: true, melee: { kb: 180 }, caution: 1.2, noPile: true },
+  magyaro: { hp: 1480, dmg: 130, atkCd: 2.0, speed: 70, fleeSpeed: 94, detect: 200, homeR: 320, reach: 40, biome: 'any', turn: 1.6, bleedable: true, melee: { kb: 240, noPile: true }, caution: 1.0 },
+  // the sky's king: three wild ones roam the archipelago, flying LOW, and
+  // now and then carry something off (thinkHatzego). noCover: never goes in
+  // under the trees
+  hatzego: { hp: 2100, dmg: 200, atkCd: 1.2, speed: 110, fleeSpeed: 120, detect: 380, homeR: 5000, reach: 44, biome: 'any', turn: 2.2, swims: true, flyer: true, flyMul: 1.6, bleedable: true, fearless: true, snatcher: true, noCover: true, caution: 0.6 },
+  // GARAMIRALA: keeper of the straits. Fearless and merciless, it never
+  // leaves deep water (deepOnly — the shallows are safe ground) or strays far
+  // from its strait. Tuned against a growing Ekrixinatosaurus: a hatchling
+  // to a fresh sub-adult is a meal, a half-grown sub-adult an even fight it
+  // slightly wins, and a grown adult sees it off
+  garami: { hp: 2600, dmg: 245, atkCd: 0.7, lungeMul: 1.35, speed: 280, detect: 440, homeR: 560, reach: 34, biome: 'ocean', turn: 3.2, aquatic: true, deepOnly: true, fearless: true, bleedable: true, melee: { kb: 260 } },
+  kaiwhe: { hp: 1100, dmg: 80, atkCd: 0.9, speed: 100, detect: 300, homeR: 450, reach: 30, biome: 'ocean', turn: 3.0, aquatic: true, bleedable: true, melee: { kb: 120 }, caution: 1.0 },
 };
 
 let npcSeq = 1;
@@ -398,6 +460,15 @@ function makePlayer(species, gender, skin) {
 }
 function hpFrac(g) { return 0.12 + 0.88 * g; }
 function dmgFrac(g) { return 0.15 + 0.85 * g; }
+// APPETITE: bigger animals need more food. A bite of meat fills every
+// animal the same amount, but a big one has to tear off (and use up) that
+// much more of the carcass to get it; a fern or a mouthful of canopy fills a
+// small animal more and a big one less. 1 = a grown Rajasaurus.
+function appetite(p) {
+  const d = DINO[p.species];
+  return clamp(d.scale * sizeScale(p.growth) * genderMod(p).size, 0.35, 3.5);
+}
+function plantFill(p) { return clamp(1 / Math.sqrt(appetite(p)), 0.6, 1.4); }
 function playerMaxHp() { return Math.round(PLAYER_DEF[G.player.species].hp * genderMod(G.player).hp * hpFrac(G.player.growth)); }
 function playerDmg() {
   const p = G.player, def = PLAYER_DEF[p.species];
@@ -423,16 +494,76 @@ function bloodBurst(x, y, n) {
   }
 }
 
+// ---------- FLIGHT: altitude decides who can touch whom ----------
+// A flyer's SHADOW is where it really is on the map; its altitude lifts the
+// body off it. Two animals can only fight when their shadows meet AND their
+// heights do: two flyers within AIR_BAND of each other, or a flyer low enough
+// to come within a grounded animal's head height (the tall reach higher).
+const FLY_CEIL = 480;     // the highest a flyer climbs (px above its shadow) — pterosaurs go HIGH
+const FLY_CLIMB = 150;    // px/s climbing while SPACE is held
+const FLY_SINK = 75;      // px/s descent the moment it's let go — all the way down
+// WINGS COST BREATH: flapping (SPACE) burns stamina as fast as a run, and
+// nothing comes back while the wings beat. Gliding is free. SHIFT on the wing
+// is the hardest work there is: twice the run.s burn in total, and faster
+// than the ground sprint multiplier alone.
+const FLY_FLAP_BURN = 20;        // stamina per second while flapping
+const FLY_SPRINT_BURN = 40;      // stamina per second sprinting aloft, in total
+const FLY_SPRINT_BONUS = 1.2;    // extra speed on top of def.sprint when sprinting aloft
+const AIR_BAND = 28;      // two flyers this close in height can fight
+const AIR_PAD = 12;       // shadow-contact slack (the reach of a jaw / a wing)
+function isAirborne(e) { return (e.alt || 0) > 0.5; }
+// a grounded animal can't get at `t` up there (with a little slack, so a
+// flyer skimming just above its head still draws a snap)
+function outOfReachAbove(e, t) {
+  return !!t && isAirborne(t) && !isAirborne(e) && t.alt > reachHeight(e) + 20;
+}
+// how high above the ground a grounded animal's jaws can reach
+function reachHeight(e) {
+  const d = DINO[e.species];
+  if (!d) return 20;
+  if (d.fish || d.marine) return 6;   // sea creatures don't leap for birds
+  const s = d.scale * sizeScale(e.growth != null ? e.growth : 1) * genderMod(e).size;
+  return zoneHeights(d).head * s + 10;
+}
+function airReach(a, t) {
+  const aa = a.alt || 0, ta = t.alt || 0;
+  if (aa <= 0.5 && ta <= 0.5) return true;
+  // shadows apart? Measured body-to-body AND from the attacker's weapon on the
+  // ground — a giant's bill strikes far out in front of its own shadow
+  const wp = DINO[a.species] && !DINO[a.species].fish ? weaponPos(a) : null;
+  const near = dist(a.x, a.y, t.x, t.y) <= bodyRadius(a) + bodyRadius(t) + AIR_PAD ||
+    (wp && dist(wp.x, wp.y, t.x, t.y) <= wp.r + bodyRadius(t) + AIR_PAD);
+  if (!near) return false;
+  if (aa > 0.5 && ta > 0.5) return Math.abs(aa - ta) < AIR_BAND;
+  if (ta > 0.5) return ta <= reachHeight(a);   // grounded jaws vs a low flyer
+  return aa <= reachHeight(t);                 // a flyer swooping on something tall enough
+}
 function dealDamage(target, amount, attacker, opts) {
   opts = opts || {};
   if (target.isPlayer && !target.alive) return;
   if (!target.isPlayer && target.hp <= 0) return;
+  if (attacker && attacker.x != null && attacker.species && !opts.force && !airReach(attacker, target)) return;
+  // the AGILE (Utoriana's dwarf homalocephale) jink out from under jaws
+  // that are much bigger than they are — a young abelisaur lands its bites,
+  // a grown one closes on empty air more often than not
+  if (target.agile && attacker && !target.isPlayer) {
+    const ratio = bodyRadius(attacker) / Math.max(1, bodyRadius(target));
+    if (Math.random() < clamp((ratio - 2.2) * 1.5, 0, 0.93)) {
+      floatText(target.x, target.y - 30, 'dodged!', '#ffe9a0');
+      target.orbitDir = -(target.orbitDir || 1);
+      target.vx += rrange(-120, 120); target.vy += rrange(-120, 120);
+      target.spookT = 1.4;   // and it bolts clear while the big jaws reset
+      if (attacker.isPlayer) { target.state = 'flee'; target.target = attacker; target.stateT = 2.5; }
+      return;
+    }
+  }
   if (G.cine && (target.isPlayer || isFamily(target) || target.cineTo)) return;
   let dmg = amount;
   let crit = false;
   let glance = false;
   // a broken skull (or body) takes the force out of every attack it makes
   if (attacker && !attacker.isPlayer) dmg *= crippleBiteMul(attacker);
+  if (attacker && attacker.dmgMul) dmg *= attacker.dmgMul;   // island dwarfs bite softer
   if (attacker && attacker.elder) dmg *= ELDER_DMG;   // the old giants hit harder
   // a sauropod's hide: every blow lands at a fraction (the bleed has its own resist)
   if (!target.isPlayer && (NPC_DEF[target.species] || {}).hide) dmg *= NPC_DEF[target.species].hide;
@@ -466,6 +597,11 @@ function dealDamage(target, amount, attacker, opts) {
   target.hurtT = 0.35;
   target.lastAttacker = attacker;
   target.aggroT = 6;
+  // an aerosteon at war with a giant calls its kin — once per giant
+  if (G.player && G.player.species === 'aero' && attacker) {
+    if (attacker === G.player && target.species === 'yunmeng') kinJoinsBloodshed(target);
+    else if (target === G.player && attacker.species === 'yunmeng') kinJoinsBloodshed(attacker);
+  }
   // the pack hunts WITH the alpha: whatever the alpha bites — and whatever
   // bites the alpha — becomes the whole pack's quarry
   if (G.pack && G.pack.length && G.player) {
@@ -505,7 +641,7 @@ function dealDamage(target, amount, attacker, opts) {
 
 function killNPC(e, attacker) {
   e.hp = 0;
-  const meat = Math.round(e.maxhp * 0.55);
+  const meat = Math.round(e.maxhp * 0.55 * ((NPC_DEF[e.species] || {}).meatMul || 1));
   G.carcasses.push({ x: e.x, y: e.y, species: e.species, growth: e.growth, meat, maxMeat: meat, t: 0 });
   const i = G.npcs.indexOf(e);
   if (i >= 0) G.npcs.splice(i, 1);
@@ -579,14 +715,50 @@ function killPlayer(cause) {
 }
 
 // ---------- movement helpers ----------
-function terrainSpeedAt(x, y) {
-  if (isWaterPx(x, y)) return 0.55;
+// how fast the ground lets an animal move. Water slows everyone; DEEP water
+// (anywhere — the rivers' channels, the ponds' hearts, the island shelves)
+// is crossable by all now, but only at a swim: slow for most, slower still
+// for the heavyweights. Fish and the water's own keep their usual pace
+const MARINE_FAMILY_SWIM = 1.6;   // a plesiosaur mate's or baby's pace in water (their base is a walking speed)
+function terrainSpeedAt(x, y, e) {
+  // a flyer on the wing: the ground below doesn't matter at all
+  if (e && (e.alt || 0) > 0) {
+    const fd = e.isPlayer ? PLAYER_DEF[e.species] : (NPC_DEF[e.species] || PLAYER_DEF[e.species] || {});
+    return fd.flyMul || 2;
+  }
+  // a plesiosaur mate or baby lives by the same rule as the player: at home
+  // in the water (quick enough to keep up with you), barely able to drag
+  // itself along on land
+  if (e && !e.isPlayer && DINO[e.species] && DINO[e.species].marine)
+    return isWaterPx(x, y) ? MARINE_FAMILY_SWIM : e.landHunt ? 0.55 : ((PLAYER_DEF[e.species] || {}).landMul || 0.2);
+  const t = terAtPx(x, y);
+  if (t === T_WATER) return 0.55;
+  if (t === T_DEEP || t === T_SWIM) {
+    if (!e) return 0.55;
+    const nd = e.isPlayer ? null : NPC_DEF[e.species];
+    if (nd && (nd.aquatic || nd.swims || nd.amphibious)) return 0.55;
+    return isHeavySwimmer(e) ? 0.28 : 0.4;
+  }
   if (isMudPx(x, y)) return 0.72;
   if (isLavaPx(x, y)) return 0.8;   // crossable — at a price
   if (isCliffPx(x, y)) return 0.5;  // climbing a wall is slow, careful going
   return 1;
 }
+// the big and the armoured wallow across rather than swim
+function isHeavySwimmer(e) {
+  const d = DINO[e.species];
+  if (!d) return false;
+  if (e.isPlayer) return d.scale >= 1.5 || (PLAYER_DEF[e.species].speed || 100) < 90;
+  const nd = NPC_DEF[e.species] || {};
+  return d.scale >= 1.5 || !!nd.tank || !!nd.giant;
+}
 function collideStatics(e, r) {
+  // up in the air nothing on the ground is in the way — only the map's edge
+  if ((e.alt || 0) > 2) {
+    e.x = clamp(e.x, 10, WORLD_W - 10);
+    e.y = clamp(e.y, 10, WORLD_H - 10);
+    return;
+  }
   // trees come from the spatial grid: only the 3×3 cells around the animal
   // are checked, so a rainforest of thousands of trunks stays cheap
   const gx = (e.x / TGRID) | 0, gy = (e.y / TGRID) | 0;
@@ -620,11 +792,23 @@ function collideStatics(e, r) {
       e.y = b.y + Math.sin(a) * min;
     }
   }
-  // deep water is impassable — unless you were built for it
-  if (isDeepPx(e.x, e.y) && !canSwimDeep(e)) {
-    const a = shallowDir(e.x, e.y);
+  // the land-bound (Okiri's Hypsilophodon) are always nudged back onto dry
+  // ground, unless they're actually drinking
+  if (!e.isPlayer && NPC_DEF[e.species] && NPC_DEF[e.species].landBound && e.state !== 'drink' && isWaterPx(e.x, e.y)) {
+    const la = landDir(e.x, e.y);
+    if (la != null) { e.x += Math.cos(la) * 3; e.y += Math.sin(la) * 3; }
+  }
+  // deep water is a slow swim for anyone (terrainSpeedAt) — but SWIMMER'S
+  // DEPTH, the open ocean past the island shelves, is for swimmers only
+  if (isSwimPx(e.x, e.y) && !canSwimDeep(e)) {
+    // out at sea with nothing driving it any more: far from home, it swims
+    // for home; close in, it just turns back onto the shelf
+    if (!e.isPlayer && e.home && dist(e.x, e.y, e.home.x, e.home.y) > 500) { e.state = 'swimHome'; e.stateT = 40; e.target = null; }
+    else {
+      const a = shelfDir(e.x, e.y);
     e.x += Math.cos(a) * 3;
     e.y += Math.sin(a) * 3;
+  }
   }
   // a rock wall is impassable — unless you can climb it (some only as babies)
   if (isCliffPx(e.x, e.y) && !isClimber(e)) {
@@ -641,11 +825,15 @@ function collideStatics(e, r) {
   e.x = clamp(e.x, 10, WORLD_W - 10);
   e.y = clamp(e.y, 10, WORLD_H - 10);
 }
+// SWIMMER'S DEPTH: every animal CAN swim it, but none goes in by choice —
+// only after its leader (or parent), after its prey, away from a hunter, or
+// swimming back home to its own island
+const SWIM_DRIVEN = new Set(['follow', 'flee', 'cover', 'chase', 'stoop', 'fight', 'windup', 'lunge', 'recover', 'swimHome']);
 function canSwimDeep(e) {
-  if (e.isPlayer) return !!PLAYER_DEF[e.species].swim;
+  if (e.isPlayer) return true;   // the player can always swim it (a non-swimmer only very slowly)
   const nd = NPC_DEF[e.species];
-  if (!nd) return !!PLAYER_DEF[e.species].swim;   // mates & babies swim like their kind
-  return !!nd.aquatic || !!nd.swims;
+  if ((nd && (nd.aquatic || nd.swims)) || (!nd && PLAYER_DEF[e.species] && PLAYER_DEF[e.species].swim)) return true;
+  return SWIM_DRIVEN.has(e.state);
 }
 // who can cross the Wall's rock walls. `climb` = always; `babyClimb` = only
 // while small (a hatchling scrambles up a face its grown parent can't) — the
@@ -658,6 +846,16 @@ function isClimber(e) {
   return false;
 }
 // direction of the nearest non-deep ground (works for the river and for ponds)
+// direction out of swimmer's depth, back onto the shelf
+function shelfDir(x, y) {
+  for (let r = TILE; r <= TILE * 12; r += TILE) {
+    for (let k = 0; k < 12; k++) {
+      const a = (k / 12) * TAU;
+      if (!isSwimPx(x + Math.cos(a) * r, y + Math.sin(a) * r)) return a;
+    }
+  }
+  return 0;
+}
 function shallowDir(x, y) {
   for (let r = TILE; r <= TILE * 8; r += TILE) {
     for (let k = 0; k < 10; k++) {
@@ -694,11 +892,11 @@ function stepToward(e, tx, ty, speed, dt) {
   const diff = ((desired - e.heading + Math.PI * 3) % TAU) - Math.PI;
   const maxT = (e.turnRate || 3) * dt * (d < 40 ? 3 : 1);  // converge when close
   e.heading += clamp(diff, -maxT, maxT);
-  const sp = speed * terrainSpeedAt(e.x, e.y);
+  const sp = speed * terrainSpeedAt(e.x, e.y, e);
   e.x += Math.cos(e.heading) * sp * dt;
   e.y += Math.sin(e.heading) * sp * dt;
   if (Math.abs(Math.cos(e.heading)) > 0.25) faceToward(e, Math.cos(e.heading) > 0 ? 1 : -1);
-  e.pitchT = Math.sin(e.heading) * 0.3;   // nose leads into vertical movement
+  e.pitchT = Math.sin(e.heading) * (isAirborne(e) ? 0.6 : 0.3);   // nose leads into vertical movement
   e.move = lerp(e.move, 1, 0.15);
   e.phase += dt * sp * 0.055;
   return d < 6;
@@ -736,6 +934,8 @@ function awayDir(e, t) {
 function playerVisibleTo(e, detectR) {
   const p = G.player;
   if (!p || !p.alive) return false;
+  // a flyer high overhead is no business of a grounded animal's
+  if (outOfReachAbove(e, p)) return false;
   let r = detectR;
   // sprinting is noisy, resting/small is stealthy
   if (G.keys && G.input && G.input.sprinting) r *= 1.3;
@@ -839,6 +1039,41 @@ function crouchSpook(p) {
 function packRoom(p) {
   const m = PLAYER_DEF[p.species].packMax;
   return m == null ? Infinity : m - (G.pack || []).filter(e => e.hp > 0).length;
+}
+// AEROSTEON vs YUNMENGLONG: the first blow traded with a giant brings one
+// more of your kin sprinting in from beyond the edge of the screen — on top
+// of the pack cap, and once per giant. It comes from the side away from the
+// giant, so you see it run the whole way in.
+function kinJoinsBloodshed(giant) {
+  const p = G.player;
+  if (!p || !p.alive || p.species !== 'aero' || !giant || giant.kinCalled || giant.hp <= 0) return null;
+  giant.kinCalled = true;
+  const z = G.zoom || 1, hw = VIEW_W * z / 2, hh = VIEW_H * z / 2;
+  // the camera centres on the player, so the view is the box around them
+  const cx = p.x, cy = p.y;
+  const base = Math.atan2(p.y - giant.y, p.x - giant.x);
+  const offView = (x, y) => Math.abs(x - cx) > hw + 60 || Math.abs(y - cy) > hh + 60;
+  let pos = null;
+  for (let k = 0; k < 36 && !pos; k++) {
+    // the first tries hug the far side; later ones sweep the whole ring
+    const a = base + (k < 12 ? rrange(-0.8, 0.8) : rrange(-Math.PI, Math.PI));
+    const c = Math.abs(Math.cos(a)), s = Math.abs(Math.sin(a));
+    const r = Math.min(c > 1e-3 ? hw / c : 1e9, s > 1e-3 ? hh / s : 1e9) + 110 + (k % 4) * 30;
+    const x = clamp(cx + Math.cos(a) * r, 80, WORLD_W - 80), y = clamp(cy + Math.sin(a) * r, 80, WORLD_H - 80);
+    if (offView(x, y) && !isWaterPx(x, y) && !isLavaPx(x, y) && !isCliffPx(x, y)) pos = { x, y };
+  }
+  if (!pos) return null;
+  const e = makeNPC('aero', pos.x, pos.y);
+  e.packAlpha = true; e.kinJoined = true;
+  e.gender = rnd() < 0.5 ? 'f' : 'm';
+  // runs straight to the alpha; once in range, the pack hunt takes it onto the giant
+  e.state = 'follow'; e.target = p; e.stateT = 2;
+  G.npcs.push(e);
+  (G.pack || (G.pack = [])).push(e);
+  G.packTarget = giant; G.packTargetT = 8;
+  G.banner = { str: 'Another of your kin joins the bloodshed!', t: 4, color: '#ff6a5e' };
+  SFX.stage();
+  return e;
 }
 function packmates(e, radius) {
   const out = [];
@@ -1007,8 +1242,8 @@ function weaponPos(e) {
 // Derived from drawDino's skeleton anchors (cy, neckBase, tailY).
 function zoneHeights(d) {
   const L = d.L;
-  const spine = d.fish ? L.body[1] * 0.1 : L.leg[0] + L.body[1] * 0.42;
-  const head = d.fish ? L.body[1] * 0.1
+  const spine = d.fish || d.marine ? L.body[1] * 0.1 : L.leg[0] + L.body[1] * 0.42;
+  const head = d.fish || d.marine ? L.body[1] * 0.1
     : spine + L.body[1] * 0.14 + Math.sin(L.neckAng) * L.neckLen + (d.foreLift || 0) * L.body[1] * 0.6;
   return { spine, head };
 }
@@ -1040,9 +1275,12 @@ function hitZonesOf(d) {
         dy: 0,
         dz: spine + L.body[1] * 0.14 + Math.sin(L.neckAng) * L.neckLen * t + (d.foreLift || 0) * L.body[1] * 0.6,
         r: Math.max(3.5, L.body[1] * 0.3 * (d.neckW || 1)),
-        part: 'body',
+        part: 'body', neck: true,
       });
     }
+    // headOutOfReach (yunmenglong): the head and neck ride far above anything
+    // that could bite them — only the body, hips and tail are hittable
+    if (d.headOutOfReach) d._zones = d._zones.filter(z => z.part !== 'head' && !z.neck);
     for (const z of d._zones) {
       if (z.dz == null) z.dz = spine;   // hand-tuned arrays may omit dz
       if (!z.part) z.part = 'body';     // …and their parts default to body
@@ -1169,16 +1407,20 @@ function bleedTick(e, dt) {
 // transform, so the circles lean exactly as far as the art does.
 function pitchPoint(e, offX, offY) {
   const p = e.pitch || 0;
-  if (!p) return { x: e.x + offX, y: e.y + offY };
+  // a swimmer rides low in the water: everything about it sits lower by the
+  // same amount the drawing sinks it (see waterSink) — and a FLYER's whole
+  // body is lifted off its grounded shadow by its altitude
+  const sk = waterSink(e) - (e.alt || 0);
+  if (!p) return { x: e.x + offX, y: e.y + offY + sk };
   const d = DINO[e.species];
   const s = d.scale * sizeScale(e.growth != null ? e.growth : 1) * genderMod(e).size;
   const f = e.facing || 1;
-  const cy = -(d.L.leg[0] + d.L.body[1] * 0.42) * s;   // the draw's rotation pivot
+  const cy = (d.marine ? -d.L.body[1] * PLESIO_CY : -(d.L.leg[0] + d.L.body[1] * 0.42)) * s;   // the draw's rotation pivot
   const lx = offX * f, dy = offY - cy;                 // into body-local space
   const cos = Math.cos(p), sin = Math.sin(p);
   return {
     x: e.x + (lx * cos - dy * sin) * f,
-    y: e.y + cy + (lx * sin + dy * cos),
+    y: e.y + cy + (lx * sin + dy * cos) + sk,
   };
 }
 function bodyCircles(victim) {
@@ -1503,7 +1745,23 @@ function thinkRunner(e, d) {
 }
 
 // skittish grazer/scavenger (ornitho, archeornithos, leaellynasaura)
+// the nearest way out of the water onto dry land (an angle), or null
+function landDir(x, y) {
+  let best = null, br = 1e9;
+  for (let k = 0; k < 16; k++) {
+    const b = k / 16 * TAU;
+    for (let r = 20; r <= 240; r += 20) {
+      if (!isWaterPx(x + Math.cos(b) * r, y + Math.sin(b) * r)) { if (r < br) { br = r; best = b; } break; }
+    }
+  }
+  return best;
+}
 function thinkSkittish(e, d) {
+  // the land-bound (Okiri's Hypsilophodon) get out of any water they're in
+  if (d.landBound && isWaterPx(e.x, e.y) && e.state !== 'flee') {
+    const a = landDir(e.x, e.y);
+    if (a != null) { e.state = 'wander'; e.tx = e.x + Math.cos(a) * 140; e.ty = e.y + Math.sin(a) * 140; e.stateT = 2.5; return; }
+  }
   const p = G.player;
   let threat = null, td = 1e9;
   if (p && p.alive && PLAYER_DEF[p.species].diet === 'carn' && powerOf(p) > powerOf(e) * SKITTISH_FLEE_MUL) {
@@ -1512,6 +1770,7 @@ function thinkSkittish(e, d) {
   }
   for (const o of G.npcs) {
     if (isPredatorNPC(o.species)) {
+      if (o.species === 'kaiwhe' && isWaterPx(o.x, o.y)) continue;   // under the surface: unseen until it strikes
       const dd = dist(e.x, e.y, o.x, o.y);
       if (dd < d.detect * 0.8 && dd < td) { threat = o; td = dd; }
     }
@@ -1556,12 +1815,26 @@ function thinkTank(e, d) {
 
 // herd hadrosaur (ugrunaaluk, magnapaulia, olorotitan): placid until provoked —
 // then the whole herd swings back, hard
+// is this hunter too big for an agile little herbivore to face? (body
+// radius ratio — a grown abelisaur is over three times a dwarf homalo's)
+function agileOutsized(e, hunter) {
+  return bodyRadius(hunter) / Math.max(1, bodyRadius(e)) > 2.6;
+}
 function thinkHerdFighter(e, d) {
   const p = G.player;
+  // the AGILE (Utoriana's dwarfs) square up to a hunter they can handle —
+  // and run rings round one they can't (see the 'flee' state)
+  // (it's SIZE that decides: anything up to a well-grown sub-adult gets the
+  // herd's heads; something near full grown gets the runaround — from far
+  // off, and kept at a distance until it gives up)
+  if (e.agile && p && p.alive && PLAYER_DEF[p.species].diet === 'carn' && agileOutsized(e, p)) {
+    const dd = dist(e.x, e.y, p.x, p.y);
+    if (dd < (e.state === 'flee' ? 340 : preyDetect(e, d.detect * 1.2))) { e.state = 'flee'; e.target = p; e.stateT = 2.5; return; }
+  }
   if (retaliationCheck(e, d, 'fight')) return;
   // a herd-mate under attack pulls the herd in
   for (const o of G.npcs) {
-    if (o !== e && o.species === e.species && o.state === 'fight' && o.target && dist(e.x, e.y, o.x, o.y) < 260) {
+    if (!d.noPile && o !== e && o.species === e.species && o.state === 'fight' && o.target && !(e.herdKin && o.target.isPlayer) && dist(e.x, e.y, o.x, o.y) < 260) {
       e.state = 'fight'; e.target = o.target; e.stateT = 2.5; return;
     }
   }
@@ -1608,6 +1881,371 @@ function thinkHunter(e, d) {
   const c = nearestCarcass(e.x, e.y, d.scavR || 260, !!d.scavPicky);
   if (c && c.meat > (d.scavMin || 20)) { e.state = 'scavenge'; e.carc = c; e.stateT = 6; return; }
   defaultWander(e, true);
+}
+
+// ---------- PTERODACTYLUS: the islands' gulls ----------
+// Pests, not hunters. They soar between the islands looking for the dead,
+// drop onto a carcass to squabble over it, and flap off the moment anything
+// big comes close. Peck one and it pecks back — at its own height.
+function thinkPtero(e, d) {
+  const p = G.player;
+  if (retaliationCheck(e, d)) return;
+  // spooked off the ground (or a low swoop) by anything big coming close
+  if ((e.alt || 0) < 40) {
+    let thr = null;
+    if (p && p.alive && p.species !== e.species && !isAirborne(p) && dist(e.x, e.y, p.x, p.y) < 110 && powerOf(p) > powerOf(e)) thr = p;
+    if (!thr) for (const o of G.npcs) {
+      if (o === e || o.hp <= 0 || DINO[o.species].flyer || DINO[o.species].fish || isAirborne(o) || o.species === 'hypsi') continue;   // (its own quarry doesn't scare it)
+      if (dist(e.x, e.y, o.x, o.y) < 90 && powerOf(o) > powerOf(e) * 1.5) { thr = o; break; }
+    }
+    if (thr) { e.state = 'flee'; e.target = thr; e.stateT = 2.5; return; }
+  }
+  // the dead, anywhere in sight from up there
+  const keep = e.state === 'scavenge' && e.carc && e.carc.meat > 0 && G.carcasses.indexOf(e.carc) >= 0;
+  const c = keep ? e.carc : nearestCarcass(e.x, e.y, d.scavR || 1100, false);
+  if (c && c.meat > 2) {
+    if (!keep) { e.state = 'scavenge'; e.carc = c; e.stateT = rrange(8, 14); }
+    return;
+  }
+  // the living: Okiri's Hypsilophodon (the smaller the better), and the
+  // flock piles in on whatever one of them goes for
+  if (e.state === 'chase' && e.target && e.target.hp > 0 && G.npcs.indexOf(e.target) >= 0 && e.stateT > 0) return;
+  if (G.time >= (e.huntAt || 0)) {
+    e.huntAt = G.time + rrange(4, 9);
+    let best = null, bs = 1e9;
+    for (const o of G.npcs) {
+      if (o.species !== 'hypsi' || o.hp <= 0 || o.heldBy) continue;
+      const dd = dist(e.x, e.y, o.x, o.y);
+      if (dd > 700) continue;
+      const s = dd + (o.growth != null ? o.growth : 1) * 300;
+      if (s < bs) { bs = s; best = o; }
+    }
+    if (best) {
+      e.state = 'chase'; e.target = best; e.stateT = 8;
+      for (const o of G.npcs) if (o !== e && o.species === 'ptero' && o.hp > 0 && o.state !== 'chase' && dist(o.x, o.y, e.x, e.y) < 300) { o.state = 'chase'; o.target = best; o.stateT = 8; }
+      return;
+    }
+  }
+  defaultWander(e, false);
+}
+// ---------- THE SKY'S KING: wild Hatzegopteryx ----------
+// Three of them roam the whole archipelago, flying LOW over the islands and
+// landing now and then. Every so often one stoops on something small enough
+// to carry off: anything up to two-thirds of its own health (the young of the
+// herds, a zalmox, a small player). Under a stand of trees (treeCover) an
+// animal is safe: a wild one never goes in after it.
+const HATZ_SOAR = [38, 70];
+// what a snatcher can lift is set by its own size: the species' health at
+// its growth (a male's extra toughness doesn't make it any bigger)
+function liftBase(h) { return h.isPlayer ? PLAYER_DEF[h.species].hp * hpFrac(h.growth) : h.maxhp; }
+function liftSize(t) { return t.isPlayer ? playerMaxHp() : (t.maxhp || t.hp); }
+function liftMode(h, t) {
+  const mx = liftBase(h), sz = liftSize(t);
+  return sz <= mx * 0.5 ? 'jaws' : sz <= mx * 2 / 3 ? 'feet' : null;
+}
+// could this wild giant take that animal right now?
+function hatzQuarryOk(h, t) {
+  if (!t || t === h) return false;
+  if (t.isPlayer) {
+    if (!t.alive || t.species === 'hatzego' || t.grabbed || t.skyHeld || t.skyFall || t.hidden || G.burrow || G.cine || isAirborne(t)) return false;
+  } else {
+    if (t.hp <= 0 || t.heldBy || t.falling || t.cineTo || t.cineHold || t.isMate || isAirborne(t)) return false;
+    const nd = NPC_DEF[t.species];
+    if (!nd || nd.aquatic || nd.giant || nd.snatcher || DINO[t.species].fish || DINO[t.species].flyer) return false;
+  }
+  if (isDeepPx(t.x, t.y) || treeCover(t.x, t.y)) return false;
+  return !!liftMode(h, t);
+}
+function hatzFindQuarry(h, R) {
+  let best = null, bs = 1e9;
+  const consider = (t) => {
+    const dd = dist(h.x, h.y, t.x, t.y);
+    if (dd > R || !hatzQuarryOk(h, t)) return;
+    const s = dd + liftSize(t) * 0.15;   // the near and the small first
+    if (s < bs) { bs = s; best = t; }
+  };
+  if (G.player) consider(G.player);
+  for (const o of G.npcs) consider(o);
+  return best;
+}
+function hatzSnatch(e, t) {
+  const mode = liftMode(e, t);
+  if (!mode) return;
+  e.snatch = { e: t, mode };
+  e.state = 'carry'; e.stateT = mode === 'jaws' ? rrange(1.8, 2.8) : 1e9; e.target = null; e.biteT = 1.2; e.landed = false; e.carryT = 0;
+  if (e.visit) e.visit.done = true;
+  // carry it off over open ground (a jaw-load to somewhere dry to swallow it)
+  let tx = e.x, ty = e.y;
+  for (let k = 0; k < 20; k++) {
+    const a = (e.heading || 0) + rrange(-1.3, 1.3), r = rrange(150, 260);
+    const x = e.x + Math.cos(a) * r, y = e.y + Math.sin(a) * r;
+    if (x < 40 || y < 40 || x > WORLD_W - 40 || y > WORLD_H - 40) continue;
+    if (mode === 'jaws' && (isWaterPx(x, y) || treeCover(x, y))) continue;
+    tx = x; ty = y; break;
+  }
+  e.tx = tx; e.ty = ty;
+  if (mode === 'feet') { const hq = hatzHomePos(e); e.tx = hq.x; e.ty = hq.y; }
+  if (t.isPlayer) {
+    if (t.carry) { t.carry.c.carried = false; t.carry = null; }
+    t.resting = false; t.action = null; t.actionT = 0;
+    t.skyHeld = { h: e, meter: 0, t: 0 };
+    G.banner = { str: 'A HATZEGOPTERYX HAS YOU! Mash SPACE to struggle free!', t: 3.5, color: '#ff6a4a' };
+    G.shake = Math.min(8, (G.shake || 0) + 5);
+  } else {
+    t.heldBy = e; t.state = 'flee'; t.target = e; t.stateT = 3;
+    const p = G.player;
+    if (p && dist(p.x, p.y, e.x, e.y) < 520) floatText(e.x, e.y - (e.alt || 0) - 60, 'snatched!', '#ffd23e');
+  }
+  holdPrey(e, e.snatch);
+  SFX.bite();
+}
+// the wild giant lets go (a feet-load from high up: the fall does the killing)
+function hatzLetGo(e, msg) {
+  const s = e.snatch;
+  e.snatch = null;
+  e.state = 'idle'; e.stateT = 0.5; e.target = null; e.landed = false;
+  e.hungry = true; e.dropAt = G.time;       // it comes down to feed on what it dropped
+  e.nextHunt = G.time + rrange(3, 6);       // (and stoops again if that got up)
+  const q = s && s.e;
+  if (!q) return;
+  if (q.isPlayer) playerSkyRelease(q);
+  else {
+    q.heldBy = null; q.droppedBy = e;
+    if ((q.alt || 0) > 1) { q.falling = true; q.fallV = 0; q.dropAlt = q.alt; }
+    q.state = 'flee'; q.target = e; q.stateT = 3;
+  }
+  const p = G.player;
+  if (msg && p && dist(p.x, p.y, e.x, e.y) < 520) floatText(e.x, e.y - (e.alt || 0) - 60, msg, '#e0b866');
+}
+// the player, let go (or wriggled free): if that was up in the air, down they go
+function playerSkyRelease(p) {
+  const sh = p.skyHeld;
+  p.skyHeld = null;
+  if (sh && sh.h && sh.h.snatch && sh.h.snatch.e === p) sh.h.snatch = null;
+  if ((p.alt || 0) > 1) p.skyFall = { v: 0, from: p.alt };
+  else p.alt = 0;
+}
+// ---- THE VISITS: the wild ones live out on the far islands, and only once
+// every twenty minutes does one come over the herds' islands to hunt. It
+// takes one animal (or one body), and goes home with it
+const PREY_ISLES = ['takurei', 'kalimbra', 'halune', 'ekkalia', 'varossa', 'ilmeth'];
+const HATZ_VISIT_EVERY = 20 * 60;
+function isleKeyAtPx(x, y) { const i = isleAtPx(x, y); return i ? i.key : null; }
+function hatzHomePos(e) {
+  const k = e.isle && !PREY_ISLES.includes(e.isle) && isleByKey(e.isle) ? e.isle : 'saruun';
+  return randIslePos(k, 'plains');
+}
+function hatzLeave(e) {
+  e.visit = null; e.target = null; e.landed = false;
+  const q = hatzHomePos(e);
+  e.tx = q.x; e.ty = q.y; e.state = 'wander'; e.stateT = 60;
+}
+function hatzVisitTick() {
+  if (G.hatzNextVisit == null) G.hatzNextVisit = G.time + rrange(8, 11) * 60;   // the first comes sooner
+  if (G.time < G.hatzNextVisit) return;
+  if (G.npcs.some(o => o.species === 'hatzego' && o.visit)) return;
+  G.hatzNextVisit = G.time + HATZ_VISIT_EVERY;
+  // where: over the player, if the player is island prey; else any herd island
+  const p = G.player;
+  let key = null;
+  if (p && p.alive && PLAYER_DEF[p.species] && PLAYER_DEF[p.species].herdBorn) { const k = isleKeyAtPx(p.x, p.y); if (PREY_ISLES.includes(k)) key = k; }
+  if (!key) key = PREY_ISLES[(rnd() * PREY_ISLES.length) | 0];
+  const is = isleByKey(key);
+  if (!is) return;
+  let h = null, bd = 1e12;
+  for (const o of G.npcs) {
+    if (o.species !== 'hatzego' || o.hp <= 0 || isFamily(o) || o.snatch || o.haul) continue;
+    const dd = dist(o.x, o.y, is.x, is.y);
+    if (dd < bd) { bd = dd; h = o; }
+  }
+  if (!h) return;
+  h.visit = { isle: key, x: is.x, y: is.y, on: false, until: 0, done: false };
+  h.state = 'wander'; h.tx = is.x; h.ty = is.y; h.stateT = 5; h.landed = false; h.target = null;
+}
+// a body small enough to carry off (judged like a living one, by its size)
+function carcLiftable(h, c) {
+  const nd = NPC_DEF[c.species];
+  if (!nd || nd.giant || nd.aquatic || (DINO[c.species] || {}).fish || (DINO[c.species] || {}).flyer) return false;
+  return !!liftMode(h, { maxhp: nd.hp * hpFrac(c.growth != null ? c.growth : 1) });
+}
+function hatzHaul(e, c) {
+  e.haul = c; c.carried = true; c.claim = null;
+  e.state = 'haul'; e.stateT = 1e9; e.carc = null; e.landed = false; e.carryT = 0;
+  const q = hatzHomePos(e);
+  e.tx = q.x; e.ty = q.y;
+  if (e.visit) e.visit.done = true;
+  const p = G.player;
+  if (p && dist(p.x, p.y, e.x, e.y) < 520) floatText(e.x, e.y - 60, 'carried off!', '#e0b866');
+}
+// the catch is gone for good: down the throat, or away over the sea
+function hatzTakeAway(e, q, cause, swallowed) {
+  e.snatch = null; e.swallowK = 0; e.gulp = false; e.gulpT = 0;
+  if (q.isPlayer) { q.skyHeld = null; q.alt = 0; killPlayer(cause); }
+  else { const i = G.npcs.indexOf(q); if (i >= 0) G.npcs.splice(i, 1); q.heldBy = null; q.hp = 0; }
+  if (e.visit) e.visit.done = true;
+  const p = G.player;
+  if (swallowed) {
+    if (p && dist(p.x, p.y, e.x, e.y) < 520) floatText(e.x, e.y - 60, 'gulp!', '#e0b866');
+    SFX.eat();
+    e.state = 'idle'; e.stateT = rrange(4, 7); e.landed = true;
+  } else hatzLeave(e);
+}
+function thinkHatzego(e, d) {
+  if (e.soar == null) e.soar = rrange(HATZ_SOAR[0], HATZ_SOAR[1]);
+  hatzVisitTick();
+  if (e.snatch || e.haul || e.state === 'carry' || e.state === 'landEat' || e.state === 'haul') return;   // the carry runs itself
+  if (retaliationCheck(e, d)) return;
+  const v = e.visit;
+  // feeding on the ground — or, on a visit, picking the body up to take home
+  if (e.state === 'scavenge' && e.carc && e.carc.meat > 0 && G.carcasses.indexOf(e.carc) >= 0) {
+    if (v && carcLiftable(e, e.carc) && dist(e.x, e.y, e.carc.x, e.carc.y) < 50 && (e.alt || 0) < 8) hatzHaul(e, e.carc);
+    return;
+  }
+  if (e.hungry) {
+    const c = nearestCarcass(e.x, e.y, 320, false);
+    if (c && c.meat > 4 && !c.carried && !treeCover(c.x, c.y)) {
+      e.state = 'scavenge'; e.carc = c; e.stateT = rrange(10, 16);
+      e.hungry = false;
+      return;
+    }
+    if (G.time - (e.dropAt || 0) < 5) { e.state = 'idle'; e.stateT = 0.4; e.landed = false; return; }   // circling, watching it fall
+    e.hungry = false;
+  }
+  if (v) {
+    if (v.done) { if (!(e.state === 'idle' && e.stateT > 0)) hatzLeave(e); return; }
+    if (!v.on) {
+      if (dist(e.x, e.y, v.x, v.y) < 520) { v.on = true; v.until = G.time + 100; e.nextHunt = G.time + rrange(2, 5); }
+      else { e.tx = v.x; e.ty = v.y; e.state = 'wander'; e.stateT = 5; e.landed = false; return; }
+    }
+    if (G.time > v.until) { hatzLeave(e); return; }
+    if (G.time >= (e.nextHunt || 0)) {
+      const t = e.state === 'stoop' && hatzQuarryOk(e, e.target) ? e.target : hatzFindQuarry(e, d.detect);
+      if (t) {
+        if (e.state !== 'stoop' || e.target !== t) { e.state = 'stoop'; e.target = t; e.stateT = 14; e.landed = false; }
+        return;
+      }
+      if (e.state === 'stoop') { e.state = 'idle'; e.stateT = 0.5; e.target = null; }
+      // nothing alive out in the open: anything dead it can carry will do
+      const c = nearestCarcass(e.x, e.y, d.detect, false);
+      if (c && c.meat > 0 && !c.carried && carcLiftable(e, c) && !treeCover(c.x, c.y)) { e.state = 'scavenge'; e.carc = c; e.stateT = 20; return; }
+    }
+    if (e.stateT > 0 && (e.state === 'wander' || e.state === 'idle')) return;
+    const q = randIslePos(v.isle, 'plains');
+    e.tx = q.x; e.ty = q.y; e.state = 'wander'; e.stateT = rrange(6, 10); e.landed = false;
+    return;
+  }
+  if (e.stateT > 0 && (e.state === 'wander' || e.state === 'idle')) return;
+  // arrived somewhere: now and then it comes down and stands a while (never
+  // in the water, never in under the trees, never on the herds' islands)
+  if (e.state === 'idle' && !e.landed && rnd() < 0.5 && !isWaterPx(e.x, e.y) && !treeCover(e.x, e.y) && !PREY_ISLES.includes(isleKeyAtPx(e.x, e.y))) {
+    e.landed = true; e.stateT = rrange(5, 12); return;
+  }
+  // roam the far islands, keeping off the herds' ones between visits
+  const isles = (World.isles || []).filter(i => !PREY_ISLES.includes(i.key));
+  let q = null;
+  for (let k = 0; k < 8 && !q && isles.length; k++) {
+    const c = randIslePos(isles[(rnd() * isles.length) | 0].key, 'plains');
+    if (dist(e.x, e.y, c.x, c.y) < 1400) q = c;
+  }
+  if (!q) q = hatzHomePos(e);
+  e.tx = q.x; e.ty = q.y; e.state = 'wander'; e.stateT = 30; e.landed = false;
+}
+// how high a wild Hatzegopteryx wants to be for what it's doing (low!)
+function hatzWant(e) {
+  const st = e.state, t = e.target;
+  if (e.haul) return 150;
+  if (e.snatch) return st === 'landEat' ? 0 : e.snatch.mode === 'feet' ? 150 : 60;
+  if (st === 'stoop' && t) return dist(e.x, e.y, t.x, t.y) < 150 ? 6 : e.soar;
+  if (st === 'scavenge') return e.carc && dist(e.x, e.y, e.carc.x, e.carc.y) < 60 ? 0 : e.soar;
+  if (st === 'idle') return e.landed && !isWaterPx(e.x, e.y) ? 0 : e.soar;
+  return e.soar || 50;
+}
+// ---------- the herds under the sky (Tethyshadros, Magyarosaurus) ----------
+// the nearest Hatzegopteryx (wild, or you) that could carry this one off
+// (ANY Hatzegopteryx about sends the island herds for the trees, grown ones
+// too: a player one only once it's big enough to be a menace)
+function skyThreat(e) {
+  let best = null, bd = 460;
+  const p = G.player;
+  if (p && p.alive && p.species === 'hatzego' && !p.hidden && ((p.growth || 1) >= 0.35 || liftMode(p, e))) { const dd = dist(e.x, e.y, p.x, p.y); if (dd < bd) { bd = dd; best = p; } }
+  for (const o of G.npcs) {
+    if (o.species !== 'hatzego' || o.hp <= 0 || o.snatch || o.haul || isFamily(o)) continue;
+    const dd = dist(e.x, e.y, o.x, o.y);
+    if (dd < bd) { bd = dd; best = o; }
+  }
+  return best;
+}
+// when a Hatzegopteryx comes, the whole herd runs for the nearest stand of
+// trees and keeps still in there until the sky is clear (no cover in reach:
+// they just run). They only turn on it when it follows them in and bites
+function thinkIslandPrey(e, d) {
+  const p = G.player;
+  // BITTEN: it fights back, one on one, whoever bit it (a Hatzegopteryx
+  // too). The rest of the herd doesn't pile in (noPile)
+  if (e.aggroT > 0 && e.lastAttacker && !e.heldBy) {
+    const t = e.lastAttacker;
+    if ((t.isPlayer ? t.alive : t.hp > 0 && G.npcs.indexOf(t) >= 0) && dist(e.x, e.y, t.x, t.y) < d.detect * 1.5) {
+      e.state = 'fight'; e.target = t; e.stateT = 1.5; return;
+    }
+  }
+  // (a scare lasts: once seen, the giant is remembered for 10 s, so the
+  // herd makes it all the way to the trees and stays put a while)
+  let thr = skyThreat(e);
+  if (thr) { e.skyThr = thr; e.skyAt = G.time; }
+  else if (e.skyThr && G.time - e.skyAt < 10 && (e.skyThr.isPlayer ? e.skyThr.alive : e.skyThr.hp > 0) && dist(e.x, e.y, e.skyThr.x, e.skyThr.y) < 1100) thr = e.skyThr;
+  else e.skyThr = null;
+  if (thr) {
+    if (treeCover(e.x, e.y)) { e.state = 'hide'; e.target = thr; e.stateT = 2.5; return; }
+    if (!e.coverSpot || G.time - (e.coverAt || 0) > 3) { e.coverSpot = nearestCover(e.x, e.y, 650); e.coverAt = G.time; }
+    if (e.coverSpot) { e.state = 'cover'; e.tx = e.coverSpot.x; e.ty = e.coverSpot.y; e.target = thr; e.stateT = 3; return; }
+    if (e.state !== 'flee') { e.state = 'flee'; e.target = thr; e.stateT = 2.5; }
+    return;
+  }
+  if ((e.state === 'cover' || e.state === 'hide') && e.stateT > 0) return;
+  // YOUR HERD: it keeps round its leader (and the leader waits for a straggler)
+  const H = G.herd;
+  if (H && e.herdKin && H.kin.indexOf(e) >= 0 && e.state !== 'fight') {
+    const L = H.leader;
+    if (L === e) {
+      if (p && p.alive && !p.skyHeld) { const pd = dist(e.x, e.y, p.x, p.y); if (pd > 340 && pd < 1000) { e.state = 'idle'; e.stateT = 1.2; return; } }
+    } else if (L && (L.isPlayer ? L.alive : L.hp > 0)) {
+      if (e.home) { e.home.x = L.x; e.home.y = L.y; }
+      if (dist(e.x, e.y, L.x, L.y) > 150) { e.state = 'follow'; e.target = L; e.stateT = 2; return; }
+    }
+  }
+  thinkHerdFighter(e, d);
+}
+// a herd of every age: the young are smaller, softer and bite lighter
+function ageNPC(e, g) {
+  g = clamp(g + (g < 1 ? rrange(-0.05, 0.05) : 0), 0.08, 1);
+  if (g >= 1) return;
+  e.growth = g;
+  e.hp = e.maxhp = Math.round(NPC_DEF[e.species].hp * hpFrac(g));
+  e.dmgMul = dmgFrac(g);
+}
+// every flyer NPC (wild, or your own mate and chicks) picks a height for
+// what it's doing and climbs or glides to it — the same rates as the player
+const NPC_SOAR = [120, 330];   // each wild flyer has its own favourite height
+function npcFlight(e, dt) {
+  const st = e.state, t = e.target;
+  let want = 0;
+  if (e.isMate || e.isBaby || e.packAlpha) {
+    // family keeps to YOUR sky: up with you, down when you land
+    const p = G.player;
+    if (p && p.alive) want = isAirborne(p) ? p.alt : (dist(e.x, e.y, p.x, p.y) > 170 ? 70 : 0);
+  } else if (NPC_DEF[e.species] && NPC_DEF[e.species].snatcher && !['chase', 'windup', 'lunge', 'recover', 'fight'].includes(st)) want = hatzWant(e);
+  else if (st === 'scavenge') want = e.carc && dist(e.x, e.y, e.carc.x, e.carc.y) < 45 ? 0 : 85;
+  else if (st === 'flee') want = Math.min(FLY_CEIL, (e.soar || 200) + 80);
+  else if (st === 'wander' || st === 'return' || st === 'migrate') want = e.soar || (e.soar = rrange(NPC_SOAR[0], NPC_SOAR[1]));
+  else if (t && (st === 'chase' || st === 'windup' || st === 'lunge' || st === 'recover' || st === 'fight')) {
+    // match a flyer's height; swoop down to a grounded one's head height
+    want = isAirborne(t) ? t.alt : dist(e.x, e.y, t.x, t.y) < 90 ? Math.min(20, reachHeight(t) * 0.7) : 60;
+  }
+  // a wild giant never comes down in under the trees
+  if (NPC_DEF[e.species] && NPC_DEF[e.species].noCover && want < 40 && treeCover(e.x, e.y)) want = 40;
+  const a = e.alt || 0;
+  e.alt = want > a ? Math.min(want, a + FLY_CLIMB * dt) : Math.max(want, a - FLY_SINK * 1.4 * dt);
+  e.wing = lerp(e.wing || 0, want > a + 1 ? 1 : 0, Math.min(1, dt * 6));
 }
 
 // the water's king (herrietopus, mawsonia): never flees — it patrols its
@@ -1736,6 +2374,22 @@ function giantFight(e, d, t, dt, sp) {
   const s = giantSize(e);
   const fx = e.x + (e.facing || 1) * DINO.yunmeng.L.body[0] * 0.3 * s;
   const em = e.elder ? ELDER_MOD.size : 1;
+  // THE PUNCH: a brief lift of the near forefoot (the tell), then it jabs —
+  // the giant stands planted for the instant of the windup
+  e.punchCd = Math.max(0, (e.punchCd || 0) - dt);
+  if (e.punchT != null) {
+    e.punchT -= dt;
+    if (e.punchT <= 0) giantPunch(e, d);
+    else { idleDrift(e, dt); return; }
+  }
+  if (front && e.growth >= 0.6 && e.punchCd <= 0 && e.attackT <= 0.15) {
+    const z = punchZone(e, d);
+    if (dist(z.x, z.y, t.x, t.y) < z.r + bodyRadius(t) * 0.6) {
+      faceToward(e, toward);
+      e.punchT = d.punch.wind * (e.elder ? 0.85 : 1);
+      return;
+    }
+  }
   if (front && e.growth >= 0.6 && (e.stompCd || 0) <= 0 && e.attackT <= 0.15 &&
       dist(fx, e.y, t.x, t.y) < d.stomp.r * em * 0.7) {
     startStomp(e, d, t);
@@ -1833,6 +2487,29 @@ function giantSlam(e, d) {
       dealDamage(v, dmg, e, { kb: 200 + 300 * f });
     }
   }
+}
+// where the punch lands: just ahead of the front feet, scaled with the giant
+function punchZone(e, d) {
+  const k = giantSize(e) / DINO.yunmeng.scale, f = e.facing || 1;
+  const fx = e.x + f * DINO.yunmeng.L.body[0] * 0.3 * giantSize(e);
+  return { x: fx + f * d.punch.reach * k, y: e.y, r: d.punch.r * k };
+}
+// …and the jab itself: everything in the zone takes the full blow (the
+// elder's extra weight rides in dealDamage's ELDER_DMG)
+function giantPunch(e, d) {
+  e.punchT = null;
+  e.punchCd = d.punch.cd * rrange(0.9, 1.15) * (e.elder ? 0.85 : 1);
+  e.atkKind = 'punch'; e.attackT = 1;
+  const z = punchZone(e, d);
+  for (const v of [G.player, ...G.npcs]) {
+    if (!v || v === e) continue;
+    if (v.isPlayer ? (!v.alive || v.hidden) : (v.hp <= 0 || v.species === 'yunmeng')) continue;
+    if (dist(z.x, z.y, v.x, v.y) > z.r + bodyRadius(v) * 0.6) continue;
+    dealDamage(v, d.punch.dmg * rrange(0.95, 1.05), e, { kb: d.punch.kb, hitX: z.x, hitY: v.y - 20 });
+    floatText(v.x, v.y - 64, 'PUNCHED!', '#ff9a5e');
+  }
+  const p = G.player;
+  if (p && dist(z.x, z.y, p.x, p.y) < 600) { G.shake = Math.min(12, (G.shake || 0) + 4); SFX.bite(); }
 }
 // walking INTO the giant's path: anything at the leading feet gets run over
 function giantTrample(e, d, dt) {
@@ -2163,6 +2840,34 @@ const NPC_THINK = {
     }
     thinkFish(e, d);
   },
+  ichthyod(e, d) {
+    // ICHTHYODECTES: Xiphactinus's smaller cousin, a sea barracuda. It runs
+    // down small fish, and harries a swimming plesiosaur (a nuisance, not a
+    // killer: a darting bite, then it breaks off). The abelisaurs it ignores
+    const p = G.player;
+    if (e.aggroT > 0 && e.lastAttacker && isWaterPx(e.lastAttacker.x, e.lastAttacker.y)) {
+      e.state = 'chase'; e.target = e.lastAttacker; e.stateT = 3; return;
+    }
+    if (e.state === 'chase' && e.target) {
+      const t = e.target;
+      if ((t.isPlayer ? t.alive : t.hp > 0) && isWaterPx(t.x, t.y) && e.stateT > 0) return;
+      e.state = 'wander'; e.target = null; e.stateT = 0;
+    }
+    e.restT = Math.max(0, (e.restT || 0) - 0.25);
+    if (e.restT <= 0 && p && p.alive && PLAYER_DEF[p.species].marine && isWaterPx(p.x, p.y) && dist(e.x, e.y, p.x, p.y) < d.detect) {
+      e.state = 'chase'; e.target = p; e.stateT = rrange(2.5, 4);
+      e.restT = rrange(6, 12);   // after a run at you, it sheers off a while
+      return;
+    }
+    if (rnd() < 0.3) {
+      for (const o of G.npcs) {
+        if (o !== e && o.hp > 0 && d.hunts.includes(o.species) && dist(e.x, e.y, o.x, o.y) < d.detect) {
+          e.state = 'chase'; e.target = o; e.stateT = 4; return;
+        }
+      }
+    }
+    thinkFish(e, d);
+  },
 };
 // --- the Wall's minds, mapped to the shared archetypes ---
 NPC_THINK.kerbero = thinkTank;          // herd guardian: stands, swings the tail
@@ -2197,6 +2902,65 @@ NPC_THINK.titanov = thinkHunter;        // the titan-killer: caution so low a gr
 // --- the Death Desert's giant and the Cradle's guardian ---
 NPC_THINK.yunmeng = thinkGiant;
 NPC_THINK.aegisu = thinkGuardian;
+// --- the Lesser Archipelago ---
+NPC_THINK.zalmox = thinkHerdFighter;    // squat island ornithopods close ranks
+NPC_THINK.iani = thinkHerdFighter;      // Drevan's and Kesh's own ornithopods
+NPC_THINK.hypsi = thinkSkittish;       // Okiri's thicket-mice: quick, and quick to bolt
+NPC_THINK.fylax = thinkHerdFighter;
+NPC_THINK.chenani = thinkHunter;      // the big island abelisaur hunts by face, slowly
+NPC_THINK.ptero = thinkPtero;          // the gull: soar, find the dead, squabble, scatter
+NPC_THINK.hatzego = thinkHatzego;      // the sky's king: roam low, stoop, carry off
+NPC_THINK.tethys = thinkIslandPrey;     // the herds: when a lifter flies over, the young run for the trees
+NPC_THINK.magyaro = thinkIslandPrey;
+NPC_THINK.garami = thinkGarami;
+NPC_THINK.kaiwhe = thinkKaiwhe;     // the wild plesiosaurs: easy-going fish-eaters
+// GARAMIRALA: the keeper of a strait. It patrols its own stretch of deep
+// water and nothing else; whatever swims into that water is attacked, no
+// warning, no mercy, no giving up while the prey stays in the deep. The
+// PATHWAY's keeper (e.guard) takes the player too. The channel keepers take
+// other animals — and players of any species but the abelisaur, which
+// hatches beyond their waters and never troubles them.
+function thinkGarami(e, d) {
+  const p = G.player;
+  const inZone = (o) => isDeepPx(o.x, o.y) && dist(o.x, o.y, e.home.x, e.home.y) < d.homeR;
+  const huntsPlayer = (q) => q && q.alive && !q.hidden && (e.guard || q.species !== 'ekrix');
+  // a hunt in progress runs until the prey dies or reaches the shallows
+  if (e.state === 'chase' && e.target) {
+    const t = e.target;
+    if ((t.isPlayer ? t.alive : t.hp > 0) && inZone(t)) { e.stateT = Math.max(e.stateT, 3); return; }
+    e.target = null; e.state = 'wander'; e.stateT = 0;
+  }
+  if (e.aggroT > 0 && e.lastAttacker && inZone(e.lastAttacker) && (!e.lastAttacker.isPlayer || e.lastAttacker.alive)) {
+    e.state = 'chase'; e.target = e.lastAttacker; e.stateT = 4; return;
+  }
+  if (huntsPlayer(p) && inZone(p) && dist(e.x, e.y, p.x, p.y) < d.detect) {
+    e.state = 'chase'; e.target = p; e.stateT = 4; return;
+  }
+  for (const o of G.npcs) {
+    if (o === e || o.hp <= 0 || DINO[o.species].fish || o.species === 'garami') continue;
+    if (inZone(o) && dist(e.x, e.y, o.x, o.y) < d.detect) { e.state = 'chase'; e.target = o; e.stateT = 4; return; }
+  }
+  // patrol the strait: slow passes through its own deep water
+  if (e.stateT > 0) return;
+  // an open-sea roamer's patrol drifts: every so often it moves its whole
+  // beat a few hundred paces on, always staying in swimmer's depth
+  if (e.roam && rnd() < 0.35) {
+    for (let k = 0; k < 10; k++) {
+      const a = rnd() * TAU, rr = rrange(250, 520);
+      const hx = e.home.x + Math.cos(a) * rr, hy = e.home.y + Math.sin(a) * rr;
+      if (hx < 200 || hy < 200 || hx > WORLD_W - 200 || hy > WORLD_H - 200) continue;
+      if (terAtPx(hx, hy) === T_SWIM) { e.home = { x: hx, y: hy }; break; }
+    }
+  }
+  for (let k = 0; k < 12; k++) {
+    const a = rnd() * TAU, rr = rrange(40, d.homeR * 0.75);
+    const tx = e.home.x + Math.cos(a) * rr, ty = e.home.y + Math.sin(a) * rr;
+    if (isDeepPx(tx, ty)) { e.tx = tx; e.ty = ty; break; }
+  }
+  e.target = null;
+  e.state = rnd() < 0.25 ? 'idle' : 'wander';
+  e.stateT = rrange(2, 4.5);
+}
 
 function defaultWander(e, mayDrink) {
   // let any in-progress state (rally, chase, flee, drink…) run its timer out
@@ -2218,6 +2982,7 @@ function defaultWander(e, mayDrink) {
       const tx = e.home.x + Math.cos(a) * rr, ty = e.home.y + Math.sin(a) * rr;
       if (tx < 20 || ty < 20 || tx > WORLD_W - 20 || ty > WORLD_H - 20) continue;
       if (isDeepPx(tx, ty) || isLavaPx(tx, ty) || isCliffPx(tx, ty)) continue;
+      if (d.landBound && isWaterPx(tx, ty)) continue;
       if (d.biome === 'plains' && forestShadePx(tx, ty) > 0.4) continue;
       e.tx = tx; e.ty = ty;
       break;
@@ -2394,6 +3159,8 @@ function updateNPC(e, dt) {
       return;
     }
   }
+  // in a snatcher's grip, or dropped from it: no thinking until it lands
+  if (npcHeldOrFalling(e, dt)) return;
   // knockback decay
   e.x += e.vx * dt; e.y += e.vy * dt;
   e.vx *= Math.pow(0.02, dt); e.vy *= Math.pow(0.02, dt);
@@ -2411,7 +3178,7 @@ function updateNPC(e, dt) {
     // an attack in motion is committed, and panic can't be reasoned with —
     // don't let thinking interrupt either (a fleeing guanlong must not stop
     // to snack on its fallen friend's carcass)
-    const committed = (e.state === 'windup' || e.state === 'lunge' || e.state === 'recover' || e.state === 'flee' || e.state === 'stomp') && e.stateT > 0;
+    const committed = (e.state === 'windup' || e.state === 'lunge' || e.state === 'recover' || e.state === 'flee' || e.state === 'stomp' || e.state === 'migrate') && e.stateT > 0;
     // a recruited packmate of ANY pack species runs with its alpha; mates and
     // babies keep their own brains (they handle packAlpha themselves)
     // the Great Walk's cast keep their own brains: the cutscene's walkers and
@@ -2420,6 +3187,11 @@ function updateNPC(e, dt) {
       : e.bloodline ? thinkBloodline : e.isMate ? thinkMate : e.isBaby ? thinkBaby : e.packAlpha ? thinkPackFollower : NPC_THINK[e.species];
     if (e.packAlpha && stompDodge(e)) { /* out from under the giant first */ }
     else if (!committed) think(e, d);
+    // the quarry took to the air: a grounded hunter can only watch it go
+    if (e.target && outOfReachAbove(e, e.target) && !e.feud &&
+        ['chase', 'windup', 'lunge', 'recover', 'stalk', 'strike', 'fight', 'avoid'].includes(e.state)) {
+      e.state = 'idle'; e.stateT = 1.5; e.target = null;
+    }
   }
   // a FEUD has one ending: whoever defied the claim hunts the claimant to
   // the death — no fatigue, no fear, no giving up, no going home
@@ -2453,7 +3225,7 @@ function updateNPC(e, dt) {
   // states, the drink/graze/feed performances for the calm ones. actT is
   // each animal's own performance clock — spawn times desync the herd.
   e.actT = (e.actT || 0) + dt;
-  const fastState = e.state === 'chase' || e.state === 'flee' || e.state === 'rally' || e.state === 'lunge' || e.state === 'strike';
+  const fastState = e.state === 'chase' || e.state === 'flee' || e.state === 'cover' || e.state === 'stoop' || e.state === 'rally' || e.state === 'lunge' || e.state === 'strike';
   e.run = lerp(e.run || 0, fastState ? 1 : 0, 0.1);
   e.drink = lerp(e.drink || 0, e.state === 'drink' ? 1 : 0, 0.12);
   e.chew = lerp(e.chew || 0, e.state === 'graze' ? 1 : 0, 0.1);
@@ -2480,6 +3252,22 @@ function updateNPC(e, dt) {
     case 'wander': {
       e.headDown = lerp(e.headDown, 0, 0.1);
       if (stepToward(e, e.tx, e.ty, sp * 0.45, dt)) { e.state = 'idle'; e.stateT = rrange(1, 3); }
+      break;
+    }
+    case 'migrate': {
+      // across a small waterway to its own kind (see isleMigration). Hurt on
+      // the way, it gives up the crossing and fends for itself
+      e.headDown = lerp(e.headDown, 0, 0.1);
+      const m = e.migr;
+      if (!m || e.hurtT > 0 || e.stateT <= 0) { e.migr = null; e.state = 'idle'; e.stateT = 0.3; break; }
+      const w = m.pts[m.i];
+      if (stepToward(e, w.x, w.y, sp * 0.55, dt) || dist(e.x, e.y, w.x, w.y) < 14) {
+        if (++m.i >= m.pts.length) {
+          // arrived: this is its island now
+          e.isle = m.to; e.home = { x: e.x, y: e.y };
+          e.migr = null; e.state = 'idle'; e.stateT = rrange(1, 3);
+        }
+      }
       break;
     }
     case 'goDrink': {
@@ -2735,14 +3523,174 @@ function updateNPC(e, dt) {
       }
       break;
     }
+    case 'cover': {
+      // a dash for the nearest stand of trees, away from the sky
+      e.headDown = 0;
+      if (treeCover(e.x, e.y)) { e.state = 'hide'; e.stateT = 2.5; break; }
+      stepToward(e, e.tx, e.ty, sp * (d.fleeSpeed ? d.fleeSpeed / d.speed : 1.3), dt);
+      if (e.stateT <= 0) { e.state = 'idle'; e.stateT = 0.3; }
+      break;
+    }
+    case 'seaFeed': {
+      // a Kaiwhekea eating from the water's edge (it never leaves the water)
+      const c = e.carc;
+      if (!c || c.meat <= 0 || G.carcasses.indexOf(c) < 0 || e.stateT <= 0) { e.state = 'idle'; e.stateT = 1; e.carc = null; break; }
+      const dd = dist(e.x, e.y, c.x, c.y);
+      if (dd > 30) stepToward(e, c.x, c.y, sp * 0.6, dt);
+      if (dd < 64) {
+        e.tear = lerp(e.tear || 0, 1, 0.2);
+        c.meat -= dt * 6;
+        e.fedUntil = G.time + rrange(60, 120);
+      }
+      break;
+    }
+    case 'swimHome': {
+      // back to its own island (a straggler, a chase gone out to sea)
+      const h = e.home;
+      if (!h) { e.state = 'idle'; e.stateT = 1; break; }
+      stepToward(e, h.x, h.y, sp, dt);
+      const ok = !isWaterPx(e.x, e.y) && (!e.isle || isleKeyAtPx(e.x, e.y) === e.isle);
+      if (ok || dist(e.x, e.y, h.x, h.y) < 60) { e.state = 'idle'; e.stateT = 1; }
+      else if (e.stateT <= 1) e.stateT = 20;
+      break;
+    }
+    case 'hide': {
+      // in among the trunks, keeping very still
+      e.move = lerp(e.move, 0, 0.2);
+      e.headDown = lerp(e.headDown, 0, 0.1);
+      if (e.stateT <= 0) { e.state = 'idle'; e.stateT = 0.3; }
+      break;
+    }
+    case 'stoop': {
+      // the wild Hatzegopteryx comes in low over its quarry
+      const t = e.target;
+      if (!hatzQuarryOk(e, t) || e.stateT <= 0) { e.state = 'idle'; e.stateT = 0.5; e.target = null; e.nextHunt = G.time + rrange(6, 14); break; }
+      e.headDown = 0;
+      stepToward(e, t.x, t.y, sp * 1.0, dt);
+      if ((e.alt || 0) < 45 && dist(e.x, e.y, t.x, t.y) < bodyRadius(e) + bodyRadius(t) + 26) hatzSnatch(e, t);
+      break;
+    }
+    case 'haul': {
+      // a body taken home in the feet
+      const c = e.haul;
+      if (!c || G.carcasses.indexOf(c) < 0) { e.haul = null; e.state = 'idle'; e.stateT = 0.5; break; }
+      stepToward(e, e.tx, e.ty, sp * 0.7, dt);
+      const pt = e.feetPt;
+      if (pt && G.time - pt.t < 0.5 && pt.air === isAirborne(e)) { c.x = pt.x; c.y = e.y - 1; c.liftY = Math.max(0, pt.h - 4); }
+      else { c.x = e.x; c.y = e.y - 1; c.liftY = e.alt || 0; }
+      const p = G.player;
+      if (dist(e.x, e.y, e.tx, e.ty) < 80 || !p || dist(e.x, e.y, p.x, p.y) > 1100) {
+        const i = G.carcasses.indexOf(c); if (i >= 0) G.carcasses.splice(i, 1);
+        e.haul = null; hatzLeave(e);
+      }
+      break;
+    }
+    case 'carry':
+    case 'landEat': {
+      const s = e.snatch, q = s && s.e;
+      if (!q || (q.isPlayer ? !q.alive || !q.skyHeld : q.hp <= 0 || G.npcs.indexOf(q) < 0)) {
+        if (q && !q.isPlayer) q.swallowK = 0;
+        e.snatch = null; e.swallowK = 0; e.gulp = false;
+        e.state = 'idle'; e.stateT = 0.5; e.hungry = true; e.dropAt = G.time; e.landed = false;
+        break;
+      }
+      // it bites what it holds as it goes — never quite to death: it takes
+      // its catch away whole, dead or alive
+      e.biteT = (e.biteT || 1.2) - dt;
+      if (e.biteT <= 0) {
+        e.biteT = 1.5; e.attackT = 1;
+        const amt = Math.min(d.dmg * 0.4, q.hp - 1);
+        if (amt > 0) dealDamage(q, amt, e, { force: true, kb: 0, hitX: q.x, hitY: q.y - (q.alt || 0) - 10 });
+      }
+      e.carryT = (e.carryT || 0) + dt;
+      if (e.state === 'carry') {
+        stepToward(e, e.tx, e.ty, sp * 0.7, dt);
+        holdPrey(e, s);
+        if (s.mode === 'jaws') {
+          // small enough to swallow: down onto open dry ground close by
+          if (e.stateT <= 0 && !isWaterPx(e.x, e.y) && !treeCover(e.x, e.y)) { e.state = 'landEat'; e.stateT = 8; e.gulpT = 0; }
+          else if (e.stateT < -5) { e.stateT = 0.5; e.tx = e.x + rrange(-160, 160); e.ty = e.y + rrange(-160, 160); }
+        } else {
+          // a feet-load is TAKEN AWAY, out over the sea to its own island
+          const p = G.player;
+          const gone = q.isPlayer ? e.carryT > 12 : dist(e.x, e.y, e.tx, e.ty) < 80 || !p || dist(e.x, e.y, p.x, p.y) > 1100;
+          if (gone) hatzTakeAway(e, q, 'carried off by a Hatzegopteryx');
+        }
+      } else {
+        e.move = lerp(e.move, 0, 0.2);
+        holdPrey(e, s);
+        if ((e.alt || 0) < 1) {
+          // THE SWALLOW: the head thrown back, the catch worked down the bill
+          e.gulpT = (e.gulpT || 0) + dt;
+          const k = clamp((e.gulpT - 0.4) / 2.2, 0, 1);
+          e.swallowK = k; e.gulp = k > 0;
+          q.swallowK = k;
+          const j = e.jawPt;
+          q.swallowAt = j && G.time - j.t < 0.5 ? { x: j.x, y: e.y - j.h } : { x: q.x, y: q.y - (q.alt || 0) };
+          if (k >= 1) { hatzTakeAway(e, q, 'swallowed whole by a Hatzegopteryx', true); break; }
+        }
+        if (e.stateT <= 0) { q.swallowK = 0; e.swallowK = 0; e.gulp = false; hatzLetGo(e); }
+      }
+      break;
+    }
     case 'flee': {
       e.headDown = 0;
       const t = e.target;
       if (!t || e.stateT <= 0) { e.state = 'idle'; e.stateT = 1; break; }
-      const a = awayDir(e, t);
+      let a = awayDir(e, t);
+      // the AGILE (Utoriana's homalocephale): never a straight bolt — it
+      // runs rings round a big hunter, cutting sideways across its nose and
+      // flipping direction at the last moment, so the big jaws keep closing
+      // on the place it just was
+      if (e.agile) {
+        const dd = dist(e.x, e.y, t.x, t.y);
+        e.jinkT = (e.jinkT || 0) - dt;
+        if (e.jinkT <= 0) { e.orbitDir = -e.orbitDir; e.jinkT = dd < 90 ? rrange(0.35, 0.7) : rrange(0.9, 1.8); }
+        // a wide arc while the hunter is still coming; a hard cut across
+        // its nose once the jaws are close
+        a = angTo(t.x, t.y, e.x, e.y) + e.orbitDir * (dd < 90 ? 1.3 : 0.5);
+        // …and it knows its island: it never lets itself be pinned against
+        // the sea — it swings along the shore instead of into the shallows
+        for (const off of [0, 0.6, -0.6, 1.2, -1.2, 1.8, -1.8, 2.4, -2.4]) {
+          const b = a + off * e.orbitDir;
+          if (!isWaterPx(e.x + Math.cos(b) * 70, e.y + Math.sin(b) * 70)) { a = b; break; }
+        }
+        // already splashing? straight back onto dry ground, whichever way
+        // is closest that isn't into the jaws
+        if (isWaterPx(e.x, e.y)) {
+          const away = awayDir(e, t);
+          let best = null, bs = -1e9;
+          for (let k = 0; k < 16; k++) {
+            const b = k / 16 * Math.PI * 2;
+            for (let r = 30; r <= 150; r += 30) {
+              if (!isWaterPx(e.x + Math.cos(b) * r, e.y + Math.sin(b) * r)) {
+                const s = -r + 40 * Math.cos(b - away);
+                if (s > bs) { bs = s; best = b; }
+                break;
+              }
+            }
+          }
+          if (best != null) a = best;
+        }
+      }
+      // the land-bound never bolt into the sea: they swing along the shore
+      // instead, and scramble straight out if they're already wet
+      // (cornered on a speck of an island, it holds at the waterline rather than wade in)
+      let cornered = false;
+      if (d.landBound) {
+        if (isWaterPx(e.x, e.y)) { const la = landDir(e.x, e.y); if (la != null) a = la; }
+        else {
+          cornered = true;
+          for (const off of [0, 0.5, -0.5, 1, -1, 1.5, -1.5, 2.1, -2.1, 2.8, -2.8]) {
+            const b = a + off;
+            if (!isWaterPx(e.x + Math.cos(b) * 40, e.y + Math.sin(b) * 40)) { a = b; cornered = false; break; }
+          }
+        }
+      }
+      if (cornered) { idleDrift(e, dt); npcBurn(e, d, dt); break; }
       // a broken thigh can't even flee at speed — the cripple cap holds (and
       // so does an empty tank); prey that heard a crouched hunter call bolts
-      const fsp = (d.fleeSpeed || d.speed) * (sp / d.speed) * (e.spookT > 0 ? SPOOK_MUL : 1);
+      const fsp = (d.fleeSpeed || d.speed) * (sp / d.speed) * (e.spookT > 0 ? SPOOK_MUL : 1) * (e.agile ? (dist(e.x, e.y, t.x, t.y) < 120 && e.stam > 10 ? 1.2 : 1.06) : 1);   // agile: a last-metres burst
       stepToward(e, e.x + Math.cos(a) * 90, e.y + Math.sin(a) * 90, fsp, dt);
       npcBurn(e, d, dt);
       break;
@@ -2862,7 +3810,7 @@ function updateNPC(e, dt) {
       if (Math.abs(Math.cos(e.lungeA)) > 0.2) e.facing = Math.cos(e.lungeA) > 0 ? 1 : -1;
       const t = e.target;
       if (!e.strikeHit && t) {
-        if (t.isPlayer && t.alive && !t.grabbed) {
+        if (t.isPlayer && t.alive && !t.grabbed && !isAirborne(t)) {
           const pt = weaponContact(e, t);
           if (pt) {
             e.strikeHit = true;
@@ -2919,6 +3867,7 @@ function updateNPC(e, dt) {
     if (e.winded && e.stam >= e.stamMax * NPC_WIND_BACK) e.winded = false;
   }
 
+  if (DINO[e.species].flyer) npcFlight(e, dt);   // the flyers pick their height
   // ease heading pitch in while moving, out while standing
   e.pitch = lerp(e.pitch || 0, e.move > 0.25 ? (e.pitchT || 0) : 0, Math.min(1, dt * 6));
 
@@ -2927,9 +3876,11 @@ function updateNPC(e, dt) {
   // the giant straddles the scrub: only its feet need clear ground (and the
   // guardian, low and heavy, ploughs through the Cradle's cycad fronds)
   collideStatics(e, d.giant ? eRad * 0.45 : e.species === 'aegisu' ? eRad * 0.5 : eRad);
+  // a wild Hatzegopteryx can't walk in under the trees (you can)
+  if (d.noCover && !isAirborne(e) && treeCover(e.x, e.y) && !treeCover(wx0, wy0)) { e.x = wx0; e.y = wy0; }
   // gentle separation between npcs
   for (const o of G.npcs) {
-    if (o === e) continue;
+    if (o === e || isAirborne(o) !== isAirborne(e)) continue;   // (a flyer passes over the herd)
     const dd = dist(e.x, e.y, o.x, o.y);
     const min = eRad + bodyRadius(o);
     if (dd < min && dd > 0.001) {
@@ -2942,7 +3893,7 @@ function updateNPC(e, dt) {
   // (suspended mid-lunge so a committed bite can actually connect,
   // and while a croc holds the player in its jaws)
   const pl = G.player;
-  if (pl && pl.alive && e.state !== 'lunge' && e.state !== 'strike' && e.state !== 'gripping') {
+  if (pl && pl.alive && isAirborne(pl) === isAirborne(e) && e.state !== 'lunge' && e.state !== 'strike' && e.state !== 'gripping') {
     const min = eRad + 6 + 10 * pl.growth;
     const ddp = dist(e.x, e.y, pl.x, pl.y);
     if (ddp < min && ddp > 0.001) {
@@ -2956,7 +3907,8 @@ function updateNPC(e, dt) {
   }
   // a fish stays in the water, no matter what pushed it around this frame
   // (the croc is amphibious — a strike may briefly carry it up the sand)
-  if (d.aquatic && !d.amphibious && !isWaterPx(e.x, e.y)) {
+  // (deepOnly: the ichthyosaur cannot even enter the shallows)
+  if (d.aquatic && !d.amphibious && !e.landHunt && (d.deepOnly ? !isDeepPx(e.x, e.y) : !isWaterPx(e.x, e.y))) {
     e.x = wx0; e.y = wy0;
     e.vx = 0; e.vy = 0;
     e.stateT = 0;   // pick a new (wet) plan next think
@@ -3115,9 +4067,91 @@ const ECO_SPAWNS = {
     { sp: 'duria', n: 2, min: 2 },
     { sp: 'drypto', n: 2, min: 2, away: true },
   ],
+  // THE LESSER ARCHIPELAGO: every island keeps its own animals (`isle`
+  // pins a spec to one island — its floor is counted per island too).
+  // Zalmoxes live on all of them but Utoriana; every fish in the game
+  // swims the open sea between
+  archi: [
+    { sp: 'homalo', isle: 'utoriana', n: 4, min: 3, agile: true, dwarf: 0.38 },   // a few island dwarfs, and too quick for a grown abelisaur
+    { sp: 'telmato', isle: 'narapa', pack: 2, sizes: [3, 4], min: 5 },
+    { sp: 'fylax', isle: 'narapa', pack: 2, sizes: [3, 4], min: 5 },
+    { sp: 'zalmox', isle: 'narapa', n: 4, min: 3 },
+    { sp: 'chenani', isle: 'narapa', n: 2, min: 1 },   // Narapa's own abelisaurs, hunting the herds
+    // every other island: Zalmoxes for now (more of the islands' own animals
+    // to come)
+    { sp: 'zalmox', isle: 'velinra', n: 3, min: 2 },
+    { sp: 'zalmox', isle: 'ossamere', n: 3, min: 2 },
+    { sp: 'zalmox', isle: 'kalimbra', n: 6, min: 4 },
+    { sp: 'zalmox', isle: 'takurei', n: 3, min: 2 },
+    { sp: 'zalmox', isle: 'merovia', n: 4, min: 3 },
+    { sp: 'zalmox', isle: 'ishandra', n: 3, min: 2 },
+    { sp: 'zalmox', isle: 'pell', n: 3, min: 2 },
+    { sp: 'zalmox', isle: 'zuranoa', n: 3, min: 2 },
+    { sp: 'zalmox', isle: 'orrotha', n: 3, min: 2 },
+    { sp: 'zalmox', isle: 'halune', n: 3, min: 2 },
+    { sp: 'zalmox', isle: 'sivanna', n: 3, min: 2 },
+    { sp: 'zalmox', isle: 'brekka', n: 3, min: 2 },
+    { sp: 'zalmox', isle: 'nimoru', n: 3, min: 2 },
+    { sp: 'zalmox', isle: 'ekkalia', n: 3, min: 2 },
+    { sp: 'zalmox', isle: 'varossa', n: 3, min: 2 },
+    // the outer reaches
+    { sp: 'zalmox', isle: 'tavessa', n: 3, min: 2 },
+    { sp: 'zalmox', isle: 'quorran', n: 3, min: 2 },
+    { sp: 'zalmox', isle: 'ilmeth', n: 3, min: 2 },
+    { sp: 'zalmox', isle: 'saruun', n: 3, min: 2 },
+    { sp: 'zalmox', isle: 'pelagra', n: 4, min: 3 },
+    { sp: 'zalmox', isle: 'ombrel', n: 3, min: 2 },
+    { sp: 'zalmox', isle: 'drevan', n: 3, min: 2 },
+    { sp: 'zalmox', isle: 'kesh', n: 3, min: 2 },
+    { sp: 'zalmox', isle: 'muradel', n: 3, min: 2 },
+    { sp: 'zalmox', isle: 'anzu', n: 3, min: 2 },
+    { sp: 'zalmox', isle: 'tollan', n: 3, min: 2 },
+    { sp: 'zalmox', isle: 'veyra', n: 3, min: 2 },
+    { sp: 'zalmox', isle: 'hesk', n: 4, min: 3 },
+    { sp: 'zalmox', isle: 'brimmora', n: 3, min: 2 },
+    { sp: 'zalmox', isle: 'orsk', n: 3, min: 2 },
+    // the gulls: Pterodactylus flocks roost on a handful of islands and fly
+    // the whole archipelago for carrion
+    { sp: 'ptero', isle: 'brekka', n: 4, min: 3 },
+    { sp: 'ptero', isle: 'orrotha', n: 3, min: 2 },
+    { sp: 'ptero', isle: 'takurei', n: 3, min: 2 },
+    { sp: 'ptero', isle: 'anzu', n: 3, min: 2 },
+    { sp: 'ptero', isle: 'quorran', n: 3, min: 2 },
+    { sp: 'ptero', isle: 'narapa', n: 3, min: 2 },
+    // MAGYAROSAURUS: Taku Rei's dwarf titanosaurs, herds of every age (a few
+    // herds hold out on Kalimbra and Halune)
+    { sp: 'magyaro', isle: 'takurei', pack: 2, sizes: [5, 6], min: 7, ages: [1, 1, 0.85, 0.6, 0.35, 0.15] },
+    { sp: 'magyaro', isle: 'kalimbra', pack: 1, sizes: [3, 4], min: 2, ages: [1, 0.7, 0.3, 0.15] },
+    { sp: 'magyaro', isle: 'halune', pack: 1, sizes: [3], min: 2, ages: [1, 0.6, 0.2] },
+    // TETHYSHADROS: the islands round Taku Rei
+    { sp: 'tethys', isle: 'ekkalia', pack: 2, sizes: [4, 5], min: 6, ages: [1, 1, 0.8, 0.45, 0.2] },
+    { sp: 'tethys', isle: 'varossa', pack: 1, sizes: [4, 5], min: 3, ages: [1, 1, 0.8, 0.45, 0.2] },
+    { sp: 'tethys', isle: 'ilmeth', pack: 1, sizes: [4, 5], min: 3, ages: [1, 1, 0.8, 0.45, 0.2] },
+    // IANI: Drevan's herds, and its neighbour Kesh's
+    { sp: 'iani', isle: 'drevan', pack: 2, sizes: [4, 5], min: 6, ages: [1, 1, 0.75, 0.45, 0.2] },
+    { sp: 'iani', isle: 'kesh', pack: 1, sizes: [3, 4], min: 3, ages: [1, 0.7, 0.35, 0.2] },
+    // HYPSILOPHODON on Okiri: quick little prey at the water's edge for the
+    // young Kaiwhekea
+    { sp: 'hypsi', isle: 'okiri', n: 6, min: 4, ages: [1, 1, 0.6, 0.35, 0.2] },
+    { sp: 'ptero', isle: 'okiri', n: 3, min: 2 },   // gulls that hunt them
+    // HATZEGOPTERYX: three wild ones, roaming the whole archipelago
+    { sp: 'hatzego', isle: 'saruun', n: 1, min: 1, away: true },
+    { sp: 'hatzego', isle: 'brekka', n: 1, min: 1, away: true },
+    { sp: 'hatzego', isle: 'quorran', n: 1, min: 1, away: true },
+    // the sea (scaled to the bigger map)
+    { sp: 'lepisosteus', n: 60, min: 45, biome: 'ocean' },
+    { sp: 'bassb', n: 42, min: 32, biome: 'ocean' },
+    { sp: 'scutelich', n: 42, min: 32, biome: 'ocean' },
+    { sp: 'herrie', n: 12, min: 9, biome: 'ocean' },
+    { sp: 'onchop', n: 9, min: 7, biome: 'ocean' },
+    { sp: 'mawsonia', n: 8, min: 6, biome: 'ocean' },
+    { sp: 'ichthyod', n: 20, min: 15, biome: 'ocean' },   // the sea's little barracudas
+  ],
 };
-function spawnPosFor(sp, i, biomeOverride) {
+function spawnPosFor(sp, i, biomeOverride, isle) {
   const biome = biomeOverride || NPC_DEF[sp].biome;
+  if (isle) return randIslePos(isle, biome === 'any' ? (i % 2 ? 'plains' : 'forest') : biome);
+  if (biome === 'ocean') return randOceanPos();
   if (biome === 'water') return randWaterPos();
   if (biome === 'sea') return randSeaPos();
   if (biome === 'lake') return randLakePos();
@@ -3133,13 +4167,31 @@ function awayFromNests(posFn) {
   }
   return posFn();
 }
-function spawnPack(species, count, sizes, den, zone) {
+// a spot 150-240 px from the species' own nest, if that nest is on this island
+function homeHerdPos(species, isle) {
+  const n = World.nests && World.nests[species], is = isleByKey(isle);
+  if (!n || !is || World.isleMap[tIdx(Math.floor(n.x / TILE), Math.floor(n.y / TILE))] !== is.idx) return null;
+  for (let k = 0; k < 60; k++) {
+    const a = rnd() * Math.PI * 2, r = rrange(150, 240), x = n.x + Math.cos(a) * r, y = n.y + Math.sin(a) * r;
+    if (World.isleMap[tIdx(Math.floor(x / TILE), Math.floor(y / TILE))] !== is.idx) continue;
+    if (isWaterPx(x, y) || isMudPx(x, y) || isCliffPx(x, y)) continue;
+    return { x, y };
+  }
+  return null;
+}
+function spawnPack(species, count, sizes, den, zone, isle, ages) {
   // hunter packs den near the mud pools; herds (den: 'plains') out on the grass;
   // a ZONE ([x0, y0, x1, y1] as map fractions) pins the pack to its own
   // quarter of the map — the desert raptors each hold their own ground
   for (let pk = 0; pk < count; pk++) {
     let cx, cy;
-    if (zone) {
+    if (isle) {
+      // an island pack: dens anywhere on its own island — except the FIRST
+      // herd of a species whose own nest is on this island, which dens in
+      // sight of the nest (a hatchling should see its kind straight away)
+      const pp = (pk === 0 && homeHerdPos(species, isle)) || randIslePos(isle, NPC_DEF[species].biome === 'forest' ? 'forest' : 'plains');
+      cx = pp.x; cy = pp.y;
+    } else if (zone) {
       let best = null;
       for (let k = 0; k < 60 && !best; k++) {
         const x = (zone[0] + rnd() * (zone[2] - zone[0])) * WORLD_W, y = (zone[1] + rnd() * (zone[3] - zone[1])) * WORLD_H;
@@ -3165,24 +4217,319 @@ function spawnPack(species, count, sizes, den, zone) {
         gx = cx + rrange(-60, 60); gy = cy + rrange(-60, 60);
         if (!isWaterPx(gx, gy) && !isLavaPx(gx, gy) && !isCliffPx(gx, gy)) break;
       }
-      G.npcs.push(makeNPC(species, clamp(gx, 30, WORLD_W - 30), clamp(gy, 30, WORLD_H - 30), pk + 1));
+      // (island packs get ids of their own: the same species packs on several isles)
+      const pid = isle ? isleByKey(isle).idx * 10 + pk + 1 : pk + 1;
+      const ne = makeNPC(species, clamp(gx, 30, WORLD_W - 30), clamp(gy, 30, WORLD_H - 30), pid);
+      if (isle) ne.isle = isle;
+      if (ages) ageNPC(ne, ages[i % ages.length]);   // a herd of every age
+      G.npcs.push(ne);
     }
   }
 }
 function spawnInitialNPCs() {
   G.npcs.length = 0;
   for (const spec of ECO_SPAWNS[World.eco]) {
-    if (spec.pack) { spawnPack(spec.sp, spec.pack, spec.sizes, spec.den, spec.zone); continue; }
+    if (spec.pack) { spawnPack(spec.sp, spec.pack, spec.sizes, spec.den, spec.zone, spec.isle, spec.ages); continue; }
     for (let i = 0; i < spec.n; i++) {
-      const pos = spec.away ? awayFromNests(() => spawnPosFor(spec.sp, i, spec.biome)) : spawnPosFor(spec.sp, i, spec.biome);
-      G.npcs.push(makeNPC(spec.sp, pos.x, pos.y));
+      const pos = spec.away ? awayFromNests(() => spawnPosFor(spec.sp, i, spec.biome, spec.isle)) : spawnPosFor(spec.sp, i, spec.biome, spec.isle);
+      G.npcs.push(specNPC(spec, pos));
     }
   }
   G.guardianSeen = G.cradleFound = false;
   G.giantRespawnAt = G.guardianRespawnAt = G.elderAlertT = null;
+  G.garaAt = []; G.roamAt = null;
   if (World.eco === 'desert') spawnDesertSpecials();
+  if (World.eco === 'archi') spawnArchiSpecials();
   recordPackBases();   // the packs' ORIGINAL rosters anchor all pack scaling
   if (typeof spawnBloodlines === 'function') spawnBloodlines();   // families settled here by the Great Walk
+}
+// one loose animal from a spawn spec: island-born ones remember their
+// island (population floors are kept per island), and the AGILE (Utoriana's
+// homalocephale) carry a deeper tank to run their rings on
+function specNPC(spec, pos) {
+  const e = makeNPC(spec.sp, pos.x, pos.y);
+  if (spec.isle) e.isle = spec.isle;
+  if (spec.agile) { e.agile = true; e.stamMax = e.stam = AGILE_STAM; }
+  if (spec.dwarf) { e.hp = e.maxhp = Math.round(e.maxhp * spec.dwarf); e.dmgMul = 0.22; e.growth = 0.8; }   // island dwarfs: smaller, softer, less meat
+  if (spec.ages) ageNPC(e, spec.ages[Math.floor(rnd() * spec.ages.length)]);
+  return e;
+}
+const AGILE_STAM = 320;   // vs the default 120: they simply outlast you
+// ---------- the Lesser Archipelago's keepers (hand-placed, one per strait) ----------
+// Garamirala holds every strait in World.straits. Kill one and the water
+// stays empty for GARA_RESPAWN seconds — then another moves in (never
+// while you're right there to watch it arrive)
+const GARA_RESPAWN = 180;
+function spawnGarami(k) {
+  const s = World.straits[k];
+  let pos = null;
+  for (let r = 0; r < 600 && !pos; r += 40) {
+    for (let j = 0; j < 10 && !pos; j++) {
+      const a = (j / 10) * TAU, x = s.x + Math.cos(a) * r, y = s.y + Math.sin(a) * r;
+      if (isDeepPx(x, y)) pos = { x, y };
+    }
+  }
+  if (!pos) return null;
+  const e = makeNPC('garami', pos.x, pos.y);
+  e.home = { x: s.x, y: s.y };
+  e.guard = !!s.guard;
+  e.strait = k;
+  G.npcs.push(e);
+  return e;
+}
+// the open sea's own: a couple of Garamirala belong to no strait at all.
+// They roam swimmer's depth far from any island, their patrol drifting
+// slowly across the ocean (see thinkGarami) — anything crossing open water
+// may meet one
+const GARA_ROAMERS = 2;
+function spawnGaramiRoamer() {
+  const p = G.player;
+  for (let k = 0; k < 200; k++) {
+    const x = rrange(0.06, 0.94) * WORLD_W, y = rrange(0.06, 0.94) * WORLD_H;
+    const i = tIdx(Math.floor(x / TILE), Math.floor(y / TILE));
+    if (World.ter[i] !== T_SWIM || World.isleS[i] > -40) continue;   // well out, far from any coast
+    if (p && dist(x, y, p.x, p.y) < 900) continue;
+    const e = makeNPC('garami', x, y);
+    e.home = { x, y };
+    e.guard = false;
+    e.roam = true;
+    G.npcs.push(e);
+    return e;
+  }
+  return null;
+}
+// ---------- KAIWHEKEA in the wild ----------
+// Rare, but less rare than Garamirala: a few out in the open sea, more round
+// Okiri, and a pair in Taku Rei's lagoon, with the lagoon's own fish (six
+// gar, three bass) to live on. Easy-going: they eat fish, and only now and
+// then come up out of the water at a youngster at the edge (on Okiri, the
+// Hypsilophodon). Bite one, though, and it bites back
+const KAI_ROAMERS = 3, KAI_OKIRI = 3, KAI_LAGOON = 2, LAGOON_FISH = { lepisosteus: 6, bassb: 3 };
+const KAI_RESPAWN = 120;
+function lagoonCentre() { const t = isleByKey('takurei'); return t ? { x: t.x, y: t.y } : null; }
+function waterSpot(cx, cy, r0, r1, deep) {
+  for (let k = 0; k < 120; k++) {
+    const a = rnd() * TAU, r = rrange(r0, r1), x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r;
+    if (x < 40 || y < 40 || x > WORLD_W - 40 || y > WORLD_H - 40) continue;
+    if (deep ? isDeepPx(x, y) : isWaterPx(x, y)) return { x, y };
+  }
+  return null;
+}
+function spawnKaiwhe(kind) {
+  const p = G.player;
+  let pos = null, home = null, homeR = 450;
+  for (let k = 0; k < 30 && !pos; k++) {
+    let q = null;
+    if (kind === 'lagoon') { const c = lagoonCentre(); if (!c) return null; q = waterSpot(c.x, c.y, 0, 380, true); home = c; homeR = 400; }
+    else if (kind === 'okiri') { const o = isleByKey('okiri'); if (!o) return null; q = waterSpot(o.x, o.y, 300, 620, false); home = { x: o.x, y: o.y }; homeR = 650; }
+    else {
+      const x = rrange(0.06, 0.94) * WORLD_W, y = rrange(0.06, 0.94) * WORLD_H;
+      const i = tIdx(Math.floor(x / TILE), Math.floor(y / TILE));
+      if (World.ter[i] === T_SWIM && World.isleS[i] < -20) q = { x, y };
+      homeR = 1200;
+    }
+    if (q && (!p || dist(q.x, q.y, p.x, p.y) > 600)) pos = q;
+  }
+  if (!pos) return null;
+  const e = makeNPC('kaiwhe', pos.x, pos.y);
+  e.home = home ? { x: home.x, y: home.y } : { x: pos.x, y: pos.y };
+  e.kai = kind; e.kaiR = homeR;
+  e.ambushAt = G.time + rrange(90, 240);
+  G.npcs.push(e);
+  return e;
+}
+function spawnLagoonFish(sp) {
+  const c = lagoonCentre();
+  if (!c) return null;
+  const p = G.player;
+  for (let k = 0; k < 20; k++) {
+    const q = waterSpot(c.x, c.y, 0, 400, false);
+    if (!q || (p && dist(q.x, q.y, p.x, p.y) < 350)) continue;
+    const e = makeNPC(sp, q.x, q.y);
+    e.home = { x: c.x, y: c.y };   // they wander round the lagoon's middle
+    e.lagoon = true;
+    G.npcs.push(e);
+    return e;
+  }
+  return null;
+}
+const KAI_KINDS = { roam: KAI_ROAMERS, okiri: KAI_OKIRI, lagoon: KAI_LAGOON };
+function spawnKaiwhes() {
+  for (const k in KAI_KINDS) for (let i = 0; i < KAI_KINDS[k]; i++) spawnKaiwhe(k);
+  for (const sp in LAGOON_FISH) for (let i = 0; i < LAGOON_FISH[sp]; i++) spawnLagoonFish(sp);
+}
+function maintainKaiwhes() {
+  G.kaiAt = G.kaiAt || {};
+  const due = (key, have, want, fn) => {
+    if (have >= want) { G.kaiAt[key] = null; return; }
+    if (G.kaiAt[key] == null) { G.kaiAt[key] = G.time + (key.startsWith('fish') ? 40 : KAI_RESPAWN); return; }
+    if (G.time >= G.kaiAt[key] && fn()) G.kaiAt[key] = null;
+  };
+  for (const k in KAI_KINDS) due('kai-' + k, G.npcs.filter(e => e.species === 'kaiwhe' && e.kai === k && e.hp > 0).length, KAI_KINDS[k], () => spawnKaiwhe(k));
+  for (const sp in LAGOON_FISH) due('fish-' + sp, G.npcs.filter(e => e.species === sp && e.lagoon && e.hp > 0).length, LAGOON_FISH[sp], () => spawnLagoonFish(sp));
+}
+const KAI_FISH = ['lepisosteus', 'bassb', 'scutelich'];
+// a youngster at the water's edge (or in it) that a Kaiwhekea might take
+function kaiAmbushOk(e, o) {
+  if (!o || o === e) return false;
+  if (o.isPlayer) {
+    if (!o.alive || o.species === 'kaiwhe' || o.hidden || o.grabbed || o.skyHeld || isAirborne(o) || (o.growth || 1) >= 0.5) return false;
+  } else {
+    const nd = NPC_DEF[o.species];
+    if (o.hp <= 0 || !nd || nd.aquatic || nd.giant || isFamily(o) || o.heldBy || isAirborne(o) || DINO[o.species].fish) return false;
+    if (o.species !== 'hypsi' && (o.growth == null || o.growth >= 0.55)) return false;
+  }
+  return isWaterPx(o.x, o.y) || nearWaterPx(o.x, o.y, 30);
+}
+function thinkKaiwhe(e, d) {
+  if (retaliationCheck(e, d)) return;   // easy-going — until it is bitten
+  const p = G.player;
+  // ASHORE (only ever after a Hypsilophodon or a youngster): the moment the
+  // hunt is over, or the quarry gets more than a few lengths from the water,
+  // it lurches straight back in
+  if (e.landHunt) {
+    if (!isWaterPx(e.x, e.y)) e.landT = (e.landT || 0) + (G.time - (e.landSeen || G.time)); else e.landT = 0;
+    e.landSeen = G.time;
+    const t = e.target;
+    const on = e.landT < 3 && (e.state === 'chase' || e.state === 'windup' || e.state === 'lunge' || e.state === 'recover') && t &&
+      (t.isPlayer ? t.alive : t.hp > 0 && G.npcs.indexOf(t) >= 0) && (isWaterPx(t.x, t.y) || nearWaterPx(t.x, t.y, 70));
+    if (on) return;
+    if (isWaterPx(e.x, e.y)) { e.landHunt = false; e.landT = 0; e.landSeen = 0; }
+    else {
+      // (straight for the nearest deep-enough water, and a little past it)
+      let wa = null, wr = 1e9;
+      for (let k = 0; k < 16; k++) {
+        const b = k / 16 * TAU;
+        for (let r = 20; r <= 400; r += 20) if (isWaterPx(e.x + Math.cos(b) * r, e.y + Math.sin(b) * r)) { if (r < wr) { wr = r; wa = b; } break; }
+      }
+      e.state = 'wander'; e.target = null; e.stateT = 4;
+      if (wa != null) { e.tx = e.x + Math.cos(wa) * (wr + 50); e.ty = e.y + Math.sin(wa) * (wr + 50); }
+      else { e.tx = e.home.x; e.ty = e.home.y; }
+      return;
+    }
+  }
+  // eating: stay on it
+  if (e.state === 'seaFeed' && e.carc && e.carc.meat > 0 && G.carcasses.indexOf(e.carc) >= 0 && e.stateT > 0) return;
+  // a chase only goes as far as the water does
+  if (e.state === 'chase' || e.state === 'windup' || e.state === 'lunge' || e.state === 'recover') {
+    const t = e.target;
+    const alive = t && (t.isPlayer ? t.alive : t.hp > 0 && G.npcs.indexOf(t) >= 0);
+    if (alive && (isWaterPx(t.x, t.y) || nearWaterPx(t.x, t.y, 40))) return;
+    e.state = 'idle'; e.stateT = 1; e.target = null;
+  }
+  // something dead within reach of the water: eat it
+  const c = nearestCarcass(e.x, e.y, 180, false);
+  if (c && c.meat > 0 && !c.carried && (isWaterPx(c.x, c.y) || nearWaterPx(c.x, c.y, 40))) {
+    e.state = 'seaFeed'; e.carc = c; e.stateT = 14; return;
+  }
+  const hungry = G.time >= (e.fedUntil || 0);
+  // THE AMBUSH: rarely, a youngster at the edge
+  if (G.time >= (e.ambushAt || 0)) {
+    let best = null, bd = d.detect;
+    const consider = (o) => { const dd = dist(e.x, e.y, o.x, o.y); if (dd < bd && kaiAmbushOk(e, o)) { bd = dd; best = o; } };
+    if (p) consider(p);
+    for (const o of G.npcs) consider(o);
+    if (best) { e.state = 'chase'; e.target = best; e.stateT = 6; e.landHunt = true; e.ambushAt = G.time + rrange(150, 300); return; }
+    e.ambushAt = G.time + rrange(6, 12);   // nobody there: look again in a while
+  }
+  // fish, when it is hungry
+  if (hungry && rnd() < 0.35) {
+    let best = null, bd = d.detect;
+    for (const o of G.npcs) {
+      if (!KAI_FISH.includes(o.species) || o.hp <= 0) continue;
+      const dd = dist(e.x, e.y, o.x, o.y);
+      if (dd < bd) { bd = dd; best = o; }
+    }
+    if (best) { e.state = 'chase'; e.target = best; e.stateT = 6; return; }
+  }
+  if (e.stateT > 0) return;
+  // cruise its own water, unhurried
+  const R = e.kaiR || d.homeR;
+  for (let k = 0; k < 12; k++) {
+    const a = rnd() * TAU, rr = e.kai === 'okiri' ? rrange(280, 620) : rrange(30, R);
+    const tx = e.home.x + Math.cos(a) * rr, ty = e.home.y + Math.sin(a) * rr;
+    if (isDeepPx(tx, ty) || ((e.kai === 'lagoon' || e.kai === 'okiri') && isWaterPx(tx, ty))) { e.tx = tx; e.ty = ty; break; }
+  }
+  e.state = rnd() < 0.3 ? 'idle' : 'wander';
+  e.stateT = rrange(3, 7);
+}
+function spawnArchiSpecials() {
+  for (let k = 0; k < World.straits.length; k++) spawnGarami(k);
+  for (let k = 0; k < GARA_ROAMERS; k++) spawnGaramiRoamer();
+  spawnKaiwhes();
+}
+function maintainArchiSpecials() {
+  maintainKaiwhes();
+  G.garaAt = G.garaAt || [];
+  const p = G.player;
+  for (let k = 0; k < World.straits.length; k++) {
+    if (G.npcs.some(e => e.species === 'garami' && e.strait === k && e.hp > 0)) { G.garaAt[k] = null; continue; }
+    if (G.garaAt[k] == null) { G.garaAt[k] = G.time + GARA_RESPAWN; continue; }
+    const s = World.straits[k];
+    if (G.time >= G.garaAt[k] && (!p || dist(p.x, p.y, s.x, s.y) > 900)) { spawnGarami(k); G.garaAt[k] = null; }
+  }
+  // the open-sea roamers: a dead one is replaced the same way
+  const roamers = G.npcs.filter(e => e.species === 'garami' && e.roam && e.hp > 0).length;
+  if (roamers >= GARA_ROAMERS) G.roamAt = null;
+  else if (G.roamAt == null) G.roamAt = G.time + GARA_RESPAWN;
+  else if (G.time >= G.roamAt && spawnGaramiRoamer()) G.roamAt = null;
+}
+// ---------- FLOTSAM: the sea washes its dead up on the beaches ----------
+// The gulls' bread: every so often a dead fish turns up on the sand of some
+// island (never in front of you), and rots away like any carcass. Enough of
+// them that a scavenger on the wing can always find a meal if it searches.
+const FLOTSAM_MAX = 16;
+const FLOTSAM_FISH = ['lepisosteus', 'bassb', 'scutelich'];
+function maintainFlotsam() {
+  if (G.carcasses.filter(c => c.flotsam).length >= FLOTSAM_MAX) return;
+  const p = G.player;
+  for (let tries = 0; tries < 3; tries++) {
+    const isle = World.isles[Math.floor(Math.random() * World.isles.length)];
+    const bb = isle.bb;
+    for (let k = 0; k < 40; k++) {
+      const x = (bb.x0 + Math.random() * (bb.x1 - bb.x0 + 1)) * TILE, y = (bb.y0 + Math.random() * (bb.y1 - bb.y0 + 1)) * TILE;
+      if (terAtPx(x, y) !== T_SAND) continue;
+      if (p && dist(p.x, p.y, x, y) < 420) continue;
+      const meat = Math.round(rrange(30, 50));
+      G.carcasses.push({ x, y, species: FLOTSAM_FISH[Math.floor(Math.random() * FLOTSAM_FISH.length)], growth: rrange(0.6, 1), meat, maxMeat: meat, t: 0, flotsam: true });
+      return;
+    }
+  }
+}
+// ---------- crossing the small waterways ----------
+// Island animals don't stay put forever: now and then one wades out across a
+// small waterway (World.isleLinks: wadeable, no swimmer's depth on the way)
+// to join ITS OWN KIND on the far island. Only ever toward an island that
+// already has its species, never emptying the island it leaves, never
+// crowding the one it goes to. In the water it is slow and exposed — the
+// channel keepers, and a Kaiwhekea's bleeding bite, are waiting.
+const MIGRATE_CHANCE = 0.5;   // per population tick (every 10 s)
+function isleMigration() {
+  const links = World.isleLinks || [];
+  if (!links.length || Math.random() > MIGRATE_CHANCE) return;
+  const counts = {};
+  for (const e of G.npcs) if (e.isle && e.hp > 0) counts[e.species + '@' + e.isle] = (counts[e.species + '@' + e.isle] || 0) + 1;
+  const specN = (sp, isle) => { const s = ECO_SPAWNS.archi.find(q => q.sp === sp && q.isle === isle); return s ? (s.n || 0) + (s.pack || 0) * 4 : 0; };
+  const pool = G.npcs.filter(e => e.isle && e.hp > 0 && !e.migr && !e.packAlpha && !e.herdKin && !e.agile && !e.isMate && !e.isBaby
+    && NPC_DEF[e.species] && !NPC_DEF[e.species].aquatic && (e.state === 'idle' || e.state === 'wander' || e.state === 'graze'));
+  for (let tries = 0; tries < 12 && pool.length; tries++) {
+    const e = pool[Math.floor(Math.random() * pool.length)];
+    const opts = links.filter(l => (l.a === e.isle || l.b === e.isle)).map(l => {
+      const fwd = l.a === e.isle;
+      return { to: fwd ? l.b : l.a, from: fwd ? l.pa : l.pb, land: fwd ? l.pb : l.pa };
+    }).filter(o => (counts[e.species + '@' + o.to] || 0) > 0
+      && (counts[e.species + '@' + o.to] || 0) < specN(e.species, o.to) + 2
+      && (counts[e.species + '@' + e.isle] || 0) > 1);
+    if (!opts.length) continue;
+    const o = opts[Math.floor(Math.random() * opts.length)];
+    const dest = isleByKey(o.to);
+    const a = angTo(o.land.x, o.land.y, dest.x, dest.y);
+    const inland = { x: o.land.x + Math.cos(a) * 90, y: o.land.y + Math.sin(a) * 90 };
+    e.migr = { to: o.to, pts: [o.from, o.land, inland], i: 0 };
+    e.state = 'migrate'; e.stateT = 120;
+    return e;
+  }
+  return null;
 }
 // ---------- the Death Desert's specials (not in ECO_SPAWNS: hand-placed) ----------
 // ONE giant walks the desert (an elder, very rarely), and the Giants' Cradle
@@ -3201,18 +4548,56 @@ function spawnGiant(initial) {
     pos = q;
   }
   if (!pos) return null;
-  const e = makeNPC('yunmeng', pos.x, pos.y);
-  e.stompCd = rrange(1.5, 3);
   // (a true dice roll: rnd() is still on the world-gen seed here, so it would
   // give the same answer on the first desert game of every page load)
-  if (Math.random() < ELDER_CHANCE || G.forceElder) {
+  const e = makeGiant(pos.x, pos.y, Math.random() < ELDER_CHANCE || G.forceElder);
+  if (e.elder) G.elderAlertT = initial ? 6 : 0.5;   // (the alert itself is for Aerosteon players only)
+  return e;
+}
+function makeGiant(x, y, elder) {
+  const e = makeNPC('yunmeng', x, y);
+  e.stompCd = rrange(1.5, 3);
+  if (elder) {
     // an ELDER: bigger, harder-hitting, slower to die — and the old claw-rake
     // across the eye that marks it
     e.elder = e.scar = true;
-    e.hp = e.maxhp = 13000;
-    G.elderAlertT = initial ? 6 : 0.5;   // (the alert itself is for Aerosteon players only)
+    e.hp = e.maxhp = 14000;
   }
   G.npcs.push(e);
+  return e;
+}
+// TEST MODE (the EVAX code): spawns on dry ground about `r` px off, on
+// whichever side of the player isn't water. Desert only, like its animals.
+function testSpawnPos(r0) {
+  const p = G.player;
+  if (!p || !p.alive || World.eco !== 'desert') return null;
+  for (let k = 0; k < 24; k++) {
+    const a = (k % 2 ? Math.PI : 0) + (p.facing < 0 ? Math.PI : 0) + rrange(-0.9, 0.9);
+    const r = r0 + k * 15;
+    const x = clamp(p.x + Math.cos(a) * r, 80, WORLD_W - 80), y = clamp(p.y + Math.sin(a) * r * 0.6, 80, WORLD_H - 80);
+    if (!isWaterPx(x, y) && !isLavaPx(x, y) && !isCliffPx(x, y)) return { x, y };
+  }
+  return null;
+}
+const TEST_AERO_MAX = 2;          // test-spawned aerosteon alive at once
+const TEST_AERO_PACK = 4242;      // they hunt together as one little pack
+function testAeroCount() { return G.npcs.filter(e => e.testSpawn && e.species === 'aero' && e.hp > 0).length; }
+// returns the new aerosteon, or a reason string when it can't spawn one
+function spawnTestAero() {
+  if (testAeroCount() >= TEST_AERO_MAX) return 'Two test Aerosteon are already out — at most ' + TEST_AERO_MAX + ' at a time.';
+  const pos = testSpawnPos(260);
+  if (!pos) return 'No dry ground nearby to put an Aerosteon on.';
+  const e = makeNPC('aero', pos.x, pos.y, TEST_AERO_PACK);
+  e.testSpawn = true;
+  G.npcs.push(e);
+  G.banner = { str: 'An Aerosteon runs in (test mode) — ' + testAeroCount() + ' / ' + TEST_AERO_MAX + '.', t: 4, color: '#ffd23e' };
+  return e;
+}
+function spawnTestGiant(elder) {
+  const pos = testSpawnPos(380);
+  if (!pos) return null;
+  const e = makeGiant(pos.x, pos.y, elder);
+  G.banner = { str: (elder ? '⚠ An ELDER Yunmenglong' : 'A Yunmenglong') + ' walks in (test mode).', t: 4, color: '#ffd23e' };
   return e;
 }
 function spawnCradleBaby() {
@@ -3220,7 +4605,7 @@ function spawnCradleBaby() {
   const e = makeNPC('yunmeng', q.x, q.y);
   e.cradle = true;
   e.growth = rrange(0.12, 0.3);
-  e.hp = e.maxhp = Math.round(NPC_DEF.yunmeng.hp * 0.09 * (e.growth / 0.2));
+  e.hp = e.maxhp = Math.round(900 * (e.growth / 0.2));   // (the young stay soft: not scaled off the adult)
   e.spMul = 2.4;
   e.home = { x: q.x, y: q.y };
   G.npcs.push(e);
@@ -3369,19 +4754,328 @@ function updatePackScale() {
   }
 }
 function maintainPopulation() {
+  // (island animals count per island: a zalmoxes dying on Narapa is
+  // replaced on Narapa, not on whichever island the dice pick)
   const counts = {};
-  for (const e of G.npcs) { if (!e.packBonus && !e.bloodline && !e.cradle) counts[e.species] = (counts[e.species] || 0) + 1; }
+  const keyOf = (sp, isle) => isle ? sp + '@' + isle : sp;
+  for (const e of G.npcs) { if (!e.packBonus && !e.bloodline && !e.cradle) { const kk = keyOf(e.species, e.isle); counts[kk] = (counts[kk] || 0) + 1; } }
   if (World.eco === 'desert') maintainDesertSpecials();
+  if (World.eco === 'archi') { maintainArchiSpecials(); isleMigration(); maintainFlotsam(); }
   for (const spec of ECO_SPAWNS[World.eco]) {
-    if ((counts[spec.sp] || 0) < spec.min) {
+    if ((counts[keyOf(spec.sp, spec.isle)] || 0) < spec.min) {
       for (let k = 0; k < 30; k++) {
-        const pos = spawnPosFor(spec.sp, k, spec.biome);
+        const pos = spawnPosFor(spec.sp, k, spec.biome, spec.isle);
         if (G.player && dist(pos.x, pos.y, G.player.x, G.player.y) < 500) continue;
-        G.npcs.push(makeNPC(spec.sp, pos.x, pos.y));
+        G.npcs.push(specNPC(spec, pos));
         break;
       }
     }
   }
+}
+// ---------- player update ----------
+// ---------- THE SNATCH (hatzegopteryx) ----------
+// Press F beside an animal and you pick it up: in the JAWS if it has half your
+// health or less ("a little snack"), in the FEET if it has up to two-thirds.
+// Aloft it only works low down and keeping still (you hover over it). Carrying costs
+// SNATCH_BURN stamina a second (and no breath comes back while you carry);
+// run dry and it slips free. M bites what you hold; F lets it go, and from
+// high up the fall does the rest.
+const SNATCH_BURN = 3;       // stamina per second while carrying
+const SWALLOW_FILL = 0.75;   // swallowing whole gives this share of the food tearing it up would
+const SNATCH_ALT = 45;       // the highest you can hover and still pick something up
+// where a carried carcass rides: in the jaws, at the drawn bill-tip for a
+// long-billed giant, else at the head — and UP with the carrier when it
+// flies (liftY is the draw height above the carcass's ground spot)
+function carryRide(p, c) {
+  const j = p.jawPt, alt = p.alt || 0;
+  if (j && G.time - j.t < 0.5 && j.air === isAirborne(p)) {
+    c.x = j.x; c.y = p.y + 1; c.liftY = j.h - 2;
+    return;
+  }
+  const hw = headWorldPos(p);
+  c.x = hw.x + p.facing * 4; c.y = p.y + 1;
+  c.liftY = p.y - hw.y - 2 + alt;
+}
+function snatchMode(p, e) {
+  // judged by the animal's SIZE (its full health), not how hurt it is — a
+  // half-dead giant is still a giant and cannot be lifted
+  // (and by the snatcher's own size: see liftBase)
+  return liftMode(p, e);
+}
+function snatchCandidate(p) {
+  const I = G.input;
+  if (isAirborne(p) && (p.alt > SNATCH_ALT || I.left || I.right || I.up || I.down)) return null;
+  let best = null, bd = 1e9;
+  for (const e of G.npcs) {
+    if (e.hp <= 0 || e.heldBy || e.falling || isFamily(e) || kinLine(e)) continue;
+    const nd = NPC_DEF[e.species];
+    if (!nd || nd.aquatic || nd.giant) continue;
+    if (isAirborne(e) && Math.abs(e.alt - (p.alt || 0)) > AIR_BAND) continue;
+    const dd = dist(p.x, p.y, e.x, e.y) - bodyRadius(e);
+    if (dd > bodyRadius(p) + 45 || dd >= bd) continue;
+    if (!snatchMode(p, e)) continue;
+    bd = dd; best = e;
+  }
+  return best;
+}
+// where the held animal hangs: from the beak, or under the body in the feet
+function holdPrey(p, s) {
+  const e = s.e, d = DINO[p.species];
+  const sc = d.scale * sizeScale(p.growth) * genderMod(p).size;
+  const ed = DINO[e.species];
+  const es = ed.scale * sizeScale(e.growth != null ? e.growth : 1) * genderMod(e).size;
+  const preyH = (ed.L.leg[0] + ed.L.body[1] * 0.5) * es;   // its own centre height
+  const f = p.facing || 1, air = isAirborne(p);
+  // the drawing records where the bill-tip and the feet really are each
+  // frame (drawAzhdarchid → p.jawPt / p.feetPt): the prey hangs from THOSE,
+  // so it swings with every stride, strike and wingbeat
+  const pt = s.mode === 'jaws' ? p.jawPt : p.feetPt;
+  if (pt && G.time - pt.t < 0.5 && pt.air === isAirborne(p)) {   // (not on the frame the pose flips)
+    const topH = (ed.L.leg[0] + ed.L.body[1] * (s.mode === 'jaws' ? 0.8 : 0.95)) * es;
+    e.x = pt.x;
+    e.y = p.y + (s.mode === 'jaws' ? 2 : -1);
+    e.alt = Math.max(0, pt.h - topH);
+    e.facing = f; e.vx = e.vy = 0; e.pitch = 0; e.move = 0;
+    return;
+  }
+  if (s.mode === 'jaws') {
+    e.x = p.x + f * snoutLen(d, sc) * (air ? 1.05 : 0.95);
+    e.y = p.y + 2;
+    e.alt = Math.max(0, (p.alt || 0) + (air ? (d.L.leg[0] + d.L.body[1] * 0.3) * sc : 24 * sc) - preyH * 0.9);
+  } else {
+    e.x = p.x - f * d.L.body[0] * sc * 0.12;
+    e.y = p.y - 1;
+    e.alt = Math.max(0, (p.alt || 0) + (air ? d.L.leg[0] * sc * 0.4 : 0) - preyH * 0.7);
+  }
+  e.facing = f; e.vx = e.vy = 0; e.pitch = 0; e.move = 0;
+}
+function dropPrey(p, why) {
+  const s = p.snatch;
+  p.snatch = null;
+  if (!s || !s.e) return;
+  const e = s.e;
+  e.heldBy = null;
+  if ((e.alt || 0) > 1) { e.falling = true; e.fallV = 0; e.dropAlt = e.alt; }
+  e.state = 'flee'; e.target = p; e.stateT = 3;
+  floatText(p.x, p.y - (p.alt || 0) - 60, why || 'dropped', '#e0b866');
+}
+function updateSnatch(p, def, input, dt) {
+  p.snatchCand = null;
+  const s = p.snatch;
+  if (s) {
+    const e = s.e;
+    if (!e || e.hp <= 0 || G.npcs.indexOf(e) < 0) { p.snatch = null; return; }
+    p.stamina = Math.max(0, p.stamina - SNATCH_BURN * dt);
+    holdPrey(p, s);
+    // M bites what you're holding — it can't get away from this one
+    if (input.attack && p.atkCd <= 0 && p.actionT <= 0) {
+      input.attack = false;
+      p.atkCd = def.atkCd; p.attackT = 1;
+      SFX.bite();
+      dealDamage(e, playerDmg() * rrange(0.9, 1.1), p, { force: true, kb: 0, hitX: e.x, hitY: e.y - (e.alt || 0) - 10 });
+      if (e.hp <= 0) { p.snatch = null; return; }
+    }
+    // E swallows a jaw-held animal WHOLE: no carcass, no fuss — a little less
+    // food than tearing the same animal apart would give (SWALLOW_FILL)
+    if (s.mode === 'jaws' && input.interact && p.actionT <= 0) {
+      input.interact = false;
+      const meat = e.maxhp * 0.55 * ((NPC_DEF[e.species] || {}).meatMul || 1);
+      const i = G.npcs.indexOf(e);
+      if (i >= 0) G.npcs.splice(i, 1);
+      e.heldBy = null; e.hp = 0;
+      p.snatch = null;
+      p.action = { kind: 'swallowPrey', meat };
+      p.actT = 0; p.actionT = 1.3;
+      SFX.eat();
+      floatText(p.x, p.y - (p.alt || 0) - 60, 'down in one!', '#e0b866');
+      return;
+    }
+    if (input.action || p.stamina <= 0) {
+      input.action = false;
+      dropPrey(p, p.stamina <= 0 ? 'too tired — it slips free!' : (p.alt || 0) > 40 ? 'let go!' : 'dropped');
+    }
+    return;
+  }
+  if (p.actionT <= 0 && !p.carry && !p.fishing && !G.wrestle) p.snatchCand = snatchCandidate(p);
+  if (p.snatchCand && input.action) {
+    input.action = false;
+    const e = p.snatchCand;
+    p.snatch = { e, mode: snatchMode(p, e) };
+    p.snatchCand = null;
+    e.heldBy = p;
+    e.state = 'flee'; e.target = p; e.stateT = 3;
+    p.resting = false;
+    holdPrey(p, p.snatch);
+    SFX.bite();
+    G.shake = Math.min(6, (G.shake || 0) + 2);
+    floatText(p.x, p.y - (p.alt || 0) - 60, p.snatch.mode === 'jaws' ? 'snatched!' : 'in your feet!', '#ffd23e');
+  }
+}
+// small enough to be carried off and a wild Hatzegopteryx is about: a warning
+// (or the comfort of the trees)
+// ---------- BORN INTO A HERD (Tethyshadros, Magyarosaurus) ----------
+// You hatch among a herd led by its biggest. Grown, and with that leader
+// dead (or killed by you), the herd is yours
+function herdTick(p) {
+  if (!G.herd) {
+    if (G.herdTried || G.cine) return;
+    G.herdTried = true;
+    const kin = G.npcs.filter(e => e.species === p.species && e.hp > 0 && !isFamily(e) && !e.bloodline && !e.heldBy && dist(e.x, e.y, p.x, p.y) < 650);
+    if (!kin.length) return;
+    const lead = kin.reduce((a, b) => (b.maxhp > a.maxhp ? b : a));
+    for (const e of kin) e.herdKin = true;
+    G.herd = { leader: lead, kin };
+    G.banner = { str: 'You were born into a herd of ' + kin.length + '. Keep with it: the big one marked ♛ leads.', t: 5, color: '#ffe9a0' };
+    return;
+  }
+  const H = G.herd;
+  H.kin = H.kin.filter(e => e.hp > 0 && G.npcs.indexOf(e) >= 0);
+  const L = H.leader;
+  if (!L.isPlayer && (L.hp <= 0 || G.npcs.indexOf(L) < 0)) {
+    if (p.growth >= 1) {
+      H.leader = p;
+      G.banner = { str: 'The old leader is gone. The herd follows YOU now.', t: 5, color: '#ffd23e' };
+      SFX.stage();
+    } else if (H.kin.length) {
+      H.leader = H.kin.reduce((a, b) => (b.maxhp > a.maxhp ? b : a));
+      G.banner = { str: 'The leader is gone, and another takes the herd. Grow up, and next time it is yours.', t: 5, color: '#ffe9a0' };
+    } else { G.herd = null; return; }
+  }
+  // NEW LAND: led across the sea by you, some of the herd settle here, and
+  // some swim back to keep the old island's herd going
+  if (H.leader === p && p.alive && !isWaterPx(p.x, p.y)) {
+    const here = isleKeyAtPx(p.x, p.y);
+    let stay = 0, back = 0;
+    if (here) for (const e of H.kin.slice()) {
+      if (!e.isle || e.isle === here || isWaterPx(e.x, e.y) || isleKeyAtPx(e.x, e.y) !== here) continue;
+      if (rnd() < 0.35) {
+        e.herdKin = false; H.kin.splice(H.kin.indexOf(e), 1);
+        e.state = 'swimHome'; e.stateT = 40; e.target = null; back++;
+      } else { e.isle = here; e.home = { x: e.x, y: e.y }; stay++; }
+    }
+    if (stay || back) {
+      const nm = (isleByKey(here) || {}).name || 'new land';
+      G.banner = { str: (stay ? stay + ' of your herd settle' + (stay === 1 ? 's' : '') + ' ' + nm + ' with you' : 'none of your herd stay') + (back ? '; ' + back + ' swim' + (back === 1 ? 's' : '') + ' back home' : '') + '.', t: 4.5, color: '#ffe9a0' };
+    }
+  }
+  if (!H.leader.isPlayer && p.alive && !p.skyHeld) {
+    const dd = dist(p.x, p.y, H.leader.x, H.leader.y);
+    if (dd > 420 && dd < 1600) G.prompt = (G.prompt ? G.prompt + '    ' : '') + 'your herd is over there: keep with the leader ♛';
+  }
+}
+function skyPrompt(p) {
+  if (p.skyHeld || p.skyFall) return;
+  let near = false;
+  for (const o of G.npcs) {
+    if (o.species === 'hatzego' && o.hp > 0 && !isFamily(o) && !o.snatch && dist(o.x, o.y, p.x, p.y) < 520 && liftMode(o, p)) { near = true; break; }
+  }
+  if (!near) return;
+  const str = treeCover(p.x, p.y) ? 'under the trees — the sky can\'t reach you' : '⚠ HATZEGOPTERYX ABOUT — get under the trees!';
+  G.prompt = (G.prompt ? G.prompt + '    ' : '') + str;
+}
+function snatchPrompt(p) {
+  const add = (str) => { G.prompt = (G.prompt ? G.prompt + '    ' : '') + str; };
+  if (p.snatch) {
+    add((p.snatch.mode === 'jaws' ? 'E — Swallow it whole    ' : '') + 'M — Bite it    F — ' + ((p.alt || 0) > 40 ? 'Let go (from up here…)' : 'Drop it'));
+    add('carrying: −' + SNATCH_BURN + ' stamina/s');
+  } else if (p.snatchCand) {
+    add(snatchMode(p, p.snatchCand) === 'jaws' ? 'press F to pick up this little snack' : 'press F to grab it in your feet');
+  }
+}
+// an animal in the snatcher's grip, or falling from it (called from updateNPC;
+// returns true while it owns the frame)
+function npcHeldOrFalling(e, dt) {
+  if (e.heldBy) {
+    const h = e.heldBy;
+    const hOk = h.isPlayer ? h.alive : h.hp > 0 && G.npcs.indexOf(h) >= 0;
+    if (!hOk || !h.snatch || h.snatch.e !== e) {   // the grip is gone
+      e.heldBy = null;
+      if ((e.alt || 0) > 1) { e.falling = true; e.fallV = 0; e.dropAlt = e.alt; }
+    } else {
+      e.thrash = lerp(e.thrash || 0, 1, 0.2);   // kicking in the air
+      e.move = 0;
+      return true;
+    }
+  }
+  if (e.falling) {
+    e.fallV = (e.fallV || 0) + 700 * dt;
+    e.alt = Math.max(0, (e.alt || 0) - e.fallV * dt);
+    e.thrash = 1; e.move = 0;
+    if (e.alt <= 0) {
+      e.falling = false; e.alt = 0;
+      const wet = isWaterPx(e.x, e.y);
+      // from up high the ground does the killing; the sea only breaks the fall
+      const dmg = e.maxhp * clamp((e.dropAlt - 25) / 320, 0, 1.3) * (wet ? 0.35 : 1);
+      if (wet) for (let k = 0; k < 10; k++) G.particles.push({ x: e.x + rrange(-10, 10), y: e.y, vx: rrange(-50, 50), vy: -rrange(30, 90), t: 0, life: 0.6, r: 1.6, color: '#bcd8dc', grav: 300 });
+      else for (let k = 0; k < 8; k++) G.particles.push({ x: e.x + rrange(-10, 10), y: e.y, vx: rrange(-40, 40), vy: -rrange(10, 40), t: 0, life: 0.6, r: 2, color: '#8a7a5e', grav: 80 });
+      if (dmg > 1) {
+        floatText(e.x, e.y - 40, wet ? 'SPLASH!' : 'THUD!', '#ff9a5e');
+        const p = G.player;
+        if (p && dist(p.x, p.y, e.x, e.y) < 600) G.shake = Math.min(8, (G.shake || 0) + 3);
+        dealDamage(e, dmg, p && p.alive && !(e.droppedBy && !e.droppedBy.isPlayer) ? p : null, { force: true, kb: 0, cause: 'the fall' });   // (a wild one's drop isn't your kill)
+        e.droppedBy = null;
+      }
+    }
+    return true;
+  }
+  return false;
+}
+
+// ---------- FLIGHT (pterodactylus) ----------
+// SPACE held: the wings beat and it climbs, up to FLY_CEIL. Let go and it
+// glides down at FLY_SINK, all the way until it touches down — on land it
+// walks (clumsily, on all fours), on water it floats and paddles. Flying over
+// the sea changes nothing. The shadow never leaves the ground: the shadow is
+// where you ARE; the altitude only lifts the body (pitchPoint, drawPtero).
+function updateFlight(p, def, input, dt) {
+  const was = p.alt || 0;
+  let want = (input.flap || input.pounceHold) && !p.grabbed && !G.wrestle && !p.fishing && p.actionT <= 0;
+  // spent wings: no flapping until the breath comes back — it glides down
+  if (want && (p.exhausted || p.stamina <= 0)) {
+    want = false;
+    if (G.time >= (p.tiredWingMsgAt || 0)) {
+      floatText(p.x, p.y - 30 - was, 'wings too tired', '#ffb03e');
+      p.tiredWingMsgAt = G.time + 2.5;
+    }
+  }
+  p.flapping = !!want;
+  if (want) {
+    p.stamina = Math.max(0, p.stamina - FLY_FLAP_BURN * dt);
+    if (p.stamina <= 0) p.exhausted = true;
+    if (was <= 0) {
+      // TAKE-OFF: up out of whatever it was doing, in a spray if afloat
+      p.resting = false; p.bathing = false; p.hidden = false; p.restT = 0;
+      crouchUp(p, false);
+      if (isWaterPx(p.x, p.y)) {
+        for (let k = 0; k < 8; k++) G.particles.push({ x: p.x + rrange(-8, 8), y: p.y, vx: rrange(-40, 40), vy: -rrange(20, 70), t: 0, life: 0.5, r: 1.4, color: '#bcd8dc', grav: 300 });
+      } else {
+        for (let k = 0; k < 5; k++) G.particles.push({ x: p.x + rrange(-8, 8), y: p.y, vx: rrange(-30, 30), vy: -rrange(5, 25), t: 0, life: 0.5, r: 1.5, color: '#8a7a5e', grav: 60 });
+      }
+    }
+    p.alt = Math.min(FLY_CEIL, was + FLY_CLIMB * dt);
+    p.wingT = 1;                                   // hard flapping
+  } else if (was > 0 && def.snatch && p.snatchCand && !p.snatch &&
+             !(input.left || input.right || input.up || input.down)) {
+    // the snatcher HOVERS: low down and keeping still over something it
+    // could pick up, it hangs in the air (F takes it) instead of sinking past
+    p.wingT = 0.6;
+  } else if (was > 0) {
+    p.alt = Math.max(0, was - FLY_SINK * dt);
+    p.wingT = 0;                                   // wings out, gliding down
+    if (p.alt <= 0) {
+      p.alt = 0;
+      // TOUCH-DOWN: a splash onto the sea (and it floats), or a dusty landing
+      if (isWaterPx(p.x, p.y)) {
+        for (let k = 0; k < 10; k++) G.particles.push({ x: p.x + rrange(-8, 8), y: p.y, vx: rrange(-40, 40), vy: -rrange(20, 60), t: 0, life: 0.5, r: 1.4, color: '#bcd8dc', grav: 300 });
+        floatText(p.x, p.y - 30, 'splash-down', '#bcd8dc');
+      } else {
+        for (let k = 0; k < 5; k++) G.particles.push({ x: p.x + rrange(-8, 8), y: p.y, vx: rrange(-30, 30), vy: -rrange(5, 20), t: 0, life: 0.5, r: 1.5, color: '#8a7a5e', grav: 60 });
+      }
+    }
+  }
+  if (p.alt > 0) { p.resting = false; p.bathing = false; p.fishing = false; }
+  // the draw's wing blend: 1 grounded/folded is handled by alt, this is beat vs glide
+  p.wing = lerp(p.wing || 0, p.wingT || 0, Math.min(1, dt * 6));
 }
 
 // ---------- player update ----------
@@ -3391,6 +5085,7 @@ function updatePlayer(dt) {
   const def = PLAYER_DEF[p.species];
   const input = G.input;
 
+  p.flapping = false;   // updateFlight sets it again, this frame, if the wings beat
   p.atkCd = Math.max(0, p.atkCd - dt);
   p.attackT = Math.max(0, p.attackT - dt * 3.2);
   p.pounceCd = Math.max(0, (p.pounceCd || 0) - dt);
@@ -3418,6 +5113,58 @@ function updatePlayer(dt) {
   // knockback
   p.x += p.vx * dt; p.y += p.vy * dt;
   p.vx *= Math.pow(0.02, dt); p.vy *= Math.pow(0.02, dt);
+
+  // ------ in a wild Hatzegopteryx's grip: mash SPACE to struggle free ------
+  // (the giant carries you off; let go from high up, the fall can kill you;
+  // a jaw-load gets taken down to the ground and swallowed)
+  if (p.skyHeld) {
+    const sh = p.skyHeld, h = sh.h;
+    if (!h || h.hp <= 0 || G.npcs.indexOf(h) < 0 || !h.snatch || h.snatch.e !== p) playerSkyRelease(p);
+    else {
+      sh.t += dt;
+      p.move = 0; p.headDown = 0; p.resting = false;
+      p.phase += dt * 14;   // kicking
+      if (input.attack) {
+        input.attack = false;
+        sh.meter += (0.075 + 0.04 * p.growth) * (def.thrashMul || 1);
+        G.shake = Math.min(6, (G.shake || 0) + 1.5);
+        SFX.bite();
+        bloodBurst(p.x, p.y - (p.alt || 0), 1);
+      }
+      sh.meter = Math.max(0, sh.meter - dt * 0.05);
+      const n = Math.round(clamp(sh.meter, 0, 1) * 10);
+      G.prompt = 'SPACE — STRUGGLE FREE!  [' + '#'.repeat(n) + '-'.repeat(10 - n) + ']';
+      if (sh.meter >= 1) {
+        h.snatch = null; h.state = 'idle'; h.stateT = 1; h.landed = false;
+        h.nextHunt = G.time + rrange(40, 70);
+        playerSkyRelease(p);
+        floatText(p.x, p.y - (p.alt || 0) - 48, 'TWISTED FREE!', '#8ad04e');
+        G.banner = { str: (p.alt || 0) > 40 ? 'You twisted free… now brace for the ground!' : 'You twisted free — get under the trees!', t: 3, color: '#8ad04e' };
+        SFX.stage();
+      }
+      return;
+    }
+  }
+  // ------ falling from a wild one's grip ------
+  if (p.skyFall) {
+    const f = p.skyFall;
+    f.v += 700 * dt;
+    p.alt = Math.max(0, (p.alt || 0) - f.v * dt);
+    p.move = 0; p.phase += dt * 10;
+    G.prompt = '';
+    if (p.alt <= 0) {
+      p.alt = 0; p.skyFall = null;
+      const wet = isWaterPx(p.x, p.y);
+      const dmg = playerMaxHp() * clamp((f.from - 25) / 320, 0, 1.3) * (wet ? 0.35 : 1);
+      for (let k = 0; k < (wet ? 10 : 8); k++) G.particles.push({ x: p.x + rrange(-10, 10), y: p.y, vx: rrange(-45, 45), vy: -rrange(10, 70), t: 0, life: 0.6, r: 1.8, color: wet ? '#bcd8dc' : '#8a7a5e', grav: 250 });
+      if (dmg > 1) {
+        floatText(p.x, p.y - 44, wet ? 'SPLASH!' : 'THUD!', '#ff9a5e');
+        G.shake = Math.min(10, (G.shake || 0) + 5);
+        dealDamage(p, dmg, null, { force: true, kb: 0, cause: 'a fall from a Hatzegopteryx' });
+      }
+    }
+    return;
+  }
 
   // ------ in the crocodile's jaws: the escape QTE owns this frame ------
   if (p.grabbed) {
@@ -3636,7 +5383,7 @@ function updatePlayer(dt) {
   // the equally unhurried 3-second rise. No popping up.
   if (input.rest) {
     input.rest = false;
-    if (!p.fishing && p.actionT <= 0 && !p.bathing) {
+    if (!p.fishing && p.actionT <= 0 && !p.bathing && !isAirborne(p)) {
       if (!p.resting) {
         p.resting = true; p.sitT = 0;
         floatText(p.x, p.y - 48, 'resting…', '#cbb98a');
@@ -3657,6 +5404,9 @@ function updatePlayer(dt) {
   // pounceHold directly; both roads meet in pounceHeld.
   input.spaceHeldT = input.atkHold ? (input.spaceHeldT || 0) + dt : 0;
   input.pounceHeld = input.pounceHold || input.spaceHeldT > POUNCE_HOLD_T;
+  // a flyer has no pounce: its SPACE (and the touch hold button) is the wingbeat
+  if (def.flyer) { input.pounceHeld = false; updateFlight(p, def, input, dt); }
+  const aloft = isAirborne(p);
   // the leap is an athletic burst: it costs real stamina, tired legs can't
   // coil at all (half a bar minimum), and the spring reloads between leaps.
   // The hold path is exempt from atkCd — the press's own bite set it.
@@ -3698,6 +5448,7 @@ function updatePlayer(dt) {
     }
   }
 
+  if (def.snatch) updateSnatch(p, def, input, dt);   // (before F is resolved: the snatch owns it)
   // which verb F means this frame (see resolveAction)
   p.fAct = resolveAction(p, def);
 
@@ -3805,12 +5556,12 @@ function updatePlayer(dt) {
   } else if (p.actionT > 0) {
     p.actionT -= dt;
     const k = p.action && p.action.kind;
-    if (k === 'browse' || k === 'swallow') {
+    if (k === 'browse' || k === 'swallow' || k === 'swallowPrey') {
       // canopy browsing and swallowing: the head goes UP, not down —
       // a swallow adds the rapid jaw-snap (p.gulp) as the food sinks in
       p.headUp = lerp(p.headUp || 0, 1, 0.15);
       p.headDown = lerp(p.headDown, 0, 0.25);
-      p.gulp = p.action.kind === 'swallow';
+      p.gulp = p.action.kind === 'swallow' || p.action.kind === 'swallowPrey';
     } else if (k === 'drink') {
       // the lap-and-swallow performance (drawDino runs it off p.actT):
       // ripples while the snout works the water, droplets on the throw-back
@@ -3983,16 +5734,22 @@ function updatePlayer(dt) {
     if (moving) {
       const l = Math.hypot(dx, dy); dx /= l; dy /= l;
       // qianzhousaurus starts slow and only becomes the prairie's fastest when grown
-      const curve = def.slowStart ? 0.5 + 0.5 * p.growth : 0.62 + 0.38 * p.growth;
-      let terr = terrainSpeedAt(p.x, p.y);
-      if (def.swim && isWaterPx(p.x, p.y)) terr = def.swimMul || 1.15;   // a swimmer glides through water
+      // the island abelisaurs are the opposite: speedster babies that slow as they grow
+      const curve = def.slowStart ? 0.5 + 0.5 * p.growth : def.babyFast ? 1.4 - 0.4 * p.growth : 0.62 + 0.38 * p.growth;
+      let terr = terrainSpeedAt(p.x, p.y, p);
+      if (aloft) terr = def.flyMul || 2;   // on the wing: nothing below slows it
+      else if (def.swim && isWaterPx(p.x, p.y)) terr = def.swimMul || 1.15;   // a swimmer glides through water
+      else if (!def.marine && isSwimPx(p.x, p.y)) terr = 0.15;   // a non-swimmer CAN cross the open sea, barely
+      else if (def.marine) terr = def.landMul || 0.2;   // a plesiosaur hauled out on land barely moves
       let sp = def.speed * genderMod(p).speed * curve * terr * (p.coldSlow || 1) * (p.heatSlow || 1) * (p.bones && p.bones.leg ? 0.5 : 1);
+      if (p.snatch) sp *= p.snatch.mode === 'feet' ? 0.75 : 0.9;   // the weight of the catch
       if (p.crouching && input.sprint) crouchUp(p, true);   // bursting up into the run
       if (p.crouchBoostT > 0) sp *= CROUCH_BOOST;
       if (p.crouching) sp *= CROUCH_SPEED;
       else if (input.sprint && !p.exhausted && p.stamina > 0) {
-        sp *= def.sprint;
-        p.stamina -= PLAYER_SPRINT_BURN * dt;
+        sp *= def.sprint * (aloft ? FLY_SPRINT_BONUS : 1);
+        // aloft: the air sprint.s total (the flap.s share is already taken)
+        p.stamina -= (aloft ? FLY_SPRINT_BURN - (p.flapping ? FLY_FLAP_BURN : 0) : PLAYER_SPRINT_BURN) * dt;
         input.sprinting = true;
         if (p.stamina <= 0) { p.stamina = 0; p.exhausted = true; }
       }
@@ -4000,11 +5757,12 @@ function updatePlayer(dt) {
       p.y += dy * sp * dt;
       if (dx !== 0) p.facing = dx > 0 ? 1 : -1;
       // nose leads into the heading; a touch of forward lean when sprinting
-      pitchTarget = dy * 0.32 + (input.sprinting ? 0.05 : 0);
+      // (a swimming plesiosaur turns its whole body into a diagonal, not just the nose)
+      pitchTarget = dy * (aloft ? 0.6 : def.marine && isWaterPx(p.x, p.y) ? 0.7 : 0.32) + (input.sprinting ? 0.05 : 0);
       p.move = lerp(p.move, 1, 0.2);
       p.phase += dt * sp * 0.055;
       // splash / mud footsteps
-      if (Math.random() < dt * 4) {
+      if (!aloft && Math.random() < dt * 4) {
         if (isWaterPx(p.x, p.y)) G.particles.push({ x: p.x, y: p.y, vx: rrange(-18, 18), vy: -rrange(10, 40), t: 0, life: 0.4, r: 1.3, color: '#bcd8dc', grav: 300 });
         else if (isMudPx(p.x, p.y)) G.particles.push({ x: p.x, y: p.y, vx: rrange(-14, 14), vy: -rrange(8, 30), t: 0, life: 0.45, r: 1.5, color: '#4e3826', grav: 300 });
         // a sprint kicks up the ground itself — dust, or powder on the snow
@@ -4022,12 +5780,13 @@ function updatePlayer(dt) {
   // 3 seconds each way (bathing keeps the body settled)
   p.restT = clamp((p.restT || 0) + (p.resting || p.bathing ? 1 / 3 : -1 / 3) * dt, 0, 1);
   p.bathe = p.bathing ? (p.bathe || 0) : lerp(p.bathe || 0, 0, 0.15);
-  if (!G.input.sprinting) {
+  if (!G.input.sprinting && !p.snatch && !p.flapping) {   // (carrying prey or beating wings: no breath comes back)
     p.stamina = Math.min(def.stamMax, p.stamina + 13 * dt);
     if (p.exhausted && p.stamina > 20) p.exhausted = false;
   }
 
-  collideStatics(p, 6 + 10 * p.growth);
+  collideStatics(p, 6 + 10 * p.growth);   // (aloft: only the map edge)
+  updateIsleLandfall(p);   // the Archipelago names each island as you walk up its beach
 
   // ------ needs decay (resting slows the clock) ------
   const drain = 1 - 0.35 * (p.restT || 0);
@@ -4035,15 +5794,20 @@ function updatePlayer(dt) {
   p.food = Math.max(0, p.food - dt * (100 / 300) * drain * (def.foodDrain || 1));
   p.water = Math.max(0, p.water - dt * (100 / 240) * drain);
   p.hygiene = Math.max(0, p.hygiene - dt * (100 / 420) * drain);
+  // a plesiosaur in the sea never goes thirsty or dirty: the water is home
+  if (def.marine && isWaterPx(p.x, p.y)) {
+    p.water = Math.min(100, p.water + 3 * dt);
+    p.hygiene = Math.min(100, p.hygiene + 3 * dt);
+  }
   // mud bath restores hygiene
-  if (isMudPx(p.x, p.y)) {
+  if (!aloft && isMudPx(p.x, p.y)) {
     if (p.hygiene < 100 && Math.random() < dt * 3) G.particles.push({ x: p.x + rrange(-8, 8), y: p.y - 10, vx: rrange(-8, 8), vy: -20, t: 0, life: 0.6, r: 1.6, color: '#5d4430', grav: 100 });
     // just STANDING in mud barely helps — a real scrub (B while resting)
     // is how a dinosaur actually gets clean
     p.hygiene = Math.min(100, p.hygiene + (p.bathing ? 30 : 2) * dt);
   }
   // lava: crossable, but it BURNS — a shortcut you pay for in hide
-  if (isLavaPx(p.x, p.y)) {
+  if (!aloft && isLavaPx(p.x, p.y)) {
     p.hp -= 55 * dt;
     p.hurtT = Math.max(p.hurtT, 0.1);
     if (Math.random() < dt * 10) {
@@ -4179,11 +5943,8 @@ function updatePlayer(dt) {
     if (c.meat <= 0 || G.carcasses.indexOf(c) < 0) {
       p.carry = null;
     } else {
-      const hw = headWorldPos(p);
       c.carried = true;
-      c.x = hw.x + p.facing * 4;
-      c.y = p.y + 1;
-      c.liftY = p.y - hw.y - 2;
+      carryRide(p, c);
     }
   }
   if (input.action && (p.fAct === 'grab' || p.fAct === 'drop')) {
@@ -4192,7 +5953,8 @@ function updatePlayer(dt) {
       // drop it at your feet — still perfectly edible
       const c = p.carry.c;
       c.carried = false;
-      c.x = p.x + p.facing * 24; c.y = p.y + 2;
+      if ((p.alt || 0) > 4) { c.fallH = Math.max(0, c.liftY || p.alt); c.fallV = 0; c.y = p.y + 2; }   // let go aloft: it FALLS from the beak
+      else { c.x = p.x + p.facing * 24; c.y = p.y + 2; }
       p.carry = null; p.grabT = -1;
       floatText(p.x, p.y - 44, 'dropped', '#cbb98a');
     } else if (def.diet === 'carn' && p.actionT <= 0 && !p.fishing) {
@@ -4262,6 +6024,9 @@ function updatePlayer(dt) {
   }
   if (p.bathing) G.prompt = 'scrubbing into the mud…';
   if (p.fishing) G.prompt = 'fishing… hold still — SPACE to strike';
+  if (def.snatch) snatchPrompt(p);
+  else skyPrompt(p);
+  if (def.herdBorn) herdTick(p);
 
   // ------ claw slash (M) — the clawSecond species' second weapon ------
   // The tail is the main argument; the thumb-claws are the closing one: a
@@ -4581,10 +6346,8 @@ function updateBurrow(dt) {
     const c = p.carry.c;
     if (c.meat <= 0 || G.carcasses.indexOf(c) < 0) p.carry = null;
     else {
-      const hw = headWorldPos(p);
       c.carried = true;
-      c.x = hw.x + p.facing * 4; c.y = p.y + 1;
-      c.liftY = p.y - hw.y - 2;
+      carryRide(p, c);
     }
   }
   // attack: same tight jaws as above ground, aimed at the residents
@@ -4924,6 +6687,8 @@ function fireCall(p, k) {
 // the object it applies to (a wrestle target, a carcass) on p.fActObj.
 function resolveAction(p, def) {
   p.fActObj = null;
+  if (p.snatch || p.snatchCand) return null;   // F picks up / drops the snatched animal
+  if (isAirborne(p)) return p.carry ? 'drop' : null;   // nothing to grab or do up there (but you can let go)
   if (G.courtOffer) return null;   // the nest / the mate owns F right now (updateNesting)
   if (p.bathing || p.fishing || p.hidden || p.actionT > 0) return null;
   // settled in mud: the scrub is the only thing you can do lying down
@@ -4958,8 +6723,20 @@ function actionPrompt(p) {
   }
 }
 
+// where an animal's mouth meets the ground: its own spot for most, but the
+// bill-tip of a long-billed giant (azhdarchid) sits far out in front
+function mouthPoint(p) {
+  const d = DINO[p.species];
+  if (!d.azhdarchid) return { x: p.x, y: p.y, far: false };
+  const s = d.scale * sizeScale(p.growth) * genderMod(p).size;
+  return { x: p.x + (p.facing || 1) * snoutLen(d, s) * 0.85, y: p.y, far: true };
+}
 function interactContext(p) {
+  if (isAirborne(p)) return null;   // land first to eat, drink or rest
   const def = PLAYER_DEF[p.species];
+  // a long-billed giant feeds and drinks at the TIP of its bill, well out in
+  // front of its feet — so that's where it looks for food and water
+  const m = mouthPoint(p);
   // a burrow mouth under your feet is the loudest thing the ground offers
   if (p.species === 'aardi' && World.burrows) {
     for (const b of World.burrows) {
@@ -4971,7 +6748,7 @@ function interactContext(p) {
   if (def.digger && !p.hidden && G.myBurrow && dist(p.x, p.y, G.myBurrow.x, G.myBurrow.y) < 42)
     return { kind: 'hide', prompt: 'E — Hide (backside out)' };
   if (def.diet === 'carn') {
-    const c = nearestCarcass(p.x, p.y, 34);
+    const c = nearestCarcass(p.x, p.y, 34) || (m.far ? nearestCarcass(m.x, m.y, 40) : null);
     if (c && c.meat > 0) return { kind: 'carcass', obj: c, prompt: 'E — Feed on carcass' };
   } else {
     let best = null, bd = 30, kind = null;
@@ -4998,7 +6775,7 @@ function interactContext(p) {
     }
     if (best) return { kind, obj: best, prompt: kind === 'fern' ? 'E — Eat ferns' : 'E — Eat horsetails' };
   }
-  if (!isWaterPx(p.x, p.y) && nearWaterPx(p.x, p.y, 22) || (isWaterPx(p.x, p.y) && !isDeepPx(p.x, p.y))) {
+  if (!isWaterPx(p.x, p.y) && (nearWaterPx(p.x, p.y, 22) || (m.far && isWaterPx(m.x, m.y))) || (isWaterPx(p.x, p.y) && !isDeepPx(p.x, p.y))) {
     if (p.water < 99) return { kind: 'drink', prompt: 'E — Drink' };
   }
   if (isMudPx(p.x, p.y) && p.hygiene < 99) return { kind: 'mudinfo', prompt: 'Standing in mud… barely helps — rest here, then bathe' };
@@ -5020,6 +6797,7 @@ function startAction(p, ctx) {
     return;
   }
   p.resting = false;   // you don't eat or drink lying down — up you get
+  if (ctx.kind === 'carcass' && ctx.obj && Math.abs(ctx.obj.x - p.x) > 4) p.facing = ctx.obj.x > p.x ? 1 : -1;
   p.action = ctx;
   p.actT = 0;          // the performance clock: every act starts on cue
   // each act runs exactly one full performance loop (drawDino's cycles)
@@ -5055,7 +6833,7 @@ function finishAction(p) {
     if (a.obj.food <= 0) return;
     a.obj.food = 0;
     a.obj.regrow = 55 + rnd() * 40;
-    p.food = Math.min(100, p.food + (a.kind === 'fern' ? 30 : 26));
+    p.food = Math.min(100, p.food + (a.kind === 'fern' ? 30 : 26) * plantFill(p));
     grow(0.008);
     floatText(p.x, p.y - 44, '+food', '#a2d066');
   } else if (a.kind === 'browse') {
@@ -5063,21 +6841,30 @@ function finishAction(p) {
     if (a.obj.leaf === 0) return;
     a.obj.leaf = 0;
     a.obj.leafRegrow = 60 + rnd() * 45;
-    p.food = Math.min(100, p.food + 36);
+    p.food = Math.min(100, p.food + 36 * plantFill(p));
     grow(0.01);
     floatText(p.x, p.y - 60, '+food (canopy)', '#7ec86a');
   } else if (a.kind === 'carcass') {
     if (a.obj.meat <= 0) return;
-    const bite = Math.min(30, a.obj.meat);
+    // big jaws take big bites — and need them: a mouthful fills an animal
+    // in proportion to its size (see appetite)
+    const app = appetite(p);
+    const bite = Math.min(30 * app, a.obj.meat);
     a.obj.meat -= bite;
     // a fish specialist lives on the river: fish feed it far better than
     // meat does, which is the whole reason to fish instead of hunt
     const fdef = PLAYER_DEF[p.species] || {};
     const feast = fdef.fishFeast && DINO[a.obj.species] && DINO[a.obj.species].fish ? fdef.fishFeast : 1;
-    p.food = Math.min(100, p.food + bite * feast);
+    p.food = Math.min(100, p.food + (bite / app) * feast);
     grow(0.008 * (feast > 1 ? 1.5 : 1));
     floatText(p.x, p.y - 44, feast > 1 ? '+FOOD (fish!)' : '+food', feast > 1 ? '#8fd8e6' : '#e08a66');
     bloodBurst(a.obj.x, a.obj.y, 3);
+  } else if (a.kind === 'swallowPrey') {
+    p.gulp = false;
+    const gain = a.meat / appetite(p) * SWALLOW_FILL;
+    p.food = Math.min(100, p.food + gain);
+    grow(0.008 * Math.min(4, a.meat / 60));
+    floatText(p.x, p.y - 56, 'gulp! +' + Math.round(gain) + ' food', '#e08a66');
   } else if (a.kind === 'swallow') {
     // head back, jaws snapping, and down it goes
     p.gulp = false;
@@ -5132,6 +6919,10 @@ function updateWorldStuff(dt) {
   for (let i = G.carcasses.length - 1; i >= 0; i--) {
     const c = G.carcasses[i];
     if (!c.carried) c.t += dt;   // the rot clock pauses in a carrier's jaws
+    if (c.fallH > 0) {   // dropped from the sky: down it comes
+      c.fallV = (c.fallV || 0) + 700 * dt; c.fallH -= c.fallV * dt;
+      if (c.fallH <= 0) { c.fallH = 0; c.fallV = 0; const wet = isWaterPx(c.x, c.y); for (let k = 0; k < (wet ? 8 : 4); k++) G.particles.push({ x: c.x + rrange(-6, 6), y: c.y, vx: rrange(-35, 35), vy: -rrange(10, 50), t: 0, life: 0.5, r: 1.4, color: wet ? "#bcd8dc" : "#8a7a5e", grav: 250 }); }
+    }
     if (c.claim && (c.claim.t -= dt) <= 0) c.claim = null;   // claims fade
     if (c.meat <= 0 || c.t > 150) G.carcasses.splice(i, 1);
   }

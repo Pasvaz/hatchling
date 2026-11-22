@@ -36,11 +36,14 @@ Nivarex) — and beyond the Wall, **The Great Moors of Martulisth**: a grey,
 sunless heath where mist rings the screen and everything beyond arm's length
 is a dark silhouette (Simosuchus → Koreaceratops →
 Sarcosaurus → Dryptosaurus → Gastonia) — and, past the Reach, **The Death
-Desert**: the biggest map in the game, miles of red sand under a sun that
+Desert**: miles of red sand under a sun that
 means it, a green river heart of giant umbrella trees, rare waterholes, a
 **HEAT bar** that only shade, water and mud bring down, and **sandstorms**
 that sweep the open sand like an avalanche turned on its side
-(Coelophysis, for now). Somewhere
+(Coelophysis, for now) — and out past it, **The Lesser Archipelago**: open
+ocean nearly three times the desert's size, thirty-three strange islands and the new
+swimmer's depth (Ekrixinatosaurus → Iani → Chenanisaurus → Kaiwhekea → Pterodactylus, the first
+flyer → Tethyshadros or Magyarosaurus, the islands' prey → Hatzegopteryx, the biggest flyer of all). Somewhere
 in the high maze one hidden cave holds the **frozen giant** the mountain is
 named for — find it, and the biggest animal in the game joins your lobby
 forever, outside the ladder. Every locked card and tab tells you exactly which
@@ -473,11 +476,218 @@ spared — the storm is a thing of the open desert.
 - **Deltadromeus** — the sprinter: absurdly long legs on a light frame, the fastest big thing on the sand. It runs down the ostrich herds and the smaller raptors. Only Eocarcharia frightens it.
 - **Eocarcharia** — "fierce-eye": a heavy carcharodontosaur with great bony brow bosses, the belt's ambush killer at the waterside. Its bite bleeds, it hunts every hadrosaur that comes down to drink, and it hunts you.
 - **Suchosaurus** — the river's theropod: a croc-snouted spinosaurid, low and long, that fishes the channels and takes whatever comes to the water's edge. **Megorontosuchus** shares the river with it — the ambush crocodile, a shadow under the surface.
-- **Yunmenglong** — the giant of the red sand, and the desert's boss: a euhelopodid sauropod as big as the Nivalotitan, with ten thousand health, a thick hide that takes the edge off every bite, and wounds that close almost as fast as you open them. It plods from tree to tree rearing up to strip the crowns, and leaves you alone until you start something. Then it fights back: it **shoulders and tramples** whatever stands at its front feet, turns its back and **swings the tail** (rarely, a bone cracks), and — its real weapon — **rears up and stomps**. The rear-up is slow and a red circle marks where the feet will land: get out from under. Caught at the centre, even a grown Aerosteon is **crushed outright**; the ring around it still hurts and throws you. A Tameryraptor is the wrong animal for this — it dies fast. An Aerosteon alone dies too. With one packmate an Aerosteon has a slim chance; with two, a hard fight it can win if it's lucky. A boss bar shows while it fights you. Very rarely an **Elder** spawns — bigger, harder-hitting and tougher still, with an old claw scar across the eye — and every Aerosteon player is told the moment one walks the desert.
+- **Yunmenglong** — the giant of the red sand, and the desert's boss: a euhelopodid sauropod as big as the Nivalotitan, with eleven and a half thousand health (fourteen thousand for an Elder), a thick hide that takes the edge off every bite, and wounds that close almost as fast as you open them. It plods from tree to tree rearing up to strip the crowns, and leaves you alone until you start something. Then it fights back: it **shoulders and tramples** whatever stands at its front feet, turns its back and **swings the tail** (rarely, a bone cracks), lifts a forefoot and throws a fast **punch** (750 damage) at anything crowding its front feet, and — its real weapon — **rears up and stomps**. The rear-up is slow and a red circle marks where the feet will land: get out from under. Caught at the centre, even a grown Aerosteon is **crushed outright**; the ring around it still hurts and throws you. A Tameryraptor is the wrong animal for this — it dies fast. An Aerosteon alone dies too — though the first blow it trades with a giant brings one more of its kin sprinting in from off-screen ("another of your kin joins the bloodshed"). With one packmate an Aerosteon has a slim chance; with two, a hard fight it can win if it's lucky. A boss bar shows while it fights you. Very rarely an **Elder** spawns — bigger, harder-hitting and tougher still, with an old claw scar across the eye — and every Aerosteon player is told the moment one walks the desert.
 - **The Giants' Cradle** — a hidden nursery in the desert's north-west, missing from the map: a ring of forest around a cycad thicket so dense you push through it, where Yunmenglong calves graze beside a herd of Homalocephale. At its heart is a big pond, and in the pond lies **Aegisuchus**, the **Guardian of the Giants' Cradle** — a crocodile big enough to kill an Aerosteon, almost invisible under the water. It takes anything with teeth that comes to drink (its jaws close faster than Megorontosuchus' — struggle hard), and every minute or two it hauls out and walks the nursery, fighting any meat-eater it finds.
 - **Raptor territory.** Each raptor holds its own quarter of the map (Shri the north-west sand, Kuru the north-east, Tsaagan the south-west, Adasaurus the south-east, Luanchuanraptor the northern belt, Mahakala the southern belt) and **rivals** the packs on its borders: where two quarters touch, packs that meet will now and then pick a fight with each other.
 - **Epidexipteryx hui** — a sparrow of a thing with four ribbon tail feathers, flitting through the river belt. Coelophysis food.
 - **Gar** in the river.
+
+**Playable — The Lesser Archipelago** (master Tameryraptor or Aerosteon)
+
+The open ocean, nearly three times the size of the desert — 1440 tiles a side. Thirty-three
+named islands, each a different, ragged, unlikely shape (a crescent, an atoll
+ring, a serpent of land, a hand of five fingers, a hook…), lie far apart across
+it, with whole stretches of empty sea between them. Past the island shelves the
+sea falls away to **swimmer's depth**, which exists nowhere else.
+
+- **Swimming (everywhere, not just here):** every dinosaur can now cross deep
+  water. In deep water the legs and the bottom of the belly are under the
+  surface; in swimmer's depth only the head, back and top of the tail stay out.
+  Swimmers move at their normal water pace; big, heavy animals are much slower
+  (about half). Only swimmer's depth still turns back animals that can't swim.
+- **Appetite (everywhere):** bigger animals need to eat more. The same bite of
+  meat or fern fills a big animal's belly less than a small one's.
+- **Ekrixinatosaurus** — a grey Argentinian abelisaur and a decent swimmer. It
+  hatches on **Utoriana**. Utoriana's only other residents are a few dwarf
+  **Homalocephale**. A young abelisaur can take them, but they run rings round
+  a full-grown one:
+  - they cut across its nose and jink out from under its jaws;
+  - they have far more stamina, and a burst over the last few metres;
+  - a caught one is only a couple of bites of food.
+- **Narapa**, Utoriana's bigger neighbour, holds herds of **Telmatosaurus** and
+  **Fylax**.
+- **Zalmoxes** lives on every island except Utoriana. For now it is the only
+  animal on the islands other than Utoriana and Narapa.
+- **Chenanisaurus** (master Ekrixinatosaurus) — a Moroccan abelisaur with a
+  short, deep skull. It is bigger and harder-hitting than Ekrixinatosaurus, but
+  slower. It hatches on **Narapa**, Utoriana's neighbour, where two grown
+  Chenanisaurus already hunt the Telmatosaurus, Fylax and Zalmoxes.
+- **Baby speed:** Ekrixinatosaurus and Chenanisaurus both hatch as speedsters
+  (40% faster than an adult) and slow down as they grow. Only player babies
+  exist; there are no wild babies.
+- **Kaiwhekea** (master Chenanisaurus) — a plesiosaur from the seas off New
+  Zealand, blue with a white belly.
+  - It swims fully under the surface, drawn beneath the water but still
+    visible.
+  - It is fast, agile and has a huge stamina pool.
+  - It hunts small fish, which feed it 2.5 times as much as other meat.
+  - Its bite bleeds, for whatever tries to cross its water.
+  - In the sea it never goes thirsty or dirty.
+  - Washed up on land it can barely drag itself along.
+  - Its mate and babies live by the same rule: quick in the water, crawling on
+    land.
+  - It hatches on **Okiri**, a speck of an island about the size of the Giants'
+    Cradle pond, in an empty stretch of sea, and has to get to the water.
+- **Pterodactylus** (master Kaiwhekea): **the first flyer**. A small pterosaur,
+  a pest rather than a fighter, that lives like a gull, on the dead.
+  - **Controls:** hold **SPACE** to climb, very high (up to 480 px above
+    the ground; the camera pulls back as you climb so the shadow stays in view). Let go and it
+    glides down without stopping until it lands. **M** bites. **SHIFT** flies
+    faster and burns stamina. On touch, the hold button flaps and the attack
+    button bites.
+  - **Where you are:** your shadow never leaves the ground. The shadow is where
+    you really are; the altitude only lifts your body.
+  - **Who can hit whom:** a fight needs the shadows to meet *and* the heights
+    to match. Two flyers at about the same height can fight. A grounded animal
+    can only reach a flyer that comes down to its head height. Up high,
+    ground hunters lose interest and stop chasing.
+  - In the air, diagonals tilt the whole body, the same as on the ground.
+  - **Altimeter:** flyers get a gauge on the right edge. Your height is the
+    pale arrow; every other flyer nearby is a tick at its own height (red when
+    it's close enough in height to fight, green for your family). Line up
+    with a tick to fight it.
+  - It has a call animation (cry, bow, threat with wings half-flared) and a
+    resting pose. Kaiwhekea now has both too.
+  - Flying over the sea changes nothing. Landing on water puts you afloat,
+    and you paddle slowly. You must land to eat, drink or rest.
+  - It hatches on **Brekka**. Wild flocks roost on Brekka, Orrotha, Takurei,
+    Anzu, Quorran and Narapa. They soar between the islands looking for
+    carcasses, drop onto them to feed, scatter from anything big, and peck
+    back at their own height.
+- **Hatzegopteryx** (master Pterodactylus): the largest pterosaur, an
+  **azhdarchid** with its own model. It stalks on four long stilt limbs with
+  long strides, the folded wing standing up past the shoulder, a short thick
+  neck and a three-metre skull. Standing, it is taller than Morosaurus. 2100
+  health, 300 stamina. It runs fast, flies well and hits harder than anything
+  else on the islands. It hatches on **Saruun**.
+  - It eats and drinks at the tip of its bill, well out in front of its
+    feet: the arms bend and the head comes right down to the ground.
+  - **The snatch:** press **F** beside an animal to pick it up. What counts is
+    the animal's size, meaning its *full* health (wounding it doesn't shrink
+    it). At half your health or less, it goes in your **jaws** ("press F to
+    pick up this little snack"). Up to two-thirds of your health, it goes in
+    your **feet**. Anything bigger, like Chenanisaurus, and fish and giants,
+    you can't lift.
+  - What you carry hangs from your **bill-tip** (or your **feet**) and moves
+    with them: every stride, strike, call and wingbeat swings it along.
+  - A **carcass** you carry (G) goes up with you when you fly. It rides in
+    the beak of either pterosaur, and if you let go in the air (F) it falls
+    to the ground or splashes into the sea.
+  - Being so tall, its bill reaches up to snap at **low-flying pterosaurs**,
+    up to about head height. The bite lands where the bill is, well out in
+    front of its own shadow.
+  - In the air you can snatch too: come in low and keep still, and you hover
+    over it until you press F or move off.
+  - Carrying costs 3 stamina a second, and no stamina comes back while you
+    carry. Run dry and it slips free. **M** bites what you're holding; **F**
+    drops it. Something in your **jaws** can be swallowed whole with
+    **E**: no carcass, and about three-quarters of the food tearing it up
+    would give. Dropped from high up, the fall can kill it (the sea breaks the
+    fall).
+- **Wild Hatzegopteryx:** three of them live on the far islands (Saruun,
+  Brekka, Quorran), flying low (well below the gulls) and landing now and
+  then. They keep off the herds' islands except for a VISIT: once every 20
+  minutes (the first after about 10) one flies over the herds' islands (over
+  you, if you're one of the herd species) and hunts for up to 100 seconds.
+  It stoops on something it can lift: anything with up to two-thirds of its
+  health, so the young of the herds, a zalmox, or a small player. If nothing
+  alive is out in the open, a body it can lift will do. It takes one, and
+  goes home:
+  - a jaw-load is set down close by and swallowed whole: the head thrown
+    back, the catch worked down the bill;
+  - a feet-load (or a body) is carried away over the sea, dead or alive.
+  - Its bites while it carries never quite kill: it takes its catch whole.
+- **Young Hatzegopteryx** have their own look, not a shrunken adult's: a short
+  stubby bill on a deep round head, a big eye, a short neck, a plump fuzzy
+  body, short stilts and wings, barely a crest, and a paler coat. They grow
+  into the adult's shape.
+- **Tree cover:** the prey islands have small stands of trees. Standing in
+  among them hides an animal from the sky: a wild Hatzegopteryx won't walk
+  or dive in after it. When one comes, the whole herd (grown ones too) runs
+  for the nearest stand and keeps still until it's been gone 10 seconds.
+  Any one of them that gets bitten fights back, one on one (a Hatzegopteryx
+  too, or you): the rest of the herd never piles in, not even your own herd
+  when you attack something. A player Hatzegopteryx
+  *can* go in.
+- **Tethyshadros** (playable, alongside Magyarosaurus after
+  Pterodactylus; either one opens Hatzegopteryx): a dwarf hadrosauroid with
+  a saw-edged bill. It hatches on Ekkalia, in sight of a herd (Ekkalia has
+  two), and herds of every age also live on Varossa and Ilmeth.
+- **Magyarosaurus dacus** (playable): a dwarf titanosaur. It hatches on
+  Taku Rei, where herds of every age live (babies, juveniles, sub-adults and
+  adults). A few herds hold out on Kalimbra and Halune.
+  - **Born into a herd:** either one hatches among a herd of its own kind,
+    led by its biggest (marked ♛). The herd keeps round its leader, and the
+    leader waits for a straggling youngster. Once you're full grown and the
+    leader is dead, the herd follows you, or kill the leader yourself if
+    you're impatient (if you're not grown yet, the next biggest takes over).
+    Your herd stays out of a fight between you and the leader.
+  - A full-grown adult of either species is just too heavy for
+    Hatzegopteryx to lift, even in its feet. Every younger one can be carried
+    off.
+  - While a wild one could take you, the prompt warns you ("get under the
+    trees!") or tells you you're safe in cover.
+  - **Caught?** Mash **SPACE** to struggle free. Wriggle loose high up and
+    the fall hurts. If it's holding you in its jaws and gets you to the
+    ground, it swallows you whole; in its feet, it carries you off (about 12
+    seconds to get free).
+- **Swimmer's depth is open to every animal**, but none goes in by choice.
+  An animal swims it only to follow its leader (or parent), to chase its
+  prey, or to get away from a hunter. Once that's over, it swims back to
+  its own island. Animals reach new land only when you lead your herd
+  there: on arrival some of the herd settle the new island with you, and
+  the rest swim home to keep the old herd going. Back in the lobby,
+  everything resets.
+  You can always swim it too, whatever you play: a species that isn't a
+  swimmer just crawls through it, at about a fifth of a swimmer's pace.
+- **Iani** (playable, between Ekrixinatosaurus and Chenanisaurus): a light,
+  long-legged ornithopod with a strong jaw. It hatches on Drevan, and herds
+  of every age live on Drevan and on its neighbour Kesh.
+- **Hypsilophodon on Okiri:** six of them, of every age (not playable), live
+  on the Kaiwhekea's hatching island. They keep to dry land: running from
+  something they swing along the shore rather than into the sea, and on
+  that speck of an island a cornered one holds at the waterline. They are
+  hunted from both sides: Pterodactylus (three roost on Okiri) dive on
+  them, the whole flock piling in on the smallest, and wild Kaiwhekea take
+  them from the water's edge.
+- **Wild Kaiwhekea:** rare, but less rare than Garamirala. Three roam the
+  open sea, three circle the waters round Okiri, and two live in the blue
+  lagoon in the middle of Taku Rei, along with the lagoon's own six gar and
+  three bass, which they eat. They're easy-going: they hunt fish and eat
+  whatever dead thing is within reach of the water, and only rarely (every
+  few minutes at most) come at a youngster at the water's edge (on Okiri,
+  the Hypsilophodon), surging a few lengths up the beach for at most three
+  seconds before lurching back in. Underwater they can't be seen until they
+  strike. Bite one and it bites back.
+- **Flotsam:** dead fish now wash up on the island beaches every so often
+  (never right in front of you) and rot away like any carcass. They are the
+  scavengers' everyday food.
+- **Mud baths:** every island now has a mud bath (a small one on the tiniest
+  islands).
+- **Crossing waterways:** island animals now and then wade across a small
+  waterway to join their own kind on the next island. A crossing only counts
+  if it needs no swimmer's depth. Right now there are three: Velinra–Ossamere,
+  Drevan–Kesh and Hesk–Brimmora, and each has its own Garamirala. A
+  crossing animal that gets hurt gives up and fends for itself.
+- **Garamirala** *(imagined)* — a large, fearless ichthyosaur:
+  - One guards the strait between Utoriana and Narapa. Hatchlings, juveniles and
+    adolescents are easy pickings for it; a fresh sub-adult is prey, a
+    half-grown sub-adult is a near-even fight, and an adult can hold its own.
+  - Eight more patrol the channels between close islands (Velinra–Ossamere,
+    Ishandra–Pell, Orrotha–Halune, Orrotha–Ekkalia, Ilmeth–Saruun, Drevan–Kesh,
+    Hesk–Brimmora, Brimmora–Orsk). Two more roam the open sea, far from any
+    island, their patrol drifting slowly across the ocean. These hunt other
+    animals and don't attack an Ekrixinatosaurus.
+  - A killed Garamirala is replaced three minutes later.
+  - All of this can be avoided by never leaving your island.
+- **Ichthyodectes** — a smaller cousin of Xiphactinus: a quick, silver,
+  barracuda-like fish with an upturned, fanged underbite. It hunts small fish,
+  and makes darting runs at a swimming Kaiwhekea, a nuisance rather than a
+  killer. It ignores the abelisaurs.
+- **Fish are much more abundant now** (about 200 in the sea). The ocean carries every fish in the game: Lepisosteus, Bass, Scutelocephalichthyus,
+  Herrietopus, Onchopristis and Mawsonia.
+- **Tethyshadros** — its model, with the serrated bill, is built and ready, but
+  it doesn't appear in the game yet.
 
 **NPCs — The Sodden Reach**
 - **Kundurosaurus** — the Reach's wall of meat: a huge river-purple, flat-headed Amur saurolophine, tankier than the Poekilopleuron that hunts it. Placid until provoked, and then it has THREE weapons and no bite: it turns its back and **whips the tail**, or squares up to **head-butt** — and to **KICK**: it rears onto its tail and throws both hind feet forward, the hardest hit on the Reach, and a hoof on a limb **breaks the bone** (yours too — a broken leg halves your speed until it knits). Every few seconds it changes stance, so watch which end is pointed at you.

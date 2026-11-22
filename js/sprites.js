@@ -25,6 +25,166 @@ const DINO = {
     },
     tailUp: 0.34, armScale: 0.5, hornBoss: true, pattern: 'stripes',
   },
+  // ---- the Lesser Archipelago ----
+  ekrix: {
+    // the island abelisaur: a stocky slab of a carnivore with a short, very
+    // deep skull crusted in rugose bone, arms that are barely there, and a
+    // hide the grey of wet basalt. A decent swimmer — it has to be
+    name: 'Ekrixinatosaurus', full: 'Ekrixinatosaurus novasi', diet: 'carn', biped: true, scale: 1.2,
+    L: { body: [48, 26], tail: [46, 9.5], neckLen: 9, neckAng: 0.2, head: [18, 14.5], leg: [25, 7.5] },
+    col: {
+      top: '#4b4f52', mid: '#7a8083', belly: '#d8d8d0', line: '#1a1c1e',
+      acc: '#a8aeb0', eye: '#e8c25a', pat: '#363a3d', shade: '#62676a',
+    },
+    tailUp: 0.3, armScale: 0.36, snoutBumps: true,
+    snoutW: 0.34, snoutMidW: 0.58, pattern: 'dapple',
+  },
+  chenani: {
+    // CHENANISAURUS: the bigger, slower island abelisaur, out of the
+    // phosphate beds of Morocco. A huge brute with a skull that is all
+    // depth and no length: the snout is cut off blunt, the lower jaw a
+    // great curved slab. Dusk-brown, with a darker saddle across the back
+    name: 'Chenanisaurus', full: 'Chenanisaurus barbaricus', diet: 'carn', biped: true, scale: 1.45,
+    L: { body: [50, 28], tail: [46, 10], neckLen: 9, neckAng: 0.2, head: [15, 16.5], leg: [25, 8.5] },
+    col: {
+      top: '#4a3828', mid: '#86684a', belly: '#dccbaa', line: '#1e150e',
+      acc: '#b89a72', eye: '#f0b648', pat: '#33251a', shade: '#6c5238',
+    },
+    tailUp: 0.28, armScale: 0.32, snoutBumps: true,
+    snoutW: 0.4, snoutMidW: 0.66, pattern: 'band',
+  },
+  kaiwhe: {
+    // KAIWHEKEA: a plesiosaur from the seas off New Zealand. A barrel body,
+    // four long flippers, a neck that is short for its family, and a big
+    // rounded head full of fine needle teeth for small fish. Sea-blue above,
+    // white below. It lives fully under the surface, and is helpless on land
+    name: 'Kaiwhekea', full: 'Kaiwhekea katiki', diet: 'carn', biped: false, scale: 1.25, marine: true,
+    L: { body: [40, 16], tail: [14, 5], neckLen: 22, neckAng: 0, head: [15, 8.5], leg: [3, 2] },
+    // laid over the drawing (body centre at PLESIO_CY of its depth): two on
+    // the round head, two down the neck, three along the barrel, the tail
+    hitZones: [
+      { dx: 49, dy: 0, dz: 10.5, r: 3.4, part: 'head' }, { dx: 42, dy: 0, dz: 11, r: 4.6, part: 'head' },
+      { dx: 31, dy: 0, dz: 10.6, r: 3.8, part: 'body' }, { dx: 22, dy: 0, dz: 9.6, r: 4.6, part: 'body' },
+      { dx: 10, dy: 0, dz: 7.2, r: 7.5, part: 'body' }, { dx: -2, dy: 0, dz: 7.2, r: 8, part: 'body' },
+      { dx: -13, dy: 0, dz: 7.2, r: 6.5, part: 'body' }, { dx: -25, dy: 0, dz: 7.2, r: 3.6, part: 'tail' },
+    ],
+    col: {
+      top: '#1d5d93', mid: '#3a8fca', belly: '#f2f6f8', line: '#0b2238',
+      acc: '#9fd2f0', eye: '#101820', pat: '#174a78', shade: '#2c76ad',
+    },
+    tailUp: 0,
+  },
+  hatzego: {
+    // HATZEGOPTERYX: the largest pterosaur, an azhdarchid giant from Hateg
+    // Island — drawn by drawAzhdarchid (stilt limbs, stiff thick neck, a
+    // three-metre skull). Standing, it looks down on Morosaurus
+    name: 'Hatzegopteryx', full: 'Hatzegopteryx thambema', diet: 'carn', biped: false, scale: 2.4, flyer: true, azhdarchid: true, zoomOut: 0.2,
+    L: { body: [26, 14], tail: [3, 2], neckLen: 22, neckAng: 1.15, head: [34, 11], leg: [20, 4.5] },
+    foreLen: 30,
+    hitZones: [
+      { dx: 25, dz: 46, r: 6.5, part: 'head' }, { dx: 34, dz: 34, r: 4, part: 'head' },
+      { dx: 14, dz: 42, r: 4.5 },
+      { dx: 7, dz: 30, r: 6 }, { dx: 0, dz: 26, r: 8 },
+      { dx: -7, dz: 9, r: 4, part: 'leg' }, { dx: 11, dz: 10, r: 4, part: 'leg' },
+    ],
+    col: {
+      top: '#4a4448', mid: '#d6d0c6', belly: '#f6f2ea', line: '#221c1c',
+      acc: '#c8402a', eye: '#2a1a10', pat: '#6a625e', shade: '#5c4a46',
+    },
+    tailUp: 0,
+  },
+  ptero: {
+    // PTERODACTYLUS: a small, short-tailed pterosaur — a long narrow beak
+    // lined with fine teeth, a little crest at the back of the skull, wings
+    // of skin stretched from one enormous finger. A gull of the old islands
+    name: 'Pterodactylus', full: 'Pterodactylus antiquus', diet: 'carn', biped: false, scale: 1.05, flyer: true,
+    L: { body: [18, 10], tail: [4, 2], neckLen: 10, neckAng: 0.8, head: [17, 5], leg: [8, 2.5] },
+    hitZones: [
+      { dx: 22, dz: 17, r: 3.6, part: 'head' }, { dx: 13, dz: 16, r: 3.2, part: 'head' },
+      { dx: 3, dz: 12.5, r: 6 }, { dx: -6, dz: 11.5, r: 4.4, part: 'tail' },
+    ],
+    col: {
+      top: '#5a5048', mid: '#9a8a78', belly: '#efe6d4', line: '#241c16',
+      acc: '#d8763a', eye: '#2a1c10', pat: '#3e3630', shade: '#7c6e60',
+    },
+    tailUp: 0,
+  },
+  zalmox: {
+    // the rhabdodontid: a squat little island ornithopod with a deep,
+    // triangular head and a beak like a pair of shears — it lives on every
+    // island but the one the abelisaur hatches on
+    name: 'Zalmoxes', full: 'Zalmoxes robustus', diet: 'herb', biped: true, scale: 0.62,
+    L: { body: [40, 24], tail: [36, 9], neckLen: 9, neckAng: 0.42, head: [15, 11], leg: [19, 6] },
+    col: {
+      top: '#6a5a3c', mid: '#a08a5e', belly: '#ece0c0', line: '#2a2214',
+      acc: '#c8743e', eye: '#3c2c16', pat: '#4e4228', shade: '#86744c',
+    },
+    tailUp: 0.16, armScale: 1.2, arch: 1, forageQuad: true, pattern: 'band',
+  },
+  iani: {
+    // IANI: a light, long-legged ornithopod from the mid-Cretaceous, with a
+    // strong, deep jaw for its size. On the islands it lives on Drevan and
+    // its neighbour Kesh
+    name: 'Iani', full: 'Iani smithi', diet: 'herb', biped: true, scale: 0.72,
+    L: { body: [36, 17], tail: [44, 7], neckLen: 12, neckAng: 0.55, head: [14, 8], leg: [23, 5] },
+    col: {
+      top: '#5c3e2a', mid: '#a06a40', belly: '#efe0c2', line: '#24160c',
+      acc: '#d8a24a', eye: '#2e1c0c', pat: '#3e2616', shade: '#84563a',
+    },
+    tailUp: 0.32, armScale: 0.95, pattern: 'band',
+  },
+  fylax: {
+    // a small plain hadrosaur from the old island sea: low, quick for its
+    // kind, and wary — the herd prey of Narapa
+    name: 'Fylax', full: 'Fylax thyrakolasus', diet: 'herb', biped: false, scale: 0.76,
+    L: { body: [40, 21], tail: [38, 8], neckLen: 12, neckAng: 0.45, head: [16, 8.5], leg: [19, 5.2] },
+    col: {
+      top: '#4e5a62', mid: '#7d8c92', belly: '#e4e2d4', line: '#1e2428',
+      acc: '#c9a25a', eye: '#4a3c22', pat: '#3c464e', shade: '#66747a',
+    },
+    tailUp: 0.24, armScale: 1.15, arch: 1, forageQuad: true, tailWeapon: true, duckbill: true, pattern: 'stripes',
+  },
+  magyaro: {
+    // MAGYAROSAURUS: the dwarf titanosaur of Hateg Island, a sauropod no
+    // longer than a minibus. Small enough to live among the trees, and
+    // (until it is full grown) small enough for Hatzegopteryx to carry off.
+    // Bony osteoderms stud its back
+    name: 'Magyarosaurus', full: 'Magyarosaurus dacus', diet: 'herb', biped: false, scale: 0.82,
+    L: { body: [44, 21], tail: [42, 8], neckLen: 25, neckAng: 0.62, head: [10, 6.5], leg: [17, 6.5] },
+    col: {
+      top: '#5a3c2c', mid: '#9a6a4a', belly: '#e2cfb0', line: '#22160e',
+      acc: '#c88a52', eye: '#2c1c10', pat: '#3e2a1e', shade: '#7e5640',
+    },
+    tailUp: 0.24, tailWeapon: true, neckW: 0.62, neckArc: 0.06, sauroHead: true,
+    beak: false, scutes: true, pattern: 'dapple',
+  },
+  tethys: {
+    // the island dwarf of Tethys: long and low in the skull, and its bill is
+    // like no other duckbill's — a narrow spout whose cutting edge is
+    // SERRATED, a row of saw-like denticles along the beak. It lives on the
+    // islands round Taku Rei
+    name: 'Tethyshadros', full: 'Tethyshadros insularis', diet: 'herb', biped: false, scale: 0.8,
+    L: { body: [40, 20], tail: [44, 7.5], neckLen: 13, neckAng: 0.42, head: [19, 8], leg: [21, 5] },
+    col: {
+      top: '#5c4a3a', mid: '#94785a', belly: '#eadcc0', line: '#261c12',
+      acc: '#d8b46a', eye: '#3a2c18', pat: '#46382a', shade: '#7a6248',
+    },
+    tailUp: 0.22, armScale: 1.1, arch: 0.8, forageQuad: true, tailWeapon: true, duckbill: true, serratedBill: true, pattern: 'dapple',
+  },
+  garami: {
+    // GARAMIRALA (imagined): an ichthyosaur the length of a grown abelisaur —
+    // a slate-dark torpedo with a long toothed rostrum, a crescent tail, and
+    // the huge red-rimmed eye of something that hunts in the deep. It guards
+    // the pathway off Utoriana, and the narrow channels elsewhere
+    name: 'Garamirala', full: 'Garamirala (imagined)', diet: 'carn', biped: false, scale: 1.5, fish: true, fishKind: 'ichthyo', submerged: true,
+    L: { body: [50, 13], tail: [12, 5], neckLen: 1, neckAng: 0, head: [14, 7], leg: [3, 1] },
+    hitZones: [{ dx: 16, dy: 0, dz: 1.5, r: 5.5 }, { dx: 0, dy: 0, dz: 1.5, r: 7 }, { dx: -15, dy: 0, dz: 1.5, r: 5.5 }],
+    col: {
+      top: '#24323c', mid: '#4a6070', belly: '#d6dfdb', line: '#0e161c',
+      acc: '#c6d4d0', eye: '#e4402e', pat: '#18222a', shade: '#3a4c5a',
+    },
+    tailUp: 0,
+  },
   campto: {
     // ornithopod: heavy arched body, small long low head, real forearms,
     // drops onto all fours to graze
@@ -145,6 +305,7 @@ const DINO = {
     },
     tailUp: 0.26, neckW: 0.8, neckArc: 0.1, sauroHead: true, beak: false, foreLift: 0.5, chest: 1.15, shFwd: 0.05,
     neckGrow: true, snoutW: 0.44, snoutMidW: 0.58, highBrowse: true, tailWeapon: true, pattern: 'band',
+    headOutOfReach: true,   // no hit circles on the head or neck (entities.js hitZonesOf)
   },
   aegisu: {
     // THE GUARDIAN OF THE GIANTS' CRADLE: the shieldcroc — a flat, broad
@@ -1116,6 +1277,19 @@ const DINO = {
     },
     tailUp: 0.32, armScale: 0.85, pattern: 'stripes',
   },
+  ichthyod: {
+    // ICHTHYODECTES: Xiphactinus's smaller cousin — a silver torpedo with a
+    // deeply forked tail and a bulldog face: the lower jaw juts up past the
+    // snout, studded with fangs. The archipelago's barracuda
+    name: 'Ichthyodectes', full: 'Ichthyodectes ctenodon', diet: 'carn', biped: false, scale: 0.75, fish: true, fishKind: 'xiph',
+    L: { body: [38, 8], tail: [10, 4], neckLen: 1, neckAng: 0, head: [10, 5], leg: [3, 1] },
+    hitZones: [{ dx: 14, dy: 0, r: 3.2 }, { dx: 2, dy: 0, r: 3.8 }, { dx: -12, dy: 0, r: 3 }],
+    col: {
+      top: '#2a4658', mid: '#8fa8b6', belly: '#eef3f2', line: '#0e1a22',
+      acc: '#cfdde2', eye: '#e8c84a', pat: '#1c3242', shade: '#6a8494',
+    },
+    tailUp: 0,
+  },
   onchop: {
     // the sawfish: a flattened cruiser with a toothed blade for a face.
     // Lethal, and permanently furious about something
@@ -1419,6 +1593,28 @@ function bodyRadius(e) {
   const d = DINO[e.species];
   return d.L.body[0] * 0.32 * d.scale * sizeScale(e.growth != null ? e.growth : 1) * (e.elder ? ELDER_MOD.size : 1);
 }
+// a FLYER's shadow: always down on the ground (or the water) right under it,
+// wings and all. It is where the animal really is — fights happen where
+// shadows meet. Higher up it grows a touch smaller and fainter
+function drawFlyShadow(ctx, e) {
+  const d = DINO[e.species];
+  const s = d.scale * sizeScale(e.growth != null ? e.growth : 1) * genderMod(e).size;
+  const up = clamp((e.alt || 0) / 150, 0, 1);
+  const k = 1 - 0.3 * up;
+  const bl = d.L.body[0] * s * k;
+  ctx.save();
+  ctx.fillStyle = 'rgba(24,20,8,' + (0.3 - 0.12 * up).toFixed(3) + ')';
+  ctx.beginPath();
+  ctx.ellipse(e.x, e.y + 1.5, bl * 0.75, Math.max(2, bl * 0.24), 0, 0, TAU);
+  if ((e.alt || 0) > 0.5 && d.flyer) {
+    // spread wings: a broad thin band across the body's line
+    const span = d.L.body[0] * 2.4 * s * k;
+    ctx.moveTo(e.x + bl * 0.3, e.y + 1.5);
+    ctx.ellipse(e.x - (e.facing || 1) * bl * 0.05, e.y + 1.5, bl * 0.3, Math.max(1.5, span * 0.3), 0, 0, TAU);
+  }
+  ctx.fill();
+  ctx.restore();
+}
 function drawShadow(ctx, x, y, w) {
   ctx.fillStyle = 'rgba(24,20,8,0.26)';
   ctx.beginPath();
@@ -1599,6 +1795,22 @@ const LEGACY_PAL = {
   // lavender, peach and sky blue
   aero:      { motif: 'splash',    top: '#c4a8ec', mid: '#f8dcec', belly: '#fff6fa', shade: '#e0c0e4', pat: '#a088d8', acc: '#ff9ec4', eye: '#6ad0f4', line: '#4a3466',
                splash: ['#ff8ebc', '#6ee4b4', '#a890ff', '#ffb070', '#78bcff', '#ffe060'] },
+  // OBSIDIAN: volcanic-glass black with molten bands — the islands' fire
+  ekrix:     { motif: 'bands',     top: '#16181c', mid: '#363a42', belly: '#d4d8de', pat: '#08090c', acc: '#ff6a1e', eye: '#ff9a2a' },
+  // WARLORD: blood-rust over bone, the dark saddle gone to soot
+  chenani:   { motif: 'bands',     top: '#2a0e08', mid: '#7a2414', belly: '#e8d6b4', pat: '#120604', acc: '#f0d04a', eye: '#ffd24a' },
+  // ABYSS: deep-sea black-violet, with glowing bioluminescent spots
+  kaiwhe:    { motif: 'ocellus',   top: '#0c0a24', mid: '#241e5a', belly: '#c8d4ff', pat: '#06051a', acc: '#4af0ff', eye: '#7af8ff' },
+  // STORMCROW: slate-black and gull-white, with a sunset crest
+  ptero:     { motif: 'bands',     top: '#1a1c22', mid: '#4a4e58', belly: '#f4f4f0', pat: '#0c0d10', acc: '#ff7a2a', eye: '#ffcf4a' },
+  // GRAVEWING: bone-white and storm-black, a blood-red beak
+  hatzego:   { motif: 'bands',     top: '#16141a', mid: '#3c3640', belly: '#ece6dc', pat: '#08070a', acc: '#d41e1e', eye: '#ff3a2a' },
+  // REEFRUNNER: lagoon-teal, with a gold-edged bill
+  // EMBERSTRIPE: charcoal, with ember bands
+  iani:      { motif: 'bands',     top: '#1e1612', mid: '#4a3022', belly: '#f0e2cc', pat: '#0c0806', acc: '#ff8a3a', eye: '#ffc46a' },
+  tethys:    { motif: 'bands',     top: '#0e2a2a', mid: '#2a6a62', belly: '#e8f0dc', pat: '#061414', acc: '#f0c24a', eye: '#ffd86a' },
+  // DUSKHIDE: twilight violet, with amber osteoderms
+  magyaro:   { motif: 'ocellus',   top: '#2a1a3a', mid: '#5a3a7a', belly: '#efe2d0', pat: '#140a20', acc: '#e8a23a', eye: '#ffcf6a' },
   regali:    { motif: 'ocellus',   top: '#4a1e6a', mid: '#7a3aa8', belly: '#f4e8ff', pat: '#2a0e40', acc: '#ffc21a' },                  // royal purple, gold eyespots
   coelo:     { motif: 'tiger',     top: '#a86a0e', mid: '#f0b02a', belly: '#fff4d8', pat: '#8a0e0e', acc: '#ff3a1e' },                  // desert gold, crimson bars
   poekilo:   { motif: 'lightning', top: '#5a3a0e', mid: '#b07a2a', belly: '#f4e4c0', pat: '#2a1a06', acc: '#2ae0d0' },                  // bronze, turquoise bolt
@@ -1710,6 +1922,7 @@ const CLADE = {
   kosmo: 'ceratopsian', korea: 'ceratopsian', spiclypeus: 'ceratopsian', mercuri: 'ceratopsian', coahuila: 'ceratopsian',
   bravo: 'ceratopsian', proto: 'ceratopsian', sino: 'ceratopsian', centro: 'ceratopsian', loki: 'ceratopsian',
   preno: 'pachycephalosaur',
+  ekrix: 'abelisaur', chenani: 'abelisaur', kaiwhe: 'plesiosaur', ptero: 'pterosaur', hatzego: 'pterosaur', ichthyod: 'fish', zalmox: 'ornithopod', iani: 'ornithopod', fylax: 'hadrosaur', tethys: 'hadrosaur', magyaro: 'sauropod', garami: 'fish',
   scelido: 'thyreophoran', scutello: 'thyreophoran', huayango: 'stegosaur', giganto: 'stegosaur', wuerho: 'stegosaur', adratik: 'stegosaur',
   gastonia: 'ankylosaur', pinaco: 'ankylosaur', panoplo: 'ankylosaur', overo: 'sauropod',
   rioja: 'sauropodomorph', vulcano: 'sauropod', atlas: 'sauropod', nivalo: 'sauropod', moro: 'sauropod', bonita: 'sauropod',
@@ -1753,12 +1966,86 @@ const SKULL = {
 };
 function skullOf(key) { return SKULL[CLADE[key]] || SKULL.default; }
 
+// ---------------------------------------------------------------------------
+// SWIMMING. Every animal can wade into deep water now; there it swims, low:
+// legs and the bottom of the belly under the surface. In the Archipelago's
+// swimmer's depth it rides lower still — the whole belly and the underside
+// of the tail submerged, only the head, the back and the top of the tail
+// showing. waterSink is how far (px) the animal is lowered so its waterline
+// sits on the surface; the hit circles drop by the same amount.
+// ---------------------------------------------------------------------------
+function waterSink(o, key) {
+  if (!o || !(o.isPlayer || o.id != null) || typeof terAtPx !== 'function') return 0;
+  const d = DINO[key || o.species];
+  if (!d || d.fish || d.marine) return 0;
+  if ((o.alt || 0) > 0.5) return 0;   // a flyer over the sea is not in it
+  if (d.flyer) {   // afloat like a gull: only the legs go under
+    const tf = terAtPx(o.x, o.y);
+    return tf === T_DEEP || tf === T_SWIM ? d.L.leg[0] * d.scale * sizeScale(o.growth != null ? o.growth : 1) * genderMod(o).size * 1.05 : 0;
+  }
+  const t = terAtPx(o.x, o.y);
+  if (t !== T_DEEP && t !== T_SWIM) return 0;
+  const s = d.scale * sizeScale(o.growth != null ? o.growth : 1) * genderMod(o).size;
+  const legLen = d.L.leg[0] * s, bodyH = d.L.body[1] * s;
+  return t === T_SWIM ? legLen + bodyH * 0.45 : legLen + bodyH * 0.02;
+}
 function drawDino(ctx, key, o) {
+  // being swallowed whole: drawn shrinking up into the bill that holds it
+  if (o.swallowK > 0.01 && o.swallowAt && !o._sw) {
+    const k = o.swallowK, f = Math.max(0.04, 1 - k * 0.92), px = o.swallowAt.x, py = o.swallowAt.y;
+    ctx.save(); ctx.translate(px, py); ctx.scale(f, f); ctx.translate(-px, -py);
+    ctx.globalAlpha *= clamp((1 - k) / 0.25, 0, 1);
+    o._sw = true;
+    try { drawDino(ctx, key, o); } finally { o._sw = false; ctx.restore(); }
+    return;
+  }
   if (DINO[key].fish) { drawFish(ctx, key, o); return; }
+  if (DINO[key].marine) { drawPlesio(ctx, key, o); return; }
+  if (DINO[key].flyer) { (DINO[key].azhdarchid ? drawAzhdarchid : drawPtero)(ctx, key, o); return; }
+  // lifted off the ground (in a snatcher's jaws or feet, or falling from
+  // them): the whole animal is drawn that much higher
+  if ((o.alt || 0) > 0.5 && !o._lifted) {
+    ctx.save(); ctx.translate(0, -o.alt); o._lifted = true;
+    try { drawDino(ctx, key, o); } finally { o._lifted = false; ctx.restore(); }
+    return;
+  }
+  // eased per animal, so wading in and climbing out glide instead of snapping
+  const want = waterSink(o, key);
+  const sk = o.sinkV = lerp(o.sinkV || 0, want, want > (o.sinkV || 0) ? 0.12 : 0.2);
+  if (sk < 0.4) { o.sinkV = want ? sk : 0; drawDinoBody(ctx, key, o); return; }
+  const d = DINO[key];
+  const bl = d.L.body[0] * d.scale * sizeScale(o.growth != null ? o.growth : 1) * genderMod(o).size;
+  // what's under the surface: a faint, water-tinted ghost of the limbs
+  ctx.save();
+  ctx.beginPath(); ctx.rect(o.x - 4000, o.y, 8000, 4000); ctx.clip();
+  ctx.globalAlpha = 0.2;
+  ctx.translate(0, sk);
+  drawDinoBody(ctx, key, o);
+  ctx.restore();
+  // the surface itself: a darker water ring round the body
+  ctx.fillStyle = 'rgba(16,40,52,0.28)';
+  ctx.beginPath(); ctx.ellipse(o.x, o.y + 1, bl * 0.78, Math.max(3, bl * 0.16), 0, 0, TAU); ctx.fill();
+  // what's above: the animal, cut clean at the waterline
+  ctx.save();
+  ctx.beginPath(); ctx.rect(o.x - 4000, o.y - 4000, 8000, 4000); ctx.clip();
+  ctx.translate(0, sk);
+  drawDinoBody(ctx, key, o);
+  ctx.restore();
+  // foam where the body breaks the water, and a slow ring spreading off it
+  const ph = (G.time * 0.8 + (o.id || 0) * 0.37) % 1;
+  ctx.strokeStyle = 'rgba(230,244,242,0.55)';
+  ctx.lineWidth = 1.2;
+  ctx.beginPath(); ctx.ellipse(o.x, o.y, bl * 0.62, Math.max(2, bl * 0.11), 0, Math.PI * 1.05, Math.PI * 1.95); ctx.stroke();
+  ctx.strokeStyle = 'rgba(230,244,242,' + (0.3 * (1 - ph)).toFixed(3) + ')';
+  ctx.beginPath(); ctx.ellipse(o.x, o.y, bl * (0.7 + ph * 0.5), Math.max(2.5, bl * (0.14 + ph * 0.1)), 0, 0, TAU); ctx.stroke();
+}
+function drawDinoBody(ctx, key, o) {
   const d = DINO[key], L = d.L, C0 = skinColors(key, o.gender, o.skin);
   // illustrated line: the outline is the hide's own colour sunk toward
   // black, never a flat ink line — it is also the colour every part shares
   const C = Object.assign({}, C0, { line: mixHex(C0.line, C0.top, 0.4) });
+  // an ELDER has faded with age: its whole hide dimmer and greyer than the young
+  if (o.elder) for (const k in C) { if (k !== 'line') C[k] = satLum(C[k], 0.45, 0.9); }
   const g = o.growth != null ? o.growth : 1;
   const s = d.scale * sizeScale(g) * genderMod(o).size;   // (the skin's size mod rides in genderMod)
   const headMul = 1 + 0.95 * Math.pow(1 - g, 1.4);
@@ -1836,6 +2123,12 @@ function drawDino(ctx, key, o) {
   // backward pitch and the leg throw below
   const kickPh = d.kick && kind === 'kick' && atk > 0 ? 1 - atk : -1;
   const kick = kickPh >= 0 ? (1 - kickPh) * Math.sin((0.25 + kickPh * 1.1) * TAU) : 0;
+  // the giant's PUNCH: the near forefoot lifts and draws back through the
+  // windup (o.punchT counting down), then shoots forward at the hit frame
+  const punchLift = o.punchT != null ? clamp(1 - o.punchT / 0.28, 0, 1) : 0;
+  const punchPh = kind === 'punch' && atk > 0 ? 1 - atk : -1;
+  // (held at full extension for the first third, so the jab reads at speed)
+  const punch = punchPh >= 0 ? (punchPh < 0.3 ? 1 : 1 - (punchPh - 0.3) / 0.7) : 0;
   // ---- the whole body works every attack: these drives feed the weight
   // shift, the crouch and the lean, not just the weapon itself
   const swingPh = tailAtk > 0 ? 1 - tailAtk : 0;                        // 0 → 1 across the tail slam
@@ -1970,6 +2263,8 @@ function drawDino(ctx, key, o) {
     const f = footPose(off, stride, hx + (front ? 1 : 2.5) * s);
     if (!front && kick > 0) { f.x += kick * legLen * 1.6; f.y -= kick * legLen * 1.05; }   // the hind feet thrown forward and UP
     if (front && kick > 0) { f.y -= kick * legLen * 0.55; f.x += kick * 4 * s; }         // forelegs tucked up as it rears
+    if (front && !far && punchLift > 0) { f.y -= punchLift * legLen * 0.4; f.x -= punchLift * legLen * 0.12; }   // the punch's tell: foot up, drawn back
+    if (front && !far && punch > 0) { f.x += punch * legLen * 0.95; f.y -= punch * legLen * 0.3; }               // …and the jab
     // metatarsus: theropods run on long ones; front limbs and squat
     // quadrupeds carry a short pastern (mtMul tunes it per species)
     const mt = reach * (front ? 0.16 : 0.24) * (d.mtMul || 1);
@@ -2601,6 +2896,862 @@ function drawCrocShadow(ctx, e) {
 // darter), 'coel' (thick lobe-finned coelacanth with a TAIL SLAP), 'shark'
 // (elongate basker with a bony skull-shield)
 // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// PTERODACTYLUS (the flyer). Its body is lifted `alt` off its grounded
+// shadow (the renderer draws the shadow, down on the ground: that is where
+// the animal really IS). On land it stands on all fours, the wings folded up
+// along its arms; afloat it sits on the sea like a gull; aloft the wings beat
+// hard while it climbs (SPACE held) and spread into a glide as it sinks.
+// The whole body tilts round the shared pivot by o.pitch, so a diagonal
+// heading points the beak along the diagonal, exactly like the hit zones.
+function drawPtero(ctx, key, o) {
+  const d = DINO[key], L = d.L;
+  const C = skinColors(key, o.gender, o.skin);
+  const s = d.scale * sizeScale(o.growth != null ? o.growth : 1) * genderMod(o).size;
+  const bl = L.body[0] * s, bh = L.body[1] * s, leg = L.leg[0] * s;
+  const nl = L.neckLen * s, hl = L.head[0] * s, hh = L.head[1] * s;
+  const alt = o.alt || 0, air = alt > 0.5;
+  const sink = air ? 0 : waterSink(o, key);
+  const wet = sink > 0;
+  const move = o.move || 0, ph = o.phase || 0;
+  const atk = o.attackT || 0;
+  const strike = atk > 0 ? Math.sin(Math.min(1, atk) * Math.PI) : 0;
+  // feeding: quick gull pecks (dip, tug, toss the morsel back)
+  const tear = o.tear || 0, drink = o.drink || 0;
+  let dip = 0, fGape = 0;
+  if (tear > 0.02) {
+    const ct = (o.actT || 0) % 0.9;
+    const k = ct < 0.35 ? ct / 0.35 : ct < 0.6 ? 1 : 1 - (ct - 0.6) / 0.3;
+    dip = k * tear;
+    fGape = (ct > 0.6 ? 0.35 * Math.sin((ct - 0.6) / 0.3 * Math.PI) : 0.1 * k) * tear;
+  }
+  if (drink > 0.02) dip = Math.max(dip, drink * (0.7 + 0.3 * Math.sin((o.actT || 0) * 3)));
+  if (o.gulp) fGape = Math.max(fGape, 0.3 * Math.abs(Math.sin(G.time * 12)));
+  // CALLS (1: crane to the sky and cry · 2: a bow · 3: the threat, wings
+  // half-flared and beak snapping) and REST (settled low, eyes shut)
+  const cb = o.callB || 0, ck = o.callK || 0, cT = o.callT || 0;
+  const callUp = ck === 1 ? cb : 0;
+  const callBow = ck === 2 ? cb * Math.sin(clamp(cT / 0.7, 0, 1) * Math.PI) : 0;
+  const callJerk = ck === 3 ? cb : 0;
+  const callJaw = ck === 1 ? cb * (0.4 + 0.15 * Math.sin(G.time * 9)) : ck === 3 ? callJerk * (Math.sin(cT * 21) > 0 ? 0.5 : 0.08) : callBow * 0.2;
+  const rest = air ? 0 : (o.restT || 0);
+  const gape = strike * 0.55 + fGape + callJaw;
+  const lw = Math.max(0.6, s * 0.8);
+  const memb = C.shade || C.mid;
+  ctx.save();
+  ctx.translate(o.x, o.y);
+  if (wet) {
+    // the surface it floats on: a ripple ring, and nothing below it shows
+    const rp = (G.time * 0.8 + (o.id || 0) * 0.37) % 1;
+    ctx.strokeStyle = 'rgba(225,240,238,' + (0.35 * (1 - rp)).toFixed(3) + ')';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.ellipse(0, 0, bl * (0.6 + rp * 0.4), bh * (0.35 + rp * 0.2), 0, 0, TAU); ctx.stroke();
+    ctx.beginPath(); ctx.rect(-bl * 4, -bl * 6, bl * 8, bl * 6); ctx.clip();
+  }
+  ctx.translate(0, sink - alt + (wet ? Math.sin(G.time * 2.2 + (o.id || 0)) * 0.6 : 0));
+  ctx.scale(o.facing || 1, 1);
+  if (o.hurtT > 0 && Math.floor(o.hurtT * 24) % 2 === 0) ctx.globalAlpha = 0.55;
+  const cy = -(leg + bh * 0.42);   // the pivot (pitchPoint uses the same one)
+  // the bill, in world terms (x, and height above the ground), so a carried
+  // carcass rides in the drawn beak in every pose
+  const billAt = (hx0, hy0, ang) => {
+    const lx = hx0 + Math.cos(ang) * hl * 0.72 - Math.sin(ang) * hh * 0.2, ly = hy0 + Math.sin(ang) * hl * 0.72 + Math.cos(ang) * hh * 0.2;
+    const pa = o.pitch || 0, dy = ly - cy;
+    const x2 = lx * Math.cos(pa) - dy * Math.sin(pa), y2 = cy + lx * Math.sin(pa) + dy * Math.cos(pa);
+    o.jawPt = { x: o.x + (o.facing || 1) * x2, h: alt - sink - y2, t: G.time, air };
+  };
+  if (o.pitch) { ctx.translate(0, cy); ctx.rotate(o.pitch); ctx.translate(0, -cy); }
+  ctx.strokeStyle = C.line;
+  ctx.lineWidth = lw;
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  // a limb or neck: a thick outlined stroke through the given points
+  const limb = (pts, w, col) => {
+    ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]);
+    for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+    ctx.strokeStyle = C.line; ctx.lineWidth = w + lw * 2; ctx.stroke();
+    ctx.strokeStyle = col; ctx.lineWidth = w; ctx.stroke();
+    ctx.strokeStyle = C.line; ctx.lineWidth = lw;
+  };
+  // the head: a long, narrow, slightly downturned beak with fine teeth and
+  // a little crest at the back of the skull
+  const head = (x, y, ang) => {
+    ctx.save();
+    ctx.translate(x, y); ctx.rotate(ang);
+    ctx.fillStyle = C.mid;   // lower jaw
+    ctx.save(); ctx.rotate(gape);
+    ctx.beginPath();
+    ctx.moveTo(-hl * 0.08, hh * 0.05);
+    ctx.lineTo(hl * 0.95, hh * 0.22);
+    ctx.lineTo(hl * 0.9, hh * 0.36);
+    ctx.quadraticCurveTo(hl * 0.3, hh * 0.5, -hl * 0.1, hh * 0.42);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#f4f0e2';
+    for (let k = 0; k < 5; k++) ctx.fillRect(hl * (0.3 + k * 0.12), hh * 0.06, Math.max(0.35, s * 0.4), -hh * 0.16);
+    ctx.restore();
+    ctx.fillStyle = C.top;   // skull and upper beak
+    ctx.beginPath();
+    ctx.moveTo(-hl * 0.14, hh * 0.3);
+    ctx.quadraticCurveTo(-hl * 0.16, -hh * 0.5, hl * 0.12, -hh * 0.5);
+    ctx.quadraticCurveTo(hl * 0.5, -hh * 0.3, hl, hh * 0.16);
+    ctx.lineTo(hl * 0.92, hh * 0.24);
+    ctx.quadraticCurveTo(hl * 0.4, hh * 0.12, -hl * 0.14, hh * 0.3);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#f4f0e2';
+    for (let k = 0; k < 6; k++) ctx.fillRect(hl * (0.26 + k * 0.11), hh * (0.16 + k * 0.012), Math.max(0.35, s * 0.4), hh * 0.17);
+    ctx.fillStyle = C.acc;   // the crest
+    ctx.beginPath();
+    ctx.moveTo(-hl * 0.04, -hh * 0.45);
+    ctx.quadraticCurveTo(-hl * 0.22, -hh * 1.05, -hl * 0.34, -hh * 0.75);
+    ctx.quadraticCurveTo(-hl * 0.2, -hh * 0.45, -hl * 0.14, -hh * 0.1);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    if (rest > 0.55) {   // asleep: a closed eye
+      ctx.strokeStyle = C.line; ctx.lineWidth = Math.max(0.5, lw * 0.8);
+      ctx.beginPath(); ctx.moveTo(hl * 0.0, -hh * 0.1); ctx.quadraticCurveTo(hl * 0.07, -hh * 0.02, hl * 0.14, -hh * 0.1); ctx.stroke();
+      ctx.lineWidth = lw;
+    } else {
+      ctx.fillStyle = '#f2ead6';   // eye
+      ctx.beginPath(); ctx.arc(hl * 0.06, -hh * 0.12, Math.max(0.8, hh * 0.2), 0, TAU); ctx.fill();
+      ctx.fillStyle = C.eye;
+      ctx.beginPath(); ctx.arc(hl * 0.08, -hh * 0.12, Math.max(0.5, hh * 0.12), 0, TAU); ctx.fill();
+    }
+    ctx.restore();
+  };
+  // the body: dark back, white belly, along its own tilt
+  const bodyEll = (x, y, rx, ry, rot) => {
+    ctx.beginPath(); ctx.ellipse(x, y, rx, ry, rot, 0, TAU);
+    ctx.save(); ctx.clip();
+    ctx.translate(x, y); ctx.rotate(rot);
+    ctx.fillStyle = C.belly; ctx.fillRect(-rx * 2, -ry * 2, rx * 4, ry * 4);
+    ctx.fillStyle = C.mid; ctx.fillRect(-rx * 2, -ry * 2, rx * 4, ry * 2.25);
+    ctx.fillStyle = C.top; ctx.fillRect(-rx * 2, -ry * 2, rx * 4, ry * 1.55);
+    ctx.restore();
+    ctx.beginPath(); ctx.ellipse(x, y, rx, ry, rot, 0, TAU); ctx.stroke();
+  };
+  if (air) {
+    // ---------- ON THE WING ----------
+    const span = L.body[0] * 2.7 * s;
+    const fl = o.wing || 0;
+    const t = G.time * 13 + (o.id || 0) * 1.7;
+    const beat = lerp(0.22 + 0.08 * Math.sin(G.time * 2 + (o.id || 0)), Math.sin(t), fl);
+    const Wx = bl * 0.14, Wy = cy - bh * 0.18;          // the shoulder
+    const Hx = -bl * 0.62, Hy = cy + bh * 0.36;          // where the membrane meets the leg (the knee)
+    const wing = (near) => {
+      const tx = Wx - span * (near ? 0.12 : 0.18);
+      const ty = near ? Wy + span * (0.4 - 0.6 * beat) : Wy - span * (0.4 + 0.45 * beat);
+      const wx = Wx + (tx - Wx) * 0.4 + span * 0.16, wy = Wy + (ty - Wy) * 0.42;   // the wrist
+      ctx.fillStyle = near ? memb : shade(memb, 0.7);
+      ctx.beginPath();
+      ctx.moveTo(Wx, Wy); ctx.lineTo(wx, wy); ctx.lineTo(tx, ty);
+      ctx.quadraticCurveTo(Hx + (tx - Hx) * 0.55 - span * 0.12, Hy + (ty - Hy) * 0.55, Hx, Hy);
+      ctx.lineTo(-bl * 0.2, cy + bh * 0.1);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      // the arm and the great wing finger along the leading edge
+      ctx.strokeStyle = near ? C.top : shade(C.top, 0.75);
+      ctx.lineWidth = Math.max(1, bh * 0.16);
+      ctx.beginPath(); ctx.moveTo(Wx, Wy); ctx.lineTo(wx, wy); ctx.lineTo(tx, ty); ctx.stroke();
+      ctx.strokeStyle = C.line; ctx.lineWidth = lw;
+    };
+    wing(false);
+    // legs trailing behind
+    const kick = Math.sin(t * 0.5) * 0.6 * fl;
+    limb([[-bl * 0.28, cy + bh * 0.2], [-bl * 0.55 - leg * 0.55, cy + bh * 0.42 + kick]], Math.max(0.8, bh * 0.16), C.mid);
+    // tail stub
+    ctx.fillStyle = C.mid;
+    ctx.beginPath(); ctx.moveTo(-bl * 0.42, cy - bh * 0.15); ctx.lineTo(-bl * 0.5 - L.tail[0] * s, cy + bh * 0.05); ctx.lineTo(-bl * 0.42, cy + bh * 0.15); ctx.closePath(); ctx.fill(); ctx.stroke();
+    bodyEll(0, cy, bl * 0.55, bh * 0.42, 0);
+    // neck straight out ahead, head level and searching
+    const n0x = bl * 0.4, n0y = cy - bh * 0.12;
+    const hx = n0x + nl * (0.9 + strike * 0.35), hy = n0y - nl * 0.22 + strike * bh * 0.1;
+    limb([[n0x, n0y], [hx, hy]], Math.max(1, bh * 0.34), C.mid);
+    { const hA = 0.12 - strike * 0.1 - callUp * 0.5 + callBow * 0.5 + callJerk * Math.sin(cT * 21) * 0.12; head(hx, hy, hA); billAt(hx, hy, hA); }
+    wing(true);
+  } else {
+    // ---------- ON THE GROUND (or afloat): all fours, wings folded ----------
+    const step = Math.sin(ph) * move;
+    const hx = -bl * 0.28, hy = -leg * 0.95 * (1 - rest * 0.55);   // resting: sunk down onto folded legs
+    const sx = bl * 0.22, sy = -leg * 1.55 * (1 - rest * 0.5);
+    const knee = -leg * 0.45 * (1 - rest * 0.7);
+    const rot = Math.atan2(sy - hy, sx - hx);
+    if (!wet) {   // far legs
+      limb([[hx, hy], [hx + bl * 0.06 - step * 2 + rest * bl * 0.12, knee], [hx - step * 3, 0]], Math.max(0.8, bh * 0.15), shade(C.mid, 0.72));
+      limb([[sx, sy], [sx + bl * 0.02, sy + leg * 0.55], [sx + bl * 0.2 + step * 2, -leg * 0.3], [sx + bl * 0.24 + step * 2, 0]], Math.max(0.8, bh * 0.15), shade(C.mid, 0.72));
+    }
+    ctx.fillStyle = C.mid;   // tail stub
+    ctx.beginPath(); ctx.moveTo(hx, hy - bh * 0.15); ctx.lineTo(hx - L.tail[0] * s * 1.3, hy + bh * 0.08); ctx.lineTo(hx + bl * 0.05, hy + bh * 0.2); ctx.closePath(); ctx.fill(); ctx.stroke();
+    bodyEll((hx + sx) / 2, (hy + sy) / 2 - bh * 0.08, bl * 0.56, bh * 0.48, rot);
+    // the neck: up and forward, bowed down to feed or drink
+    const na = L.neckAng * (1 - dip * 1.3) - strike * 0.5 + callUp * 0.55 - callBow * 0.9 - rest * 1.0;
+    const n0x = sx + bl * 0.06, n0y = sy - bh * 0.2;
+    const ex = n0x + Math.cos(na) * nl * (1 + strike * 0.3), ey = n0y - Math.sin(na) * nl + dip * leg * 0.8;
+    limb([[n0x, n0y], [ex, ey]], Math.max(1, bh * 0.34), C.mid);
+    { const hA = 0.28 + dip * 0.9 + strike * 0.1 - callUp * 1.0 + callBow * 0.7 - rest * 0.2 + callJerk * Math.sin(cT * 21) * 0.15; head(ex, ey, hA); billAt(ex, ey, hA); }
+    // near legs: the hind leg, and the arm walking on its knuckles with the
+    // great wing finger folded back up along the flank
+    if (!wet) limb([[hx, hy], [hx + bl * 0.06 + step * 2 + rest * bl * 0.12, knee], [hx + step * 3, 0]], Math.max(0.8, bh * 0.16), C.mid);
+    // the threat display flares the folded wing up off the flank
+    const ftx = hx - bl * 0.1 - callJerk * bl * 0.25, fty = hy - bh * 0.55 - callJerk * bh * 1.8;
+    const wrx = sx + bl * 0.22 - step * 2, wry = wet ? sy + leg * 0.3 : -leg * 0.3;
+    ctx.fillStyle = shade(memb, 0.85);   // the folded membrane
+    ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(wrx, wry); ctx.lineTo(ftx, fty); ctx.closePath(); ctx.fill(); ctx.stroke();
+    limb([[sx, sy], [sx + bl * 0.02, sy + leg * 0.55], [wrx, wry]].concat(wet ? [] : [[wrx + bl * 0.04, 0]]), Math.max(0.8, bh * 0.16), C.mid);
+    ctx.strokeStyle = C.top; ctx.lineWidth = Math.max(0.9, bh * 0.13);   // the folded finger
+    ctx.beginPath(); ctx.moveTo(wrx, wry); ctx.lineTo(ftx, fty); ctx.stroke();
+    ctx.strokeStyle = C.line; ctx.lineWidth = lw;
+  }
+  ctx.restore();
+}
+
+// HATZEGOPTERYX — the AZHDARCHID build, nothing like the little
+// pterodactyls: it stalks on four long, stilt-like limbs (the arms longest,
+// so the back slopes up to the shoulders), the folded wing finger standing
+// up past the shoulder like a rolled umbrella, a short, enormously thick
+// neck, and a skull three metres long ending in a toothless dagger of a
+// beak. In the air: a vast wingspan, legs trailing, neck and skull out in
+// front. Same pivot / pitch / altitude rules as drawPtero.
+function drawAzhdarchid(ctx, key, o) {
+  const d = DINO[key], L = d.L;
+  const g = o.growth != null ? o.growth : 1;
+  // the YOUNG are not small adults: a flapling has a short stubby bill on a
+  // deep round head with a big eye, a short neck, a plump fluffy body, short
+  // stilts and wings, barely a crest, and a paler, fuzzier coat
+  const yk = clamp(1 - g, 0, 1);
+  const C0 = skinColors(key, o.gender, o.skin), C = Object.assign({}, C0);
+  if (yk > 0) for (const k of ['top', 'mid', 'shade', 'acc']) if (C[k]) C[k] = mixHex(C[k], C0.belly, 0.3 * yk);
+  const s = d.scale * sizeScale(g) * genderMod(o).size;
+  const bl = L.body[0] * s * (1 - 0.05 * yk), bh = L.body[1] * s * (1 + 0.5 * yk), leg = L.leg[0] * s * (1 - 0.3 * yk), fore = (d.foreLen || L.leg[0] * 1.5) * s * (1 - 0.3 * yk);
+  const nl = L.neckLen * s * (1 - 0.45 * yk), hl = L.head[0] * s * (1 - 0.5 * yk), hh = L.head[1] * s * (1 + 0.6 * yk);
+  const crK = 1 - 0.85 * yk;   // the crest grows in with age
+  const alt = o.alt || 0, air = alt > 0.5;
+  const sink = air ? 0 : waterSink(o, key);
+  const wet = sink > 0;
+  const move = o.move || 0, ph = o.phase || 0;
+  const atk = o.attackT || 0;
+  const strike = atk > 0 ? Math.sin(Math.min(1, atk) * Math.PI) : 0;
+  const tear = o.tear || 0, drink = o.drink || 0;
+  let dip = 0, fGape = 0;
+  if (tear > 0.02) {   // feeding: the great beak drives down, wrenches, tosses
+    const ct = (o.actT || 0) % 1.2;
+    const k = ct < 0.45 ? ct / 0.45 : ct < 0.8 ? 1 : 1 - (ct - 0.8) / 0.4;
+    dip = k * tear;
+    fGape = (ct > 0.8 ? 0.3 * Math.sin((ct - 0.8) / 0.4 * Math.PI) : 0.08 * k) * tear;
+  }
+  if (drink > 0.02) dip = Math.max(dip, drink * (0.75 + 0.25 * Math.sin((o.actT || 0) * 3)));
+  if (o.gulp) fGape = Math.max(fGape, 0.25 * Math.abs(Math.sin(G.time * 10)));
+  const cb = o.callB || 0, ck = o.callK || 0, cT = o.callT || 0;
+  const callUp = ck === 1 ? cb : 0;
+  const callBow = ck === 2 ? cb * Math.sin(clamp(cT / 0.7, 0, 1) * Math.PI) : 0;
+  const callJerk = ck === 3 ? cb : 0;
+  const callJaw = ck === 1 ? cb * (0.32 + 0.1 * Math.sin(G.time * 7)) : ck === 3 ? callJerk * (Math.sin(cT * 21) > 0 ? 0.42 : 0.06) : callBow * 0.15;
+  const rest = air ? 0 : (o.restT || 0);
+  const gape = strike * 0.4 + fGape + callJaw;
+  const lw = Math.max(0.6, Math.min(1.6, s * 0.7));
+  // the palette: membranes a deep warm brown that glows toward the edge, the
+  // bill pale horn flushed with the crest's colour at its root, an amber eye
+  const memb = C.shade || C.mid, membEdge = mixHex(memb, C.acc, 0.22);
+  const horn = mixHex(C.belly, '#d9c39c', 0.55), hornBase = mixHex(horn, C.acc, 0.4);
+  const iris = mixHex('#f0b443', C.eye, 0.2);
+  ctx.save();
+  ctx.translate(o.x, o.y);
+  if (wet) {
+    const rp = (G.time * 0.6 + (o.id || 0) * 0.37) % 1;
+    ctx.strokeStyle = 'rgba(225,240,238,' + (0.35 * (1 - rp)).toFixed(3) + ')';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.ellipse(0, 0, bl * (0.7 + rp * 0.4), bh * (0.45 + rp * 0.2), 0, 0, TAU); ctx.stroke();
+    ctx.beginPath(); ctx.rect(-bl * 6, -bl * 8, bl * 12, bl * 8); ctx.clip();
+  }
+  ctx.translate(0, sink - alt + (wet ? Math.sin(G.time * 1.8 + (o.id || 0)) * 0.8 : 0));
+  ctx.scale(o.facing || 1, 1);
+  if (o.hurtT > 0 && Math.floor(o.hurtT * 24) % 2 === 0) ctx.globalAlpha = 0.55;
+  const cy = -(leg + bh * 0.42);   // the shared pivot
+  // body-local point → world x and height above the ground (undoing the
+  // facing mirror, the pitch tilt, the float and the altitude)
+  const grip = (lx, ly) => {
+    const pa = o.pitch || 0, dy = ly - cy;
+    const x2 = lx * Math.cos(pa) - dy * Math.sin(pa), y2 = cy + lx * Math.sin(pa) + dy * Math.cos(pa);
+    return { x: o.x + (o.facing || 1) * x2, h: alt - sink - y2, t: G.time, air };
+  };
+  const billTip = (hx, hy, ang) => grip(hx + Math.cos(ang) * hl * 0.78 - Math.sin(ang) * hh * 0.2, hy + Math.sin(ang) * hl * 0.78 + Math.cos(ang) * hh * 0.2);
+  if (o.pitch) { ctx.translate(0, cy); ctx.rotate(o.pitch); ctx.translate(0, -cy); }
+  ctx.strokeStyle = C.line; ctx.lineWidth = lw;
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  const qp = (a, b, c, u) => (1 - u) * (1 - u) * a + 2 * (1 - u) * u * b + u * u * c;   // a point on a quadratic
+  // A LIMB as one smooth tapering shape through its joints: the width given
+  // at each joint, so a thigh swells and a shin runs fine
+  const taper = (pts, ws, col) => {
+    const n = pts.length, A = [], B = [], ang = [];
+    for (let i = 0; i < n; i++) {
+      const p0 = pts[Math.max(0, i - 1)], p1 = pts[Math.min(n - 1, i + 1)];
+      const a = Math.atan2(p1[1] - p0[1], p1[0] - p0[0]), w = ws[i] / 2;
+      ang.push(a);
+      A.push([pts[i][0] - Math.sin(a) * w, pts[i][1] + Math.cos(a) * w]);
+      B.push([pts[i][0] + Math.sin(a) * w, pts[i][1] - Math.cos(a) * w]);
+    }
+    const side = (P, rev) => {
+      const Q = rev ? P.slice().reverse() : P;
+      for (let i = 1; i < n - 1; i++) ctx.quadraticCurveTo(Q[i][0], Q[i][1], (Q[i][0] + Q[i + 1][0]) / 2, (Q[i][1] + Q[i + 1][1]) / 2);
+      ctx.lineTo(Q[n - 1][0], Q[n - 1][1]);
+    };
+    ctx.beginPath(); ctx.moveTo(A[0][0], A[0][1]);
+    side(A, false);
+    ctx.arc(pts[n - 1][0], pts[n - 1][1], ws[n - 1] / 2, ang[n - 1] + Math.PI / 2, ang[n - 1] - Math.PI / 2, true);
+    side(B, true);
+    ctx.arc(pts[0][0], pts[0][1], ws[0] / 2, ang[0] - Math.PI / 2, ang[0] - Math.PI * 1.5, true);
+    ctx.closePath();
+    ctx.fillStyle = col; ctx.fill(); ctx.stroke();
+  };
+  const claws = (x, y, dir, len, n) => {
+    ctx.lineWidth = Math.max(0.6, lw * 0.9);
+    for (let i = 0; i < n; i++) {
+      const a = dir + (i - (n - 1) / 2) * 0.4;
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(a) * len, y + Math.sin(a) * len); ctx.stroke();
+    }
+    ctx.lineWidth = lw;
+  };
+  // fine fur (pycnofibres) standing off an edge, swept back
+  const fuzz = (pts, len, col) => {
+    ctx.strokeStyle = col; ctx.lineWidth = Math.max(0.6, lw * (col === C.top ? 1.3 : 0.7));
+    for (let i = 0; i < pts.length; i++) {
+      const [x, y, nx, ny] = pts[i], Lf = len * (1 + 0.35 * Math.sin(i * 2.3));
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + nx * Lf - Lf * 0.45, y + ny * Lf); ctx.stroke();
+    }
+    ctx.strokeStyle = C.line; ctx.lineWidth = lw;
+  };
+  // THE BODY: deep and round in the chest, falling away to small hips and a
+  // stub of tail; a dark furry saddle down the back over a pale underside
+  const torso = (x, y, rx, ry, rot) => {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(rot);
+    const path = () => {
+      ctx.beginPath();
+      ctx.moveTo(-rx * 1.1, -ry * 0.12);
+      ctx.bezierCurveTo(-rx * 0.95, -ry * 0.72, -rx * 0.45, -ry * 0.96, rx * 0.05, -ry * 0.98);
+      ctx.bezierCurveTo(rx * 0.6, -ry * 1.02, rx * 1.02, -ry * 0.62, rx * 1.02, ry * 0.02);
+      ctx.bezierCurveTo(rx * 1.02, ry * 0.72, rx * 0.5, ry * 1.04, -rx * 0.1, ry * 0.96);
+      ctx.bezierCurveTo(-rx * 0.6, ry * 0.9, -rx * 0.95, ry * 0.42, -rx * 1.1, -ry * 0.12);
+      ctx.closePath();
+    };
+    path();
+    const gr = ctx.createLinearGradient(0, -ry, 0, ry);
+    gr.addColorStop(0, C.mid); gr.addColorStop(0.5, mixHex(C.mid, C.belly, 0.45)); gr.addColorStop(1, C.belly);
+    ctx.fillStyle = gr; ctx.fill();
+    ctx.save(); ctx.clip();
+    ctx.fillStyle = C.top;
+    ctx.beginPath(); ctx.moveTo(-rx * 1.3, -ry * 1.3); ctx.lineTo(rx * 1.3, -ry * 1.3);
+    const N = 16;
+    for (let i = 0; i <= N; i++) {
+      const u = i / N;
+      ctx.lineTo(lerp(rx * 1.3, -rx * 1.3, u), -ry * lerp(0.4, 0.02, u) + (i % 2 ? ry * 0.13 : 0));
+    }
+    ctx.closePath(); ctx.fill();
+    const hi = ctx.createRadialGradient(rx * 0.3, -ry * 0.55, 0, rx * 0.3, -ry * 0.55, rx * 0.95);
+    hi.addColorStop(0, 'rgba(255,255,255,0.22)'); hi.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = hi; ctx.fillRect(-rx * 1.3, -ry * 1.3, rx * 2.6, ry * 2.6);
+    const sh = ctx.createLinearGradient(0, ry * 0.25, 0, ry);
+    sh.addColorStop(0, 'rgba(0,0,0,0)'); sh.addColorStop(1, 'rgba(0,0,0,0.2)');
+    ctx.fillStyle = sh; ctx.fillRect(-rx * 1.3, -ry * 1.3, rx * 2.6, ry * 2.6);
+    ctx.restore();
+    path(); ctx.stroke();
+    const nF = 10 + Math.round(8 * yk), F = [];
+    for (let i = 0; i < nF; i++) {
+      const a = Math.PI + 0.3 + (i + 0.5) / nF * (Math.PI - 0.75);
+      F.push([Math.cos(a) * rx * 0.97, Math.sin(a) * ry * 0.97, Math.cos(a) * 0.5, Math.sin(a)]);
+    }
+    fuzz(F, ry * (0.07 + 0.16 * yk), yk > 0.15 ? mixHex(C.belly, C.mid, 0.4) : C.top);
+    ctx.restore();
+  };
+  // the neck: short, thick at the shoulders, still thick at the skull. It is
+  // WELDED on at both ends: the root is sunk into the body and the tip tucked
+  // under the skull, the fill covers the body's outline where they meet, and
+  // only the two side contours are inked, so no seam lines show. A ruff of
+  // fur where it leaves the shoulders
+  const neck = (x0, y0, x1, y1) => {
+    const a = Math.atan2(y1 - y0, x1 - x0), ux = Math.cos(a), uy = Math.sin(a), nx = -uy, ny = ux;
+    const w0 = bh * 0.4, w1 = bh * 0.21, root = bh * 0.4;
+    const bx = x0 - ux * root, by = y0 - uy * root;          // the root, inside the body
+    const tx = x1 + ux * hh * 0.15, ty = y1 + uy * hh * 0.15; // the tip, under the skull
+    const mx = (x0 + x1) / 2, my = (y0 + y1) / 2, wm = (w0 + w1) * 0.47;
+    const gr = ctx.createLinearGradient(mx - nx * wm, my - ny * wm, mx + nx * wm, my + ny * wm);
+    gr.addColorStop(0, mixHex(C.top, C.mid, 0.3)); gr.addColorStop(0.4, C.mid); gr.addColorStop(1, C.belly);
+    ctx.fillStyle = gr;
+    ctx.beginPath();
+    ctx.moveTo(bx + nx * w0, by + ny * w0);
+    ctx.quadraticCurveTo(mx + nx * wm, my + ny * wm, tx + nx * w1, ty + ny * w1);
+    ctx.lineTo(tx - nx * w1, ty - ny * w1);
+    ctx.quadraticCurveTo(mx - nx * wm, my - ny * wm, bx - nx * w0, by - ny * w0);
+    ctx.closePath(); ctx.fill();
+    const side = (k) => {
+      ctx.beginPath();
+      ctx.moveTo(x0 + ux * bh * 0.04 + nx * w0 * 0.95 * k, y0 + uy * bh * 0.04 + ny * w0 * 0.95 * k);
+      ctx.quadraticCurveTo(mx + nx * wm * k, my + ny * wm * k, x1 + nx * w1 * k, y1 + ny * w1 * k);
+      ctx.stroke();
+    };
+    side(1); side(-1);
+    ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = Math.max(0.8, bh * 0.08);   // light down the throat
+    ctx.beginPath(); ctx.moveTo(x0 + nx * w0 * 0.6, y0 + ny * w0 * 0.6); ctx.quadraticCurveTo(mx + nx * wm * 0.62, my + ny * wm * 0.62, x1 + nx * w1 * 0.45 - ux * hh * 0.2, y1 + ny * w1 * 0.45 - uy * hh * 0.2); ctx.stroke();
+    // the young: a fluffy ruff down the nape
+    ctx.strokeStyle = C.line; ctx.lineWidth = lw;
+    if (yk < 0.15) return;
+    const R = [];
+    for (let i = 0; i < 4; i++) {
+      const u = 0.02 + i * 0.08, w = lerp(w0, w1, u) * 0.96;
+      R.push([lerp(x0, x1, u) - nx * w, lerp(y0, y1, u) - ny * w, -nx, -ny]);
+    }
+    fuzz(R, bh * (0.09 + 0.1 * yk), yk > 0.15 ? mixHex(C.belly, C.mid, 0.4) : C.top);
+  };
+  // THE HEAD: one long skull, deep at the back and running out into a great
+  // straight bill of pale horn. A dark stripe through an amber eye under a
+  // heavy brow, the gape curling up at the back into a grim smile, and the
+  // crest, a veined sail of colour, rising off the back of the skull
+  const head = (x, y, ang) => {
+    ctx.save();
+    ctx.translate(x, y); ctx.rotate(ang);
+    const grad = ctx.createLinearGradient(-hl * 0.2, 0, hl, 0);
+    grad.addColorStop(0, C.mid); grad.addColorStop(0.36, C.mid);
+    grad.addColorStop(0.45, hornBase); grad.addColorStop(0.8, horn); grad.addColorStop(1, shade(horn, 0.72));
+    // the mouth, dark inside when it opens
+    const hgx = -hl * 0.06, hgy = hh * 0.3;
+    if (gape > 0.03) {
+      const dx = hl * 1.01, dy = hh * -0.15, lx = hgx + dx * Math.cos(gape) - dy * Math.sin(gape), ly = hgy + dx * Math.sin(gape) + dy * Math.cos(gape);
+      ctx.fillStyle = '#4a2422';
+      ctx.beginPath(); ctx.moveTo(hgx, hh * 0.2); ctx.lineTo(hl * 0.97, hh * 0.14); ctx.lineTo(lx, ly); ctx.closePath(); ctx.fill();
+    }
+    // lower jaw, hinged under the back of the skull
+    ctx.save();
+    ctx.translate(hgx, hgy); ctx.rotate(gape); ctx.translate(-hgx, -hgy);
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.moveTo(-hl * 0.1, hh * 0.16);
+    ctx.lineTo(hl * 0.95, hh * 0.15);
+    ctx.quadraticCurveTo(hl * 0.55, hh * 0.36, hl * 0.06, hh * 0.38);
+    ctx.quadraticCurveTo(-hl * 0.12, hh * 0.36, -hl * 0.1, hh * 0.16);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.restore();
+    // the crest first, so the skull's outline sits over its root
+    const cH = hh * (0.5 + 0.8 * crK);
+    const cg = ctx.createLinearGradient(hl * 0.05, -hh * 0.4, -hl * 0.15, -cH);
+    cg.addColorStop(0, shade(C.acc, 0.72)); cg.addColorStop(0.55, C.acc); cg.addColorStop(1, mixHex(C.acc, '#ffe6b0', 0.4));
+    const crest = () => {
+      ctx.beginPath();
+      ctx.moveTo(hl * 0.3, -hh * 0.36);
+      ctx.bezierCurveTo(hl * 0.12, -hh * 0.5 - cH * 0.25, -hl * 0.02, -cH, -hl * (0.12 + 0.1 * crK), -cH * 0.98);
+    ctx.quadraticCurveTo(-hl * (0.22 + 0.06 * crK), -cH * 0.8, -hl * 0.17, -hh * 0.18);
+      ctx.closePath();
+    };
+    crest(); ctx.fillStyle = cg; ctx.fill();
+    if (crK > 0.4) {   // veins in the sail
+      ctx.save(); crest(); ctx.clip();
+      ctx.strokeStyle = shade(C.acc, 0.6); ctx.lineWidth = lw * 0.6;
+      for (let i = 0; i < 3; i++) {
+        const u = 0.3 + i * 0.22, ex = lerp(hl * 0.18, -hl * 0.2, u), ey = -lerp(hh * 0.55, cH * 0.92, Math.sin(u * Math.PI * 0.9));
+        ctx.beginPath(); ctx.moveTo(hl * 0.06 - i * hl * 0.05, -hh * 0.38); ctx.quadraticCurveTo(lerp(hl * 0.06, ex, 0.5) + hl * 0.03, lerp(-hh * 0.38, ey, 0.5), ex, ey); ctx.stroke();
+      }
+      ctx.restore();
+    }
+    ctx.strokeStyle = C.line; ctx.lineWidth = lw;
+    crest(); ctx.stroke();
+    // the skull-and-bill
+    const skull = () => {
+      ctx.beginPath();
+      ctx.moveTo(-hl * 0.12, hh * 0.24);
+      ctx.quadraticCurveTo(-hl * 0.24, -hh * 0.12, -hl * 0.08, -hh * 0.44);
+      ctx.quadraticCurveTo(hl * 0.06, -hh * 0.6, hl * 0.24, -hh * 0.42);
+      ctx.quadraticCurveTo(hl * 0.62, -hh * 0.25, hl, hh * 0.08);
+      ctx.lineTo(hl * 0.975, hh * 0.15);
+      ctx.quadraticCurveTo(hl * 0.55, hh * 0.15, hl * 0.08, hh * 0.24);
+      ctx.closePath();
+    };
+    skull(); ctx.fillStyle = grad; ctx.fill();
+    const ex0 = hl * (0.02 + 0.06 * yk), ey0 = -hh * (0.24 - 0.04 * yk), er = Math.max(1, hh * 0.115 * (1 + 1.6 * yk));
+    ctx.save(); skull(); ctx.clip();
+    // the dark stripe through the eye, from the bill's root back
+    ctx.fillStyle = mixHex(C.top, C.mid, 0.2);
+    ctx.beginPath();
+    ctx.moveTo(hl * 0.24, -hh * 0.22);
+    ctx.quadraticCurveTo(ex0, ey0 - er * 1.7, -hl * 0.3, -hh * 0.34);
+    ctx.lineTo(-hl * 0.3, -hh * 0.02);
+    ctx.quadraticCurveTo(ex0, ey0 + er * 1.5, hl * 0.24, -hh * 0.18);
+    ctx.closePath(); ctx.fill();
+    // where skin gives way to horn, and a gleam along the top of the bill
+    ctx.strokeStyle = shade(hornBase, 0.72); ctx.lineWidth = lw * 0.7;
+    ctx.beginPath(); ctx.moveTo(hl * 0.33, -hh * 0.4); ctx.quadraticCurveTo(hl * 0.27, -hh * 0.08, hl * 0.32, hh * 0.22); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = Math.max(0.7, hh * 0.07);
+    ctx.beginPath(); ctx.moveTo(hl * 0.4, -hh * 0.27); ctx.quadraticCurveTo(hl * 0.65, -hh * 0.14, hl * 0.9, hh * 0.03); ctx.stroke();
+    ctx.restore();
+    ctx.strokeStyle = C.line; ctx.lineWidth = lw;
+    skull(); ctx.stroke();
+    // the gape line, curling up at the back; the nostril
+    ctx.strokeStyle = shade(horn, 0.45); ctx.lineWidth = lw * 0.8;
+    ctx.beginPath(); ctx.moveTo(hl * 0.94, hh * 0.15); ctx.quadraticCurveTo(hl * 0.5, hh * 0.19, hl * 0.06, hh * 0.22); ctx.quadraticCurveTo(-hl * 0.02, hh * 0.22, -hl * 0.03, hh * 0.12); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(hl * 0.4, -hh * 0.2); ctx.lineTo(hl * 0.47, -hh * 0.15); ctx.stroke();
+    ctx.strokeStyle = C.line; ctx.lineWidth = lw;
+    // the eye
+    if (rest > 0.55) {
+      ctx.beginPath(); ctx.moveTo(ex0 - er, ey0); ctx.quadraticCurveTo(ex0, ey0 + er * 0.7, ex0 + er, ey0); ctx.stroke();
+    } else {
+      ctx.fillStyle = yk > 0.5 ? C.eye : iris;
+      ctx.beginPath(); ctx.arc(ex0, ey0, er, 0, TAU); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#120a06';
+      ctx.beginPath(); ctx.arc(ex0 + er * 0.12, ey0, er * (0.5 + 0.3 * yk), 0, TAU); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      ctx.beginPath(); ctx.arc(ex0 + er * 0.32, ey0 - er * 0.35, er * 0.28, 0, TAU); ctx.fill();
+    }
+    // the brow: a heavy ridge that hoods the eye (the young have none yet)
+    if (yk < 0.6) {
+      const bk = 1 - yk / 0.6, eb = er / (1 + 1.6 * yk);
+      ctx.fillStyle = shade(C.mid, 0.82);
+      ctx.beginPath();
+      ctx.moveTo(ex0 - er - eb * 0.6, ey0 - er * 0.55);
+      ctx.quadraticCurveTo(ex0, ey0 - er - eb * (0.5 + 0.5 * bk), ex0 + er + eb * 0.9, ey0 - er * 0.35);
+      ctx.quadraticCurveTo(ex0 + er * 0.3, ey0 - er * (1 - 0.45 * bk), ex0 - er - eb * 0.6, ey0 - er * 0.55);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    }
+    ctx.restore();
+  };
+  if (air) {
+    // ---------- ON THE WING ----------
+    const span = L.body[0] * 3.8 * s * (1 - 0.25 * yk);
+    const fl = o.wing || 0;
+    const t = G.time * 7 + (o.id || 0) * 1.7;   // big wings beat slower
+    const beat = lerp(0.18 + 0.06 * Math.sin(G.time * 1.3 + (o.id || 0)), Math.sin(t), fl);
+    const Wx = bl * 0.2, Wy = cy - bh * 0.22;
+    const Hx = -bl * 0.62, Hy = cy + bh * 0.38;
+    // each wing: the arm along the leading edge to the wrist, then the one
+    // enormous finger out to the tip; the membrane's trailing edge sweeps in
+    // from the tip to the ankle, fine fibres fanning through it
+    const wing = (near) => {
+      const tx = Wx - span * (near ? 0.36 : 0.36);
+      const ty = near ? Wy + span * (0.36 - 0.55 * beat) : Wy - span * (0.36 + 0.42 * beat);
+      const dy = ty - Wy, k = near ? 1 : 0.68;
+      const Ex = Wx + span * 0.07, Ey = Wy + dy * 0.18;
+      const Rx = Wx + span * 0.12, Ry = Wy + dy * 0.4;
+      const Mx = lerp(Rx, tx, 0.5) + span * 0.035, My = lerp(Ry, ty, 0.5);
+      const mhx = lerp(tx, Hx, 0.5), mhy = lerp(ty, Hy, 0.5);
+      const Qx = mhx + (Mx - mhx) * 0.8, Qy = mhy + (My - mhy) * 0.8;
+      const gr = ctx.createLinearGradient(Wx, Wy, tx, ty);
+      gr.addColorStop(0, shade(memb, k)); gr.addColorStop(0.6, shade(membEdge, k)); gr.addColorStop(1, shade(mixHex(membEdge, C.belly, 0.2), k));
+      ctx.fillStyle = gr;
+      ctx.beginPath();
+      ctx.moveTo(Wx, Wy); ctx.lineTo(Ex, Ey); ctx.lineTo(Rx, Ry); ctx.quadraticCurveTo(Mx, My, tx, ty);
+      ctx.quadraticCurveTo(Qx, Qy, Hx, Hy);
+      ctx.lineTo(-bl * 0.2, cy + bh * 0.1);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = 'rgba(0,0,0,' + (0.16 * k).toFixed(3) + ')'; ctx.lineWidth = lw * 0.6;
+      for (let i = 1; i <= 4; i++) {
+        const u = i / 5, v = 1 - u * 0.85;
+        ctx.beginPath();
+        ctx.moveTo(qp(Rx, Mx, tx, u), qp(Ry, My, ty, u));
+        ctx.lineTo(qp(tx, Qx, Hx, 1 - v), qp(ty, Qy, Hy, 1 - v));
+        ctx.stroke();
+      }
+      ctx.strokeStyle = C.line; ctx.lineWidth = lw;
+      // the small forward flap between shoulder and wrist
+      ctx.fillStyle = shade(membEdge, k * 1.08);
+      ctx.beginPath(); ctx.moveTo(Wx, Wy); ctx.quadraticCurveTo(lerp(Wx, Rx, 0.5) + span * 0.06, lerp(Wy, Ry, 0.5), Rx, Ry); ctx.lineTo(Ex, Ey); ctx.closePath(); ctx.fill(); ctx.stroke();
+      taper([[Wx, Wy], [Ex, Ey], [Rx, Ry]], [bh * 0.3, bh * 0.2, bh * 0.14], shade(C.mid, k));
+      taper([[Rx, Ry], [Mx, My], [tx, ty]], [bh * 0.13, bh * 0.08, bh * 0.03], shade(C.top, k));
+      claws(Rx, Ry, 0.3, bh * 0.14, 3);
+    };
+    wing(false);
+    const kick = Math.sin(t * 0.5) * 0.5 * fl;
+    const fx = -bl * 0.58 - leg * 0.5, fy = cy + bh * 0.45 + kick;
+    o.feetPt = grip(fx, fy);
+    taper([[-bl * 0.3, cy + bh * 0.12], [-bl * 0.52, cy + bh * 0.32 + kick * 0.5], [fx, fy]], [bh * 0.34, bh * 0.14, bh * 0.08], C.mid);
+    claws(fx, fy, Math.PI * 0.95, bh * 0.14, 3);
+    torso(0, cy, bl * 0.55, bh * 0.45, 0);
+    const n0x = bl * 0.42, n0y = cy - bh * 0.15;
+    const na = 0.32 + callUp * 0.4 - callBow * 0.3;
+    const ex = n0x + Math.cos(na) * nl * (1 + strike * 0.2), ey = n0y - Math.sin(na) * nl;
+    neck(n0x, n0y, ex, ey);
+    const hAng = 0.22 + strike * 0.15 - callUp * 0.6 + callBow * 0.5 + callJerk * Math.sin(cT * 21) * 0.1;
+    head(ex, ey, hAng);
+    o.jawPt = billTip(ex, ey, hAng);
+    wing(true);
+  } else {
+    // ---------- STANDING: four stilts, arms longest ----------
+    // The walk is a slow four-beat stride: each foot swings a long way
+    // forward, lifted clear, and plants (near hind, near fore, far hind,
+    // far fore, a quarter-cycle apart), the body riding gently over them
+    const STR = bl * 0.3 * move, LIFT = leg * 0.3 * move;
+    const gait = (f) => ({ dx: Math.sin(f) * STR, up: Math.max(0, Math.cos(f)) * LIFT });
+    const gNH = gait(ph), gNF = gait(ph + Math.PI * 0.5), gFH = gait(ph + Math.PI), gFF = gait(ph + Math.PI * 1.5);
+    const bob = Math.abs(Math.sin(ph * 2)) * leg * 0.05 * move;
+    const hx = -bl * 0.3, hy = -leg * (1 - rest * 0.55) - bob;
+    // feeding or drinking, the arms bend and the shoulders come down so the
+    // bill can reach the ground
+    const sx = bl * 0.3, sy = -fore * (1 - rest * 0.5 - dip * 0.3) - bob;
+    const rot = Math.atan2(sy - hy, sx - hx);
+    // hind leg: a swelling thigh, the knee forward, a fine shin, a flat foot
+    const hind = (gg) => {
+      const fx = hx + gg.dx, fy = -gg.up;
+      const kx = hx + bl * 0.15 + gg.dx * 0.5, ky = hy * 0.5 - gg.up * 0.6;
+      return [[hx, hy - bh * 0.12], [lerp(hx, kx, 0.5) + bl * 0.03, lerp(hy, ky, 0.5)], [kx, ky], [fx - bl * 0.03, fy - leg * 0.08], [fx + bl * 0.11, fy]];
+    };
+    const hindW = [bh * 0.48, bh * 0.36, bh * 0.15, bh * 0.1, bh * 0.07];
+    // arm: a stout upper arm, the elbow back, a long forearm and longer hand
+    // bone down to the knuckle, the small fingers on the ground ahead
+    const arm = (gg) => [
+      [sx, sy + bh * 0.05],
+      [sx - bl * 0.05 + gg.dx * 0.12, lerp(sy, -gg.up, 0.15)],
+      [sx - bl * 0.09 + gg.dx * 0.25, lerp(sy, -gg.up, 0.3)],
+      [sx + bl * 0.03 + gg.dx * 0.5, lerp(sy, -gg.up, 0.58)],
+      [sx + bl * 0.12 + gg.dx * 0.85, -fore * 0.07 * (1 - rest * 0.5) - gg.up * 0.6],
+      [sx + bl * 0.2 + gg.dx, -gg.up],
+    ];
+    const armW = [bh * 0.24, bh * 0.3, bh * 0.2, bh * 0.15, bh * 0.12, bh * 0.06];
+    // the folded wing: the great finger runs from the knuckle up past the
+    // shoulder (flared out and up in the threat display), the membrane
+    // pleated between it, the arm and the flank
+    const ftx = sx - bl * (0.55 - 0.15 * callJerk), fty = sy + bh * (0.05 - 2.4 * callJerk);
+    const fold = (A, tx, ty, k) => {
+      const K = A[4], E = A[2], Wr = A[3];
+      const Mx = lerp(K[0], tx, 0.5) - bl * 0.02, My = lerp(K[1], ty, 0.5) + bh * 0.12;
+      const Bx = sx - bl * 0.12, By = sy + bh * 0.45;
+      const gr = ctx.createLinearGradient(K[0], K[1], tx, ty);
+      gr.addColorStop(0, shade(memb, k * 0.85)); gr.addColorStop(1, shade(membEdge, k));
+      ctx.fillStyle = gr;
+      ctx.beginPath();
+      ctx.moveTo(tx, ty);
+      ctx.quadraticCurveTo(sx - bl * 0.42, sy + bh * 0.15, Bx, By);
+      ctx.lineTo(E[0], E[1]); ctx.lineTo(Wr[0], Wr[1]); ctx.lineTo(K[0], K[1]);
+      ctx.quadraticCurveTo(Mx, My, tx, ty);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = lw * 0.7;   // the pleats
+      for (let i = 1; i <= 2; i++) {
+        const u = i / 3;
+        ctx.beginPath(); ctx.moveTo(lerp(Wr[0], K[0], 0.5), lerp(Wr[1], K[1], 0.5));
+        ctx.quadraticCurveTo(lerp(Mx, Bx, u) + bl * 0.02, lerp(My, By, u), qp(tx, sx - bl * 0.42, Bx, u * 0.8), qp(ty, sy + bh * 0.15, By, u * 0.8));
+        ctx.stroke();
+      }
+      ctx.strokeStyle = C.line; ctx.lineWidth = lw;
+      return [K, [Mx, My], [tx, ty]];
+    };
+    const finger = (P, k) => {
+      taper(P, [bh * 0.17, bh * 0.12, bh * 0.05], shade(mixHex(memb, C.mid, 0.3), k));
+      ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = Math.max(0.6, bh * 0.04);
+      ctx.beginPath(); ctx.moveTo(P[0][0], P[0][1]); ctx.quadraticCurveTo(P[1][0], P[1][1], P[2][0], P[2][1]); ctx.stroke();
+      ctx.strokeStyle = C.line; ctx.lineWidth = lw;
+    };
+    const limbC = mixHex(C.mid, C.top, 0.18);
+    const hand = (A) => claws(A[5][0], A[5][1], -0.05, bh * 0.13, 3);
+    // far side: limbs and wing in shadow
+    const farA = arm(gFF);
+    taper(hind(gFH), hindW, shade(C.mid, 0.7));
+    const farF = fold(farA, ftx + bl * 0.08, fty + bh * 0.1, 0.7);
+    taper(farA, armW, shade(C.mid, 0.7)); hand(farA);
+    finger(farF, 0.7);
+    torso((hx + sx) / 2, (hy + sy) / 2, bl * 0.56, bh * 0.5, rot);
+    // the neck rises steeply from the shoulders; the skull hangs off it
+    // pointing down at the ground ahead — a stork with a building for a head
+    const na = L.neckAng + callUp * 0.25 - callBow * 0.5 - dip * 0.65 - strike * 0.2 - rest * 0.75 + (o.swallowK || 0) * 0.5;
+    const n0x = sx + bl * 0.06, n0y = sy - bh * 0.25;
+    const ex = n0x + Math.cos(na) * nl, ey = n0y - Math.sin(na) * nl;
+    neck(n0x, n0y, ex, ey);
+    const hAng = 0.9 + strike * 0.35 + dip * 0.62 - callUp * 1.6 - (o.swallowK || 0) * 1.7 + callBow * 0.4 - rest * 0.45 + callJerk * Math.sin(cT * 21) * 0.12 + Math.sin(ph * 2) * 0.03 * move;
+    head(ex, ey, hAng);
+    o.jawPt = billTip(ex, ey, hAng);
+    o.feetPt = grip(hx + (gNH.dx + gFH.dx) * 0.5 + bl * 0.1, -Math.max(gNH.up, gFH.up));
+    // near side on top: the hind leg, the folded wing, the arm over it
+    const nearH = hind(gNH);
+    taper(nearH, hindW, limbC);
+    claws(nearH[4][0], nearH[4][1], 0, bh * 0.1, 3);
+    const nearA = arm(gNF);
+    const nearF = fold(nearA, ftx, fty, 1);
+    taper(nearA, armW, limbC); hand(nearA);
+    finger(nearF, 1);
+  }
+  ctx.restore();
+}
+
+// PLESIOSAUR (kaiwhekea): a barrel body rowed along by four long flippers,
+// a short-for-its-kind neck and a round head lined with needle teeth. In the
+// water it swims fully UNDER the surface: drawn dimmed and blue-tinted
+// beneath a ripple, still easy to read. Hauled out on land it lies flat, its
+// flippers splayed and useless.
+const PLESIO_CY = 0.45;   // body centre height, as a fraction of body depth (hit zones match it)
+function drawPlesio(ctx, key, o) {
+  const d = DINO[key], L = d.L;
+  const C = skinColors(key, o.gender, o.skin);
+  const s = d.scale * sizeScale(o.growth != null ? o.growth : 1) * genderMod(o).size;
+  const bl = L.body[0] * s, bh = L.body[1] * s;
+  const wet = typeof isWaterPx === 'function' && isWaterPx(o.x, o.y);
+  const move = o.move || 0;
+  // the stroke: flippers beat with the stride clock while swimming, idle
+  // sculling otherwise (slow and lazy) — on land, a feeble flop
+  const ph = (o.phase || 0) * 0.9 + G.time * (wet ? 1.1 : 0.5);
+  const beat = Math.sin(ph) * (wet ? 0.12 + 0.22 * move : 0.05) * (1 - 0.7 * (o.restT || 0));   // resting: barely sculling
+  const atk = o.attackT || 0;
+  const strike = atk > 0 ? Math.sin(Math.min(1, atk) * Math.PI) : 0;   // the head darts out and back
+  const sway = Math.sin(G.time * 1.6 + (o.id || 0)) * bh * 0.08;
+  ctx.save();
+  ctx.translate(o.x, o.y);
+  // the dark of the water over it, and the surface ripple above
+  if (wet) {
+    ctx.fillStyle = 'rgba(8,30,48,0.30)';
+    ctx.beginPath(); ctx.ellipse(0, -bh * 0.3, bl * 0.95, bh * 0.75, 0, 0, TAU); ctx.fill();
+    const rp = (G.time * 0.7 + (o.id || 0) * 0.31) % 1;
+    ctx.strokeStyle = 'rgba(225,240,238,' + (0.28 * (1 - rp)).toFixed(3) + ')';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.ellipse(0, -bh * 0.3, bl * (0.75 + rp * 0.4), bh * (0.5 + rp * 0.25), 0, 0, TAU); ctx.stroke();
+  }
+  ctx.scale(o.facing || 1, 1);
+  if (o.hurtT > 0 && Math.floor(o.hurtT * 24) % 2 === 0) ctx.globalAlpha = 0.55;
+  const cy = -bh * PLESIO_CY;     // body centre — and the pivot it tilts round
+  // swimming on a diagonal: the whole animal tilts into its heading
+  if (o.pitch) { ctx.translate(0, cy); ctx.rotate(o.pitch); ctx.translate(0, -cy); }
+  ctx.strokeStyle = C.line;
+  ctx.lineWidth = Math.max(0.7, s * 0.9);
+  ctx.lineJoin = 'round';
+  // one flipper: a long tapered leaf from its root, swept back by `a`
+  const flipper = (rx, ry, len, w, a, col) => {
+    ctx.save();
+    ctx.translate(rx, ry);
+    ctx.rotate(-a);
+    ctx.fillStyle = col;
+    ctx.beginPath();
+    ctx.moveTo(0, -w * 0.5);
+    ctx.quadraticCurveTo(-len * 0.45, -w * 0.9, -len, 0);
+    ctx.quadraticCurveTo(-len * 0.5, w * 0.55, 0, w * 0.5);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.restore();
+  };
+  const splay = wet ? 0 : 0.5;   // on land the flippers lie out flat
+  // far-side flippers first, a shade darker
+  flipper(bl * 0.2, cy + bh * 0.1, bl * 0.58, bh * 0.3, 0.36 - beat - splay * 0.3, shade(C.mid, 0.72));
+  flipper(-bl * 0.26, cy + bh * 0.12, bl * 0.46, bh * 0.26, 0.28 + beat - splay * 0.25, shade(C.mid, 0.72));
+  // short tail
+  ctx.fillStyle = C.mid;
+  ctx.beginPath();
+  ctx.moveTo(-bl * 0.42, cy - bh * 0.22);
+  ctx.quadraticCurveTo(-bl * 0.5 - L.tail[0] * s * 0.6, cy - bh * 0.05 + sway, -bl * 0.5 - L.tail[0] * s, cy + sway * 1.5);
+  ctx.quadraticCurveTo(-bl * 0.5 - L.tail[0] * s * 0.5, cy + bh * 0.2 + sway, -bl * 0.42, cy + bh * 0.22);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  // the neck: thick at the shoulders, tapering into the head, a gentle S
+  // FEEDING (the same performance clock the land animals use, o.actT):
+  // on a carcass the head dives down onto it, jaws working, then WRENCHES
+  // a mouthful loose with a hard head-shake, then lifts and gulps it down.
+  // A swallow tips the head up with snapping jaws; a drink is a slow dip
+  const tear = o.tear || 0, drink = o.drink || 0;
+  let eDrop = 0, eExt = 0, eGape = 0, eTilt = 0;
+  if (tear > 0.02) {
+    const ct = (o.actT || 0) % 1.5;
+    if (ct < 0.62) {          // the dive: down onto the meat, jaws open and bite
+      const k = Math.sin((ct / 0.62) * Math.PI * 0.5);
+      eDrop = k; eExt = 0.2 * k; eTilt = 0.45 * k;
+      eGape = (ct < 0.4 ? ct / 0.4 : 1 - (ct - 0.4) / 0.22) * 0.45;
+    } else if (ct < 1.0) {    // the wrench: a violent shake, tearing it free
+      const k = (ct - 0.62) / 0.38;
+      eDrop = 1 - 0.6 * k; eExt = 0.2 * (1 - k);
+      eTilt = 0.45 - 0.7 * k + Math.sin(ct * 55) * 0.16;
+    } else {                  // the gulp: head up, the mouthful worked down
+      const k = (ct - 1.0) / 0.5;
+      eDrop = 0.4 * (1 - k); eTilt = -0.3 * Math.sin(k * Math.PI);
+      eGape = 0.18 * Math.abs(Math.sin(k * Math.PI * 3));
+    }
+    eDrop *= tear; eExt *= tear; eGape *= tear; eTilt *= tear;
+  }
+  if (o.gulp) { eTilt = -0.4; eGape = 0.25 * Math.abs(Math.sin(G.time * 13)); }
+  if (drink > 0.02) {
+    const k = 0.6 + 0.4 * Math.sin((o.actT || 0) * 3.2);
+    eDrop = Math.max(eDrop, drink * k); eTilt = Math.max(eTilt, 0.35 * drink * k);
+    eGape = Math.max(eGape, 0.12 * drink * Math.abs(Math.sin((o.actT || 0) * 9)));
+  }
+  // CALLS: 1 rears the head up out of the water and cries · 2 a slow bow ·
+  // 3 snapping threat jerks. REST: drifting still, head drooped, eyes shut
+  const cb = o.callB || 0, ck = o.callK || 0, cT = o.callT || 0;
+  const callUp = ck === 1 ? cb : 0;
+  const callBow = ck === 2 ? cb * Math.sin(clamp(cT / 0.7, 0, 1) * Math.PI) : 0;
+  const callJerk = ck === 3 ? cb : 0;
+  const rest = o.restT || 0;
+  eDrop += callBow * 0.9 + rest * 0.85 - callUp * 1.3;
+  eTilt += callBow * 0.4 - callUp * 0.55 + rest * 0.2 + callJerk * Math.sin(cT * 21) * 0.18;
+  eGape += ck === 1 ? callUp * (0.3 + 0.1 * Math.sin(G.time * 8)) : callJerk * (Math.sin(cT * 21) > 0 ? 0.4 : 0.05);
+  eExt += callUp * 0.25 - rest * 0.3;   // asleep: the neck drawn in, head low on the water
+  const nl = L.neckLen * s * (1 + strike * 0.35 + eExt);
+  const n0x = bl * 0.4, n0y = cy - bh * 0.08;
+  const hx = n0x + nl, hy = cy - bh * 0.22 + sway * 2 - strike * bh * 0.08 + eDrop * bh * 0.85;
+  const mx = n0x + nl * 0.5, my = cy - bh * 0.3 - sway + eDrop * bh * 0.3;
+  const w0 = bh * 0.34, w1 = L.head[1] * s * 0.36;
+  ctx.fillStyle = C.mid;
+  ctx.beginPath();
+  ctx.moveTo(n0x - bl * 0.06, n0y - w0);
+  ctx.quadraticCurveTo(mx, my - (w0 + w1) * 0.5, hx, hy - w1);
+  ctx.lineTo(hx, hy + w1);
+  ctx.quadraticCurveTo(mx, my + (w0 + w1) * 0.5, n0x - bl * 0.06, n0y + w0);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  // the barrel body: dark back, white belly
+  ctx.beginPath(); ctx.ellipse(0, cy, bl * 0.5, bh * 0.5, 0, 0, TAU);
+  ctx.save();
+  ctx.clip();
+  ctx.fillStyle = C.belly; ctx.fillRect(-bl, cy - bh, bl * 2, bh * 2);
+  ctx.fillStyle = C.mid; ctx.fillRect(-bl, cy - bh, bl * 2, bh * 0.92);
+  ctx.fillStyle = C.top; ctx.fillRect(-bl, cy - bh, bl * 2, bh * 0.66);
+  // a soft line of spots along the flank
+  ctx.fillStyle = C.pat;
+  ctx.globalAlpha *= 0.5;
+  for (let k = 0; k < 5; k++) { ctx.beginPath(); ctx.arc(-bl * 0.3 + k * bl * 0.14, cy - bh * 0.12, Math.max(0.6, bh * 0.06), 0, TAU); ctx.fill(); }
+  ctx.restore();
+  ctx.beginPath(); ctx.ellipse(0, cy, bl * 0.5, bh * 0.5, 0, 0, TAU); ctx.stroke();
+  // belly sweep carried up the underside of the neck
+  ctx.strokeStyle = C.belly;
+  ctx.lineWidth = Math.max(0.8, bh * 0.12);
+  ctx.beginPath(); ctx.moveTo(n0x, n0y + w0 * 0.6); ctx.quadraticCurveTo(mx, my + (w0 + w1) * 0.32, hx - L.head[0] * s * 0.1, hy + w1 * 0.6); ctx.stroke();
+  ctx.strokeStyle = C.line;
+  ctx.lineWidth = Math.max(0.7, s * 0.9);
+  // the head: round-crowned, a long jaw lined with needle teeth
+  const hl = L.head[0] * s, hh = L.head[1] * s;
+  const gape = strike * 0.35 + eGape;
+  ctx.save();
+  ctx.translate(hx, hy);
+  if (eTilt) ctx.rotate(eTilt);   // feeding: the head dips, shakes, tips back
+  ctx.fillStyle = C.mid;   // lower jaw (drops on the strike)
+  ctx.save(); ctx.rotate(gape);
+  ctx.beginPath();
+  ctx.moveTo(-hl * 0.1, hh * 0.05);
+  ctx.quadraticCurveTo(hl * 0.6, hh * 0.45, hl * 0.95, hh * 0.12);
+  ctx.lineTo(hl * 0.9, hh * 0.02);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#f4f0e2';
+  for (let k = 0; k < 6; k++) { const tx = hl * (0.25 + k * 0.11); ctx.fillRect(tx, hh * 0.02 - hh * 0.16, Math.max(0.4, s * 0.35), hh * 0.16); }
+  ctx.restore();
+  ctx.fillStyle = C.top;   // skull
+  ctx.beginPath();
+  ctx.moveTo(-hl * 0.15, hh * 0.1);
+  ctx.quadraticCurveTo(-hl * 0.1, -hh * 0.55, hl * 0.35, -hh * 0.45);
+  ctx.quadraticCurveTo(hl * 0.85, -hh * 0.28, hl, 0);
+  ctx.lineTo(hl * 0.92, hh * 0.04);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#f4f0e2';   // upper needle teeth, overlapping the jaw line
+  for (let k = 0; k < 7; k++) { const tx = hl * (0.22 + k * 0.1); ctx.fillRect(tx, hh * 0.02, Math.max(0.4, s * 0.35), hh * 0.18); }
+  if (rest > 0.55) {   // asleep: a closed eye
+    ctx.strokeStyle = C.line;
+    ctx.beginPath(); ctx.moveTo(hl * 0.22, -hh * 0.16); ctx.quadraticCurveTo(hl * 0.3, -hh * 0.08, hl * 0.38, -hh * 0.16); ctx.stroke();
+  } else {
+    ctx.fillStyle = '#e8f2f6';   // eye
+    ctx.beginPath(); ctx.arc(hl * 0.3, -hh * 0.18, Math.max(0.9, hh * 0.15), 0, TAU); ctx.fill();
+    ctx.fillStyle = C.eye;
+    ctx.beginPath(); ctx.arc(hl * 0.32, -hh * 0.18, Math.max(0.5, hh * 0.09), 0, TAU); ctx.fill();
+  }
+  ctx.restore();
+  // near-side flippers on top
+  flipper(bl * 0.24, cy + bh * 0.22, bl * 0.62, bh * 0.32, 0.3 + beat - splay * 0.25, C.mid);
+  flipper(-bl * 0.22, cy + bh * 0.24, bl * 0.5, bh * 0.28, 0.22 - beat - splay * 0.2, C.mid);
+  // under the surface: a soft wash of sea over the whole animal
+  if (wet) {
+    ctx.globalAlpha = 1;
+    ctx.save();
+    ctx.translate(bl * 0.5, cy);
+    ctx.scale(1, 0.42);
+    const R = bl * 1.4;
+    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, R);
+    g.addColorStop(0, 'rgba(26,74,104,0.46)');
+    g.addColorStop(0.72, 'rgba(26,74,104,0.42)');
+    g.addColorStop(1, 'rgba(26,74,104,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(0, 0, R, 0, TAU); ctx.fill();
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
 function drawFish(ctx, key, o) {
   const d = DINO[key], C = d.col;
   const s = d.scale * sizeScale(o.growth != null ? o.growth : 1);
@@ -2625,6 +3776,11 @@ function drawFish(ctx, key, o) {
   ctx.beginPath();
   ctx.ellipse(0, 0, bl * 0.72 + 3 + Math.sin(G.time * 2 + ph) * 1.5, bh * 0.6 + 2.4, 0, 0, TAU);
   ctx.stroke();
+  const sunk = d.submerged && typeof isWaterPx === 'function' && isWaterPx(o.x, o.y);
+  if (sunk) {   // the darker water it moves through
+    ctx.fillStyle = 'rgba(8,30,48,0.30)';
+    ctx.beginPath(); ctx.ellipse(0, -1.5 * s, bl * 0.85, bh * 1.1, 0, 0, TAU); ctx.fill();
+  }
   ctx.scale(o.facing || 1, 1);
   // body width profile per kind (t: 0 = tail, 1 = nose)
   const prof = (t) => {
@@ -2635,6 +3791,12 @@ function drawFish(ctx, key, o) {
     if (kind === 'shark') return t < 0.12 ? bh * 0.42 * (t / 0.12 * 0.7 + 0.3)
       : t < 0.7 ? bh * (0.5 + 0.3 * Math.sin((t - 0.12) / 0.58 * Math.PI * 0.9))
         : bh * lerp(0.78, 0.34, (t - 0.7) / 0.3);   // wide shielded head, blunt nose
+    if (kind === 'ichthyo') return t < 0.14 ? bh * 0.3 * (t / 0.14 * 0.7 + 0.3)   // a thin tail stock…
+      : t < 0.7 ? bh * (0.4 + 0.6 * Math.sin((t - 0.14) / 0.56 * Math.PI * 0.92))  // …a deep torpedo body…
+        : bh * lerp(0.66, 0.1, Math.pow((t - 0.7) / 0.3, 0.8));                   // …into the long rostrum
+    if (kind === 'xiph') return t < 0.12 ? bh * 0.28 * (t / 0.12 * 0.7 + 0.3)   // a thin wrist to the tail…
+      : t < 0.76 ? bh * (0.36 + 0.56 * Math.sin((t - 0.12) / 0.64 * Math.PI * 0.85))  // …a long torpedo…
+        : bh * lerp(0.84, 0.56, (t - 0.76) / 0.24);                                  // …and a blunt bulldog head
     if (kind === 'saw') return t < 0.12 ? bh * 0.4 * (t / 0.12 * 0.7 + 0.3)
       : t < 0.6 ? bh * (0.5 + 0.4 * Math.sin((t - 0.12) / 0.48 * Math.PI * 0.85))
         : bh * lerp(0.85, 0.42, (t - 0.6) / 0.4);   // broad flat forequarters — the blade takes over from here
@@ -2746,6 +3908,102 @@ function drawFish(ctx, key, o) {
     for (const [rx, ry] of [[0.34, -0.5], [0.46, -0.42], [0.52, -0.25]]) {
       ctx.beginPath(); ctx.arc(bl * rx, bh * ry - 1.5 * s, Math.max(0.5, bh * 0.07), 0, TAU); ctx.fill();
     }
+  } else if (kind === 'ichthyo') {
+    // garamirala: a tall lunate tail (both lobes long), a sharp dorsal
+    // fin, a paddle flipper hanging forward — and the toothed rostrum
+    ctx.fillStyle = shade(C.mid, 0.85);
+    ctx.beginPath();
+    ctx.moveTo(tx0, ty0);
+    ctx.quadraticCurveTo(tx0 - bh * 0.6, ty0 - bh * 0.9 + wig(1.3), tx0 - bh * 1.05, ty0 - bh * 1.15 + wig(1.4));
+    ctx.quadraticCurveTo(tx0 - bh * 0.55, ty0 + wig(1.35), tx0 - bh * 1.05, ty0 + bh * 1.05 + wig(1.4));
+    ctx.quadraticCurveTo(tx0 - bh * 0.6, ty0 + bh * 0.8 + wig(1.3), tx0, ty0);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = shade(C.top, 1.1);
+    ctx.beginPath();   // the dorsal: a tall raked triangle
+    ctx.moveTo(bl * 0.04, -bh * 0.62 - 1.5 * s);
+    ctx.quadraticCurveTo(-bl * 0.06, -bh * 1.45 - 1.5 * s, -bl * 0.18, -bh * 1.32 - 1.5 * s);
+    ctx.quadraticCurveTo(-bl * 0.16, -bh * 0.9 - 1.5 * s, -bl * 0.22, -bh * 0.55 - 1.5 * s);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = shade(C.mid, 0.78);
+    ctx.beginPath();   // fore-flipper, swept back
+    ctx.moveTo(bl * 0.24, bh * 0.36 - 1.5 * s);
+    ctx.quadraticCurveTo(bl * 0.12, bh * 1.15 - 1.5 * s + wig(0.6) * 0.3, -bl * 0.02, bh * 1.0 - 1.5 * s);
+    ctx.quadraticCurveTo(bl * 0.06, bh * 0.5 - 1.5 * s, bl * 0.12, bh * 0.36 - 1.5 * s);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    // pale flank streaks
+    ctx.strokeStyle = 'rgba(214,226,222,0.4)';
+    ctx.lineWidth = Math.max(0.6, bh * 0.07);
+    for (const k of [0, 1, 2]) {
+      ctx.beginPath();
+      ctx.moveTo(-bl * 0.34 + k * bl * 0.16, -bh * 0.1 - 1.5 * s);
+      ctx.lineTo(-bl * 0.24 + k * bl * 0.16, -bh * 0.36 - 1.5 * s);
+      ctx.stroke();
+    }
+    // the rostrum's teeth: a row of small pale points along the jaw line
+    ctx.fillStyle = '#f0ead6';
+    ctx.strokeStyle = C.line;
+    ctx.lineWidth = Math.max(0.4, s * 0.4);
+    for (let k = 0; k < 7; k++) {
+      const tx = bl * (0.42 + k * 0.026), ty = -1.5 * s + bh * 0.05;
+      ctx.beginPath(); ctx.moveTo(tx - bh * 0.04, ty); ctx.lineTo(tx, ty + bh * 0.12); ctx.lineTo(tx + bh * 0.04, ty); ctx.closePath(); ctx.fill();
+    }
+  } else if (kind === 'xiph') {
+    // ichthyodectes: a deeply forked tail, a small dorsal far back, a long
+    // pectoral — and the BULLDOG JAW: the lower jaw juts up past the snout,
+    // two big fangs standing up out of it
+    ctx.fillStyle = shade(C.mid, 0.85);
+    ctx.beginPath();
+    ctx.moveTo(tx0, ty0);
+    ctx.quadraticCurveTo(tx0 - bh * 0.7, ty0 - bh * 0.8 + wig(1.3), tx0 - bh * 1.25, ty0 - bh * 1.2 + wig(1.4));
+    ctx.quadraticCurveTo(tx0 - bh * 0.75, ty0 + wig(1.35), tx0 - bh * 1.25, ty0 + bh * 1.2 + wig(1.4));
+    ctx.quadraticCurveTo(tx0 - bh * 0.7, ty0 + bh * 0.8 + wig(1.3), tx0, ty0);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = shade(C.top, 1.15);
+    ctx.beginPath();   // little dorsal, set far back
+    ctx.moveTo(-bl * 0.2, -bh * 0.48 - 1.5 * s);
+    ctx.quadraticCurveTo(-bl * 0.3, -bh * 1.1 - 1.5 * s, -bl * 0.38, -bh * 0.42 - 1.5 * s);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = shade(C.mid, 0.8);
+    ctx.beginPath();   // long swept pectoral
+    ctx.moveTo(bl * 0.3, bh * 0.3 - 1.5 * s);
+    ctx.quadraticCurveTo(bl * 0.14, bh * 0.95 - 1.5 * s, bl * 0.02, bh * 0.8 - 1.5 * s);
+    ctx.quadraticCurveTo(bl * 0.14, bh * 0.45 - 1.5 * s, bl * 0.22, bh * 0.3 - 1.5 * s);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    // silver lateral stripe
+    ctx.strokeStyle = 'rgba(240,248,250,0.5)';
+    ctx.lineWidth = Math.max(0.6, bh * 0.09);
+    ctx.beginPath(); ctx.moveTo(-bl * 0.5, -1.5 * s - bh * 0.05); ctx.lineTo(bl * 0.42, -1.5 * s - bh * 0.12); ctx.stroke();
+    // the jaw: an upturned underbite jutting past the snout, two fangs
+    // hooked up out of its tip; it drops wide open on the bite
+    const gp = (o.attackT || 0) > 0 ? 0.45 * Math.sin(Math.min(1, o.attackT) * Math.PI) : 0;
+    const jx = bl * 0.46, jy = -1.5 * s + bh * 0.1;
+    ctx.save();
+    ctx.translate(jx, jy);
+    if (gp > 0.02) {   // the open mouth
+      ctx.fillStyle = '#3a1418';
+      ctx.beginPath(); ctx.moveTo(-bh * 0.05, 0); ctx.lineTo(bl * 0.17, -bh * 0.08);
+      ctx.lineTo(Math.cos(gp) * bl * 0.2, Math.sin(gp) * bl * 0.2 - bh * 0.05); ctx.closePath(); ctx.fill();
+    }
+    ctx.rotate(gp);
+    ctx.lineWidth = Math.max(0.4, s * 0.5);
+    ctx.strokeStyle = C.line;
+    ctx.fillStyle = '#f4efdc';   // fangs first, so the jaw edge overlaps their roots
+    for (const [fx, fy, fh] of [[0.165, -0.2, 0.62], [0.115, -0.08, 0.44]]) {
+      const x = bl * fx, y = bh * fy;
+      ctx.beginPath();
+      ctx.moveTo(x - bh * 0.08, y + bh * 0.04);
+      ctx.quadraticCurveTo(x - bh * 0.02, y - bh * fh * 0.6, x - bh * 0.07, y - bh * fh);
+      ctx.lineTo(x + bh * 0.07, y + bh * 0.04);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    }
+    ctx.fillStyle = C.belly;
+    ctx.beginPath();   // the jaw itself: deep under the head, rising to a chin
+    ctx.moveTo(-bh * 0.15, bh * 0.36);
+    ctx.quadraticCurveTo(bl * 0.13, bh * 0.36, bl * 0.2, -bh * 0.2);
+    ctx.lineTo(bl * 0.16, -bh * 0.18);
+    ctx.quadraticCurveTo(bl * 0.08, -bh * 0.02, -bh * 0.15, bh * 0.04);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.restore();
   } else if (kind === 'saw') {
     // onchopristis: shark-ish tail, swept wing pectorals — and the SAW,
     // a long flat rostrum studded with teeth down both edges
@@ -2813,8 +4071,10 @@ function drawFish(ctx, key, o) {
   }
   // eye
   const garish = kind === 'gar';
-  const ex = bl * (garish ? 0.34 : kind === 'bass' ? 0.4 : kind === 'saw' ? 0.38 : 0.42);
-  const ey = -bh * (kind === 'shark' ? 0.24 : kind === 'saw' ? 0.28 : 0.14) - 1.5 * s;
+  const ex = bl * (garish ? 0.34 : kind === 'bass' ? 0.4 : kind === 'saw' ? 0.38 : kind === 'ichthyo' ? 0.3 : kind === 'xiph' ? 0.46 : 0.42);
+  const ey = -bh * (kind === 'shark' ? 0.24 : kind === 'saw' ? 0.28 : kind === 'ichthyo' ? 0.16 : kind === 'xiph' ? 0.3 : 0.14) - 1.5 * s;
+  // the ichthyosaur's eye is HUGE, rimmed in its own red ring of bone
+  if (kind === 'ichthyo') { ctx.fillStyle = C.eye; ctx.beginPath(); ctx.arc(ex, ey, bh * 0.3, 0, TAU); ctx.fill(); }
   ctx.fillStyle = '#e8e0b0';
   ctx.beginPath(); ctx.arc(ex, ey, Math.max(0.9, bh * (kind === 'coel' ? 0.16 : 0.22)), 0, TAU); ctx.fill();
   ctx.fillStyle = C.line;
@@ -2823,7 +4083,7 @@ function drawFish(ctx, key, o) {
   ctx.strokeStyle = C.line;
   ctx.lineWidth = 0.7;
   ctx.beginPath();
-  if (kind === 'saw') {
+  if (kind === 'saw' || kind === 'xiph') {
     // no visible mouth
   } else if (garish) {
     ctx.moveTo(bl * 0.42, -1.2 * s + bh * 0.06);
@@ -2833,6 +4093,22 @@ function drawFish(ctx, key, o) {
     ctx.quadraticCurveTo(bl * 0.58, -1.5 * s + bh * 0.18, bl * 0.62, -1.5 * s + bh * 0.06);
   }
   ctx.stroke();
+  // a SUBMERGED swimmer (garamirala) cruises under the surface: a soft wash
+  // of sea over the whole animal, still easy to read
+  if (sunk) {
+    ctx.globalAlpha = 1;
+    ctx.save();
+    ctx.translate(bl * 0.02, -1.5 * s - bh * 0.2);
+    ctx.scale(1, 0.62);
+    const R = bl * 1.45;
+    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, R);
+    g.addColorStop(0, 'rgba(26,74,104,0.46)');
+    g.addColorStop(0.72, 'rgba(26,74,104,0.42)');
+    g.addColorStop(1, 'rgba(26,74,104,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(0, 0, R, 0, TAU); ctx.fill();
+    ctx.restore();
+  }
   ctx.restore();
 }
 
@@ -4446,11 +5722,35 @@ function drawHead(ctx, key, d, C, a) {
     ctx.lineWidth = lineW * 0.85;
     ctx.lineJoin = 'round';
     ctx.beginPath();
+    if (d.serratedBill) {
+      // tethyshadros: a long NARROW spout of a bill, reaching well past the
+      // snout, its lower cutting edge a saw of denticles
+      ctx.moveTo(b0.x, b0.y);
+      ctx.quadraticCurveTo(hPt(0.6, -0.2).x, hPt(0.6, -0.2).y, snout.x + hl * 0.24, snout.y + hh * 0.02);
+      ctx.quadraticCurveTo(snout.x + hl * 0.28, snout.y + hh * 0.13, snout.x + hl * 0.2, snout.y + hh * 0.2);
+      ctx.quadraticCurveTo(hPt(0.42, 0.3).x, hPt(0.42, 0.3).y, hPt(0.22, 0.26).x, hPt(0.22, 0.26).y);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      // the denticles: little pale teeth of keratin down the beak's edge
+      ctx.fillStyle = shade(C.belly, 1.05);
+      ctx.lineWidth = lineW * 0.45;
+      for (let k = 0; k < 6; k++) {
+        const t = k / 5;
+        const ex = lerp(hPt(0.3, 0.27).x, snout.x + hl * 0.19, t), ey = lerp(hPt(0.3, 0.27).y, snout.y + hh * 0.2, t);
+        ctx.beginPath();
+        ctx.moveTo(ex - hl * 0.025, ey - hh * 0.01);
+        ctx.lineTo(ex, ey + hh * 0.1);
+        ctx.lineTo(ex + hl * 0.025, ey - hh * 0.01);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+      }
+      ctx.fillStyle = shade(C.belly, 0.9);
+      ctx.lineWidth = lineW * 0.85;
+    } else {
     ctx.moveTo(b0.x, b0.y);
     ctx.quadraticCurveTo(hPt(0.55, -0.26).x, hPt(0.55, -0.26).y, snout.x + hl * 0.08, snout.y - hh * 0.04);          // top edge, out past the snout
     ctx.quadraticCurveTo(snout.x + hl * 0.13, snout.y + hh * 0.2, snout.x + hl * 0.01, snout.y + hh * 0.34);          // rounded bill tip, proud of the outline
     ctx.quadraticCurveTo(hPt(0.4, 0.4).x, hPt(0.4, 0.4).y, hPt(0.22, 0.3).x, hPt(0.22, 0.3).y);                       // lower lip back
     ctx.closePath(); ctx.fill(); ctx.stroke();
+    }
     // bill nostril + a soft shading line where beak meets face
     ctx.fillStyle = shade(C.mid, 0.55);
     const nb = hPt(0.34, -0.03);
@@ -4541,13 +5841,14 @@ function drawHead(ctx, key, d, C, a) {
     ctx.beginPath(); ctx.ellipse(ep.x, ep.y, er * 1.25, er * 1.05, -0.1, 0, TAU); ctx.stroke();
   }
   // an ELDER's scar: three pale rake lines torn across the eye, brow to
-  // cheek, old enough to have healed raised and light
+  // cheek, old enough to have healed raised and light — kept short so they
+  // stay on the skull even with the head craned up
   if (scar) {
     ctx.lineCap = 'round';
     for (const [k, w] of [[-1, 0.7], [0, 1], [1, 0.7]]) {
-      const a0 = hPt(-0.06 + k * 0.1, -0.8), a1 = hPt(0.24 + k * 0.1, 0.4);
+      const a0 = hPt(-0.01 + k * 0.08, -0.46), a1 = hPt(0.19 + k * 0.08, 0.3);
       ctx.strokeStyle = C.line; ctx.globalAlpha = 0.5;
-      ctx.lineWidth = lineW * 1.7 * w;
+      ctx.lineWidth = lineW * 1.3 * w;
       ctx.beginPath(); ctx.moveTo(a0.x, a0.y); ctx.lineTo(a1.x, a1.y); ctx.stroke();
       ctx.strokeStyle = '#f4dcc4'; ctx.globalAlpha = 0.9;
       ctx.lineWidth = lineW * 0.9 * w;
@@ -4774,7 +6075,7 @@ function drawMyBurrow(ctx, b, p) {
 
 function drawCarcass(ctx, c) {
   // carried things ride at the carrier's mouth — lifted for the draw only
-  const lift = c.carried ? (c.liftY || 0) + Math.sin(G.time * 9) * 0.8 : 0;
+  const lift = c.carried ? (c.liftY || 0) + Math.sin(G.time * 9) * 0.8 : (c.fallH || 0);   // (or still falling, dropped from the sky)
   if (c.chunk) {
     // a torn chunk of meat, bone peeking out of one end
     ctx.save();
@@ -4793,7 +6094,7 @@ function drawCarcass(ctx, c) {
   const s = d.scale * 0.95 * sizeScale(c.growth != null ? c.growth : 1);
   const bw = d.L.body[0] * s, bh = d.L.body[1] * s;
   const fresh = c.meat / c.maxMeat;
-  if (d.fish) {
+  if (d.fish || d.marine) {
     // a gar floating belly-up
     ctx.save();
     ctx.translate(c.x, c.y - lift);
