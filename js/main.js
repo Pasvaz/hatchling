@@ -618,6 +618,100 @@ function bdGull(x) {
   x.quadraticCurveTo(-13, -16, 0, 0); x.quadraticCurveTo(13, -16, 26, 0);
   x.stroke();
 }
+function bdDune(x) {
+  // a long windward slope, a sharp crest, a steep slip face — wind ripples cut out
+  x.beginPath(); x.moveTo(-280, 0);
+  x.quadraticCurveTo(-90, -40, 40, -130);
+  x.quadraticCurveTo(110, -70, 240, 0);
+  x.closePath(); x.fill();
+  x.save(); x.globalCompositeOperation = 'destination-out'; x.lineWidth = 6;
+  for (const [x0, y0, x1, y1] of [[-200, -14, -40, -58], [-150, -6, 0, -48], [-90, -2, 30, -34]])
+    { x.beginPath(); x.moveTo(x0, y0); x.quadraticCurveTo((x0 + x1) / 2, y1 + 14, x1, y1); x.stroke(); }
+  x.restore();
+}
+function bdSun(x) {
+  x.beginPath(); x.arc(0, 0, 46, 0, Math.PI * 2); x.fill();
+  x.lineWidth = 9;
+  for (let i = 0; i < 10; i++) {
+    const a = i / 10 * Math.PI * 2;
+    x.beginPath(); x.moveTo(Math.cos(a) * 64, Math.sin(a) * 64); x.lineTo(Math.cos(a) * 90, Math.sin(a) * 90); x.stroke();
+  }
+}
+function bdPrint(x) {
+  // one three-toed theropod footprint, toes pointing up (-y)
+  x.beginPath(); x.ellipse(0, 0, 13, 16, 0, 0, Math.PI * 2); x.fill();
+  for (const a of [-0.5, 0, 0.5]) {
+    x.save(); x.rotate(a);
+    x.beginPath(); x.moveTo(-8, -8); x.quadraticCurveTo(-6, -40, 0, -50); x.quadraticCurveTo(6, -40, 8, -8); x.closePath(); x.fill();
+    x.restore();
+  }
+}
+function bdTrackway(x) {
+  for (let i = 0; i < 4; i++) bdAt(x, (i % 2 ? 26 : -26), -i * 120, 1, i % 2 ? 0.12 : -0.12, bdPrint);
+}
+function bdWind(x, w) {
+  x.lineWidth = 6;
+  x.beginPath(); x.moveTo(0, 0); x.lineTo(w, 0);
+  x.arc(w, -18, 18, Math.PI / 2, -Math.PI * 0.6, true);
+  x.stroke();
+}
+function bdIslet(x) {
+  x.beginPath(); x.moveTo(-160, 0);
+  x.quadraticCurveTo(-80, -80, 0, -78);
+  x.quadraticCurveTo(100, -72, 170, 0);
+  x.closePath(); x.fill();
+  bdAt(x, -40, -70, 0.5, 0.05, bdPalm);
+  x.lineWidth = 7;
+  for (const [wx, wy] of [[-210, 22], [130, 26]])
+    { x.beginPath(); x.moveTo(wx, wy); x.quadraticCurveTo(wx + 20, wy - 16, wx + 40, wy); x.quadraticCurveTo(wx + 60, wy - 16, wx + 80, wy); x.stroke(); }
+}
+function bdAzhdarchid(x) {
+  // a giant azhdarchid gliding to the right: both wings swept back from the
+  // shoulder (the far one raised, the near one lowered), a short stout neck,
+  // the great spear of a bill, a low crest, legs trailing under the tail
+  const wing = (wx, wy, tx, ty, bx, by) => {
+    x.beginPath(); x.moveTo(6, -2);
+    x.quadraticCurveTo(wx + 14, wy, wx, wy);                 // arm to the wrist
+    x.quadraticCurveTo((wx + tx) / 2, (wy + ty) / 2 - 6, tx, ty);   // the long finger
+    x.quadraticCurveTo((tx + bx) / 2 + 30, (ty + by) / 2 + 4, bx, by);   // the trailing membrane
+    x.closePath(); x.fill();
+  };
+  wing(-14, -66, -150, -112, -34, -6);   // far wing, up
+  wing(-8, 44, -168, 54, -36, 8);        // near wing, down
+  x.beginPath(); x.ellipse(-4, 0, 36, 12, -0.08, 0, Math.PI * 2); x.fill();
+  x.lineWidth = 6;
+  for (const dy of [2, 8]) { x.beginPath(); x.moveTo(-30, dy); x.lineTo(-78, dy + 8); x.stroke(); }
+  x.lineWidth = 16;
+  x.beginPath(); x.moveTo(24, -6); x.quadraticCurveTo(40, -14, 48, -24); x.stroke();
+  // skull and bill: deep at the back, tapering to a dagger point
+  x.beginPath(); x.moveTo(36, -34); x.quadraticCurveTo(52, -40, 66, -32);
+  x.lineTo(168, -14); x.lineTo(62, -14); x.quadraticCurveTo(44, -14, 36, -24); x.closePath(); x.fill();
+  x.beginPath(); x.moveTo(40, -34); x.lineTo(22, -50); x.lineTo(58, -36); x.closePath(); x.fill();
+  x.save(); x.globalCompositeOperation = 'destination-out';
+  x.beginPath(); x.arc(52, -27, 3.5, 0, Math.PI * 2); x.fill();
+  x.restore();
+}
+function bdPlesio(x) {
+  // a plesiosaur surfacing: the back's hump and a flipper, the long neck
+  // rising and arching over, the small head looking down at the water
+  x.beginPath(); x.moveTo(-130, 0); x.quadraticCurveTo(-70, -62, -6, 0); x.closePath(); x.fill();
+  x.beginPath(); x.moveTo(-96, 2); x.quadraticCurveTo(-120, 20, -150, 18); x.quadraticCurveTo(-118, 8, -104, 0); x.closePath(); x.fill();
+  x.lineWidth = 17; x.lineCap = 'round';
+  x.beginPath(); x.moveTo(-20, -6); x.quadraticCurveTo(10, -170, 74, -150); x.stroke();
+  x.beginPath(); x.ellipse(84, -140, 22, 11, 0.55, 0, Math.PI * 2); x.fill();
+  x.lineWidth = 6;
+  for (const [cx, rx] of [[-60, 90], [-60, 120]])
+    { x.beginPath(); x.ellipse(cx, 6, rx, rx * 0.12, 0, 0.15, Math.PI - 0.15); x.stroke(); }
+}
+function bdOasis(x) {
+  // the river heart: a winding water-ribbon, a fringe of horsetails on its bank
+  x.lineWidth = 12;
+  x.beginPath(); x.moveTo(-170, -10);
+  x.bezierCurveTo(-110, -60, -60, 40, 0, 0);
+  x.bezierCurveTo(60, -40, 110, 30, 170, -14); x.stroke();
+  bdAt(x, -40, -24, 0.55, 0, bdReeds);
+  bdAt(x, 70, -30, 0.45, 0, bdReeds);
+}
 // one tile per land (640×560, repeated): motifs alternate corner to corner
 // and flip up/down like a wallpaper print so the repeat reads as texture
 const ECO_ART = {
@@ -674,6 +768,31 @@ const ECO_ART = {
     bdAt(x, 480, 120, 0.55, -0.35, bdLeaf);
     bdAt(x, 430, 500, 0.45, 0.5, bdLeaf);
     bdAt(x, 560, 555, 0.34, -0.06, (c) => { c.scale(-1, 1); bdPalm(c); });
+  },
+  desert(x) {
+    // the Death Desert: red dunes under a hard sun, a theropod's trackway
+    // across the sand, sandstorm wind — and the river heart, its one green
+    bdAt(x, 215, 250, 0.6, 0, bdDune);
+    bdAt(x, 470, 552, 0.42, 0, (c) => { c.scale(-1, 1); bdDune(c); });
+    bdAt(x, 510, 110, 0.55, 0, bdSun);
+    bdAt(x, 90, 540, 0.55, 0.5, bdTrackway);
+    bdAt(x, 420, 370, 0.7, 0, bdOasis);
+    for (const [wx, wy, w] of [[250, 60, 140], [40, 330, 110], [330, 470, 90]])
+      bdAt(x, wx, wy, 1, 0, (c) => bdWind(c, w));
+  },
+  archi(x) {
+    // the Lesser Archipelago: islands scattered over open sea, the great
+    // pterosaur gliding between them, a plesiosaur rising in the swell
+    bdAt(x, 170, 470, 0.85, 0, bdIslet);
+    bdAt(x, 545, 285, 0.45, 0, (c) => { c.scale(-1, 1); bdIslet(c); });
+    for (const [ix, iy, s] of [[370, 300, 0.22], [420, 292, 0.15]])   // the chain, far off
+      { x.beginPath(); x.ellipse(ix, iy, 160 * s, 60 * s, 0, Math.PI, 0); x.fill(); }
+    bdAt(x, 300, 120, 0.72, -0.06, bdAzhdarchid);
+    bdAt(x, 520, 535, 0.6, 0, bdPlesio);
+    bdAt(x, 560, 60, 0.6, 0.1, bdGull);
+    x.lineWidth = 6;
+    for (const [wx, wy] of [[40, 270], [230, 330], [330, 420]])
+      { x.beginPath(); x.moveTo(wx, wy); x.quadraticCurveTo(wx + 20, wy - 14, wx + 40, wy); x.quadraticCurveTo(wx + 60, wy - 14, wx + 80, wy); x.stroke(); }
   },
 };
 function ecoBackdrop(key, tint) {
