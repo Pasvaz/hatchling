@@ -502,6 +502,13 @@ function bloodBurst(x, y, n) {
 const FLY_CEIL = 480;     // the highest a flyer climbs (px above its shadow) — pterosaurs go HIGH
 const FLY_CLIMB = 150;    // px/s climbing while SPACE is held
 const FLY_SINK = 75;      // px/s descent the moment it's let go — all the way down
+// WINGS COST BREATH: flapping (SPACE) burns stamina as fast as a run, and
+// nothing comes back while the wings beat. Gliding is free. SHIFT on the wing
+// is the hardest work there is: twice the run.s burn in total, and faster
+// than the ground sprint multiplier alone.
+const FLY_FLAP_BURN = 20;        // stamina per second while flapping
+const FLY_SPRINT_BURN = 40;      // stamina per second sprinting aloft, in total
+const FLY_SPRINT_BONUS = 1.2;    // extra speed on top of def.sprint when sprinting aloft
 const AIR_BAND = 28;      // two flyers this close in height can fight
 const AIR_PAD = 12;       // shadow-contact slack (the reach of a jaw / a wing)
 function isAirborne(e) { return (e.alt || 0) > 0.5; }
@@ -5022,8 +5029,19 @@ function npcHeldOrFalling(e, dt) {
 // where you ARE; the altitude only lifts the body (pitchPoint, drawPtero).
 function updateFlight(p, def, input, dt) {
   const was = p.alt || 0;
-  const want = (input.flap || input.pounceHold) && !p.grabbed && !G.wrestle && !p.fishing && p.actionT <= 0;
+  let want = (input.flap || input.pounceHold) && !p.grabbed && !G.wrestle && !p.fishing && p.actionT <= 0;
+  // spent wings: no flapping until the breath comes back — it glides down
+  if (want && (p.exhausted || p.stamina <= 0)) {
+    want = false;
+    if (G.time >= (p.tiredWingMsgAt || 0)) {
+      floatText(p.x, p.y - 30 - was, 'wings too tired', '#ffb03e');
+      p.tiredWingMsgAt = G.time + 2.5;
+    }
+  }
+  p.flapping = !!want;
   if (want) {
+    p.stamina = Math.max(0, p.stamina - FLY_FLAP_BURN * dt);
+    if (p.stamina <= 0) p.exhausted = true;
     if (was <= 0) {
       // TAKE-OFF: up out of whatever it was doing, in a spray if afloat
       p.resting = false; p.bathing = false; p.hidden = false; p.restT = 0;
@@ -5067,6 +5085,7 @@ function updatePlayer(dt) {
   const def = PLAYER_DEF[p.species];
   const input = G.input;
 
+  p.flapping = false;   // updateFlight sets it again, this frame, if the wings beat
   p.atkCd = Math.max(0, p.atkCd - dt);
   p.attackT = Math.max(0, p.attackT - dt * 3.2);
   p.pounceCd = Math.max(0, (p.pounceCd || 0) - dt);
@@ -5728,8 +5747,9 @@ function updatePlayer(dt) {
       if (p.crouchBoostT > 0) sp *= CROUCH_BOOST;
       if (p.crouching) sp *= CROUCH_SPEED;
       else if (input.sprint && !p.exhausted && p.stamina > 0) {
-        sp *= def.sprint;
-        p.stamina -= PLAYER_SPRINT_BURN * dt;
+        sp *= def.sprint * (aloft ? FLY_SPRINT_BONUS : 1);
+        // aloft: the air sprint.s total (the flap.s share is already taken)
+        p.stamina -= (aloft ? FLY_SPRINT_BURN - (p.flapping ? FLY_FLAP_BURN : 0) : PLAYER_SPRINT_BURN) * dt;
         input.sprinting = true;
         if (p.stamina <= 0) { p.stamina = 0; p.exhausted = true; }
       }
@@ -5760,7 +5780,7 @@ function updatePlayer(dt) {
   // 3 seconds each way (bathing keeps the body settled)
   p.restT = clamp((p.restT || 0) + (p.resting || p.bathing ? 1 / 3 : -1 / 3) * dt, 0, 1);
   p.bathe = p.bathing ? (p.bathe || 0) : lerp(p.bathe || 0, 0, 0.15);
-  if (!G.input.sprinting && !p.snatch) {   // (carrying prey: no breath comes back)
+  if (!G.input.sprinting && !p.snatch && !p.flapping) {   // (carrying prey or beating wings: no breath comes back)
     p.stamina = Math.min(def.stamMax, p.stamina + 13 * dt);
     if (p.exhausted && p.stamina > 20) p.exhausted = false;
   }

@@ -3145,8 +3145,11 @@ function drawAzhdarchid(ctx, key, o) {
   const rest = air ? 0 : (o.restT || 0);
   const gape = strike * 0.4 + fGape + callJaw;
   const lw = Math.max(0.6, Math.min(1.6, s * 0.7));
-  const memb = C.shade || C.mid;
-  const beakCol = mixHex(C.belly, C.acc, 0.3);
+  // the palette: membranes a deep warm brown that glows toward the edge, the
+  // bill pale horn flushed with the crest's colour at its root, an amber eye
+  const memb = C.shade || C.mid, membEdge = mixHex(memb, C.acc, 0.22);
+  const horn = mixHex(C.belly, '#d9c39c', 0.55), hornBase = mixHex(horn, C.acc, 0.4);
+  const iris = mixHex('#f0b443', C.eye, 0.2);
   ctx.save();
   ctx.translate(o.x, o.y);
   if (wet) {
@@ -3171,31 +3174,110 @@ function drawAzhdarchid(ctx, key, o) {
   if (o.pitch) { ctx.translate(0, cy); ctx.rotate(o.pitch); ctx.translate(0, -cy); }
   ctx.strokeStyle = C.line; ctx.lineWidth = lw;
   ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-  const limb = (pts, w, col) => {
-    ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]);
-    for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
-    ctx.strokeStyle = C.line; ctx.lineWidth = w + lw * 2; ctx.stroke();
-    ctx.strokeStyle = col; ctx.lineWidth = w; ctx.stroke();
+  const qp = (a, b, c, u) => (1 - u) * (1 - u) * a + 2 * (1 - u) * u * b + u * u * c;   // a point on a quadratic
+  // A LIMB as one smooth tapering shape through its joints: the width given
+  // at each joint, so a thigh swells and a shin runs fine
+  const taper = (pts, ws, col) => {
+    const n = pts.length, A = [], B = [], ang = [];
+    for (let i = 0; i < n; i++) {
+      const p0 = pts[Math.max(0, i - 1)], p1 = pts[Math.min(n - 1, i + 1)];
+      const a = Math.atan2(p1[1] - p0[1], p1[0] - p0[0]), w = ws[i] / 2;
+      ang.push(a);
+      A.push([pts[i][0] - Math.sin(a) * w, pts[i][1] + Math.cos(a) * w]);
+      B.push([pts[i][0] + Math.sin(a) * w, pts[i][1] - Math.cos(a) * w]);
+    }
+    const side = (P, rev) => {
+      const Q = rev ? P.slice().reverse() : P;
+      for (let i = 1; i < n - 1; i++) ctx.quadraticCurveTo(Q[i][0], Q[i][1], (Q[i][0] + Q[i + 1][0]) / 2, (Q[i][1] + Q[i + 1][1]) / 2);
+      ctx.lineTo(Q[n - 1][0], Q[n - 1][1]);
+    };
+    ctx.beginPath(); ctx.moveTo(A[0][0], A[0][1]);
+    side(A, false);
+    ctx.arc(pts[n - 1][0], pts[n - 1][1], ws[n - 1] / 2, ang[n - 1] + Math.PI / 2, ang[n - 1] - Math.PI / 2, true);
+    side(B, true);
+    ctx.arc(pts[0][0], pts[0][1], ws[0] / 2, ang[0] - Math.PI / 2, ang[0] - Math.PI * 1.5, true);
+    ctx.closePath();
+    ctx.fillStyle = col; ctx.fill(); ctx.stroke();
+  };
+  const claws = (x, y, dir, len, n) => {
+    ctx.lineWidth = Math.max(0.6, lw * 0.9);
+    for (let i = 0; i < n; i++) {
+      const a = dir + (i - (n - 1) / 2) * 0.4;
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(a) * len, y + Math.sin(a) * len); ctx.stroke();
+    }
+    ctx.lineWidth = lw;
+  };
+  // fine fur (pycnofibres) standing off an edge, swept back
+  const fuzz = (pts, len, col) => {
+    ctx.strokeStyle = col; ctx.lineWidth = Math.max(0.6, lw * (col === C.top ? 1.3 : 0.7));
+    for (let i = 0; i < pts.length; i++) {
+      const [x, y, nx, ny] = pts[i], Lf = len * (1 + 0.35 * Math.sin(i * 2.3));
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + nx * Lf - Lf * 0.45, y + ny * Lf); ctx.stroke();
+    }
     ctx.strokeStyle = C.line; ctx.lineWidth = lw;
+  };
+  // THE BODY: deep and round in the chest, falling away to small hips and a
+  // stub of tail; a dark furry saddle down the back over a pale underside
+  const torso = (x, y, rx, ry, rot) => {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(rot);
+    const path = () => {
+      ctx.beginPath();
+      ctx.moveTo(-rx * 1.1, -ry * 0.12);
+      ctx.bezierCurveTo(-rx * 0.95, -ry * 0.72, -rx * 0.45, -ry * 0.96, rx * 0.05, -ry * 0.98);
+      ctx.bezierCurveTo(rx * 0.6, -ry * 1.02, rx * 1.02, -ry * 0.62, rx * 1.02, ry * 0.02);
+      ctx.bezierCurveTo(rx * 1.02, ry * 0.72, rx * 0.5, ry * 1.04, -rx * 0.1, ry * 0.96);
+      ctx.bezierCurveTo(-rx * 0.6, ry * 0.9, -rx * 0.95, ry * 0.42, -rx * 1.1, -ry * 0.12);
+      ctx.closePath();
+    };
+    path();
+    const gr = ctx.createLinearGradient(0, -ry, 0, ry);
+    gr.addColorStop(0, C.mid); gr.addColorStop(0.5, mixHex(C.mid, C.belly, 0.45)); gr.addColorStop(1, C.belly);
+    ctx.fillStyle = gr; ctx.fill();
+    ctx.save(); ctx.clip();
+    ctx.fillStyle = C.top;
+    ctx.beginPath(); ctx.moveTo(-rx * 1.3, -ry * 1.3); ctx.lineTo(rx * 1.3, -ry * 1.3);
+    const N = 16;
+    for (let i = 0; i <= N; i++) {
+      const u = i / N;
+      ctx.lineTo(lerp(rx * 1.3, -rx * 1.3, u), -ry * lerp(0.4, 0.02, u) + (i % 2 ? ry * 0.13 : 0));
+    }
+    ctx.closePath(); ctx.fill();
+    const hi = ctx.createRadialGradient(rx * 0.3, -ry * 0.55, 0, rx * 0.3, -ry * 0.55, rx * 0.95);
+    hi.addColorStop(0, 'rgba(255,255,255,0.22)'); hi.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = hi; ctx.fillRect(-rx * 1.3, -ry * 1.3, rx * 2.6, ry * 2.6);
+    const sh = ctx.createLinearGradient(0, ry * 0.25, 0, ry);
+    sh.addColorStop(0, 'rgba(0,0,0,0)'); sh.addColorStop(1, 'rgba(0,0,0,0.2)');
+    ctx.fillStyle = sh; ctx.fillRect(-rx * 1.3, -ry * 1.3, rx * 2.6, ry * 2.6);
+    ctx.restore();
+    path(); ctx.stroke();
+    const nF = 10 + Math.round(8 * yk), F = [];
+    for (let i = 0; i < nF; i++) {
+      const a = Math.PI + 0.3 + (i + 0.5) / nF * (Math.PI - 0.75);
+      F.push([Math.cos(a) * rx * 0.97, Math.sin(a) * ry * 0.97, Math.cos(a) * 0.5, Math.sin(a)]);
+    }
+    fuzz(F, ry * (0.07 + 0.16 * yk), yk > 0.15 ? mixHex(C.belly, C.mid, 0.4) : C.top);
+    ctx.restore();
   };
   // the neck: short, thick at the shoulders, still thick at the skull. It is
   // WELDED on at both ends: the root is sunk into the body and the tip tucked
   // under the skull, the fill covers the body's outline where they meet, and
-  // only the two side contours are inked, so no seam lines show
+  // only the two side contours are inked, so no seam lines show. A ruff of
+  // fur where it leaves the shoulders
   const neck = (x0, y0, x1, y1) => {
     const a = Math.atan2(y1 - y0, x1 - x0), ux = Math.cos(a), uy = Math.sin(a), nx = -uy, ny = ux;
-    const w0 = bh * 0.38, w1 = bh * 0.2, sink = bh * 0.4;
-    const bx = x0 - ux * sink, by = y0 - uy * sink;          // the root, inside the body
+    const w0 = bh * 0.4, w1 = bh * 0.21, root = bh * 0.4;
+    const bx = x0 - ux * root, by = y0 - uy * root;          // the root, inside the body
     const tx = x1 + ux * hh * 0.15, ty = y1 + uy * hh * 0.15; // the tip, under the skull
     const mx = (x0 + x1) / 2, my = (y0 + y1) / 2, wm = (w0 + w1) * 0.47;
-    ctx.fillStyle = C.mid;
+    const gr = ctx.createLinearGradient(mx - nx * wm, my - ny * wm, mx + nx * wm, my + ny * wm);
+    gr.addColorStop(0, mixHex(C.top, C.mid, 0.3)); gr.addColorStop(0.4, C.mid); gr.addColorStop(1, C.belly);
+    ctx.fillStyle = gr;
     ctx.beginPath();
     ctx.moveTo(bx + nx * w0, by + ny * w0);
     ctx.quadraticCurveTo(mx + nx * wm, my + ny * wm, tx + nx * w1, ty + ny * w1);
     ctx.lineTo(tx - nx * w1, ty - ny * w1);
     ctx.quadraticCurveTo(mx - nx * wm, my - ny * wm, bx - nx * w0, by - ny * w0);
     ctx.closePath(); ctx.fill();
-    // ink the sides only, from where they leave the body to under the skull
     const side = (k) => {
       ctx.beginPath();
       ctx.moveTo(x0 + ux * bh * 0.04 + nx * w0 * 0.95 * k, y0 + uy * bh * 0.04 + ny * w0 * 0.95 * k);
@@ -3203,87 +3285,126 @@ function drawAzhdarchid(ctx, key, o) {
       ctx.stroke();
     };
     side(1); side(-1);
-    ctx.strokeStyle = C.belly; ctx.lineWidth = Math.max(0.8, bh * 0.1);   // pale throat
-    ctx.beginPath(); ctx.moveTo(x0 + nx * w0 * 0.55, y0 + ny * w0 * 0.55); ctx.quadraticCurveTo(mx + nx * wm * 0.6, my + ny * wm * 0.6, x1 + nx * w1 * 0.4 - ux * hh * 0.2, y1 + ny * w1 * 0.4 - uy * hh * 0.2); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = Math.max(0.8, bh * 0.08);   // light down the throat
+    ctx.beginPath(); ctx.moveTo(x0 + nx * w0 * 0.6, y0 + ny * w0 * 0.6); ctx.quadraticCurveTo(mx + nx * wm * 0.62, my + ny * wm * 0.62, x1 + nx * w1 * 0.45 - ux * hh * 0.2, y1 + ny * w1 * 0.45 - uy * hh * 0.2); ctx.stroke();
+    // the young: a fluffy ruff down the nape
     ctx.strokeStyle = C.line; ctx.lineWidth = lw;
+    if (yk < 0.15) return;
+    const R = [];
+    for (let i = 0; i < 4; i++) {
+      const u = 0.02 + i * 0.08, w = lerp(w0, w1, u) * 0.96;
+      R.push([lerp(x0, x1, u) - nx * w, lerp(y0, y1, u) - ny * w, -nx, -ny]);
+    }
+    fuzz(R, bh * (0.09 + 0.1 * yk), yk > 0.15 ? mixHex(C.belly, C.mid, 0.4) : C.top);
   };
-  // the skull: ONE long tapering wedge from the back of the head to the
-  // bill-tip (the bill IS the skull, no seam), its colour shading from the
-  // head's grey into horn along its length; a low crest, the big skull
-  // window in front of the eye, and a small dark eye set high at the back
+  // THE HEAD: one long skull, deep at the back and running out into a great
+  // straight bill of pale horn. A dark stripe through an amber eye under a
+  // heavy brow, the gape curling up at the back into a grim smile, and the
+  // crest, a veined sail of colour, rising off the back of the skull
   const head = (x, y, ang) => {
     ctx.save();
     ctx.translate(x, y); ctx.rotate(ang);
-    const grad = ctx.createLinearGradient(-hl * 0.15, 0, hl, 0);
-    grad.addColorStop(0, C.mid); grad.addColorStop(0.3, C.mid);
-    grad.addColorStop(0.55, beakCol); grad.addColorStop(1, shade(beakCol, 0.85));
+    const grad = ctx.createLinearGradient(-hl * 0.2, 0, hl, 0);
+    grad.addColorStop(0, C.mid); grad.addColorStop(0.36, C.mid);
+    grad.addColorStop(0.45, hornBase); grad.addColorStop(0.8, horn); grad.addColorStop(1, shade(horn, 0.72));
+    // the mouth, dark inside when it opens
+    const hgx = -hl * 0.06, hgy = hh * 0.3;
+    if (gape > 0.03) {
+      const dx = hl * 1.01, dy = hh * -0.15, lx = hgx + dx * Math.cos(gape) - dy * Math.sin(gape), ly = hgy + dx * Math.sin(gape) + dy * Math.cos(gape);
+      ctx.fillStyle = '#4a2422';
+      ctx.beginPath(); ctx.moveTo(hgx, hh * 0.2); ctx.lineTo(hl * 0.97, hh * 0.14); ctx.lineTo(lx, ly); ctx.closePath(); ctx.fill();
+    }
     // lower jaw, hinged under the back of the skull
     ctx.save();
-    ctx.translate(-hl * 0.06, hh * 0.3); ctx.rotate(gape); ctx.translate(hl * 0.06, -hh * 0.3);
+    ctx.translate(hgx, hgy); ctx.rotate(gape); ctx.translate(-hgx, -hgy);
     ctx.fillStyle = grad;
     ctx.beginPath();
-    ctx.moveTo(-hl * 0.1, hh * 0.18);
-    ctx.lineTo(hl * 0.97, hh * 0.13);
-    ctx.quadraticCurveTo(hl * 0.5, hh * 0.34, hl * 0.02, hh * 0.36);
-    ctx.quadraticCurveTo(-hl * 0.1, hh * 0.32, -hl * 0.1, hh * 0.18);
+    ctx.moveTo(-hl * 0.1, hh * 0.16);
+    ctx.lineTo(hl * 0.95, hh * 0.15);
+    ctx.quadraticCurveTo(hl * 0.55, hh * 0.36, hl * 0.06, hh * 0.38);
+    ctx.quadraticCurveTo(-hl * 0.12, hh * 0.36, -hl * 0.1, hh * 0.16);
     ctx.closePath(); ctx.fill(); ctx.stroke();
     ctx.restore();
     // the crest first, so the skull's outline sits over its root
-    ctx.fillStyle = C.acc;
-    ctx.beginPath();
-    ctx.moveTo(hl * 0.08, -hh * 0.46);
-    ctx.quadraticCurveTo(-hl * 0.12, -hh * (0.46 + 0.54 * crK), -hl * (0.14 + 0.16 * crK), -hh * (0.46 + 0.32 * crK));
-    ctx.quadraticCurveTo(-hl * 0.2, -hh * 0.45, -hl * 0.14, -hh * 0.2);
-    ctx.closePath(); ctx.fill(); ctx.stroke();
-    // the skull-and-bill wedge
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.moveTo(-hl * 0.14, hh * 0.22);
-    ctx.quadraticCurveTo(-hl * 0.2, -hh * 0.3, -hl * 0.02, -hh * 0.48);
-    ctx.quadraticCurveTo(hl * 0.12, -hh * 0.55, hl * 0.24, -hh * 0.44);
-    ctx.lineTo(hl, hh * 0.06);
-    ctx.lineTo(hl * 0.96, hh * 0.14);
-    ctx.lineTo(-hl * 0.1, hh * 0.24);
-    ctx.closePath(); ctx.fill(); ctx.stroke();
-    // the jaw line, and the great window in the skull before the eye
-    ctx.strokeStyle = shade(beakCol, 0.6); ctx.lineWidth = lw * 0.8;
-    ctx.beginPath(); ctx.moveTo(hl * 0.02, hh * 0.2); ctx.lineTo(hl * 0.93, hh * 0.12); ctx.stroke();
-    ctx.fillStyle = 'rgba(40,28,24,0.18)';
-    ctx.beginPath(); ctx.ellipse(hl * 0.25, -hh * 0.1, hl * 0.11, hh * 0.15, -0.12, 0, TAU); ctx.fill();
+    const cH = hh * (0.5 + 0.8 * crK);
+    const cg = ctx.createLinearGradient(hl * 0.05, -hh * 0.4, -hl * 0.15, -cH);
+    cg.addColorStop(0, shade(C.acc, 0.72)); cg.addColorStop(0.55, C.acc); cg.addColorStop(1, mixHex(C.acc, '#ffe6b0', 0.4));
+    const crest = () => {
+      ctx.beginPath();
+      ctx.moveTo(hl * 0.3, -hh * 0.36);
+      ctx.bezierCurveTo(hl * 0.12, -hh * 0.5 - cH * 0.25, -hl * 0.02, -cH, -hl * (0.12 + 0.1 * crK), -cH * 0.98);
+    ctx.quadraticCurveTo(-hl * (0.22 + 0.06 * crK), -cH * 0.8, -hl * 0.17, -hh * 0.18);
+      ctx.closePath();
+    };
+    crest(); ctx.fillStyle = cg; ctx.fill();
+    if (crK > 0.4) {   // veins in the sail
+      ctx.save(); crest(); ctx.clip();
+      ctx.strokeStyle = shade(C.acc, 0.6); ctx.lineWidth = lw * 0.6;
+      for (let i = 0; i < 3; i++) {
+        const u = 0.3 + i * 0.22, ex = lerp(hl * 0.18, -hl * 0.2, u), ey = -lerp(hh * 0.55, cH * 0.92, Math.sin(u * Math.PI * 0.9));
+        ctx.beginPath(); ctx.moveTo(hl * 0.06 - i * hl * 0.05, -hh * 0.38); ctx.quadraticCurveTo(lerp(hl * 0.06, ex, 0.5) + hl * 0.03, lerp(-hh * 0.38, ey, 0.5), ex, ey); ctx.stroke();
+      }
+      ctx.restore();
+    }
     ctx.strokeStyle = C.line; ctx.lineWidth = lw;
-    // the eye: small, dark, high at the back of the skull, under a brow
-    const ex0 = hl * (0.02 + 0.06 * yk), ey0 = -hh * (0.24 - 0.04 * yk), er = Math.max(0.9, hh * 0.085 * (1 + 2.4 * yk));
+    crest(); ctx.stroke();
+    // the skull-and-bill
+    const skull = () => {
+      ctx.beginPath();
+      ctx.moveTo(-hl * 0.12, hh * 0.24);
+      ctx.quadraticCurveTo(-hl * 0.24, -hh * 0.12, -hl * 0.08, -hh * 0.44);
+      ctx.quadraticCurveTo(hl * 0.06, -hh * 0.6, hl * 0.24, -hh * 0.42);
+      ctx.quadraticCurveTo(hl * 0.62, -hh * 0.25, hl, hh * 0.08);
+      ctx.lineTo(hl * 0.975, hh * 0.15);
+      ctx.quadraticCurveTo(hl * 0.55, hh * 0.15, hl * 0.08, hh * 0.24);
+      ctx.closePath();
+    };
+    skull(); ctx.fillStyle = grad; ctx.fill();
+    const ex0 = hl * (0.02 + 0.06 * yk), ey0 = -hh * (0.24 - 0.04 * yk), er = Math.max(1, hh * 0.115 * (1 + 1.6 * yk));
+    ctx.save(); skull(); ctx.clip();
+    // the dark stripe through the eye, from the bill's root back
+    ctx.fillStyle = mixHex(C.top, C.mid, 0.2);
+    ctx.beginPath();
+    ctx.moveTo(hl * 0.24, -hh * 0.22);
+    ctx.quadraticCurveTo(ex0, ey0 - er * 1.7, -hl * 0.3, -hh * 0.34);
+    ctx.lineTo(-hl * 0.3, -hh * 0.02);
+    ctx.quadraticCurveTo(ex0, ey0 + er * 1.5, hl * 0.24, -hh * 0.18);
+    ctx.closePath(); ctx.fill();
+    // where skin gives way to horn, and a gleam along the top of the bill
+    ctx.strokeStyle = shade(hornBase, 0.72); ctx.lineWidth = lw * 0.7;
+    ctx.beginPath(); ctx.moveTo(hl * 0.33, -hh * 0.4); ctx.quadraticCurveTo(hl * 0.27, -hh * 0.08, hl * 0.32, hh * 0.22); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = Math.max(0.7, hh * 0.07);
+    ctx.beginPath(); ctx.moveTo(hl * 0.4, -hh * 0.27); ctx.quadraticCurveTo(hl * 0.65, -hh * 0.14, hl * 0.9, hh * 0.03); ctx.stroke();
+    ctx.restore();
+    ctx.strokeStyle = C.line; ctx.lineWidth = lw;
+    skull(); ctx.stroke();
+    // the gape line, curling up at the back; the nostril
+    ctx.strokeStyle = shade(horn, 0.45); ctx.lineWidth = lw * 0.8;
+    ctx.beginPath(); ctx.moveTo(hl * 0.94, hh * 0.15); ctx.quadraticCurveTo(hl * 0.5, hh * 0.19, hl * 0.06, hh * 0.22); ctx.quadraticCurveTo(-hl * 0.02, hh * 0.22, -hl * 0.03, hh * 0.12); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(hl * 0.4, -hh * 0.2); ctx.lineTo(hl * 0.47, -hh * 0.15); ctx.stroke();
+    ctx.strokeStyle = C.line; ctx.lineWidth = lw;
+    // the eye
     if (rest > 0.55) {
       ctx.beginPath(); ctx.moveTo(ex0 - er, ey0); ctx.quadraticCurveTo(ex0, ey0 + er * 0.7, ex0 + er, ey0); ctx.stroke();
     } else {
-      ctx.fillStyle = C.eye;
+      ctx.fillStyle = yk > 0.5 ? C.eye : iris;
       ctx.beginPath(); ctx.arc(ex0, ey0, er, 0, TAU); ctx.fill(); ctx.stroke();
-      ctx.fillStyle = 'rgba(255,255,255,0.75)';
-      ctx.beginPath(); ctx.arc(ex0 + er * 0.35, ey0 - er * 0.35, er * 0.3, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#120a06';
+      ctx.beginPath(); ctx.arc(ex0 + er * 0.12, ey0, er * (0.5 + 0.3 * yk), 0, TAU); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      ctx.beginPath(); ctx.arc(ex0 + er * 0.32, ey0 - er * 0.35, er * 0.28, 0, TAU); ctx.fill();
     }
-    if (yk < 0.5) { const eb = er / (1 + 2.4 * yk); ctx.beginPath(); ctx.moveTo(ex0 - eb * 1.4, ey0 - er - eb * 0.3); ctx.quadraticCurveTo(ex0, ey0 - er - eb * 0.9, ex0 + eb * 1.6, ey0 - er - eb * 0.1); ctx.stroke(); }   // the brow (the young have none yet)
-    ctx.restore();
-  };
-  const bodyEll = (x, y, rx, ry, rot) => {
-    ctx.beginPath(); ctx.ellipse(x, y, rx, ry, rot, 0, TAU);
-    ctx.save(); ctx.clip();
-    ctx.translate(x, y); ctx.rotate(rot);
-    ctx.fillStyle = C.belly; ctx.fillRect(-rx * 2, -ry * 2, rx * 4, ry * 4);
-    ctx.fillStyle = C.mid; ctx.fillRect(-rx * 2, -ry * 2, rx * 4, ry * 2.2);
-    ctx.fillStyle = C.top; ctx.fillRect(-rx * 2, -ry * 2, rx * 4, ry * 1.5);
-    ctx.restore();
-    ctx.beginPath(); ctx.ellipse(x, y, rx, ry, rot, 0, TAU); ctx.stroke();
-    if (yk > 0.15) {   // the young are covered in soft fuzz
-      ctx.strokeStyle = mixHex(C.belly, C.mid, 0.4); ctx.lineWidth = Math.max(0.5, ry * 0.06);
-      const n = 15;
-      for (let i = 0; i < n; i++) {
-        const a = Math.PI + (i + 0.5) / n * Math.PI, c = Math.cos(a), sn = Math.sin(a), cr = Math.cos(rot), sr = Math.sin(rot);
-        const px = c * rx, py = sn * ry, ox = x + px * cr - py * sr, oy = y + px * sr + py * cr;
-        const L2 = ry * (0.11 + 0.08 * yk) * (1 + 0.35 * Math.sin(i * 2.3));
-        ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(ox + (c * cr - sn * sr) * L2 * 0.4, oy + (c * sr + sn * cr) * L2 - L2 * 0.5); ctx.stroke();
-      }
-      ctx.strokeStyle = C.line; ctx.lineWidth = lw;
+    // the brow: a heavy ridge that hoods the eye (the young have none yet)
+    if (yk < 0.6) {
+      const bk = 1 - yk / 0.6, eb = er / (1 + 1.6 * yk);
+      ctx.fillStyle = shade(C.mid, 0.82);
+      ctx.beginPath();
+      ctx.moveTo(ex0 - er - eb * 0.6, ey0 - er * 0.55);
+      ctx.quadraticCurveTo(ex0, ey0 - er - eb * (0.5 + 0.5 * bk), ex0 + er + eb * 0.9, ey0 - er * 0.35);
+      ctx.quadraticCurveTo(ex0 + er * 0.3, ey0 - er * (1 - 0.45 * bk), ex0 - er - eb * 0.6, ey0 - er * 0.55);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
     }
+    ctx.restore();
   };
   if (air) {
     // ---------- ON THE WING ----------
@@ -3291,28 +3412,51 @@ function drawAzhdarchid(ctx, key, o) {
     const fl = o.wing || 0;
     const t = G.time * 7 + (o.id || 0) * 1.7;   // big wings beat slower
     const beat = lerp(0.18 + 0.06 * Math.sin(G.time * 1.3 + (o.id || 0)), Math.sin(t), fl);
-    const Wx = bl * 0.18, Wy = cy - bh * 0.2;
+    const Wx = bl * 0.2, Wy = cy - bh * 0.22;
     const Hx = -bl * 0.62, Hy = cy + bh * 0.38;
+    // each wing: the arm along the leading edge to the wrist, then the one
+    // enormous finger out to the tip; the membrane's trailing edge sweeps in
+    // from the tip to the ankle, fine fibres fanning through it
     const wing = (near) => {
-      const tx = Wx - span * (near ? 0.1 : 0.16);
+      const tx = Wx - span * (near ? 0.36 : 0.36);
       const ty = near ? Wy + span * (0.36 - 0.55 * beat) : Wy - span * (0.36 + 0.42 * beat);
-      const wx = Wx + (tx - Wx) * 0.36 + span * 0.13, wy = Wy + (ty - Wy) * 0.4;
-      ctx.fillStyle = near ? memb : shade(memb, 0.7);
+      const dy = ty - Wy, k = near ? 1 : 0.68;
+      const Ex = Wx + span * 0.07, Ey = Wy + dy * 0.18;
+      const Rx = Wx + span * 0.12, Ry = Wy + dy * 0.4;
+      const Mx = lerp(Rx, tx, 0.5) + span * 0.035, My = lerp(Ry, ty, 0.5);
+      const mhx = lerp(tx, Hx, 0.5), mhy = lerp(ty, Hy, 0.5);
+      const Qx = mhx + (Mx - mhx) * 0.8, Qy = mhy + (My - mhy) * 0.8;
+      const gr = ctx.createLinearGradient(Wx, Wy, tx, ty);
+      gr.addColorStop(0, shade(memb, k)); gr.addColorStop(0.6, shade(membEdge, k)); gr.addColorStop(1, shade(mixHex(membEdge, C.belly, 0.2), k));
+      ctx.fillStyle = gr;
       ctx.beginPath();
-      ctx.moveTo(Wx, Wy); ctx.lineTo(wx, wy); ctx.lineTo(tx, ty);
-      ctx.quadraticCurveTo(Hx + (tx - Hx) * 0.55 - span * 0.1, Hy + (ty - Hy) * 0.55, Hx, Hy);
+      ctx.moveTo(Wx, Wy); ctx.lineTo(Ex, Ey); ctx.lineTo(Rx, Ry); ctx.quadraticCurveTo(Mx, My, tx, ty);
+      ctx.quadraticCurveTo(Qx, Qy, Hx, Hy);
       ctx.lineTo(-bl * 0.2, cy + bh * 0.1);
       ctx.closePath(); ctx.fill(); ctx.stroke();
-      ctx.strokeStyle = near ? C.top : shade(C.top, 0.75);
-      ctx.lineWidth = Math.max(1.2, bh * 0.14);
-      ctx.beginPath(); ctx.moveTo(Wx, Wy); ctx.lineTo(wx, wy); ctx.lineTo(tx, ty); ctx.stroke();
+      ctx.strokeStyle = 'rgba(0,0,0,' + (0.16 * k).toFixed(3) + ')'; ctx.lineWidth = lw * 0.6;
+      for (let i = 1; i <= 4; i++) {
+        const u = i / 5, v = 1 - u * 0.85;
+        ctx.beginPath();
+        ctx.moveTo(qp(Rx, Mx, tx, u), qp(Ry, My, ty, u));
+        ctx.lineTo(qp(tx, Qx, Hx, 1 - v), qp(ty, Qy, Hy, 1 - v));
+        ctx.stroke();
+      }
       ctx.strokeStyle = C.line; ctx.lineWidth = lw;
+      // the small forward flap between shoulder and wrist
+      ctx.fillStyle = shade(membEdge, k * 1.08);
+      ctx.beginPath(); ctx.moveTo(Wx, Wy); ctx.quadraticCurveTo(lerp(Wx, Rx, 0.5) + span * 0.06, lerp(Wy, Ry, 0.5), Rx, Ry); ctx.lineTo(Ex, Ey); ctx.closePath(); ctx.fill(); ctx.stroke();
+      taper([[Wx, Wy], [Ex, Ey], [Rx, Ry]], [bh * 0.3, bh * 0.2, bh * 0.14], shade(C.mid, k));
+      taper([[Rx, Ry], [Mx, My], [tx, ty]], [bh * 0.13, bh * 0.08, bh * 0.03], shade(C.top, k));
+      claws(Rx, Ry, 0.3, bh * 0.14, 3);
     };
     wing(false);
     const kick = Math.sin(t * 0.5) * 0.5 * fl;
-    o.feetPt = grip(-bl * 0.58 - leg * 0.5, cy + bh * 0.45 + kick);
-    limb([[-bl * 0.3, cy + bh * 0.2], [-bl * 0.58 - leg * 0.5, cy + bh * 0.45 + kick]], Math.max(1, bh * 0.15), C.mid);
-    bodyEll(0, cy, bl * 0.55, bh * 0.45, 0);
+    const fx = -bl * 0.58 - leg * 0.5, fy = cy + bh * 0.45 + kick;
+    o.feetPt = grip(fx, fy);
+    taper([[-bl * 0.3, cy + bh * 0.12], [-bl * 0.52, cy + bh * 0.32 + kick * 0.5], [fx, fy]], [bh * 0.34, bh * 0.14, bh * 0.08], C.mid);
+    claws(fx, fy, Math.PI * 0.95, bh * 0.14, 3);
+    torso(0, cy, bl * 0.55, bh * 0.45, 0);
     const n0x = bl * 0.42, n0y = cy - bh * 0.15;
     const na = 0.32 + callUp * 0.4 - callBow * 0.3;
     const ex = n0x + Math.cos(na) * nl * (1 + strike * 0.2), ey = n0y - Math.sin(na) * nl;
@@ -3335,21 +3479,66 @@ function drawAzhdarchid(ctx, key, o) {
     // bill can reach the ground
     const sx = bl * 0.3, sy = -fore * (1 - rest * 0.5 - dip * 0.3) - bob;
     const rot = Math.atan2(sy - hy, sx - hx);
-    const kneeY = hy * 0.5, elbY = sy + fore * 0.38 * (1 - rest * 0.3);
-    const wrY = wet ? sy + fore * 0.5 : -fore * 0.12 * (1 - rest * 0.5);
-    const hind = (g) => [[hx, hy], [hx + bl * 0.12 + g.dx * 0.5, kneeY - g.up * 0.6], [hx + g.dx, -g.up], [hx + g.dx + bl * 0.08, -g.up]];
-    const arm = (g) => [[sx, sy], [sx - bl * 0.06 + g.dx * 0.3, elbY], [sx + bl * 0.1 + g.dx * 0.85, wrY - g.up * 0.5]].concat(wet ? [] : [[sx + bl * 0.16 + g.dx, -g.up]]);
-    // the folded wing: the great finger runs from the wrist up past the
-    // shoulder (flared out and up in the threat display)
-    const ftx = sx - bl * 0.38 - callJerk * bl * 0.3, fty = sy - bh * 1.35 - callJerk * bh * 1.6;
-    if (!wet) {   // far limbs
-      limb(hind(gFH), Math.max(1, bh * 0.13), shade(C.mid, 0.72));
-      limb(arm(gFF), Math.max(1, bh * 0.14), shade(C.mid, 0.72));
-    }
-    const fw = arm(gFF)[2];
-    ctx.fillStyle = shade(memb, 0.72);   // far folded wing
-    ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(fw[0], fw[1]); ctx.lineTo(ftx + bl * 0.08, fty + bh * 0.1); ctx.closePath(); ctx.fill(); ctx.stroke();
-    bodyEll((hx + sx) / 2, (hy + sy) / 2, bl * 0.56, bh * 0.5, rot);
+    // hind leg: a swelling thigh, the knee forward, a fine shin, a flat foot
+    const hind = (gg) => {
+      const fx = hx + gg.dx, fy = -gg.up;
+      const kx = hx + bl * 0.15 + gg.dx * 0.5, ky = hy * 0.5 - gg.up * 0.6;
+      return [[hx, hy - bh * 0.12], [lerp(hx, kx, 0.5) + bl * 0.03, lerp(hy, ky, 0.5)], [kx, ky], [fx - bl * 0.03, fy - leg * 0.08], [fx + bl * 0.11, fy]];
+    };
+    const hindW = [bh * 0.48, bh * 0.36, bh * 0.15, bh * 0.1, bh * 0.07];
+    // arm: a stout upper arm, the elbow back, a long forearm and longer hand
+    // bone down to the knuckle, the small fingers on the ground ahead
+    const arm = (gg) => [
+      [sx, sy + bh * 0.05],
+      [sx - bl * 0.05 + gg.dx * 0.12, lerp(sy, -gg.up, 0.15)],
+      [sx - bl * 0.09 + gg.dx * 0.25, lerp(sy, -gg.up, 0.3)],
+      [sx + bl * 0.03 + gg.dx * 0.5, lerp(sy, -gg.up, 0.58)],
+      [sx + bl * 0.12 + gg.dx * 0.85, -fore * 0.07 * (1 - rest * 0.5) - gg.up * 0.6],
+      [sx + bl * 0.2 + gg.dx, -gg.up],
+    ];
+    const armW = [bh * 0.24, bh * 0.3, bh * 0.2, bh * 0.15, bh * 0.12, bh * 0.06];
+    // the folded wing: the great finger runs from the knuckle up past the
+    // shoulder (flared out and up in the threat display), the membrane
+    // pleated between it, the arm and the flank
+    const ftx = sx - bl * (0.55 - 0.15 * callJerk), fty = sy + bh * (0.05 - 2.4 * callJerk);
+    const fold = (A, tx, ty, k) => {
+      const K = A[4], E = A[2], Wr = A[3];
+      const Mx = lerp(K[0], tx, 0.5) - bl * 0.02, My = lerp(K[1], ty, 0.5) + bh * 0.12;
+      const Bx = sx - bl * 0.12, By = sy + bh * 0.45;
+      const gr = ctx.createLinearGradient(K[0], K[1], tx, ty);
+      gr.addColorStop(0, shade(memb, k * 0.85)); gr.addColorStop(1, shade(membEdge, k));
+      ctx.fillStyle = gr;
+      ctx.beginPath();
+      ctx.moveTo(tx, ty);
+      ctx.quadraticCurveTo(sx - bl * 0.42, sy + bh * 0.15, Bx, By);
+      ctx.lineTo(E[0], E[1]); ctx.lineTo(Wr[0], Wr[1]); ctx.lineTo(K[0], K[1]);
+      ctx.quadraticCurveTo(Mx, My, tx, ty);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = lw * 0.7;   // the pleats
+      for (let i = 1; i <= 2; i++) {
+        const u = i / 3;
+        ctx.beginPath(); ctx.moveTo(lerp(Wr[0], K[0], 0.5), lerp(Wr[1], K[1], 0.5));
+        ctx.quadraticCurveTo(lerp(Mx, Bx, u) + bl * 0.02, lerp(My, By, u), qp(tx, sx - bl * 0.42, Bx, u * 0.8), qp(ty, sy + bh * 0.15, By, u * 0.8));
+        ctx.stroke();
+      }
+      ctx.strokeStyle = C.line; ctx.lineWidth = lw;
+      return [K, [Mx, My], [tx, ty]];
+    };
+    const finger = (P, k) => {
+      taper(P, [bh * 0.17, bh * 0.12, bh * 0.05], shade(mixHex(memb, C.mid, 0.3), k));
+      ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = Math.max(0.6, bh * 0.04);
+      ctx.beginPath(); ctx.moveTo(P[0][0], P[0][1]); ctx.quadraticCurveTo(P[1][0], P[1][1], P[2][0], P[2][1]); ctx.stroke();
+      ctx.strokeStyle = C.line; ctx.lineWidth = lw;
+    };
+    const limbC = mixHex(C.mid, C.top, 0.18);
+    const hand = (A) => claws(A[5][0], A[5][1], -0.05, bh * 0.13, 3);
+    // far side: limbs and wing in shadow
+    const farA = arm(gFF);
+    taper(hind(gFH), hindW, shade(C.mid, 0.7));
+    const farF = fold(farA, ftx + bl * 0.08, fty + bh * 0.1, 0.7);
+    taper(farA, armW, shade(C.mid, 0.7)); hand(farA);
+    finger(farF, 0.7);
+    torso((hx + sx) / 2, (hy + sy) / 2, bl * 0.56, bh * 0.5, rot);
     // the neck rises steeply from the shoulders; the skull hangs off it
     // pointing down at the ground ahead — a stork with a building for a head
     const na = L.neckAng + callUp * 0.25 - callBow * 0.5 - dip * 0.65 - strike * 0.2 - rest * 0.75 + (o.swallowK || 0) * 0.5;
@@ -3360,15 +3549,14 @@ function drawAzhdarchid(ctx, key, o) {
     head(ex, ey, hAng);
     o.jawPt = billTip(ex, ey, hAng);
     o.feetPt = grip(hx + (gNH.dx + gFH.dx) * 0.5 + bl * 0.1, -Math.max(gNH.up, gFH.up));
-    // near limbs and the near folded wing on top
-    if (!wet) limb(hind(gNH), Math.max(1, bh * 0.14), C.mid);
-    const na2 = arm(gNF), wrx = na2[2][0], wrY2 = na2[2][1];
-    ctx.fillStyle = memb;
-    ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(wrx, wrY2); ctx.lineTo(ftx, fty); ctx.closePath(); ctx.fill(); ctx.stroke();
-    limb(na2, Math.max(1, bh * 0.15), C.mid);
-    ctx.strokeStyle = C.top; ctx.lineWidth = Math.max(1, bh * 0.12);   // the folded finger itself
-    ctx.beginPath(); ctx.moveTo(wrx, wrY2); ctx.lineTo(ftx, fty); ctx.stroke();
-    ctx.strokeStyle = C.line; ctx.lineWidth = lw;
+    // near side on top: the hind leg, the folded wing, the arm over it
+    const nearH = hind(gNH);
+    taper(nearH, hindW, limbC);
+    claws(nearH[4][0], nearH[4][1], 0, bh * 0.1, 3);
+    const nearA = arm(gNF);
+    const nearF = fold(nearA, ftx, fty, 1);
+    taper(nearA, armW, limbC); hand(nearA);
+    finger(nearF, 1);
   }
   ctx.restore();
 }
