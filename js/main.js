@@ -1574,7 +1574,7 @@ function respawn(species, gender, skin, growth) {
   G.wrestle = null;
   G.pack = [];
   G.burrow = null;
-  G.herd = null; G.herdTried = false; G.herdFoe = null; G.hatzNextVisit = null;
+  G.herd = null; G.herdTried = false; G.hatzNextVisit = null;
   G.myBurrow = null;   // the digger starts homeless
   G.carcasses.length = 0;
   G.particles.length = 0;

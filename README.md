@@ -605,7 +605,9 @@ sea falls away to **swimmer's depth**, which exists nowhere else.
   among them hides an animal from the sky: a wild Hatzegopteryx won't walk
   or dive in after it. When one comes, the whole herd (grown ones too) runs
   for the nearest stand and keeps still until it's been gone 10 seconds.
-  They only turn on it if it follows them in and bites. A player Hatzegopteryx
+  Any one of them that gets bitten fights back, one on one (a Hatzegopteryx
+  too, or you): the rest of the herd never piles in, not even your own herd
+  when you attack something. A player Hatzegopteryx
   *can* go in.
 - **Tethyshadros** (playable, alongside Magyarosaurus after
   Pterodactylus; either one opens Hatzegopteryx): a dwarf hadrosauroid with
@@ -620,8 +622,6 @@ sea falls away to **swimmer's depth**, which exists nowhere else.
     leader is dead, the herd follows you, or kill the leader yourself if
     you're impatient (if you're not grown yet, the next biggest takes over).
     Your herd stays out of a fight between you and the leader.
-  - **They unite:** attack something (a Hatzegopteryx, say) and every one of
-    your kind nearby piles in with you for 10 seconds.
   - A full-grown adult of either species is just too heavy for
     Hatzegopteryx to lift, even in its feet. Every younger one can be carried
     off.

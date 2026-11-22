@@ -409,8 +409,8 @@ const NPC_DEF = {
   // the sea is no barrier, and their whole life is the next carcass
   ptero: { hp: 110, dmg: 12, atkCd: 0.8, speed: 55, fleeSpeed: 60, detect: 160, homeR: 700, reach: 14, biome: 'any', turn: 4.2, swims: true, flyer: true, flyMul: 2.8, scavR: 1100, bleedable: true, caution: 1.4 },
   // the islands' prey (herds of every age: see `ages` in the spawns)
-  tethys: { hp: 1440, dmg: 75, atkCd: 1.6, speed: 104, fleeSpeed: 136, detect: 220, homeR: 340, reach: 28, biome: 'any', turn: 2.4, bleedable: true, melee: { kb: 180 }, caution: 1.2 },
-  magyaro: { hp: 1480, dmg: 130, atkCd: 2.0, speed: 70, fleeSpeed: 94, detect: 200, homeR: 320, reach: 40, biome: 'any', turn: 1.6, bleedable: true, melee: { kb: 240 }, caution: 1.0 },
+  tethys: { hp: 1440, dmg: 75, atkCd: 1.6, speed: 104, fleeSpeed: 136, detect: 220, homeR: 340, reach: 28, biome: 'any', turn: 2.4, bleedable: true, melee: { kb: 180 }, caution: 1.2, noPile: true },
+  magyaro: { hp: 1480, dmg: 130, atkCd: 2.0, speed: 70, fleeSpeed: 94, detect: 200, homeR: 320, reach: 40, biome: 'any', turn: 1.6, bleedable: true, melee: { kb: 240, noPile: true }, caution: 1.0 },
   // the sky's king: three wild ones roam the archipelago, flying LOW, and
   // now and then carry something off (thinkHatzego). noCover: never goes in
   // under the trees
@@ -590,9 +590,6 @@ function dealDamage(target, amount, attacker, opts) {
   target.hurtT = 0.35;
   target.lastAttacker = attacker;
   target.aggroT = 6;
-  if (attacker && attacker === G.player && !target.isPlayer && PLAYER_DEF[attacker.species] && PLAYER_DEF[attacker.species].herdBorn && target.species !== attacker.species) {
-    G.herdFoe = target; G.herdFoeUntil = G.time + 10;
-  }
   // an aerosteon at war with a giant calls its kin — once per giant
   if (G.player && G.player.species === 'aero' && attacker) {
     if (attacker === G.player && target.species === 'yunmeng') kinJoinsBloodshed(target);
@@ -1830,7 +1827,7 @@ function thinkHerdFighter(e, d) {
   if (retaliationCheck(e, d, 'fight')) return;
   // a herd-mate under attack pulls the herd in
   for (const o of G.npcs) {
-    if (o !== e && o.species === e.species && o.state === 'fight' && o.target && !(e.herdKin && o.target.isPlayer) && dist(e.x, e.y, o.x, o.y) < 260) {
+    if (!d.noPile && o !== e && o.species === e.species && o.state === 'fight' && o.target && !(e.herdKin && o.target.isPlayer) && dist(e.x, e.y, o.x, o.y) < 260) {
       e.state = 'fight'; e.target = o.target; e.stateT = 2.5; return;
     }
   }
@@ -2175,11 +2172,14 @@ function skyThreat(e) {
 // trees and keeps still in there until the sky is clear (no cover in reach:
 // they just run). They only turn on it when it follows them in and bites
 function thinkIslandPrey(e, d) {
-  // the player's kind hits something: every one of them near piles in
-  const p = G.player, foe = G.herdFoe;
-  if (foe && G.time < (G.herdFoeUntil || 0) && p && p.alive && e.species === p.species && foe.hp > 0 && G.npcs.indexOf(foe) >= 0 &&
-    (e.herdKin || dist(e.x, e.y, p.x, p.y) < 450) && dist(e.x, e.y, foe.x, foe.y) < 650) {
-    e.state = 'fight'; e.target = foe; e.stateT = 1.5; return;
+  const p = G.player;
+  // BITTEN: it fights back, one on one, whoever bit it (a Hatzegopteryx
+  // too). The rest of the herd doesn't pile in (noPile)
+  if (e.aggroT > 0 && e.lastAttacker && !e.heldBy) {
+    const t = e.lastAttacker;
+    if ((t.isPlayer ? t.alive : t.hp > 0 && G.npcs.indexOf(t) >= 0) && dist(e.x, e.y, t.x, t.y) < d.detect * 1.5) {
+      e.state = 'fight'; e.target = t; e.stateT = 1.5; return;
+    }
   }
   // (a scare lasts: once seen, the giant is remembered for 10 s, so the
   // herd makes it all the way to the trees and stays put a while)
@@ -2188,8 +2188,6 @@ function thinkIslandPrey(e, d) {
   else if (e.skyThr && G.time - e.skyAt < 10 && (e.skyThr.isPlayer ? e.skyThr.alive : e.skyThr.hp > 0) && dist(e.x, e.y, e.skyThr.x, e.skyThr.y) < 1100) thr = e.skyThr;
   else e.skyThr = null;
   if (thr) {
-    const la = e.aggroT > 0 && e.lastAttacker === thr;
-    if (la && treeCover(e.x, e.y) && dist(e.x, e.y, thr.x, thr.y) < d.reach * 2 + 50) { e.state = 'fight'; e.target = thr; e.stateT = 1.2; return; }
     if (treeCover(e.x, e.y)) { e.state = 'hide'; e.target = thr; e.stateT = 2.5; return; }
     if (!e.coverSpot || G.time - (e.coverAt || 0) > 3) { e.coverSpot = nearestCover(e.x, e.y, 650); e.coverAt = G.time; }
     if (e.coverSpot) { e.state = 'cover'; e.tx = e.coverSpot.x; e.ty = e.coverSpot.y; e.target = thr; e.stateT = 3; return; }
